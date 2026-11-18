@@ -10,7 +10,9 @@
  *
  * Casualties inflicted and suffered count toward faction totals.
  *
- * Player choice: bot factions auto-approve; player gets batch decision panel.
+ * Player choice: a manual (autonomy 0) player gets the batch decision panel under `ask`; every
+ * other faction (bots, and a human's staff at Assisted to Observer) passes the one policy gate in
+ * `detectParamilitaryTargets` (paramilitary_policy.ts, §6 D1 stage 2).
  *
  * Deterministic: sorted iteration, no randomness, no timestamps.
  */
@@ -57,6 +59,9 @@ import type { EdgeRecord } from '../../map/settlements.js';
 // shipped main-path split (KIA 0.22 / WIA 0.74 / MIA 0.04), byte-identical to before.
 import { getMainCasualtySplit } from './casualty_realism_v2_gate.js';
 import { selectManualPlayerFaction } from '../bot/staff_control.js';
+import { resolveNonManualParamilitaryPolicy } from './paramilitary_policy.js';
+import { PARAMILITARY_POLICY_CARD_ID_BY_FACTION } from '../events/paramilitary_policy_flag.js';
+import type { EventDefinition } from '../events/event_types.js';
 /** Casualty multiplier when paramilitary retreats from defended OSID (heavy losses). */
 const DEFENDED_RETREAT_CASUALTY_MULT = 3;
 
@@ -77,17 +82,12 @@ function emptyReport(): ParamilitarySweepReport {
     return { spawned: [], captured: [], dissolved: [], pending_player_requests: 0 };
 }
 
-const PLAYER_PARAMILITARY_POLICY_EVENT: Partial<Record<FactionId, string>> = {
-    RS: 'rs_paramilitary_policy_1992',
-    RBiH: 'rbih_paramilitary_policy_1992',
-};
-
 function isPlayerParamilitaryPolicyDecisionPending(
     state: GameState,
     playerFaction: FactionId | null,
 ): boolean {
     if (!playerFaction) return false;
-    const eventId = PLAYER_PARAMILITARY_POLICY_EVENT[playerFaction];
+    const eventId = PARAMILITARY_POLICY_CARD_ID_BY_FACTION[playerFaction];
     if (!eventId || !(state.military.enabled_event_ids ?? []).includes(eventId)) return false;
     return !(state.military.event_decision_log ?? []).some((entry) => entry.event_id === eventId);
 }
@@ -403,21 +403,29 @@ function splitCasualties(total: number): { killed: number; wounded: number; miss
 
 /**
  * Detect rear enemy pockets for all factions and generate paramilitary requests.
- * Bot factions auto-approve. Player faction populates pending_paramilitary_requests.
+ * A manual (autonomy 0) player's faction follows its standing order request by request and
+ * populates pending_paramilitary_requests under `ask`. Every other faction (a bot, or a human's
+ * staff at Assisted, Delegated or Observer) sends sweeps only when
+ * `resolveNonManualParamilitaryPolicy` allows it (§6 D1 stage 2).
+ *
+ * `eventDefinitions` is the turn's event catalog: an undecided bot reads its card's historical
+ * default from it. Production passes it on every turn (scenario runner, desktop); `undefined`
+ * keeps the pre-binding allow for undecided bots only and exists for synthetic unit tests.
  *
  * Call once per turn, after partition-corps-front-sectors.
  */
 export function detectParamilitaryTargets(
     state: GameState,
     edges: EdgeRecord[],
-    reverseMap: OperationalToCanonicalReverseMap
+    reverseMap: OperationalToCanonicalReverseMap,
+    eventDefinitions: readonly EventDefinition[] | undefined,
 ): ParamilitarySweepReport {
     const report = emptyReport();
     const turn = state.meta?.turn ?? 0;
-    // Owner calibration directive 2026-11-05: live play must reproduce the calibrated
-    // headless (no-player) result. At autonomy >= 1 the player's staff runs rear-pocket
-    // consolidation exactly as bot staff do (no pending window, no per-request gate). Only a
-    // manual (autonomy 0) player keeps the request/policy path. Headless has no player: inert.
+    // Only a manual (autonomy 0) player keeps the request/policy path below. At autonomy >= 1
+    // the player's staff and every bot go through the one policy gate in the faction loop
+    // (§6 D1 stage 2, which replaced the 2026-11-05 "staff run consolidation like bots" rule).
+    // Headless has no player: every faction is a bot.
     const playerFaction = selectManualPlayerFaction(state);
     const playerPolicyDecisionPending = isPlayerParamilitaryPolicyDecisionPending(state, playerFaction);
     if (playerPolicyDecisionPending && playerFaction) {
@@ -448,6 +456,16 @@ export function detectParamilitaryTargets(
 
     for (const faction of factions) {
         if (faction === playerFaction && playerPolicyDecisionPending) continue;
+        // §6 D1 stage 2: the one gate in front of every non-manual spawn. A bot follows its
+        // decided card flag, else the card's historical default; a human's staff follow the
+        // human's current standing order (unanswered or `ask` sends none). Deny skips every
+        // candidate, so skipping the faction here is the same as skipping each one.
+        if (
+            faction !== playerFaction
+            && resolveNonManualParamilitaryPolicy(state, faction, eventDefinitions) !== 'always_allow'
+        ) {
+            continue;
+        }
         // LANE-NIGHTSHIFT-ANALYZE-FACTION-GRAPH-DEDUPE bisect (2026-05-05): this call site
         // MUST stay on legacy `analyzeFactionGraph`. Routing it through `analyzeFactionGraphCached`
         // produced reproducible 40w hash drift (`51dca710b9db7d37` cached vs baseline
@@ -538,7 +556,7 @@ export function detectParamilitaryTargets(
                 continue;
             }
 
-            // Bot faction: auto-approve
+            // Non-manual faction (bot, or a human's staff): the policy gate above already allowed it.
             spawnParamilitary(state, faction, candidate.osid, turn, spawnIndex, report);
             spawnIndex++;
             deploymentsThisTurn++;

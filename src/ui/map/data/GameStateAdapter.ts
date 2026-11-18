@@ -40,6 +40,7 @@ import type {
     OperationView, RepositionOrderView, RecruitmentView,
     StanceHoldView, StanceMatterReceiptView, StanceMatterView,
     ArmyClashView, ArmyClashReceiptView,
+    ParamilitaryUnrequestedView,
 } from './types';
 import { proposalBackingCost } from '../utils/commandAuthority';
 import {
@@ -60,6 +61,7 @@ import { hideWithdrawnEmptySyntheticJnaCommands } from './syntheticJnaCommandVis
 import { getMunicipalitySupportLabel } from '../../../sim/combat/municipality_support.js';
 import { splitKiaWiaMia } from '../../../sim/combat/attack_casualty_distribution.js';
 import { strictCompare } from '../../../state/validateGameState.js';
+import { PARAMILITARY_POLICY_CARD_ID_BY_FACTION } from '../../../sim/events/paramilitary_policy_flag.js';
 import { countHeldOgsByCorps } from '../utils/heldOg.js';
 import { computeFullVerdict } from '../../../sim/negotiation/scoring.js';
 import { DIMENSION_WEIGHTS } from '../../../sim/events/strategic_dimensions.js';
@@ -4480,9 +4482,45 @@ function deriveParamilitaryDecisionHistory(
 }
 
 /**
- * Paramilitary sweeps the player's side carried out with no request to the player (staff at Assisted command or above, or a
- * standing order to allow). A sweep the player decided has a decision record with the same turn and target and is not listed here.
- * Read-only: derived from the paramilitary formation each sweep created.
+ * The cause an unrequested-sweep receipt names, from the saved basis at the sweep's turn (§6 D1 stage 2, round-2 amendment A3).
+ * No new state field: the side's policy-card answer (`event_decision_log`) and its filed paramilitary decisions
+ * (`paramilitary_decision_history`) are enough. Under stage 2 a sweep is sent in the side's name without a request only under
+ * the standing order Always allow. The card's response ids equal the orders they write (pinned by
+ * tests/paramilitary_receipt_cause.test.ts). Returns undefined when the basis shows no Always allow: no stage-2 rule sweeps
+ * under that, so the save comes from the stage-1 rule and the receipt keeps the stage-1 cause.
+ */
+function deriveParamilitaryReceiptCause(
+    state: any,
+    faction: string,
+    turn: number,
+): ParamilitaryUnrequestedView['cause'] {
+    const cardId = (PARAMILITARY_POLICY_CARD_ID_BY_FACTION as Readonly<Record<string, string | undefined>>)[faction];
+    let answer: { turn: number; responseId: string; inPerson: boolean } | null = null;
+    if (cardId) {
+        for (const entry of Array.isArray(state.military?.event_decision_log) ? state.military.event_decision_log : []) {
+            if (!entry || entry.event_id !== cardId) continue;
+            const answeredTurn = Number(entry.turn);
+            if (!Number.isFinite(answeredTurn) || answeredTurn > turn) continue;
+            if (answer && answeredTurn < answer.turn) continue;
+            answer = { turn: answeredTurn, responseId: String(entry.response_id), inPerson: entry.decision_source === 'player' };
+        }
+    }
+    const answeredTurn = answer?.turn ?? Number.NEGATIVE_INFINITY;
+    const filedAfterAnswer = (Array.isArray(state.paramilitary_decision_history) ? state.paramilitary_decision_history : [])
+        .some((record: any) => record
+            && record.faction === faction
+            && Number(record.turn) > answeredTurn
+            && Number(record.turn) <= turn);
+    if (filedAfterAnswer) return 'neutral';
+    if (answer?.responseId === 'always_allow') return answer.inPerson ? 'standing_order' : 'standing_order_automatic';
+    return undefined;
+}
+
+/**
+ * Paramilitary sweeps the player's side carried out with no request to the player (under the standing order Always allow, at any
+ * command level; a pre-stage-2 save also holds staff sweeps sent under any order). A sweep the player decided has a decision
+ * record with the same turn and target and is not listed here.
+ * Read-only: derived from the paramilitary formation each sweep created; its cause from the saved basis at its turn.
  */
 function deriveParamilitaryUnrequested(
     state: any,
@@ -4515,7 +4553,15 @@ function deriveParamilitaryUnrequested(
             !candidate.used && candidate.osid === target && candidate.turn >= Number(turn) && candidate.turn <= Number(turn) + 2
         ));
         if (capture) capture.used = true;
-        sweeps.push({ id: String(formation.id ?? id), turn: Number(turn), target_osid: target, faction: String(formation.faction), captured: Boolean(capture) });
+        const cause = deriveParamilitaryReceiptCause(state, String(formation.faction), Number(turn));
+        sweeps.push({
+            id: String(formation.id ?? id),
+            turn: Number(turn),
+            target_osid: target,
+            faction: String(formation.faction),
+            captured: Boolean(capture),
+            ...(cause ? { cause } : {}),
+        });
     }
     sweeps.sort((a, b) => (a.turn !== b.turn ? b.turn - a.turn : strictCompare(a.id, b.id)));
     return sweeps.length > 0 ? sweeps : undefined;

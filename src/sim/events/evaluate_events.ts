@@ -21,6 +21,7 @@ import { isWarOutsideHistoricalBand } from '../political/historical_territory_ba
 import { isPoliticalGateEligible, isPoliticsOffHistoryFor } from '../political/political_departure_markers.js';
 import { compareCausalityEntries, strictCompare } from '../../state/validateGameState.js';
 import { findAnswerAheadOfFiring, isAnswerAheadOfFiringDecision } from './answer_ahead_of_firing.js';
+import { paramilitaryPolicyFlagKey } from './paramilitary_policy_flag.js';
 
 /**
  * Maximum PLAYER-FACING DECISION events that can fire in a single turn.
@@ -169,11 +170,13 @@ export function applyDefinitionFlags(state: GameState, flags: Record<string, str
         state.military.event_flags[key] = value;
     }
 
-    const policyFlag = state.meta.player_faction === 'RS'
-        ? 'rs_paramilitary_policy'
-        : state.meta.player_faction === 'RBiH'
-            ? 'rbih_paramilitary_policy'
-            : null;
+    // The player-faction mirror: a card answer for the player's own side (in person, or
+    // Observer's automatic answer) also writes the human's standing order. One flag-key helper
+    // with the paramilitary policy resolver (§6 D1 stage 2).
+    const playerFaction = state.meta.player_faction;
+    const policyFlag = playerFaction === 'RS' || playerFaction === 'RBiH'
+        ? paramilitaryPolicyFlagKey(playerFaction)
+        : null;
     const policy = policyFlag ? flags[policyFlag] : undefined;
     if (policy === 'always_allow' || policy === 'always_deny' || policy === 'ask') {
         state.paramilitary_policy = policy;

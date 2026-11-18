@@ -83,6 +83,24 @@ describe('paramilitary spawn guards (§6 D1 stage 2)', () => {
         for (const args of calls) expect(args).not.toMatch(/offensive/);
     });
 
+    it('every spawn sits behind the policy gate or the player\'s own decision (§6 D1 stage 2)', () => {
+        const sweep = code(SWEEP_FILE);
+        const detect = functionBody(sweep, 'detectParamilitaryTargets');
+        const resolver = functionBody(sweep, 'resolvePlayerParamilitaryDecisions');
+        const definition = functionBody(sweep, 'spawnParamilitary');
+        // Outside its definition, spawnParamilitary is called only in detection and in the player's decision replay.
+        const elsewhere = sweep.replace(detect, '').replace(resolver, '').replace(definition, '');
+        expect(elsewhere).not.toMatch(/spawnParamilitary\(/);
+        // In detection the one gate comes before any spawn, and the non-manual spawn is reachable only past it.
+        const gate = detect.indexOf('resolveNonManualParamilitaryPolicy(');
+        expect(gate).toBeGreaterThan(0);
+        for (const match of detect.matchAll(/spawnParamilitary\(/g)) expect(match.index!).toBeGreaterThan(gate);
+        // No other module calls the spawner or reaches around the gate.
+        for (const file of sourceFiles().filter((f) => f !== SWEEP_FILE)) {
+            expect(code(file), file).not.toMatch(/\bspawnParamilitary\s*\(/);
+        }
+    });
+
     it('spawnParamilitary is the only code that creates a paramilitary formation', () => {
         const creators: string[] = [];
         for (const file of sourceFiles()) {

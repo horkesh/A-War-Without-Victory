@@ -16,6 +16,10 @@ import {
     isEligibleForReinforcement,
     PARAMILITARY_MAX_REAR_DEPLOYMENTS_PER_FACTION_TURN,
 } from '../src/state/formation_constants.js';
+import { loadEventDefinitions } from '../src/sim/events/event_loader.js';
+
+/** The real event catalog (start week 0), for tests that exercise the bot's historical default. */
+const EVENT_CATALOG = loadEventDefinitions(0);
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Test helpers
@@ -119,7 +123,7 @@ describe('paramilitary_sweep', () => {
   } as any,
 });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
 
             // RS should detect op:d as the strongest eligible pocket and spawn paramilitary.
             const rsSpawns = report.spawned.filter(s => s.faction === 'RS');
@@ -155,22 +159,23 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
 
             expect(report.spawned.some((spawn) =>
                 spawn.faction === 'RBiH' && spawn.target_osid === target,
             )).toBe(false);
         });
 
-        it('still permits rear-pocket consolidation inside the defined enclave boundary', () => {
+        // §6 D1 stage 2 rewrite: the stage-1 version pinned an RBiH bot sweep of Obadi, the artefact
+        // itself. The enclave-boundary rule is kept under an explicit Always allow; the RBiH historical
+        // default (Refuse, read from the card) sends none.
+        function obadiPocketState(rbihFlag?: 'always_allow'): GameState {
             const target = 'op:srebrenica:obadi';
             const neighbors = [
                 'op:srebrenica:srebrenica_2',
                 'op:srebrenica:donji_potocari_2',
                 'op:srebrenica:ljeskovik_2',
             ];
-            const edges = makeEdges(neighbors.map((neighbor) => [neighbor, target]));
-            const reverseMap = makeReverseMap([target, ...neighbors]);
             const controllers = Object.fromEntries([
                 [target, 'RS'],
                 ...neighbors.map((neighbor) => [neighbor, 'RBiH']),
@@ -188,12 +193,39 @@ describe('paramilitary_sweep', () => {
                     },
                 } as any,
             });
+            if (rbihFlag) state.military.event_flags = { rbih_paramilitary_policy: rbihFlag };
+            return state;
+        }
+        const obadiEdges = makeEdges([
+            'op:srebrenica:srebrenica_2',
+            'op:srebrenica:donji_potocari_2',
+            'op:srebrenica:ljeskovik_2',
+        ].map((neighbor) => [neighbor, 'op:srebrenica:obadi']));
+        const obadiReverseMap = makeReverseMap([
+            'op:srebrenica:obadi',
+            'op:srebrenica:srebrenica_2',
+            'op:srebrenica:donji_potocari_2',
+            'op:srebrenica:ljeskovik_2',
+        ]);
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+        it('still permits rear-pocket consolidation inside the defined enclave boundary under an explicit Always allow', () => {
+            const state = obadiPocketState('always_allow');
+            const report = detectParamilitaryTargets(
+                state, obadiEdges, obadiReverseMap, EVENT_CATALOG,
+            );
 
             expect(report.spawned.some((spawn) =>
-                spawn.faction === 'RBiH' && spawn.target_osid === target,
+                spawn.faction === 'RBiH' && spawn.target_osid === 'op:srebrenica:obadi',
             )).toBe(true);
+        });
+
+        it('the RBiH historical default (Refuse, from the card) sends no sweep into Obadi', () => {
+            const state = obadiPocketState();
+            const report = detectParamilitaryTargets(
+                state, obadiEdges, obadiReverseMap, EVENT_CATALOG,
+            );
+
+            expect(report.spawned.filter((spawn) => spawn.faction === 'RBiH')).toEqual([]);
         });
 
         it('does not spawn paramilitaries after week 20', () => {
@@ -206,7 +238,7 @@ describe('paramilitary_sweep', () => {
   } as any,
 });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
             expect(report.spawned).toHaveLength(0);
             expect(report.pending_player_requests).toBe(0);
         });
@@ -222,7 +254,7 @@ describe('paramilitary_sweep', () => {
   } as any,
 });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
 
             // RS is player faction with 'ask' policy — pocket op:d becomes a pending request
             expect(report.spawned.filter(s => s.faction === 'RS')).toHaveLength(0);
@@ -244,13 +276,13 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const beforePolicy = detectParamilitaryTargets(state, edges, reverseMap);
+            const beforePolicy = detectParamilitaryTargets(state, edges, reverseMap, undefined);
 
             expect(beforePolicy.pending_player_requests).toBe(0);
             expect(state.pending_paramilitary_requests ?? []).toHaveLength(0);
 
             state.military.event_decision_log = [{ event_id: 'rs_paramilitary_policy_1992' }] as any;
-            const afterPolicy = detectParamilitaryTargets(state, edges, reverseMap);
+            const afterPolicy = detectParamilitaryTargets(state, edges, reverseMap, undefined);
 
             expect(afterPolicy.pending_player_requests).toBe(1);
             expect(state.pending_paramilitary_requests).toHaveLength(1);
@@ -267,7 +299,7 @@ describe('paramilitary_sweep', () => {
   } as any,
 });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
             expect(report.pending_player_requests).toBe(0);
             expect(report.spawned.filter(s => s.faction === 'RS')).toHaveLength(0);
         });
@@ -290,7 +322,7 @@ describe('paramilitary_sweep', () => {
   } as any,
 });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
             // Defended pocket should not generate a spawn
             expect(report.spawned.filter(s => s.target_osid === 'op:d')).toHaveLength(0);
         });
@@ -308,7 +340,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
 
             expect(report.spawned.filter((spawn) => spawn.faction === 'RBiH')).toHaveLength(0);
             expect(report.pending_player_requests).toBe(0);
@@ -337,7 +369,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
             expect(report.spawned.filter(s => s.target_osid === 'op:d')).toHaveLength(0);
             expect(report.pending_player_requests).toBe(0);
         });
@@ -371,7 +403,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
             expect(report.spawned.filter(s => s.faction === 'RS')).toHaveLength(0);
             expect(report.pending_player_requests).toBe(0);
         });
@@ -394,7 +426,7 @@ describe('paramilitary_sweep', () => {
   } as any,
 });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
             // op:d already targeted — should not spawn another
             expect(report.spawned.filter(s => s.target_osid === 'op:d')).toHaveLength(0);
         });
@@ -411,7 +443,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
 
             expect(report.spawned.filter((spawn) => spawn.faction === 'RS')).toHaveLength(
                 PARAMILITARY_MAX_REAR_DEPLOYMENTS_PER_FACTION_TURN
@@ -439,7 +471,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
             const rsTargets = report.spawned
                 .filter((spawn) => spawn.faction === 'RS')
                 .map((spawn) => spawn.target_osid);
@@ -476,7 +508,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const rsTargets = detectParamilitaryTargets(state, edges, reverseMap).spawned
+            const rsTargets = detectParamilitaryTargets(state, edges, reverseMap, undefined).spawned
                 .filter((spawn) => spawn.faction === 'RS')
                 .map((spawn) => spawn.target_osid);
 
@@ -515,7 +547,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const rsTargets = detectParamilitaryTargets(state, edges, reverseMap).spawned
+            const rsTargets = detectParamilitaryTargets(state, edges, reverseMap, undefined).spawned
                 .filter((spawn) => spawn.faction === 'RS')
                 .map((spawn) => spawn.target_osid);
 
@@ -555,7 +587,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const rsTargets = detectParamilitaryTargets(state, edges, reverseMap).spawned
+            const rsTargets = detectParamilitaryTargets(state, edges, reverseMap, undefined).spawned
                 .filter((spawn) => spawn.faction === 'RS')
                 .map((spawn) => spawn.target_osid);
 
@@ -586,8 +618,8 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const first = detectParamilitaryTargets(state, edges, reverseMap);
-            const second = detectParamilitaryTargets(state, edges, reverseMap);
+            const first = detectParamilitaryTargets(state, edges, reverseMap, undefined);
+            const second = detectParamilitaryTargets(state, edges, reverseMap, undefined);
 
             expect(first.pending_player_requests).toBe(PARAMILITARY_MAX_REAR_DEPLOYMENTS_PER_FACTION_TURN);
             expect(second.pending_player_requests).toBe(0);
@@ -628,7 +660,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
 
             expect(report.spawned.filter((spawn) => spawn.faction === 'RS').map((spawn) => spawn.target_osid))
                 .toEqual(['op:operation:target']);
@@ -662,7 +694,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
 
             expect(report.pending_player_requests).toBe(0);
             expect(state.pending_paramilitary_requests ?? []).toHaveLength(0);
@@ -697,7 +729,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
 
             expect(state.military.formations?.[existing.id]?.paramilitary_target).toBe('op:existing:target');
             expect(report.spawned).toContainEqual(expect.objectContaining({
@@ -954,7 +986,7 @@ describe('paramilitary_sweep', () => {
                 ],
             });
 
-            detectParamilitaryTargets(state, [], new Map());
+            detectParamilitaryTargets(state, [], new Map(), undefined);
 
             expect(state.pending_paramilitary_requests).toHaveLength(0);
             expect(state.paramilitary_decision_history).toEqual([
@@ -978,7 +1010,7 @@ describe('paramilitary_sweep', () => {
                 ],
             });
 
-            detectParamilitaryTargets(state, [], new Map());
+            detectParamilitaryTargets(state, [], new Map(), undefined);
 
             expect(state.pending_paramilitary_requests).toHaveLength(0);
             expect(state.paramilitary_decision_history?.[0]?.decision).toBe('deny');

@@ -713,6 +713,17 @@ export interface ParamilitaryUnrequestedView {
      * dissolved without taking it (target already friendly, combat blocked, organized defence, the fade cutoff) books nothing.
      */
     captured: boolean;
+    /**
+     * The cause the receipt names, derived from the saved basis at the sweep's turn (§6 D1 stage 2, A3; no new state field):
+     * - `standing_order`: the side's policy card was answered Always allow in person, and no paramilitary decision was filed
+     *   for the side between that answer and the sweep;
+     * - `standing_order_automatic`: the same, but the card was answered automatically with the historical policy (Observer);
+     * - `neutral`: a paramilitary decision was filed for the side after the card answer (the review modal can change the order
+     *   there), so the order in force is not derivable; the receipt gives one cause-neutral line.
+     * Absent: the saved basis shows no Always allow (Always deny, Review, unanswered, or no card), which no stage-2 rule sweeps
+     * under, so the save comes from the stage-1 rule and the receipt keeps the stage-1 cause.
+     */
+    cause?: 'standing_order' | 'standing_order_automatic' | 'neutral';
 }
 
 export interface OfficerDecisionRecordView {
