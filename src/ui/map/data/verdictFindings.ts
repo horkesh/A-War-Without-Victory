@@ -14,7 +14,7 @@ import {
     WAR_CRIMES_AUTHORIZED_FINDING_PREFIX,
     WAR_CRIMES_RECORD_FINDING_PREFIX,
 } from '../../../sim/endgame/cost_ledger.js';
-import { t, type MessageKey } from '../i18n';
+import { isMessageKey, t, type MessageKey } from '../i18n';
 import { formatCount } from '../utils/formatters.js';
 import { resolveEventDisplayTitle } from './eventDisplayCopy.js';
 
@@ -59,30 +59,40 @@ function sideOrder(faction: string | undefined): number {
 }
 
 function perSideKind(id: string): string | undefined {
-    // §6 E3b: a side's two war-crimes lines (historical record, authorized in play) form one kind.
+    // §6 E3b: a side's two war-crimes lines ("Historical war-crimes record of this campaign",
+    // "War crimes arising from decisions in play") form one kind.
     if (id.startsWith(WAR_CRIMES_RECORD_FINDING_PREFIX) || id.startsWith(WAR_CRIMES_AUTHORIZED_FINDING_PREFIX)) return 'war_crimes_record';
     if (id.startsWith('paramilitary_war_crimes_findings_')) return 'paramilitary';
     return undefined;
 }
 
-/** Within a side: the historical-record line before the authorized-in-play line. */
+/** Within a side: the historical-record line before the decisions-in-play line. */
 function lineOrder(id: string): number {
     return id.startsWith(WAR_CRIMES_AUTHORIZED_FINDING_PREFIX) ? 1 : 0;
 }
 
-/** What fired, by localized card title, in the ledger's order; a repeated card shows its count. */
+/** An incident's signed label (`warCost.incident.<event_id>`), or the card's display title where it has none. */
+function incidentLabel(eventId: string, title: string): string {
+    const key = `warCost.incident.${eventId}`;
+    return isMessageKey(key) ? t(key) : resolveEventDisplayTitle(eventId, title);
+}
+
+/** What fired, by localized incident label, in the ledger's order; a repeated card shows its count. */
 function formatIncidentList(entry: CostLedgerEntry): string {
     return (entry.war_crime_incidents?.recorded_incidents ?? [])
         .map((incident) => {
-            const title = resolveEventDisplayTitle(incident.event_id, incident.title);
-            return incident.count > 1 ? `${title} (${formatCount(incident.count)})` : title;
+            const label = incidentLabel(incident.event_id, incident.title);
+            return incident.count > 1 ? `${label} (${formatCount(incident.count)})` : label;
         })
         .join(', ');
 }
 
 /**
- * §6 E3b: the two war-crimes lines (DRAFT for §4 panel). Counts are incidents, never deltas;
- * the record line states the Srebrenica genocide with its adjudication where the record holds it.
+ * §6 E3b: the two war-crimes lines (signed: SHDG §4 panel (narrative designer + historian),
+ * 2026-11-18). Counts are incidents, never deltas; the record line states the Srebrenica genocide
+ * with its adjudication where the record holds it, and is that sentence alone when nothing else
+ * is recorded. Which lines exist is decided where the ledger builds them (`visibleWarCrimeLines`):
+ * this layer only words them.
  */
 function localizeWarCrimeLine(
     finding: CostLedgerFinding,
@@ -107,11 +117,13 @@ function localizeWarCrimeLine(
             count: formatCount(count),
             incidents: formatIncidentList(entry),
         })
-        : t('warCost.finding.warCrimesRecorded.none');
+        : '';
     const genocide = recordsSrebrenicaGenocide(ledger.rupture_consequences, entry.faction);
     return {
         title: t('warCost.finding.warCrimesRecorded.title', { forces }),
-        text: genocide ? `${recorded} ${t('warCost.finding.warCrimesRecorded.genocide')}` : recorded,
+        text: [recorded, genocide ? t('warCost.finding.warCrimesRecorded.genocide') : '']
+            .filter((part) => part.length > 0)
+            .join(' '),
         sources: genocide ? [COST_LEDGER_SOURCES.srebrenicaGenocideAdjudication] : [],
     };
 }

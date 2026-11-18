@@ -4702,9 +4702,10 @@ export const enMessages = {
     'verdict.report.stat.enclavesLost': 'Enclaves Lost',
     'verdict.report.stat.plansAccepted': 'Plans Accepted',
     'verdict.report.stat.plansRejected': 'Plans Rejected',
-    // §6 E3b (2026-11-17): the two war-crimes lines, in incidents. DRAFT for §4 panel.
-    'verdict.report.stat.warCrimesRecorded': 'Recorded in the historical record of this campaign',
-    'verdict.report.stat.warCrimesAuthorized': 'Authorized in play',
+    // §6 E3b (2026-11-17): the two war-crimes counts, in incidents; the record row is hidden at 0.
+    // Signed: SHDG §4 panel (narrative designer + historian), 2026-11-18.
+    'verdict.report.stat.warCrimesRecorded': 'War-crime incidents, historical record',
+    'verdict.report.stat.warCrimesAuthorized': 'War-crime incidents arising from decisions in play',
     'verdict.condemnation.genocide': 'Its forces committed the Srebrenica genocide (found by the ICTY and the ICJ)',
     'verdict.condemnation.civilianAtrocities': 'Condemned for systematic atrocities against civilian population',
     'verdict.condemnation.unreported': 'Additional condemnation record',
@@ -6681,16 +6682,39 @@ export const enMessages = {
     'warCost.finding.warCrimes.title': 'War-crimes record: {forces}',
     'warCost.finding.warCrimes.text': 'This campaign recorded {events} war-crime events by {forces}.',
     'warCost.finding.warCrimes.textOne': 'This campaign recorded {events} war-crime event by {forces}.',
-    // §6 E3b (2026-11-17): two lines per side, in incidents, never deltas. DRAFT for §4 panel.
-    'warCost.finding.warCrimesRecorded.title': 'Recorded in the historical record of this campaign: {forces}',
+    // §6 E3b (2026-11-17): two lines per side, in incidents, never deltas; no false zero (the
+    // record line has no "none" text; the decisions-in-play "none" shows only beside a shown
+    // record line). Signed: SHDG §4 panel (narrative designer + historian), 2026-11-18.
+    'warCost.finding.warCrimesRecorded.title': 'Historical war-crimes record of this campaign: {forces}',
     'warCost.finding.warCrimesRecorded.text': '{count} recorded incidents: {incidents}.',
     'warCost.finding.warCrimesRecorded.textOne': '{count} recorded incident: {incidents}.',
-    'warCost.finding.warCrimesRecorded.none': 'No recorded incident.',
     'warCost.finding.warCrimesRecorded.genocide': 'The ICTY held the Srebrenica killings to be genocide, as did the International Court of Justice.',
-    'warCost.finding.warCrimesAuthorized.title': 'Authorized in play: {forces}',
-    'warCost.finding.warCrimesAuthorized.text': '{count} incidents authorized in play.',
-    'warCost.finding.warCrimesAuthorized.textOne': '{count} incident authorized in play.',
-    'warCost.finding.warCrimesAuthorized.none': 'No incident authorized in play.',
+    'warCost.finding.warCrimesAuthorized.title': 'War crimes arising from decisions in play: {forces}',
+    'warCost.finding.warCrimesAuthorized.text': '{count} incidents arose from decisions in play.',
+    'warCost.finding.warCrimesAuthorized.textOne': '{count} incident arose from decisions in play.',
+    'warCost.finding.warCrimesAuthorized.none': 'No incident arose from decisions in play.',
+    // §6 E3b incident labels: what the historical-record line names for each war-crimes card (the
+    // card title only as a fallback). Equal to WAR_CRIME_INCIDENT_LABELS (cost_ledger.ts).
+    // Signed: SHDG §4 panel (narrative designer + historian), 2026-11-18.
+    'warCost.incident.srebrenica_falls_1995': 'Srebrenica genocide',
+    'warCost.incident.zepa_falls_1995': 'Forcible transfer from Žepa',
+    'warCost.incident.concentration_camps_revealed_1992': 'Omarska, Keraterm and Trnopolje camps',
+    'warCost.incident.csq_accelerated_camps_discovery_1992': 'Prijedor-area camps exposed',
+    'warCost.incident.drina_valley_ethnic_cleansing_1992': 'Ethnic cleansing in the Drina valley',
+    'warCost.incident.sarajevo_siege_begins_1992': 'Siege of Sarajevo: shelling and sniping of civilians',
+    'warCost.incident.markale_area_shelling_1993': 'Shelling of civilians in Sarajevo',
+    'warCost.incident.markale_massacre_1994': 'First Markale massacre',
+    'warCost.incident.second_markale_massacre_1995': 'Second Markale massacre',
+    'warCost.incident.tuzla_gate_massacre_1995': 'Tuzla Gate massacre',
+    'warCost.incident.un_hostage_crisis_1995': 'Taking of UN personnel as hostages',
+    'warCost.incident.ahmici_massacre_1993': 'Ahmići massacre',
+    'warCost.incident.sovici_doljani_attack_1993': 'Sovići-Doljani attack',
+    'warCost.incident.east_mostar_siege_1993': 'Siege of East Mostar',
+    'warCost.incident.hvo_detention_camps_1993': 'HVO detention camps',
+    'warCost.incident.hrhb_camp_exposure_response_1993': 'Heliodrom, Dretelj and Gabela camps exposed',
+    'warCost.incident.stupni_do_massacre_1993': 'Stupni Do massacre',
+    'warCost.incident.trusina_killings_1993': 'Trusina killings',
+    'warCost.incident.grabovica_uzdol_massacres_1993': 'Grabovica and Uzdol massacres',
     'warCost.finding.paramilitary.title': 'Paramilitary deployments: {command}',
     'warCost.finding.paramilitary.text': 'This campaign recorded {count} paramilitary deployments carried out for {command}. Each is recorded as a war-crimes finding.',
     'warCost.finding.paramilitary.textOne': 'This campaign recorded {count} paramilitary deployment carried out for {command}. It is recorded as a war-crimes finding.',

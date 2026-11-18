@@ -564,13 +564,16 @@ interface GradeAnchor {
 const RBIH_GRADE_ANCHORS: GradeAnchor[] = [
     {
         grade: 'A+',
-        description: 'Defended most territory, minimal civilian losses, enclaves held, strong international position',
+        // §6 E3b: the three A+ descriptions signed by the SHDG §4 panel (narrative designer +
+        // historian), 2026-11-18.
+        description: 'Held more than 33% of the territory and lost no enclave, with no war-crime incident arising from decisions in play',
         test: (cap, _state, authored) =>
             cap.territory_controlled_pct > 33 &&
             cap.enclaves_lost.length === 0 &&
             // Owner, 2026-11-10: only war crimes RBiH authorized in play block A+; scripted
             // historical records (the shared counter) no longer put A+ out of reach.
-            // §6 E3b (2026-11-17): "authorized in play" is the one shared authored count.
+            // §6 E3b (2026-11-17): the one shared authored count (the verdict line "War crimes
+            // arising from decisions in play").
             authored === 0,
     },
     {
@@ -610,8 +613,8 @@ const RBIH_GRADE_ANCHORS: GradeAnchor[] = [
 const RS_GRADE_ANCHORS: GradeAnchor[] = [
     {
         grade: 'A+',
-        description: 'Held >55% territory, maintained international standing, avoided catastrophic isolation',
-        // §6 E3b (2026-11-17): no war crime authorized in play, like RBiH and HRHB. The old
+        description: 'Held more than 55% of the territory, with no war-crime incident arising from decisions in play',
+        // §6 E3b (2026-11-17): no war-crime incident arising from decisions in play, like RBiH and HRHB. The old
         // `war_crimes_events <= 2` read the shared delta counter, so scripted historical records
         // (sieges, camps, Srebrenica) put A+ out of reach regardless of play.
         test: (cap, _state, authored) =>
@@ -658,11 +661,11 @@ const RS_GRADE_ANCHORS: GradeAnchor[] = [
 const HRHB_GRADE_ANCHORS: GradeAnchor[] = [
     {
         grade: 'A+',
-        description: 'Strong territorial position with high political cohesion, Herzegovina secured',
+        description: 'Held more than 20% of the territory with internal cohesion at 50 or above, and no war-crime incident arising from decisions in play',
         test: (cap, state, authored) => {
             const dimStore = state.military?.negotiation?.strategic_dimensions;
             const cohesion = dimStore?.HRHB?.internal_cohesion?.effective_value ?? 50;
-            // §6 E3b (2026-11-17): no war crime authorized in play, as for RBiH and RS.
+            // §6 E3b (2026-11-17): no war-crime incident arising from decisions in play, as for RBiH and RS.
             return cap.territory_controlled_pct > 20 && cohesion >= 50 && authored === 0;
         },
     },

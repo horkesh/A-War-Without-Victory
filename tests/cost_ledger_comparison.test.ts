@@ -272,7 +272,8 @@ describe('buildCostLedger', () => {
         const ledger = buildCostLedger(state);
 
         // War-crimes lines follow the fixed side order (RBiH, RS, HRHB), never ranked by count;
-        // per side the historical record, then what was authorized in play (§6 E3b).
+        // per side the historical war-crimes record, then war crimes arising from decisions in
+        // play (§6 E3b; signed: SHDG §4 panel, 2026-11-18).
         expect(ledger.findings.map((f) => f.id)).toEqual([
             'human_cost_record',
             'civilian_displacement_record',
@@ -303,12 +304,12 @@ describe('buildCostLedger', () => {
         expect(ledger.findings.find((f) => f.id === 'human_cost_record')!.text).toBe(
             'This campaign recorded 46,500 military dead and 38,000 civilian dead on all sides.',
         );
-        // Incidents, never the shared counter's deltas (35).
+        // Incidents, never the shared counter's deltas (35), named by their signed incident labels.
         expect(rsRecord.text).toBe(
-            '2 recorded incidents: Siege of Sarajevo Intensifies, Srebrenica Falls. '
+            '2 recorded incidents: Siege of Sarajevo: shelling and sniping of civilians, Srebrenica genocide. '
             + 'The ICTY held the Srebrenica killings to be genocide, as did the International Court of Justice.',
         );
-        expect(ledger.findings.find((f) => f.id === 'war_crimes_authorized_RBiH')!.text).toBe('3 incidents authorized in play.');
+        expect(ledger.findings.find((f) => f.id === 'war_crimes_authorized_RBiH')!.text).toBe('3 incidents arose from decisions in play.');
         for (const finding of ledger.findings) {
             expect(finding.text).not.toMatch(/\byou\b/i);
             expect(finding.text).not.toMatch(/less costly|more costly|achievement|badge/i);

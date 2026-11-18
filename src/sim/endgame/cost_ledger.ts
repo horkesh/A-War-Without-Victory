@@ -300,15 +300,75 @@ export const COST_LEDGER_SOURCES = Object.freeze({
         + 'Prosecutor v. Ratko Mladić, IT-09-92-T (2017), MICT-13-56-A (2021); '
         + 'ICJ, Bosnia and Herzegovina v. Serbia and Montenegro (2007)',
     /** §6 E3b (2026-11-17): the adjudication the historical-record line cites for the genocide
-     *  (Krstić appeal judgment; ICJ 2007). DRAFT for §4 panel. */
-    srebrenicaGenocideAdjudication: 'ICTY: Prosecutor v. Radislav Krstić, IT-98-33-A (2004); '
-        + 'ICJ, Bosnia and Herzegovina v. Serbia and Montenegro (2007)',
+     *  (Krstić appeal judgment; ICJ 2007). Signed: SHDG §4 panel (narrative designer + historian), 2026-11-18. */
+    srebrenicaGenocideAdjudication: 'ICTY: Prosecutor v. Radislav Krstić, IT-98-33-A, Appeal Judgement (19 April 2004); '
+        + 'ICJ, Application of the Genocide Convention (Bosnia and Herzegovina v. Serbia and Montenegro), '
+        + 'Judgment (26 February 2007)',
 });
 
-/** The finding id of a side's historical-record line (kept from the one-card finding: Codex essays key on it). */
+/** The finding id of a side's "Historical war-crimes record of this campaign" line (kept from the one-card finding: Codex essays key on it). */
 export const WAR_CRIMES_RECORD_FINDING_PREFIX = 'war_crimes_record_';
-/** The finding id of a side's "authorized in play" line. */
+/** The finding id of a side's "War crimes arising from decisions in play" line. */
 export const WAR_CRIMES_AUTHORIZED_FINDING_PREFIX = 'war_crimes_authorized_';
+
+/**
+ * §6 E3b false-zero rule (SHDG §4 panel, 2026-11-18): which of a side's two war-crimes lines show.
+ * The historical-record line shows only when it has something to state: a recorded incident, or
+ * (findings only) the Srebrenica genocide record holding the side. The decisions-in-play line
+ * shows when its count is above zero, or beside a shown record line (where it may read none).
+ * A side with neither shows no war-crimes line. The figure rows pass no genocide flag: a count
+ * of 0 is never shown as the record.
+ */
+export function visibleWarCrimeLines(
+    counts: { recorded: number; authorized: number },
+    holdsSrebrenicaGenocide = false,
+): { record: boolean; authorized: boolean } {
+    const record = counts.recorded > 0 || holdsSrebrenicaGenocide;
+    return { record, authorized: counts.authorized > 0 || record };
+}
+
+/**
+ * §6 E3b incident labels (signed: SHDG §4 panel (narrative designer + historian), 2026-11-18):
+ * what the historical-record line names for each scripted war-crimes card, in sentence case,
+ * naming the crime rather than the card's headline. Equals the i18n EN `warCost.incident.<event_id>`
+ * (pinned by tests/s6_e3b_verdict_lines.test.ts). A card without a label is listed by its title.
+ */
+export const WAR_CRIME_INCIDENT_LABELS: Readonly<Record<string, string>> = Object.freeze({
+    srebrenica_falls_1995: 'Srebrenica genocide',
+    zepa_falls_1995: 'Forcible transfer from Žepa',
+    concentration_camps_revealed_1992: 'Omarska, Keraterm and Trnopolje camps',
+    csq_accelerated_camps_discovery_1992: 'Prijedor-area camps exposed',
+    drina_valley_ethnic_cleansing_1992: 'Ethnic cleansing in the Drina valley',
+    sarajevo_siege_begins_1992: 'Siege of Sarajevo: shelling and sniping of civilians',
+    markale_area_shelling_1993: 'Shelling of civilians in Sarajevo',
+    markale_massacre_1994: 'First Markale massacre',
+    second_markale_massacre_1995: 'Second Markale massacre',
+    tuzla_gate_massacre_1995: 'Tuzla Gate massacre',
+    un_hostage_crisis_1995: 'Taking of UN personnel as hostages',
+    ahmici_massacre_1993: 'Ahmići massacre',
+    sovici_doljani_attack_1993: 'Sovići-Doljani attack',
+    east_mostar_siege_1993: 'Siege of East Mostar',
+    hvo_detention_camps_1993: 'HVO detention camps',
+    hrhb_camp_exposure_response_1993: 'Heliodrom, Dretelj and Gabela camps exposed',
+    stupni_do_massacre_1993: 'Stupni Do massacre',
+    trusina_killings_1993: 'Trusina killings',
+    grabovica_uzdol_massacres_1993: 'Grabovica and Uzdol massacres',
+});
+
+/**
+ * What fired, by incident label (the card title where a card has none), in the ledger's order; a
+ * repeated card shows its count.
+ */
+export function formatRecordedWarCrimeIncidents(incidents: readonly RecordedWarCrimeIncident[]): string {
+    return incidents
+        .map((incident) => {
+            const label = Object.prototype.hasOwnProperty.call(WAR_CRIME_INCIDENT_LABELS, incident.event_id)
+                ? WAR_CRIME_INCIDENT_LABELS[incident.event_id]!
+                : incident.title;
+            return incident.count > 1 ? `${label} (${formatInteger(incident.count)})` : label;
+        })
+        .join(', ');
+}
 
 /** True when the Srebrenica genocide record holds `faction` as perpetrator (the line then states it). */
 export function recordsSrebrenicaGenocide(
@@ -332,7 +392,7 @@ export const SREBRENICA_FINDING_TEXT =
 /**
  * §6 E3b: the historical-record line states the genocide plainly, in the words of the signed
  * Srebrenica finding above (Krstić appeal judgment; ICJ 2007). Equals the i18n EN
- * `warCost.finding.warCrimesRecorded.genocide`. DRAFT for §4 panel.
+ * `warCost.finding.warCrimesRecorded.genocide`. Signed: SHDG §4 panel (narrative designer + historian), 2026-11-18.
  */
 export const SREBRENICA_GENOCIDE_LINE =
     'The ICTY held the Srebrenica killings to be genocide, as did the International Court of Justice.';
@@ -487,53 +547,50 @@ function buildProsecutorialFindings(
 
     // §6 E3b (ruling 2026-11-17): two lines per side, in incidents, never deltas. Fixed side
     // order, never ranked by count (§4 panel 2026-11-14; Ring 3 #7); per side the historical
-    // record comes first, then what was authorized in play. "Grave" = an authored incident or a
-    // §3.4 condemnation flag, and both lines then carry it (equal prominence). The record line
-    // keeps the old card's id, which Codex essays key on (`FINDING:war_crimes_record_<side>`).
-    // Counts only: the civilian and displacement figures are booked by control or siege, not
-    // culpability, so they are not attributed here (§4 panel, red-team A8).
-    // Copy: DRAFT for §4 panel (narrative designer + historian).
+    // war-crimes record comes first, then war crimes arising from decisions in play. "Grave" =
+    // an authored incident or a §3.4 condemnation flag, and every shown line of the side then
+    // carries it (equal prominence). The record line keeps the old card's id, which Codex essays
+    // key on (`FINDING:war_crimes_record_<side>`). No false zero (`visibleWarCrimeLines`): a
+    // hidden line is never created, so it leaves no card. Counts only: the civilian and
+    // displacement figures are booked by control or siege, not culpability, so they are not
+    // attributed here (§4 panel, red-team A8).
+    // Copy signed: SHDG §4 panel (narrative designer + historian), 2026-11-18.
     const warCrimeEntries = entries
-        .filter((entry) => {
-            const incidents = entry.war_crime_incidents;
-            return incidents !== undefined
-                && (incidents.recorded > 0 || incidents.authorized > 0 || recordsSrebrenicaGenocide(ruptures, entry.faction));
-        })
+        .filter((entry) => entry.war_crime_incidents !== undefined)
         .sort((a, b) => sideOrder(a.faction) - sideOrder(b.faction) || strictCompare(a.faction, b.faction));
     for (const entry of warCrimeEntries) {
         const incidents = entry.war_crime_incidents!;
+        const genocide = recordsSrebrenicaGenocide(ruptures, entry.faction);
+        const shown = visibleWarCrimeLines(incidents, genocide);
+        if (!shown.authorized) continue;
         const forces = FORCES_NAME[entry.faction] ?? entry.faction;
         const severity: CostLedgerFindingSeverity = incidents.authorized > 0 || entry.condemnation_flags.length > 0 ? 'grave' : 'record';
-        const genocide = recordsSrebrenicaGenocide(ruptures, entry.faction);
-        const recordedText = incidents.recorded > 0
-            // DRAFT for §4 panel
-            ? `${formatInteger(incidents.recorded)} recorded ${plural(incidents.recorded, 'incident')}: ` +
-                `${formatIncidentList(incidents.recorded_incidents)}.`
-            // DRAFT for §4 panel
-            : 'No recorded incident.';
-        findings.push({
-            id: `${WAR_CRIMES_RECORD_FINDING_PREFIX}${entry.faction}`,
-            category: 'war_crimes',
-            severity,
-            faction: entry.faction,
-            // DRAFT for §4 panel
-            title: `Recorded in the historical record of this campaign: ${forces}`,
-            // DRAFT for §4 panel (the genocide sentence reuses the signed Srebrenica finding's words)
-            text: genocide ? `${recordedText} ${SREBRENICA_GENOCIDE_LINE}` : recordedText,
-            sources: genocide ? [COST_LEDGER_SOURCES.srebrenicaGenocideAdjudication] : [],
-        });
+        if (shown.record) {
+            const recordedText = incidents.recorded > 0
+                ? `${formatInteger(incidents.recorded)} recorded ${plural(incidents.recorded, 'incident')}: ` +
+                    `${formatRecordedWarCrimeIncidents(incidents.recorded_incidents)}.`
+                : '';
+            findings.push({
+                id: `${WAR_CRIMES_RECORD_FINDING_PREFIX}${entry.faction}`,
+                category: 'war_crimes',
+                severity,
+                faction: entry.faction,
+                title: `Historical war-crimes record of this campaign: ${forces}`,
+                // With no recorded incident the genocide sentence stands alone (no false zero).
+                text: [recordedText, genocide ? SREBRENICA_GENOCIDE_LINE : ''].filter((part) => part.length > 0).join(' '),
+                sources: genocide ? [COST_LEDGER_SOURCES.srebrenicaGenocideAdjudication] : [],
+            });
+        }
         findings.push({
             id: `${WAR_CRIMES_AUTHORIZED_FINDING_PREFIX}${entry.faction}`,
             category: 'war_crimes',
             severity,
             faction: entry.faction,
-            // DRAFT for §4 panel
-            title: `Authorized in play: ${forces}`,
+            title: `War crimes arising from decisions in play: ${forces}`,
             text: incidents.authorized > 0
-                // DRAFT for §4 panel
-                ? `${formatInteger(incidents.authorized)} ${plural(incidents.authorized, 'incident')} authorized in play.`
-                // DRAFT for §4 panel
-                : 'No incident authorized in play.',
+                ? `${formatInteger(incidents.authorized)} ${plural(incidents.authorized, 'incident')} arose from decisions in play.`
+                // Only beside a shown record line.
+                : 'No incident arose from decisions in play.',
             sources: [],
         });
     }
@@ -573,13 +630,6 @@ function buildProsecutorialFindings(
     }
 
     return findings;
-}
-
-/** What fired, by card title, in loader order; a repeated card shows its count. */
-function formatIncidentList(incidents: readonly RecordedWarCrimeIncident[]): string {
-    return incidents
-        .map((incident) => (incident.count > 1 ? `${incident.title} (${formatInteger(incident.count)})` : incident.title))
-        .join(', ');
 }
 
 function parseDeploymentCount(text?: string): number {
