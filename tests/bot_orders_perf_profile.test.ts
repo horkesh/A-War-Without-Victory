@@ -260,7 +260,9 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(combatPredictor).toContain('powerByFormationId');
         expect(combatPredictor).toContain('powerByFormationId.get(b.id)');
         expect(combatPredictor).toContain('collectSectorDefenseBrigades');
-        expect(sectorDefenseRoster).toContain('getStandingOgDefenseBrigadeIds(sector)');
+        // Ruling D 4c: the owning sector, then same-corps seam sectors, each read the same way.
+        expect(sectorDefenseRoster).toContain('for (const rosterSector of sector ? [sector, ...seamSectors] : [])');
+        expect(sectorDefenseRoster).toContain('getStandingOgDefenseBrigadeIds(rosterSector)');
         expect(sectorDefenseRoster).toContain('isStandingOgDefenseBrigadeAvailable(state, f.id)');
         expect(combatPredictor).toContain('const avgReactivePower = avgBrigadePower');
         expect(combatPredictor).toContain('attackerCount * avgReactivePower * REACTIVE_DEFENSE_RATIO');

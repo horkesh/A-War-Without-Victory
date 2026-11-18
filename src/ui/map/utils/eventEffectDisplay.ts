@@ -12,6 +12,9 @@ export const NON_DISPLAY_EVENT_EFFECT_KINDS = new Set<string>([
   'bot_priority_shift',
   'doctrine_constraint',
   'alliance_lock',
+  // Retired 2026-11-17 (supply is connection, not stock): an old save's staged decision may still carry
+  // one. The engine ignores it, so the player must not be shown it.
+  'supply_delta',
 ]);
 
 export function isDisplayEventEffectKind(kind: string): boolean {

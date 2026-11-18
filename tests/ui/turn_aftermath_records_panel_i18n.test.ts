@@ -149,11 +149,11 @@ describe('TurnAftermathRecordsPanel localization', () => {
             ...useGameStore.getInitialState(),
             loadedGameState: {
                 ...makeState(),
-                pendingConvoyDecisions: [{
-                    id: 'convoy_latest',
-                    target_enclave: 'Srebrenica',
-                    route_faction: 'RBiH',
-                    supply_amount: 120,
+                pendingParamilitaryRequests: [{
+                    faction: 'RBiH',
+                    strength: 120,
+                    target_osid: 'srebrenica_1',
+                    estimated_civilian_risk: 10,
                 }],
             } as LoadedGameState,
             osidDisplayNames: {},
@@ -161,9 +161,9 @@ describe('TurnAftermathRecordsPanel localization', () => {
 
         const { container } = render(createElement(TurnAftermathRecordsPanel));
 
-        expect(screen.getAllByText('Humanitarni konvoj').length).toBeGreaterThan(0);
-        expect(container.textContent).not.toContain('convoy_decision');
-        expect(container.textContent).not.toContain('Humanitarian convoy');
+        expect(screen.getAllByText('Paravojno odobrenje').length).toBeGreaterThan(0);
+        expect(container.textContent).not.toContain('paramilitary_request');
+        expect(container.textContent).not.toContain('Paramilitary authorization');
     });
 
     it('uses explicit aftermath label maps instead of dynamic enum i18n keys', () => {

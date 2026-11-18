@@ -22,7 +22,6 @@ import aftermathLossWide from '../assets/presidential_desk/aftermath_headers/aft
 import aftermathMixedWide from '../assets/presidential_desk/aftermath_headers/aftermath_mixed_wide.webp';
 import aftermathQuietWide from '../assets/presidential_desk/aftermath_headers/aftermath_quiet_wide.webp';
 
-import packetThumbConvoy from '../assets/presidential_desk/packet_thumbnails/packet_thumb_convoy.webp';
 import packetThumbEventDecision from '../assets/presidential_desk/packet_thumbnails/packet_thumb_event_decision.webp';
 import packetThumbIntelligence from '../assets/presidential_desk/packet_thumbnails/packet_thumb_intelligence.webp';
 import packetThumbOfficerMatter from '../assets/presidential_desk/packet_thumbnails/packet_thumb_officer_matter.webp';
@@ -40,7 +39,6 @@ export const PRESIDENTIAL_DESK_BANNER = presidentialDeskBanner;
 
 const DECISION_HEADERS: Partial<Record<DecisionSurfaceFamilyId, string>> = {
   autonomy_proposal: decisionHeaderDiplomacy,
-  convoy_decision: decisionHeaderHumanitarianConvoy,
   counter_offer: decisionHeaderCounterOffer,
   dayton_negotiation: decisionHeaderDiplomacy,
   intelligence_notification: decisionHeaderIntelligence,
@@ -53,7 +51,6 @@ const DECISION_HEADERS: Partial<Record<DecisionSurfaceFamilyId, string>> = {
 
 const PACKET_THUMBNAILS: Partial<Record<InboxItemType, string>> = {
   autonomy_proposal: packetThumbPeacePlan,
-  convoy_decision: packetThumbConvoy,
   dayton_negotiation: packetThumbPeacePlan,
   event_decision: packetThumbEventDecision,
   intelligence_notification: packetThumbIntelligence,
@@ -132,7 +129,7 @@ export function getConsequenceStillForRecord(record: Pick<DecisionConsequenceRec
   if (family.includes('reserve') || family.includes('operation')) {
     return consequenceReserveDeployment;
   }
-  if (family.includes('humanitarian') || family.includes('convoy')) {
+  if (family.includes('humanitarian')) {
     return consequenceHumanitarianAccess;
   }
   if (family.includes('officer') || family.includes('personnel')) {

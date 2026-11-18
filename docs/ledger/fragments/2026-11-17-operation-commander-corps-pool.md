@@ -20,7 +20,24 @@ Pre-freeze fix (owner rule: no engine changes after 1.0). PR 2a of the commander
   - Cikotić: compatible 7th Corps. His OG West passed to the 7th Corps (BB2 pp.429, 510).
 - The startup snapshot is re-baked.
 
-**Measured** (188w, main runs at the same commit 08f486ae9; main 709/709/708/682, historical 2c63bd10fecd6bc7, emergent bfcbfa55dd206585):
+**Measured at merge** (188w, on post-P2 main 1f814da3c, after #774 and #794; the main runs are #794's at the same simulation code, 694/686/685/655 historical and 694/686/685/654 emergent):
+- **Historical:** 694/686/685/656, final_save 03833ed22dee182f.
+  - oct95, lost: Jajce lupnica, Konjic sitnik.
+  - oct95, gained: Donji Vakuf babin_potok_2, donji_vakuf_2, oborci_2.
+- **Hands-off emergent:** 694/686/683/656, final_save 14515fd1837f05dd.
+  - apr95, lost: Konjic sitnik and Nevesinje hrusta_2, both taken early by RBiH.
+  - oct95, net +2.
+- The first control divergence is at t119: Konjic bijela_2 falls to RBiH 9 turns earlier.
+- Guards intact in both modes: enclaves H1.8, Farz P-A, P-B, HRHB western cascade (30 matched).
+- Reload contract (CI fix):
+  - A generic acting commander now carries the migration-v10 defaults: stubbornness 3, override_tolerance 3, recent_overrides [].
+  - Before, a fresh-process reload filled them in (`tests/desktop_spawn_reload_contract.test.ts`). This PR exposes the gap at t1: the JNA Herzegovina Command gets a generic where main borrowed Gavrić.
+  - Measured byte-identical in both modes.
+- Acting corps-turns: 328 of 3098 (10.6%).
+  - JNA Herzegovina Command 188 (all war; ruled to end with the JNA withdrawal, in PR 2c).
+  - 4th Corps 126 (t63-188), 7th Corps 13 (t176-188), 3rd Corps 1.
+
+**Measured earlier** (188w, main runs at the same commit 08f486ae9; main 709/709/708/682, historical 2c63bd10fecd6bc7, emergent bfcbfa55dd206585):
 - Restricting operation command alone (first version) gave 709/709/705/671 in both modes.
   - Cause, traced turn by turn with a runner observer: the 4th Corps had no eligible officer, so its operations ran commanderless (10 of 12).
   - Because the vacancy fallback was still faction-wide, Hadžihasanović (t66-80) and then Alagić (t80-99) were seated in the 4th Corps. The corps commander's personality drives the commander loop, so the 4th Corps made 12 attacks against 5 on main and over-captured RS cells in Mostar, Nevesinje and Kalinovik.

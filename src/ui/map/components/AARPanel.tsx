@@ -523,40 +523,6 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                                 </Section>
                             )}
 
-                            {/* Faction Pulse */}
-                            {(Object.keys(summary.supply_deltas).length > 0 || Object.keys(summary.heavy_munitions_deltas).length > 0) && (
-                                <Section title={t('aar.section.factionPulse')} defaultOpen={false}>
-                                    {(['RS', 'RBiH', 'HRHB'] as const).map((faction) => {
-                                        const sup = summary.supply_deltas[faction];
-                                        const mun = summary.heavy_munitions_deltas[faction];
-                                        if (sup == null && mun == null) return null;
-                                        return (
-                                            <div key={faction} className="flex items-center gap-2 py-0.5">
-                                                <FactionTag faction={faction} />
-                                                <div className="text-[15px] tabular-nums flex gap-3 text-[#c2b69c]">
-                                                    {sup != null && (
-                                                        <span>
-                                                            {t('aar.supply')}{' '}
-                                                            <span className={sup > 0 ? 'text-emerald-200' : 'text-red-200'}>
-                                                                {sup > 0 ? '+' : ''}{sup.toFixed(1)}
-                                                            </span>
-                                                        </span>
-                                                    )}
-                                                    {mun != null && (
-                                                        <span>
-                                                            {t('aar.munitions')}{' '}
-                                                            <span className={mun > 0 ? 'text-emerald-200' : 'text-red-200'}>
-                                                                {mun > 0 ? '+' : ''}{mun.toFixed(1)}
-                                                            </span>
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </Section>
-                            )}
-
                             {/* Displacement */}
                             {(summary.displacement_total > 0 || (summary.displacement_killed ?? 0) > 0) && (
                                 <Section title={t('aar.section.displacement')} defaultOpen={false}>

@@ -16,9 +16,6 @@ export interface PresidentialBlocker {
 }
 
 function blockerSummary(item: InboxItem): string {
-  if (item.type === 'convoy_decision') {
-    return t('presidentialBlockers.convoy.summary');
-  }
   const surface = getDecisionSurfaceForInboxType(item.type);
   return surface?.copySanitizer({ title: item.title, subtitle: item.subtitle }).summary ?? item.subtitle;
 }

@@ -106,10 +106,11 @@ export async function updateNegotiationCapital(
         const patronCommitment = faction.patron_state?.patron_commitment ?? 0;
         const patronBonus = patronCommitment * 5.0;
 
-        const enclavePenalty =
-            (state.political.enclaves ?? [])
-                .filter((e) => e.faction_id === faction.id)
-                .reduce((sum, e) => sum + e.humanitarian_pressure, 0) * 10.0;
+        // F1i (2026-11-16, §6 panel, unanimous): the enclave liability penalty is retired. It billed
+        // the besieged party for its own sieges (and turn-1 mixed-control noise pockets) once
+        // political.enclaves was populated; the siege's political cost reaches capital through
+        // IVP and negotiation momentum. The zero row is kept so ledger ids (their seq) are stable.
+        const enclavePenalty = 0;
 
         const nextCapital = Math.max(
             0,

@@ -59,7 +59,6 @@ import type {
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
-import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { resolveActiveEmbargoPhase, EMBARGO_PHASE_CAPS } from '../../state/embargo.js';
 import { pickOperationName } from './operation_names.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
@@ -146,7 +145,6 @@ import {
     areParticipantsReadyForExecution,
     buildOsidAdjacencyFromFrontEdges,
     collectObjectiveApproachOsids,
-    computeSupplyReadiness,
     evaluateLaunchFeasibility,
     evaluateOpeningAttackReadiness,
     getEquipmentOffensivePriority,
@@ -644,7 +642,6 @@ const MAX_CONSECUTIVE_CATASTROPHIC_ON_CURRENT = 2;
 const MAX_SHARED_OBJECTIVE_WAIT_TURNS = 3;
 const EARLY_LAUNCH_COHESION_PENALTY = 15;
 const ALL_OUT_EXTRA_COHESION_COST = 1;
-const BOMBARDMENT_PREP_COST = 2;
 const FEINT_PLANNING_TURNS = 2;
 
 /**
@@ -1289,27 +1286,10 @@ function applyCohesionDelta(state: GameState, brigadeIds: FormationId[], delta: 
     }
 }
 
-function applyArtilleryPreparation(
-    state: GameState,
-    faction: FactionId,
-    operation: CorpsOperation
-): void {
-    if (!operation.artillery_preparation || operation.artillery_preparation_consumed) return;
-    const currentObjective = operation.objectives?.[operation.current_objective_index ?? 0];
-    if (typeof currentObjective !== 'string' || currentObjective.length === 0) return;
-    if (!state.military.heavy_munitions_reserve) state.military.heavy_munitions_reserve = {};
-    const currentReserve = state.military.heavy_munitions_reserve[faction] ?? 0;
-    if (currentReserve < BOMBARDMENT_PREP_COST) return;
-    state.military.heavy_munitions_reserve[faction] = Math.max(0, currentReserve - BOMBARDMENT_PREP_COST);
-    for (const formationId of Object.keys(state.military.formations ?? {}).sort(strictCompare)) {
-        const formation = state.military.formations?.[formationId];
-        if (!formation || formation.status !== 'active') continue;
-        if (formation.location_osid !== currentObjective || formation.faction === faction) continue;
-        formation.dig_in_progress = 0;
-        formation.cohesion = Math.max(0, (formation.cohesion ?? 100) - 10);
-    }
-    operation.artillery_preparation_consumed = true;
-}
+// applyArtilleryPreparation retired 2026-11-17 (Fable consult 6): it spent BOMBARDMENT_PREP_COST from the
+// heavy-munitions reserve and returned without effect whenever that reserve was absent, which it always
+// was with the supply-reserve economy off. The player's artillery_preparation flag is still recorded on
+// the operation but has never had an effect in a reserves-off game.
 
 function fullyRevealProbeSectorIntel(state: GameState, operation: CorpsOperation): void {
     if (operation.type !== 'probe' || !operation.sector_id || !state.military.sector_intel?.[operation.sector_id]) return;
@@ -1551,7 +1531,8 @@ export function advanceSectorOffensives(
         }
 
         // Recompute supply readiness
-        op.supply_readiness = computeSupplyReadiness(state, allBrigades, faction, supplyByOsid);
+        // Supply readiness is fixed at 1.0 since the supply-reserve economy was retired (2026-11-17).
+        op.supply_readiness = 1.0;
 
         if (op.recovery_reason === 'manual_termination' && op.phase !== 'recovery') {
             beginRecovery(op, turn, 'manual_termination', state);
@@ -1761,13 +1742,7 @@ export function advanceSectorOffensives(
 
             if (op.type === 'feint' && elapsed >= FEINT_PLANNING_TURNS) {
                 applyCohesionDelta(state, allBrigades, -5);
-                // The feint's supply cost exists only where the reserve model runs (F7, 2026-11-15).
-                // With reserves off this wrote a phantom 0 reserve that nothing acted on but the turn
-                // summary showed as a -0.5 supply change.
-                if (state.meta.supply_reserves_enabled) {
-                    if (!state.military.general_supply_reserve) state.military.general_supply_reserve = {};
-                    state.military.general_supply_reserve[faction] = Math.max(0, (state.military.general_supply_reserve[faction] ?? 0) - 0.5);
-                }
+                // The feint's -0.5 supply cost drew on the supply reserve, retired 2026-11-17 (Fable consult 6).
                 beginRecovery(op, turn, 'manual_termination', state);
                 continue;
             }
@@ -1888,7 +1863,6 @@ export function advanceSectorOffensives(
                     applyCohesionDelta(state, allBrigades, -EARLY_LAUNCH_COHESION_PENALTY);
                     op.force_launch = false;
                 }
-                applyArtilleryPreparation(state, faction, op);
             }
         } else if (op.phase === 'execution') {
             const tgExhaustionReason = evaluateOperationTacticalGroupExhaustion(state, corpsId, op, turn);
@@ -2685,8 +2659,8 @@ export function evaluateCorpsOffensiveLaunch(
     const turn = state.meta?.turn ?? 0;
     const formations = state.military.formations ?? {};
 
-    // Embargo-driven offensive-eligibility gate. Independent of
-    // supply_reserves_enabled: while the faction's embargo cap is below
+    // Embargo-driven offensive-eligibility gate. Independent of the retired
+    // supply-reserve economy: while the faction's embargo cap is below
     // threshold, it cannot open a NEW offensive corps operation this turn.
     // Existing operations already in flight are untouched.
     if (isFactionOffensiveGatedByEmbargo(state, faction)) return null;
@@ -2700,16 +2674,10 @@ export function evaluateCorpsOffensiveLaunch(
         const fac = supplyByOsid.factions?.find(f => f.faction_id === faction);
         if (fac?.by_osid) {
             const osidState = new Map(fac.by_osid.map(e => [e.osid, e.state] as const));
-            const reserveLevel = state.meta?.supply_reserves_enabled
-                ? ((state.military.general_supply_reserve as Record<string, number> | undefined)?.[faction] ?? 100)
-                : 100;
             corpsBrigadeIds = corpsBrigadeIds.filter(bid => {
                 const b = formations[bid];
                 if (!b) return true;
-                const rawSt = b.location_osid ? (osidState.get(b.location_osid) ?? 'adequate') : 'adequate';
-                const st = state.meta?.supply_reserves_enabled
-                    ? getEffectiveSupplyState(rawSt, reserveLevel)
-                    : rawSt;
+                const st = b.location_osid ? (osidState.get(b.location_osid) ?? 'adequate') : 'adequate';
                 return st !== 'critical';
             });
         }
@@ -2728,7 +2696,7 @@ export function evaluateCorpsOffensiveLaunch(
     // Launch itself is allowed even under poor sector-wide supply so the force can stage and
     // reposition toward the next objective. Individual brigades still remain supply-gated when
     // bot_brigade_ai_osid decides whether an attack order is actually eligible.
-    const supplyReadiness = computeSupplyReadiness(state, corpsBrigadeIds, faction, supplyByOsid);
+    const supplyReadiness = 1.0; // reserve-based readiness retired 2026-11-17 (Fable consult 6)
 
     // Select objectives: offensive targets that are in this corps' enemy OSIDs,
     // filtered to a contiguous chain from the corps' friendly front.

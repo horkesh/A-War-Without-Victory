@@ -1342,7 +1342,9 @@ function isSectorUnstaffableByFaction(
         if (!formation.location_osid) return false;
         if (operationParticipants.has(formation.id)) return false;
         if ((formation.disrupted_turns ?? 0) > 0 || formation.disrupted === true) return false;
-        if (formation.posture === 'dig_in' || pendingDigIn.has(formation.id)) return false;
+        // A dug-in brigade is a legal relief donor (package P2 step 1, 2026-11-16), as in
+        // computeEmptySectorReliefReassignments: the two donor checks change together, so a sector
+        // is not flagged unstaffable while the relief planner could fill it.
         if (formation.elite_loan_state?.on_loan) return false;
         if (state.military.brigade_movement_orders?.[formation.id]) return false;
         const movementState = state.military.brigade_movement_state?.[formation.id];

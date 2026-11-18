@@ -1,5 +1,20 @@
 # Save Schema Evolution
 
+## v41 — `negotiation_capital` event effects stripped from pending decisions (2026-11-17, §6 E2)
+
+`CURRENT_SCHEMA_VERSION` 40 → 41. Migration v41 runs after v40 (the September 1991 peace start retirement, #773); a v39 save takes v40 and then v41. The `negotiation_capital` event effect kind is retired (the loader rejects it; `applyEventEffects` throws on an unknown kind). Migration v41 (`src/state/save_migration.ts`):
+- strips `kind === 'negotiation_capital'` entries from `military.pending_event_decisions[].response_options[].effects`;
+- deletes a singular `response_options[].effect` of that kind.
+
+Forward-only, deterministic and idempotent; no change on a clean state, and no field is added. Accepted and recorded: a decision pending at upgrade loses the dimension shift its catalog row now carries, because pending options are stored snapshots. The startup snapshot is rebuilt at v41 (its `schema_version` is the only byte change from v40). Tests: `tests/s6_e2_negotiation_capital_retired.test.ts`, the `v40_negotiation_capital_pending.json` round-trip fixture (a v40 save, so it exercises v41 alone).
+
+## v40 — September 1991 peace start retired (2026-11-16)
+
+`CURRENT_SCHEMA_VERSION` 39 → 40. The September 1991 peace start was cut as playable content by the campaign structure decision of 2026-03-23 (`PROJECT_LEDGER_KNOWLEDGE.md`); its scenario (`sep1991_to_dayton.json`), registry entry, the runner's peace-start block, the peace-to-war control-map read and the `peace_*` scenario fields are now removed, and the loader rejects `start_lifecycle_phase: "peace"`. Migration v40 (`src/state/save_migration.ts`):
+- deletes `meta.peace_war_start_control_path`. Only the peace start ever set it (an absolute filesystem path, which made the state hash depend on the checkout location) and only the peace-to-war transition read it; every war-start save held `null`.
+
+The migration is forward-only, deterministic and idempotent. No field is added. The validator no longer requires the key from v40 (`retiredAtVersion`) and rejects it if present on a v40 state. The startup snapshot is rebuilt at v40. Fixture: `tests/fixtures/save_migration/v39_peace_control_path_retired.json` (holds a legacy absolute path). Test: `tests/sep1991_peace_start_retired.test.ts`. The in-sim peace phase itself (`runOneTurn`'s peace branch, referendum and declaration logic, `peace_scheduled_*` meta) is retired separately.
+
 ## v39 — political-directive chain retired (2026-11-16, freeze cut B3 + B2)
 
 `CURRENT_SCHEMA_VERSION` 38 → 39. The turn pipeline no longer writes `political_directives_by_faction` or `army_corps_directives_by_faction`, and nothing reads them in a game. Migration v39 (`src/state/save_migration.ts`):

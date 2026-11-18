@@ -25,7 +25,6 @@ function minimalState(turn: number): GameState {
         military: {
             formations: {},
             fired_event_ids: [],
-            general_supply_reserve: { RBiH: 10, RS: 10, HRHB: 10 },
         },
         political: {},
         factions: [],
@@ -67,7 +66,8 @@ describe('event calendar chronology', () => {
 
             expect(result.fired.map((event) => event.id)).toContain('carter_ceasefire_1994');
             expect(state.military.event_flags?.carter_ceasefire_active).toBe(true);
-            expect(state.military.general_supply_reserve).toMatchObject({ RBiH: 15, RS: 13 });
+            // The former RBiH +5 / RS +3 supply effects were retired 2026-11-17 (supply is connection, not stock).
+            expect(state.military.general_supply_reserve).toBeUndefined();
             expect(state.military.pending_event_decisions?.[0]).toMatchObject({
                 event_id: 'carter_ceasefire_1994',
                 requires_player_response: true,
