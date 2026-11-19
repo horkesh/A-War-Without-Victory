@@ -3,7 +3,7 @@ import type { FactionId, GameState } from '../../state/game_state.js';
 import { applyEventEffects } from './apply_effects.js';
 import { applyDefinitionDimensionShifts, applyDefinitionFlags } from './evaluate_events.js';
 import { resolveEventDecision } from './resolve_decision.js';
-import type { EventDefinition, EventEffect, PendingEventDecision } from './event_types.js';
+import type { EventDefinition, EventEffect, EventResponseOption, PendingEventDecision } from './event_types.js';
 
 const IDENTITY = 'rbih_state_identity';
 const POLICY = 'rbih_paramilitary_policy_1992';
@@ -296,6 +296,11 @@ function queuePolicy(state: GameState, def: EventDefinition): void {
     state.military.event_readiness[def.id] = 0;
     state.military.pending_event_decisions ??= [];
     state.military.pending_event_decisions.push(buildPending(def, 'RBiH', turn));
+}
+
+/** RED seam (§6 design T2, D1): implemented with the filing lane. */
+export function filedIdentityOptionEnablesPolicy(_option: EventResponseOption | undefined, _policy: EventDefinition): boolean {
+    throw new Error('filedIdentityOptionEnablesPolicy is not implemented yet');
 }
 
 export function resolvePlayerEventDecisionWithOpeningPolicy(

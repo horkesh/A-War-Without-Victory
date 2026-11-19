@@ -28,6 +28,8 @@ export interface RealizedConsequenceReceipt {
     decision_event_id: string;
     response_id: string;
     decision_turn: number;
+    /** The turn the decision's response applied and wrote its causal edges (see `decisionAppliedTurn`). */
+    applied_turn: number;
     consequence_event_id: string;
     fired_turn: number;
     turns_elapsed: number;
@@ -146,6 +148,7 @@ export function buildRealizedConsequenceReceipts(
                 decision_event_id: decision.event_id,
                 response_id: decision.response_id,
                 decision_turn: decision.turn,
+                applied_turn: decision.turn,
                 consequence_event_id: consequenceId,
                 fired_turn: firedTurn,
                 turns_elapsed: firedTurn - decision.turn,

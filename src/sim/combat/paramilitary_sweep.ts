@@ -97,6 +97,19 @@ function isPlayerParamilitaryPolicyDecisionPending(
     return !(state.military.event_decision_log ?? []).some((entry) => entry.event_id === eventId);
 }
 
+/** The player the request gate binds: a manual (autonomy 0) player only; null for staff control and headless. */
+function selectRequestGatePlayer(state: GameState): FactionId | null {
+    const rawPlayerFaction = state.meta?.player_faction ?? null;
+    return rawPlayerFaction != null && selectStaffControlledFactions(state).includes(rawPlayerFaction)
+        ? null
+        : rawPlayerFaction;
+}
+
+/** Whether the manual player's paramilitary requests are held this turn (read by the request IPC too). */
+export function isPlayerParamilitaryRequestGateHolding(state: GameState): boolean {
+    return isPlayerParamilitaryPolicyDecisionPending(state, selectRequestGatePlayer(state));
+}
+
 function removePrematurePlayerParamilitaryRequests(state: GameState, playerFaction: FactionId): void {
     if (!Array.isArray(state.pending_paramilitary_requests)) return;
     state.pending_paramilitary_requests = state.pending_paramilitary_requests
@@ -423,11 +436,7 @@ export function detectParamilitaryTargets(
     // headless (no-player) result. At autonomy >= 1 the player's staff runs rear-pocket
     // consolidation exactly as bot staff do (no pending window, no per-request gate). Only a
     // manual (autonomy 0) player keeps the request/policy path. Headless has no player: inert.
-    const rawPlayerFaction = state.meta?.player_faction ?? null;
-    const playerFaction = rawPlayerFaction != null
-        && selectStaffControlledFactions(state).includes(rawPlayerFaction)
-        ? null
-        : rawPlayerFaction;
+    const playerFaction = selectRequestGatePlayer(state);
     const playerPolicyDecisionPending = isPlayerParamilitaryPolicyDecisionPending(state, playerFaction);
     if (playerPolicyDecisionPending && playerFaction) {
         removePrematurePlayerParamilitaryRequests(state, playerFaction);

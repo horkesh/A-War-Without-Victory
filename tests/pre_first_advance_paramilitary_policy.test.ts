@@ -16,6 +16,7 @@ import type { GameState } from '../src/state/game_state.js';
 import { listBlockingPlayerDecisions } from '../src/state/player_decision_manifest.js';
 import { resolveBrowserEventDecision } from '../src/ui/map/desktop/campaignRecruitmentActions.js';
 import war1992Events from '../data/scenarios/events/war_1992.json';
+import { asPreTBirthSave } from './helpers/s6_opening_lane_fixtures.js';
 
 const POLICY_EVENT_ID = 'rbih_paramilitary_policy_1992';
 const POLICY_OPTIONS = ['always_deny', 'ask', 'always_allow'] as const;
@@ -26,9 +27,20 @@ async function openingState(): Promise<GameState> {
   return (await startNewCampaign(process.cwd(), 'RBiH', 'apr_1992', 'historical')).state;
 }
 
+/** New build (§6 design T2): the identity is filed at t0 and the policy card is queued, unfired. */
 async function pendingPolicyState(): Promise<GameState> {
   return resolveDesktopEventDecision(
     await openingState(),
+    'rbih_state_identity',
+    'civic',
+    process.cwd(),
+  );
+}
+
+/** A save from a build before T: identity fired at birth, so its answer fires the policy card at t0 (the old lane). */
+async function oldLanePendingPolicyState(): Promise<GameState> {
+  return resolveDesktopEventDecision(
+    asPreTBirthSave(await openingState()),
     'rbih_state_identity',
     'civic',
     process.cwd(),
@@ -103,9 +115,13 @@ describe('pre-first-Advance RBiH paramilitary policy', () => {
         turn: 0,
       }),
     ]);
-    expect(resolved.military.fired_event_ids).toContain(POLICY_EVENT_ID);
-    expect(resolved.military.event_fire_counts[POLICY_EVENT_ID]).toBe(1);
-    expect(resolved.military.event_last_fired_turn[POLICY_EVENT_ID]).toBe(0);
+    // §6 design T2: the card is put to the player at t0 but NOT fired; its answer is filed and
+    // applied when it fires at t4 (before T it was fired here, at t0).
+    expect(resolved.military.fired_event_ids).not.toContain(POLICY_EVENT_ID);
+    expect(resolved.military.event_fire_counts[POLICY_EVENT_ID] ?? 0).toBe(0);
+    expect(resolved.military.event_last_fired_turn[POLICY_EVENT_ID]).toBeUndefined();
+    expect(resolved.military.enabled_event_ids).not.toContain(POLICY_EVENT_ID);
+    expect(resolved.military.fired_event_ids).not.toContain('rbih_state_identity');
     expect(resolved.pending_paramilitary_requests ?? []).toHaveLength(0);
     expect(resolved.political.control_events ?? []).toHaveLength(0);
     expect(listBlockingPlayerDecisions(resolved as any)).toEqual([
@@ -139,7 +155,7 @@ describe('pre-first-Advance RBiH paramilitary policy', () => {
       recruitment: [{ faction: 'RBiH', pool_multiplier: 0.95, expires_turn: 52 }],
       priority: [{ faction: 'RBiH', add_objectives: ['paramilitary_rear_clearance'], expires_turn: 104 }],
     },
-  ])('applies the complete canonical $responseId response exactly once', async ({
+  ])('old lane (pre-T save): applies the complete canonical $responseId response exactly once', async ({
     responseId,
     policy,
     flags,
@@ -147,7 +163,8 @@ describe('pre-first-Advance RBiH paramilitary policy', () => {
     recruitment,
     priority,
   }) => {
-    const before = await pendingPolicyState();
+    // A pre-T save keeps the timing it started under: the t0 answer applies at once.
+    const before = await oldLanePendingPolicyState();
     const beforeDimensions = {
       international_standing: dimension(before, 'international_standing'),
       internal_cohesion: dimension(before, 'internal_cohesion'),
@@ -208,8 +225,9 @@ describe('pre-first-Advance RBiH paramilitary policy', () => {
     }
   });
 
+  // ('wrong turn' left this table with §6 design T, D3: a birth identity card that outlives t0 while its
+  // card is unfired stays answerable, so meta.turn 1 is no longer a rejection; s6_opening_timing_lane.test.ts.)
   it.each([
-    ['wrong turn', (state: GameState) => { state.meta.turn = 1; }],
     ['wrong phase', (state: GameState) => { state.meta.phase = 'peace'; }],
     ['wrong player', (state: GameState) => { state.meta.player_faction = 'RS'; }],
     ['headless auto-control', (state: GameState) => { state.meta.headless_scenario_auto_control = true; }],
@@ -280,8 +298,9 @@ describe('pre-first-Advance RBiH paramilitary policy', () => {
     ['forged notifications', (state: GameState) => { state.military.pending_event_decisions![0]!.notifications_to_other_factions = {}; }],
     ['forged narrative', (state: GameState) => { state.military.pending_event_decisions![0]!.narrative = 'forged'; }],
     ['forged option description', (state: GameState) => { state.military.pending_event_decisions![0]!.response_options[2]!.description = 'forged'; }],
-  ])('rejects policy response with %s and leaves input bytes unchanged', async (_label, arrange) => {
-    const state = await pendingPolicyState();
+  ])('old lane (pre-T save): rejects policy response with %s and leaves input bytes unchanged', async (_label, arrange) => {
+    // The fired-card guards of the old turn-0 lane; the filing lane's own guards are in s6_opening_timing_lane.test.ts.
+    const state = await oldLanePendingPolicyState();
     arrange(state);
     const before = serializeState(state);
     expect(() => resolvePlayerEventDecisionWithOpeningPolicy(
@@ -356,8 +375,25 @@ describe('pre-first-Advance RBiH paramilitary policy', () => {
     }
   });
 
-  it('preserves exact deny, ask, and allow first-Advance semantics for a manual (autonomy 0) player', async () => {
+  it('new lane: a manual (autonomy 0) player gets no request and sends no sweep before the filed answer applies', async () => {
+    // §6 design T2/T3: the t0 answer is only filed, so at the first Advance no answer has applied and the
+    // manual gate holds, whatever was filed (before T the t0 answer applied at once: see the old-lane test).
     const pending = await pendingPolicyState();
+    pending.meta.autonomy_level = 0;
+    for (const responseId of POLICY_OPTIONS) {
+      const filed = resolveDesktopEventDecision(pending, POLICY_EVENT_ID, responseId, process.cwd());
+      const advanced = await advanceTurn(filed, process.cwd());
+      expect(advanced.error).toBeUndefined();
+      expect((advanced.state.pending_paramilitary_requests ?? []).filter((request) => request.faction === 'RBiH'), responseId)
+        .toHaveLength(0);
+      expect((advanced.state.political.control_events ?? [])
+        .filter((event) => event.mechanism === 'paramilitary' && event.to === 'RBiH'), responseId).toHaveLength(0);
+      expect(advanced.state.military.event_flags?.rbih_paramilitary_policy, responseId).toBeUndefined();
+    }
+  }, 120_000);
+
+  it('old lane (pre-T save): preserves exact deny, ask, and allow first-Advance semantics for a manual (autonomy 0) player', async () => {
+    const pending = await oldLanePendingPolicyState();
     // Owner calibration directive 2026-11-05: the policy gate governs a manual player only.
     pending.meta.autonomy_level = 0;
     const beforeWarCrimes = pending.military.negotiation?.capital?.RBiH?.war_crimes_events ?? 0;

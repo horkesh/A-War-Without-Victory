@@ -29,6 +29,9 @@ export const OPENING_FOUNDATIONAL_EVENT_IDS: readonly string[] = [
     'rs_strategic_goals',
 ];
 
+/** RED seam (§6 design T2): the full answer-ahead list; the RBiH policy card joins it with the filing lane. */
+export const ANSWER_AHEAD_EVENT_IDS: readonly string[] = OPENING_FOUNDATIONAL_EVENT_IDS;
+
 function hasFired(state: GameState, eventId: string): boolean {
     return (state.military.fired_event_ids ?? []).includes(eventId)
         || (state.military.event_fire_counts?.[eventId] ?? 0) > 0;
