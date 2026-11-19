@@ -1663,6 +1663,11 @@ export interface LoadedGameState {
         effects: Array<{ kind: string; description: string }>;
         isDecision: boolean;
         responseOptions?: Array<{ id: string; label: string; description?: string }>;
+        /** A player answer filed ahead of its card firing that has since applied: the card's fire turn
+         *  (§6 design T; answer_ahead_of_firing.ts). `turn` stays the turn the answer was filed. */
+        filedAnswerAppliedTurn?: number;
+        /** Player-facing label of the recorded response (decisions only). */
+        responseLabel?: string;
     }>;
 
     /** Pending event decisions awaiting player response. */

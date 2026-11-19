@@ -122,8 +122,9 @@ export function queueBrowserOpeningFoundationalDecision(
 
     const turn = state.meta?.turn ?? 0;
     state.military.pending_event_decisions ??= [];
-    // Same bot-equivalent timing rule as the Electron adapter (desktop_sim.ts): the card is
-    // queued at birth, the event fires (and the filed answer applies) in its authored window.
+    // Same bot-equivalent timing rule as the Electron adapter (desktop_sim.ts; §6 design T1): the
+    // card is queued at birth and never fired there; the event fires (and the filed answer applies)
+    // in its authored window. The fire-at-birth path below is no longer reached.
     if (!preFiresOpeningDecisionAtBirth(def, turn)) {
         state.military.pending_event_decisions.push(buildOpeningPendingDecision(def, playerFaction, turn));
         return;

@@ -3,7 +3,8 @@ import type { FactionId, GameState } from '../../state/game_state.js';
 import { applyEventEffects } from './apply_effects.js';
 import { applyDefinitionDimensionShifts, applyDefinitionFlags } from './evaluate_events.js';
 import { resolveEventDecision } from './resolve_decision.js';
-import type { EventDefinition, EventEffect, PendingEventDecision } from './event_types.js';
+import type { EventDefinition, EventEffect, EventResponseOption, PendingEventDecision } from './event_types.js';
+import { evaluateCondition } from './event_types.js';
 
 const IDENTITY = 'rbih_state_identity';
 const POLICY = 'rbih_paramilitary_policy_1992';
@@ -195,6 +196,46 @@ function reviewedIdentity(catalog: EventDefinitionCatalog | undefined): EventDef
     return def;
 }
 
+function eventHasFired(state: GameState, eventId: string): boolean {
+    return (state.military.fired_event_ids ?? []).includes(eventId)
+        || (state.military.event_fire_counts?.[eventId] ?? 0) > 0;
+}
+
+function countOf(ids: readonly string[] | undefined, eventId: string): number {
+    return (ids ?? []).filter((id) => id === eventId).length;
+}
+
+/**
+ * D1 (§6 design T2): whether a FILED identity answer gives the policy card its authored basis. The card is
+ * put to the player at t0 only when the filed option's `enables_events_runtime` names the card AND the
+ * identity flag that option sets satisfies the card's trigger condition, both read from the reviewed catalog.
+ * Otherwise the identity is filed alone: a policy answer filed for a card that can never fire would sit in
+ * the record forever as an answer that never applies.
+ */
+export function filedIdentityOptionEnablesPolicy(
+    option: EventResponseOption | undefined,
+    policy: EventDefinition,
+    state: GameState,
+): boolean {
+    if (!option?.enables_events_runtime?.includes(policy.id)) return false;
+    const identityFlag = option.sets_flags?.[IDENTITY];
+    if (identityFlag === undefined) return false;
+    const condition = policy.trigger.condition;
+    if (!condition) return true;
+    // The condition judged on the state the card will see once the filed identity applies its flag.
+    const probe: GameState = {
+        ...state,
+        military: { ...state.military, event_flags: { ...(state.military.event_flags ?? {}), [IDENTITY]: identityFlag } },
+    };
+    return evaluateCondition(condition, probe);
+}
+
+/**
+ * The identity answer the RBiH policy card rests on, on a fired policy card (the old turn-0 lane and the
+ * in-window lane). In-window: answered in the identity's window, at or before the policy fired. D3: an
+ * identity answer FILED ahead at birth and applied when the identity fired in its window is also canonical,
+ * so a birth policy card left pending through its own firing (harness `defer`) stays answerable.
+ */
 function requireCanonicalIdentityReceipt(
     state: GameState,
     catalog: EventDefinitionCatalog | undefined,
@@ -208,10 +249,16 @@ function requireCanonicalIdentityReceipt(
     const option = identity?.response_options?.find((entry) => entry.id === receipt.response_id);
     const identityTurnMin = identity?.trigger.turn_min;
     const identityTurnMax = identity?.trigger.turn_max;
+    const identityFiredTurn = state.military.event_last_fired_turn?.[IDENTITY];
+    const inIdentityWindow = (turn: unknown): boolean => typeof turn === 'number'
+        && typeof identityTurnMin === 'number' && typeof identityTurnMax === 'number'
+        && turn >= identityTurnMin && turn <= identityTurnMax;
+    const answeredInWindow = inIdentityWindow(receipt.turn) && receipt.turn <= policyFireTurn;
+    const filedAndAppliedInWindow = inIdentityWindow(identityFiredTurn)
+        && receipt.turn < (identityFiredTurn as number) && (identityFiredTurn as number) <= policyFireTurn;
     const receiptIsCanonicalForLane = openingLane
         ? receipt.turn === 0
-        : typeof identityTurnMin === 'number' && typeof identityTurnMax === 'number'
-            && receipt.turn >= identityTurnMin && receipt.turn <= identityTurnMax && receipt.turn <= policyFireTurn;
+        : answeredInWindow || filedAndAppliedInWindow;
     if (!identity || identity.responding_faction !== 'RBiH' || receipt.decision_source !== 'player'
         || receipt.faction !== 'RBiH' || !receiptIsCanonicalForLane
         || state.military.event_flags.rbih_state_identity !== receipt.response_id
@@ -220,72 +267,159 @@ function requireCanonicalIdentityReceipt(
     }
 }
 
+/**
+ * The basis of the T2 filing lane: exactly one player identity answer, whose reviewed option gives the card
+ * its authored basis (D1, in place of the applied-flag check, since a filed identity sets no flag). If the
+ * identity has since fired, that answer must have been filed ahead of it and applied by it.
+ */
+function requireFiledIdentityBasis(state: GameState, catalog: EventDefinitionCatalog | undefined, policy: EventDefinition): void {
+    const receipts = (state.military.event_decision_log ?? []).filter((receipt) => receipt.event_id === IDENTITY);
+    if (receipts.length !== 1) throw new Error('Opening policy requires exactly one filed identity receipt');
+    const receipt = receipts[0]!;
+    const identity = reviewedIdentity(catalog);
+    const option = identity.response_options?.find((entry) => entry.id === receipt.response_id);
+    let basis = receipt.decision_source === 'player' && receipt.faction === 'RBiH'
+        && filedIdentityOptionEnablesPolicy(option, policy, state);
+    if (basis && eventHasFired(state, IDENTITY)) {
+        const firedTurn = state.military.event_last_fired_turn?.[IDENTITY];
+        basis = typeof firedTurn === 'number' && receipt.turn < firedTurn
+            && state.military.event_flags?.rbih_state_identity === receipt.response_id;
+    }
+    if (!basis) throw new Error('Opening policy identity receipt does not establish the authored enabling basis');
+}
+
+type PolicyLane = 'filing' | 'opening' | 'legacy';
+
+/**
+ * The RBiH paramilitary-policy answer, by save shape:
+ * - FILING (§6 design T2): the card was put to the player at birth by the identity filing lane and has not
+ *   fired. Answering only files the answer (`resolve_decision_core.ts`); evaluate-events applies it when the
+ *   card fires (t4). Keyed on "turn_fired 0 and the card unfired", not on meta.turn (D3), so a birth card
+ *   left pending past t0 stays answerable.
+ * - OPENING (saves from before T): the card was FIRED at t0 by the old lane; the answer applies at once.
+ * - LEGACY: the card fired in its window (t3-9) and is answered then, applied at once. D3: the fire turn is
+ *   read from `event_last_fired_turn`, so a birth card (turn_fired 0) that stayed pending through its firing
+ *   is answered here too.
+ */
 function requirePolicyResponseState(
     state: GameState,
     decision: PendingEventDecision,
     catalog: EventDefinitionCatalog | undefined,
-): void {
+): PolicyLane {
     const def = reviewedPolicy(catalog);
-    const fireTurn = decision.turn_fired;
-    const turnMin = def.trigger.turn_min;
-    const turnMax = def.trigger.turn_max;
-    const openingLane = fireTurn === 0 && state.meta.turn === 0;
-    const legacyLane = typeof turnMin === 'number' && typeof turnMax === 'number'
-        && fireTurn >= turnMin && fireTurn <= turnMax && state.meta.turn >= fireTurn;
     const military = state.military;
-    const headlessMarkerIsEligible = openingLane
-        ? state.meta.headless_scenario_auto_control === false
-        : state.meta.headless_scenario_auto_control !== true;
     if (state.meta.phase !== 'war' || state.meta.player_faction !== 'RBiH'
-        || !headlessMarkerIsEligible || decision.faction !== 'RBiH'
-        || decision.requires_player_response !== true || (!openingLane && !legacyLane)
+        || decision.faction !== 'RBiH' || decision.requires_player_response !== true
         || (military.pending_event_decisions ?? []).filter((entry) => entry.event_id === POLICY).length !== 1
-        || military.fired_event_ids.filter((id) => id === POLICY).length !== 1
-        || military.event_fire_counts[POLICY] !== 1
-        || military.event_last_fired_turn[POLICY] !== fireTurn
-        || military.enabled_event_ids.filter((id) => id === POLICY).length !== 1
         || (military.closed_event_ids ?? []).includes(POLICY)
         || (military.event_decision_log ?? []).some((receipt) => receipt.event_id === POLICY)) {
         throw new Error('Pending RBiH policy response is not eligible in the current state');
     }
+
+    if (!eventHasFired(state, POLICY)) {
+        // Enabled exactly when the identity's filed answer has applied (its runtime causality enables the card).
+        const expectedEnabled = eventHasFired(state, IDENTITY) ? 1 : 0;
+        if (decision.turn_fired !== 0 || state.meta.headless_scenario_auto_control !== false
+            || military.event_last_fired_turn?.[POLICY] !== undefined
+            || countOf(military.enabled_event_ids, POLICY) !== expectedEnabled) {
+            throw new Error('Pending RBiH policy response is not eligible in the current state');
+        }
+        requireFiledIdentityBasis(state, catalog, def);
+        if (canonicalJson(withoutProvenanceText(decision)) !== canonicalJson(withoutProvenanceText(buildPending(def, 'RBiH', 0)))) {
+            throw new Error('Pending RBiH policy payload differs from the reviewed catalog');
+        }
+        return 'filing';
+    }
+
+    const fireTurn = military.event_last_fired_turn?.[POLICY];
+    const turnMin = def.trigger.turn_min;
+    const turnMax = def.trigger.turn_max;
+    const openingLane = decision.turn_fired === 0 && fireTurn === 0 && state.meta.turn === 0;
+    const legacyLane = typeof fireTurn === 'number' && typeof turnMin === 'number' && typeof turnMax === 'number'
+        && fireTurn >= turnMin && fireTurn <= turnMax && state.meta.turn >= fireTurn
+        && (decision.turn_fired === fireTurn || decision.turn_fired === 0);
+    const headlessMarkerIsEligible = openingLane
+        ? state.meta.headless_scenario_auto_control === false
+        : state.meta.headless_scenario_auto_control !== true;
+    if (!headlessMarkerIsEligible || (!openingLane && !legacyLane) || typeof fireTurn !== 'number'
+        || countOf(military.fired_event_ids, POLICY) !== 1
+        || military.event_fire_counts[POLICY] !== 1
+        || countOf(military.enabled_event_ids, POLICY) !== 1) {
+        throw new Error('Pending RBiH policy response is not eligible in the current state');
+    }
     requireCanonicalIdentityReceipt(state, catalog, openingLane, fireTurn);
-    if (canonicalJson(withoutProvenanceText(decision)) !== canonicalJson(withoutProvenanceText(buildPending(def, 'RBiH', fireTurn)))) {
+    if (canonicalJson(withoutProvenanceText(decision)) !== canonicalJson(withoutProvenanceText(buildPending(def, 'RBiH', decision.turn_fired)))) {
         throw new Error('Pending RBiH policy payload differs from the reviewed catalog');
     }
+    return openingLane ? 'opening' : 'legacy';
 }
 
+type IdentityLane =
+    | { kind: 'filing'; identity: EventDefinition; policy: EventDefinition }
+    | { kind: 'opening'; policy: EventDefinition }
+    | { kind: 'legacy' };
+
+/**
+ * The RBiH identity answer, by save shape:
+ * - FILING (§6 design T1/T2): the birth card, its event unfired. The answer is filed, and the lane then puts
+ *   the policy card to the player (queued, not fired) when the filed option gives it its basis (D1). Keyed on
+ *   "turn_fired 0 and the identity unfired", not on meta.turn (D3).
+ * - OPENING (saves from before T): the identity was FIRED at birth; the answer applies at once and the old
+ *   lane fires the policy card at t0.
+ * - LEGACY: the identity fired in its window (t2-5) and is answered then, applied at once; the policy card
+ *   then fires through evaluate-events. D3: the fire turn is read from `event_last_fired_turn`, so a birth
+ *   card that stayed pending through the identity's firing is answered here.
+ */
 function requireIdentityLane(
     state: GameState,
     decision: PendingEventDecision,
     catalog: EventDefinitionCatalog | undefined,
-): { policy?: EventDefinition; opening: boolean } {
+): IdentityLane {
     const identity = reviewedIdentity(catalog);
-    const fireTurn = decision.turn_fired;
-    const opening = fireTurn === 0 && state.meta.turn === 0
-        && state.meta.headless_scenario_auto_control === false;
-    const legacy = fireTurn >= identity.trigger.turn_min! && fireTurn <= identity.trigger.turn_max!
-        && state.meta.turn >= fireTurn && state.meta.headless_scenario_auto_control !== true;
     if (state.meta.phase !== 'war' || state.meta.player_faction !== 'RBiH'
-        || decision.faction !== 'RBiH' || decision.requires_player_response !== true || (!opening && !legacy)) {
+        || decision.faction !== 'RBiH' || decision.requires_player_response !== true) {
         throw new Error('RBiH identity decision is not eligible in the current state');
     }
     const military = state.military;
-    if (military.fired_event_ids.filter((id) => id === IDENTITY).length !== 1
+    const untouched = !military.fired_event_ids.includes(POLICY) && !(military.closed_event_ids ?? []).includes(POLICY)
+        && !(military.enabled_event_ids ?? []).includes(POLICY)
+        && !(military.pending_event_decisions ?? []).some((d) => d.event_id === POLICY)
+        && !(military.event_decision_log ?? []).some((r) => r.event_id === POLICY || r.event_id === IDENTITY)
+        && !(military.closed_event_ids ?? []).includes(IDENTITY);
+
+    if (!eventHasFired(state, IDENTITY)) {
+        if (decision.turn_fired !== 0 || state.meta.headless_scenario_auto_control !== false) {
+            throw new Error('RBiH identity decision is not eligible in the current state');
+        }
+        if (!untouched || military.event_last_fired_turn?.[IDENTITY] !== undefined
+            || canonicalJson(withoutDisplayText(decision)) !== canonicalJson(withoutDisplayText(buildPending(identity, 'RBiH', 0)))) {
+            throw new Error('RBiH identity decision is stale, forged, or already completed');
+        }
+        return { kind: 'filing', identity, policy: reviewedPolicy(catalog) };
+    }
+
+    const fireTurn = military.event_last_fired_turn?.[IDENTITY];
+    const opening = decision.turn_fired === 0 && fireTurn === 0 && state.meta.turn === 0
+        && state.meta.headless_scenario_auto_control === false;
+    const legacy = typeof fireTurn === 'number'
+        && fireTurn >= identity.trigger.turn_min! && fireTurn <= identity.trigger.turn_max!
+        && (decision.turn_fired === fireTurn || decision.turn_fired === 0)
+        && state.meta.turn >= fireTurn && state.meta.headless_scenario_auto_control !== true;
+    if (!opening && !legacy) {
+        throw new Error('RBiH identity decision is not eligible in the current state');
+    }
+    if (countOf(military.fired_event_ids, IDENTITY) !== 1
         || military.event_fire_counts[IDENTITY] !== 1
-        || military.event_last_fired_turn[IDENTITY] !== fireTurn
         || military.event_readiness[IDENTITY] !== 0
-        || (military.closed_event_ids ?? []).includes(IDENTITY)
-        || canonicalJson(withoutDisplayText(decision)) !== canonicalJson(withoutDisplayText(buildPending(identity, 'RBiH', fireTurn)))
-        || military.fired_event_ids.includes(POLICY) || (military.closed_event_ids ?? []).includes(POLICY)
-        || (military.enabled_event_ids ?? []).includes(POLICY)
-        || (military.pending_event_decisions ?? []).some((d) => d.event_id === POLICY)
-        || (military.event_decision_log ?? []).some((r) => r.event_id === POLICY || r.event_id === IDENTITY)) {
+        || !untouched
+        || canonicalJson(withoutDisplayText(decision)) !== canonicalJson(withoutDisplayText(buildPending(identity, 'RBiH', decision.turn_fired)))) {
         throw new Error('RBiH identity decision is stale, forged, or already completed');
     }
-    return opening ? { policy: reviewedPolicy(catalog), opening: true } : { opening: false };
+    return opening ? { kind: 'opening', policy: reviewedPolicy(catalog) } : { kind: 'legacy' };
 }
 
-function queuePolicy(state: GameState, def: EventDefinition): void {
+/** The old turn-0 lane (saves from before T only): the policy card FIRES at t0, its answer applies at once. */
+function fireAndQueuePolicy(state: GameState, def: EventDefinition): void {
     const turn = state.meta.turn;
     applyEventEffects(state, effects(def));
     applyDefinitionDimensionShifts(state, def.dimension_shifts);
@@ -298,6 +432,16 @@ function queuePolicy(state: GameState, def: EventDefinition): void {
     state.military.pending_event_decisions.push(buildPending(def, 'RBiH', turn));
 }
 
+/**
+ * The T2 filing lane: the policy card is put to the player before the first Advance as a birth card
+ * (turn_fired 0), NOT fired. No effect, flag, shift or fired receipt is written; its answer is filed and
+ * evaluate-events applies it when the card fires in its window (answer_ahead_of_firing.ts).
+ */
+function queueFiledPolicy(state: GameState, def: EventDefinition): void {
+    state.military.pending_event_decisions ??= [];
+    state.military.pending_event_decisions.push(buildPending(def, 'RBiH', 0));
+}
+
 export function resolvePlayerEventDecisionWithOpeningPolicy(
     state: GameState,
     catalog: EventDefinitionCatalog | undefined,
@@ -307,43 +451,60 @@ export function resolvePlayerEventDecisionWithOpeningPolicy(
     const candidate = cloneGameState(state);
     const pending = requireCurrentDecision(candidate, eventId, responseId);
     const identityLane = eventId === IDENTITY ? requireIdentityLane(candidate, pending, catalog) : undefined;
-    const policy = identityLane?.policy;
-    if (eventId === POLICY) requirePolicyResponseState(candidate, pending, catalog);
-    const receiptsBefore = (candidate.military.event_decision_log ?? []).filter((r) => r.event_id === IDENTITY).length;
+    const policyLane = eventId === POLICY ? requirePolicyResponseState(candidate, pending, catalog) : undefined;
+    const receiptsBefore = (candidate.military.event_decision_log ?? []).filter((r) => r.event_id === eventId).length;
+    const orderBefore = candidate.paramilitary_policy;
+    const policyFlagBefore = candidate.military.event_flags?.rbih_paramilitary_policy;
     resolveEventDecision(candidate, eventId, responseId);
-    if (policy) {
-        const receipts = (candidate.military.event_decision_log ?? []).filter((r) => r.event_id === IDENTITY);
-        const receipt = receipts.at(-1);
-        if (receipts.length !== receiptsBefore + 1 || receipt?.response_id !== responseId || receipt.decision_source !== 'player'
-            || receipt.faction !== 'RBiH' || receipt.turn !== 0 || !(candidate.military.enabled_event_ids ?? []).includes(POLICY)
+    const receipts = (candidate.military.event_decision_log ?? []).filter((r) => r.event_id === eventId);
+    const receipt = receipts.at(-1);
+    // The turn of the one new player receipt this answer wrote; null if it wrote anything else.
+    const newReceiptTurn = receipts.length === receiptsBefore + 1 && receipt?.response_id === responseId
+        && receipt.decision_source === 'player' && receipt.faction === 'RBiH'
+        ? receipt.turn
+        : null;
+
+    if (identityLane?.kind === 'opening') {
+        if (newReceiptTurn !== 0 || !(candidate.military.enabled_event_ids ?? []).includes(POLICY)
             || candidate.paramilitary_policy !== 'ask') {
             throw new Error('Canonical identity resolution did not establish the reviewed policy preconditions');
         }
-        queuePolicy(candidate, policy);
+        fireAndQueuePolicy(candidate, identityLane.policy);
+    } else if (identityLane?.kind === 'filing') {
+        // Filed only: the identity is still unfired, the card not yet enabled, the standing order unchanged.
+        if (newReceiptTurn !== candidate.meta.turn || eventHasFired(candidate, IDENTITY)
+            || (candidate.military.enabled_event_ids ?? []).includes(POLICY) || candidate.paramilitary_policy !== orderBefore) {
+            throw new Error('Filed identity resolution did not leave the reviewed filing preconditions');
+        }
+        const option = identityLane.identity.response_options?.find((entry) => entry.id === responseId);
+        if (filedIdentityOptionEnablesPolicy(option, identityLane.policy, candidate)) queueFiledPolicy(candidate, identityLane.policy);
+    } else if (policyLane === 'filing') {
+        // Filed only: nothing applies before the card fires (red-team T2 condition 1).
+        if (newReceiptTurn !== candidate.meta.turn || eventHasFired(candidate, POLICY)
+            || candidate.paramilitary_policy !== orderBefore
+            || candidate.military.event_flags?.rbih_paramilitary_policy !== policyFlagBefore) {
+            throw new Error('Filed policy resolution applied effects before the card fired');
+        }
     }
     return candidate;
 }
 
 /**
- * Whether a player's opening foundational decision is pre-fired at campaign birth (turn 0)
- * — shared by the Electron (`desktop_sim.ts`) and browser-fallback start adapters.
+ * Whether a player's opening foundational decision is FIRED at campaign birth (turn 0), shared by the
+ * Electron (`desktop_sim.ts`) and browser-fallback start adapters. Since §6 design T1 (2026-11-19): never.
  *
- * BOT-EQUIVALENT TIMING. A bot answers a foundational event in its authored trigger window,
- * so only an event eligible on the first turn (rs_strategic_goals, window t1-3) is
- * pre-fired. One whose window opens later (hrhb_political_goal, t3-7) is left to
- * evaluate-events: it fires the turn a bot's would and the player answers it in the pause
- * before combat. Pre-firing hrhb_political_goal at t0 applied its one-shot effects to the
- * t0 formation set (croat_republic: +5 HRHB morale), so the four HRHB brigades raised
- * before the bot's fire turn (t4) kept a permanent -5 morale offset, the gated
- * hrhb_1992_graz_cooperation_collapse fired a turn early, and by t65 the offset changed a
- * Central Bosnia brigade's orders.
+ * BOT-EQUIVALENT TIMING. A bot answers each opening card in its authored window: rs_strategic_goals at t1,
+ * rbih_state_identity at t3, hrhb_political_goal at t4. So every card is queued at birth WITHOUT firing;
+ * the player's answer is filed and evaluate-events applies it when the card fires, on the bot's turn
+ * (answer_ahead_of_firing.ts). Firing a card at birth applied its one-shot effects to the t0 formation set
+ * and opened its gated follow-ups early: croat_republic's +5 HRHB morale left the brigades raised before t4
+ * a permanent -5 offset (163bee0e5); rs_strategic_goals put RS morale and its 52-turn aggression modifier a
+ * turn early; rbih_state_identity three turns early. The RBiH paramilitary-policy lane now keys on the FILED
+ * identity answer (resolvePlayerEventDecisionWithOpeningPolicy above).
  *
- * rbih_state_identity (window t2-5) keeps its reviewed turn-0 receipt: the pre-first-Advance
- * paramilitary policy lane above requires it (`receipt.turn !== 0` throws). Moving it is an
- * owner call; its measured residual is a morale offset on two late-raised ARBiH brigades.
+ * Saves written before T hold the RBiH or RS card already fired at birth; they keep that timing, chosen by
+ * save shape (the answer-ahead rule applies only to an unfired card).
  */
-export function preFiresOpeningDecisionAtBirth(def: EventDefinition, turn: number): boolean {
-    if (def.id === IDENTITY) return true;
-    const turnMin = def.trigger?.turn_min;
-    return turnMin == null || turnMin <= turn + 1;
+export function preFiresOpeningDecisionAtBirth(_def: EventDefinition, _turn: number): boolean {
+    return false;
 }

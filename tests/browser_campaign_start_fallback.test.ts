@@ -16,6 +16,8 @@ import {
   startNewCampaign,
 } from '../src/desktop/desktop_sim';
 import type { EventDefinition } from '../src/sim/events/event_types';
+import type { GameState } from '../src/state/game_state';
+import { asPreTBirthSave } from './helpers/s6_opening_lane_fixtures';
 
 const STARTUP = JSON.parse(readFileSync(
   join(process.cwd(), 'data', 'derived', 'startup', 'apr_1992_initial_save.json'),
@@ -66,11 +68,11 @@ describe('browser new-campaign fallback', () => {
   });
 
   it('queues the selected faction foundational decision when Electron IPC is unavailable', async () => {
-    // Every card is queued at birth; hrhb_political_goal (window t3-7) is not FIRED at birth
-    // (answered ahead, applied in its window) — same rule as Electron.
+    // Every card is queued at birth and none is FIRED then (answered ahead, applied in its window;
+    // §6 design T1) — same rule as Electron.
     const expected = [
-      { faction: 'RBiH' as const, eventId: 'rbih_state_identity', atBirth: true },
-      { faction: 'RS' as const, eventId: 'rs_strategic_goals', atBirth: true },
+      { faction: 'RBiH' as const, eventId: 'rbih_state_identity', atBirth: false },
+      { faction: 'RS' as const, eventId: 'rs_strategic_goals', atBirth: false },
       { faction: 'HRHB' as const, eventId: 'hrhb_political_goal', atBirth: false },
     ];
     const ipc = { isAvailable: false } as IPC;
@@ -194,32 +196,21 @@ describe('browser new-campaign fallback', () => {
     const state = loaded[0] as typeof STARTUP;
     resolveBrowserEventDecision(state, 'rs_strategic_goals', 'all_six');
 
+    // §6 design T1: the answer is filed at birth and applied when the card fires at t1, so nothing
+    // it enables, closes or flags is written yet (before T1 it all landed at t0).
     expect(state.military.pending_event_decisions ?? []).toHaveLength(0);
-    expect(state.military.event_flags.rs_strategic_goals).toBe('all_six');
+    expect(state.military.event_flags.rs_strategic_goals).toBeUndefined();
     expect(state.military.event_decision_log).toContainEqual(expect.objectContaining({
       event_id: 'rs_strategic_goals',
       response_id: 'all_six',
       decision_source: 'player',
       faction: 'RS',
+      turn: 0,
     }));
-    expect(state.military.enabled_event_ids).toContain('rs_paramilitary_policy_1992');
-    expect(state.military.closed_event_ids).toContain('csq_drina_partisan_resistance_1992');
-    expect(state.military.event_causality_log).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          from_event: 'rs_strategic_goals',
-          to_event: 'rs_paramilitary_policy_1992',
-          kind: 'enables',
-          source_response_id: 'all_six',
-        }),
-        expect.objectContaining({
-          from_event: 'rs_strategic_goals',
-          to_event: 'csq_drina_partisan_resistance_1992',
-          kind: 'closes',
-          source_response_id: 'all_six',
-        }),
-      ]),
-    );
+    expect(state.military.enabled_event_ids).not.toContain('rs_paramilitary_policy_1992');
+    expect(state.military.closed_event_ids ?? []).not.toContain('csq_drina_partisan_resistance_1992');
+    expect((state.military.event_causality_log ?? [])
+      .filter((entry: { from_event: string }) => entry.from_event === 'rs_strategic_goals')).toEqual([]);
 
     const parsed = parseGameState(state);
     const filed = parsed.firedEvents?.find((event) => event.id === 'rs_strategic_goals');
@@ -253,10 +244,12 @@ describe('browser new-campaign fallback', () => {
       war_alliance_rbih_hrhb: state.political.war_alliance_rbih_hrhb,
       paramilitary_policy: state.paramilitary_policy,
     });
-    for (const { faction, eventId, atBirth } of [
-      { faction: 'RBiH' as const, eventId: 'rbih_state_identity', atBirth: true },
-      { faction: 'RS' as const, eventId: 'rs_strategic_goals', atBirth: true },
-      { faction: 'HRHB' as const, eventId: 'hrhb_political_goal', atBirth: false },
+    // §6 design T1: every adapter files the opening answer at birth. The RBiH and RS cards were fired at
+    // birth before T1, and such saves keep that timing, so the old-lane half below runs on those saves.
+    for (const { faction, eventId, preTBirthFired } of [
+      { faction: 'RBiH' as const, eventId: 'rbih_state_identity', preTBirthFired: true },
+      { faction: 'RS' as const, eventId: 'rs_strategic_goals', preTBirthFired: true },
+      { faction: 'HRHB' as const, eventId: 'hrhb_political_goal', preTBirthFired: false },
     ]) {
       const loaded: unknown[] = [];
       vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: RequestInfo | URL) => {
@@ -270,11 +263,13 @@ describe('browser new-campaign fallback', () => {
         loadSave: async (state) => { loaded.push(state); },
         setLoadError: vi.fn(),
       }, { playerFaction: faction, decisionMode: 'emergent', scenarioKey: 'apr_1992' });
-      const browserStart = loaded[0] as typeof STARTUP;
-      const desktopStart = (await startNewCampaign(process.cwd(), faction, 'apr_1992', 'emergent')).state;
-      expect(openingProjection(browserStart)).toEqual(openingProjection(desktopStart));
+      const newBrowserStart = loaded[0] as typeof STARTUP;
+      const newDesktopStart = (await startNewCampaign(process.cwd(), faction, 'apr_1992', 'emergent')).state;
+      expect(openingProjection(newBrowserStart)).toEqual(openingProjection(newDesktopStart));
       const definition = catalog.find((entry) => entry.id === eventId)!;
-      if (!atBirth) {
+      {
+        const browserStart = newBrowserStart;
+        const desktopStart = newDesktopStart;
         // Queued but not fired at birth in either adapter. Answering files the choice (turn 0
         // receipt) and applies nothing; the event fires in its authored window.
         expect(browserStart.military.fired_event_ids).not.toContain(eventId);
@@ -298,10 +293,15 @@ describe('browser new-campaign fallback', () => {
             expect(browser.military.formations[formationId].morale, `${eventId}:${option.id}:${formationId}`).toBe(formation.morale);
           }
         }
+      }
+      if (!preTBirthFired) {
         vi.restoreAllMocks();
         continue;
       }
 
+      const browserStart = asPreTBirthSave(newBrowserStart as GameState) as typeof STARTUP;
+      const desktopStart = asPreTBirthSave(newDesktopStart);
+      expect(openingProjection(browserStart)).toEqual(openingProjection(desktopStart));
       expect(browserStart.military.pending_event_decisions[0].response_options).toEqual(definition.response_options);
       for (const option of definition.response_options ?? []) {
         const browser = structuredClone(browserStart);

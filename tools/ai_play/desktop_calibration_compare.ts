@@ -20,7 +20,7 @@ import { dirname, relative, resolve } from 'node:path';
 import {
     advanceTurn,
     loadStateFromPath,
-    resolveEventDecision,
+    resolveDesktopEventDecisionInPlace,
     resolvePlayerParamilitaryDecisions,
     serializeState,
     startNewCampaign,
@@ -133,6 +133,8 @@ interface DecisionTranscriptRow {
     value?: string;
     /** 'paused_turn': answered inside the pause before combat (turn = the turn being run). */
     stage?: 'paused_turn';
+    /** Event answers only: the harness's scripted answer, never a player's own choice (§6 design T4). */
+    answer_author?: 'harness_script';
 }
 
 interface ElectronStateSummary {
@@ -443,6 +445,24 @@ function botEquivalentResponseId(state: GameState, decision: PendingEventDecisio
     return selectBotEventResponse(state, narrowed, decision.faction, false).chosen.id;
 }
 
+function pendingDecisionsFor(state: GameState, faction: FactionId): PendingEventDecision[] {
+    return [...(state.military.pending_event_decisions ?? [])]
+        .filter((decision) => decision.faction === faction)
+        .sort((a, b) => strictCompare(a.event_id, b.event_id));
+}
+
+/**
+ * Answer the player's event decisions the way the desktop does (§6 design T4).
+ *
+ * - Through the product resolver (`resolveDesktopEventDecisionInPlace`, which takes the RBiH opening lane),
+ *   never the plain sim resolver, so the harness measures the game a player plays.
+ * - Until nothing it can answer is pending (engine D6): an answer can put a further card on the desk (the
+ *   identity answer queues the RBiH policy card), and the product blocks Advance on such a card. Only cards
+ *   queued by this call's own answers are chased, so earlier deferred cards are not re-asked in the pause.
+ * - Every answer is the harness's SCRIPTED answer. The engine records it as a `player` row, as it would a
+ *   human's; the transcript marks it `answer_author: 'harness_script'` so no reader takes it for a choice a
+ *   player made (red-team T4 condition). Parity claims list that log source as the allowed difference.
+ */
 function applyEventPolicy(
     state: GameState,
     faction: FactionId,
@@ -452,43 +472,54 @@ function applyEventPolicy(
 ): void {
     // In the pause before combat the decisions are answered in the order the turn fired them
     // (the order a bot answers in-turn); between turns, by event id as before.
-    const pending = pausedDecisions
+    const pendingAtStart = new Set((state.military.pending_event_decisions ?? []).map((decision) => decision.event_id));
+    const handled = new Set<string>();
+    let batch = pausedDecisions
         ? pausedDecisions.filter((decision) => decision.faction === faction)
-        : [...(state.military.pending_event_decisions ?? [])]
-            .filter((decision) => decision.faction === faction)
-            .sort((a, b) => strictCompare(a.event_id, b.event_id));
+        : pendingDecisionsFor(state, faction);
 
-    for (const decision of pending) {
-        const overrideId = eventResponseOverrides.get(decision.event_id);
-        const responseId = overrideId != null && decision.response_options.some((o) => o.id === overrideId)
-            ? overrideId
-            : policy === 'historical_default'
-            ? decision.historical_default_response_id ?? decision.response_options[0]?.id
-            : policy === 'staff_recommended'
-                ? decision.staff_recommended_response_id ?? decision.historical_default_response_id
-                : policy === 'bot_equivalent'
-                    ? botEquivalentResponseId(state, decision)
-                    : undefined;
-        const stage = pausedDecisions ? { stage: 'paused_turn' as const } : {};
-        if (!responseId) {
+    while (batch.length > 0) {
+        let answeredAny = false;
+        for (const decision of batch) {
+            if (handled.has(decision.event_id)) continue;
+            handled.add(decision.event_id);
+            const overrideId = eventResponseOverrides.get(decision.event_id);
+            const responseId = overrideId != null && decision.response_options.some((o) => o.id === overrideId)
+                ? overrideId
+                : policy === 'historical_default'
+                ? decision.historical_default_response_id ?? decision.response_options[0]?.id
+                : policy === 'staff_recommended'
+                    ? decision.staff_recommended_response_id ?? decision.historical_default_response_id
+                    : policy === 'bot_equivalent'
+                        ? botEquivalentResponseId(state, decision)
+                        : undefined;
+            const stage = pausedDecisions ? { stage: 'paused_turn' as const } : {};
+            if (!responseId) {
+                transcript.push({
+                    turn: state.meta.turn,
+                    family: 'event',
+                    id: decision.event_id,
+                    decision: 'defer',
+                    ...stage,
+                });
+                continue;
+            }
+            resolveDesktopEventDecisionInPlace(state, decision.event_id, responseId, REPO_ROOT);
+            answeredAny = true;
             transcript.push({
                 turn: state.meta.turn,
                 family: 'event',
                 id: decision.event_id,
-                decision: 'defer',
+                decision: policy,
+                value: responseId,
                 ...stage,
+                answer_author: 'harness_script',
             });
-            continue;
         }
-        resolveEventDecision(state, decision.event_id, responseId);
-        transcript.push({
-            turn: state.meta.turn,
-            family: 'event',
-            id: decision.event_id,
-            decision: policy,
-            value: responseId,
-            ...stage,
-        });
+        if (!answeredAny) break;
+        // D6: re-read; answer what this call's answers put on the desk.
+        batch = pendingDecisionsFor(state, faction)
+            .filter((decision) => !handled.has(decision.event_id) && !pendingAtStart.has(decision.event_id));
     }
 }
 
