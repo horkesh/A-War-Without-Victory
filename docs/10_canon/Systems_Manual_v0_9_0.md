@@ -285,6 +285,19 @@ and own-origin pockets. A brigade with an owner-authored evacuation rule (the 10
 counts toward a garrison nor is held by one. The rule is faction-blind, grants no supply, and leaves
 the critical-supply stranded rule in force, so a held pocket costs its garrison cohesion and men.
 
+**Defence of a held line (defence fix D1-D3 and P3 step 4, 2026-11-19; four-seat panel, two rounds):**
+These rules are faction-blind and add no state.
+- **A planned operation does not empty the line (D1).** A brigade named in an operation that is still in planning, and that has not marched or received a movement order, stays in its sector's defence roster. Only executing and recovering participants leave it. The resolver and the planner's predictor share that roster.
+- **Enemy territory is read off the ground (D2).** The −2 morale drift for standing in enemy territory applies only when both the municipality and the cell the brigade stands on are below 30% of its own people (1991 census). A brigade holding its own people's village inside an other-majority municipality does not drain. The +2 and the other drift branches still read the municipality.
+- **Relief in place on contact cells (D3).** A contact cell is a held front cell that was defended within the commander's recapture window.
+  - An empty contact cell is taken by the nearest eligible brigade of the same corps (R1).
+  - A brigade that outpowers the occupant at the cell relieves it in place (R2). It is valued without entrenchment against the occupant's dug-in value, and the occupant leaves only once the relief is on the cell.
+  - No brigade leaves a contact cell to fill another.
+  - Operation participants of any phase, queued pre-planned, must-hold, loaned and dug-in brigades never move for relief.
+  - The run-consistency validator applies the same donor rule.
+- **Objectives come from the weakest enemy sector first (P3 step 4).** An attacking corps takes its General Staff objectives from its enemy sectors in ascending threat ratio. Hold objectives keep the highest-threat-first order.
+- **Outcome.** Attacks on a prepared defence now usually fail at about pr 1 and below, as in the 1994-95 ARBiH pattern of many launches, most of them failing. A strong offensive (Farz, Sept 1995, pr 10 and above) still wins.
+
 **Owner-directed 102nd Odžak→Orašje evacuation (2026-10-28):** when the capture-triggered
 salient lifecycle would evacuate `hrhb_102nd_brigade` from the Odžak/Bosanski Šamac neck, the
 brigade is placed in its own held Orašje pocket and retains `hvo_northwest_bosnia` rather than
