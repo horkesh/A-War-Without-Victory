@@ -16,9 +16,16 @@ import {
 } from './surface/Surface';
 import { t, useLocale, type Locale } from '../i18n';
 import { formatLocaleNumber } from '../utils/formatters';
+import {
+    PARAMILITARY_POLICY_CANNOT_LOOSEN,
+    isParamilitaryOrderWithinCap,
+} from '../../../sim/events/paramilitary_policy_card';
 
 type ParamilitaryDecision = 'allow' | 'deny';
 type ParamilitaryPolicy = 'always_allow' | 'always_deny';
+
+/** The visible reason under the button row, linked to the unavailable Always allow button (§6 M-a, R2-2). */
+const ALWAYS_ALLOW_UNAVAILABLE_ID = 'paramilitary-always-allow-unavailable';
 
 interface ParamilitaryReviewModalProps {
     isOpen: boolean;
@@ -75,6 +82,11 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
     const [standingPolicy, setStandingPolicy] = useState<ParamilitaryPolicy | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const headerImage = getDecisionHeaderForFamily('paramilitary_request');
+    // §6 design M (M-a): the cap the adapter reads through the one accessor (the policy card's APPLIED answer,
+    // `ask` before it applies; null for HRHB), checked with the review IPC's own rank check. The IPC refusal is
+    // the guard; the button only tells the truth about it.
+    const policyCap = state?.paramilitaryPolicyCap ?? null;
+    const alwaysAllowUnavailable = !isParamilitaryOrderWithinCap('always_allow', policyCap);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -127,7 +139,9 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                 ? await ipc.resolveParamilitaryRequests(payload, { policy: standingPolicy })
                 : await ipc.resolveParamilitaryRequests(payload);
             if (!result.ok) {
-                setLoadError(result.error ?? t('paramilitaryReview.error.resolveFailed'));
+                setLoadError(result.error === PARAMILITARY_POLICY_CANNOT_LOOSEN
+                    ? t('paramilitaryReview.error.cannotLoosen')
+                    : result.error ?? t('paramilitaryReview.error.resolveFailed'));
                 return;
             }
             const stateJson = await ipc.getCurrentGameState();
@@ -182,6 +196,14 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                     <div className="mt-1 text-[16px] leading-relaxed text-[#ddd1b3]">
                         {t('paramilitaryReview.policyHint')}
                     </div>
+                    {policyCap !== null && (
+                        <div
+                            data-testid="paramilitary-policy-cap-hint"
+                            className="mt-1 text-[16px] leading-relaxed text-[#ddd1b3]"
+                        >
+                            {t('paramilitaryReview.policyCapHint')}
+                        </div>
+                    )}
                 </div>
 
                 <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-8 py-6">
@@ -340,19 +362,33 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                         >
                             {t('paramilitaryReview.alwaysDeny')}
                         </button>
-                        <button
-                            type="button"
-                            data-testid="paramilitary-always-allow"
-                            onClick={() => chooseStandingPolicy('always_allow')}
-                            disabled={requests.length === 0 || submitting}
-                            className={`h-11 rounded-md border px-4 text-[15px] font-semibold transition-colors disabled:opacity-40 ${
-                                standingPolicy === 'always_allow'
-                                    ? 'border-red-400/75 bg-red-500/15 text-red-200'
-                                    : 'border-red-500/35 text-red-300 hover:bg-red-500/10'
-                            }`}
-                        >
-                            {t('paramilitaryReview.alwaysAllow')}
-                        </button>
+                        {alwaysAllowUnavailable ? (
+                            // Unavailable under the cap: aria-disabled (still focusable, so a screen reader
+                            // reaches the reason), not native disabled; a neutral muted style, no red, no lock.
+                            <button
+                                type="button"
+                                data-testid="paramilitary-always-allow"
+                                aria-disabled="true"
+                                aria-describedby={ALWAYS_ALLOW_UNAVAILABLE_ID}
+                                className="h-11 cursor-not-allowed rounded-md border border-[#3a4150] px-4 text-[15px] font-semibold text-[#9c917b]"
+                            >
+                                {t('paramilitaryReview.alwaysAllow')}
+                            </button>
+                        ) : (
+                            <button
+                                type="button"
+                                data-testid="paramilitary-always-allow"
+                                onClick={() => chooseStandingPolicy('always_allow')}
+                                disabled={requests.length === 0 || submitting}
+                                className={`h-11 rounded-md border px-4 text-[15px] font-semibold transition-colors disabled:opacity-40 ${
+                                    standingPolicy === 'always_allow'
+                                        ? 'border-red-400/75 bg-red-500/15 text-red-200'
+                                        : 'border-red-500/35 text-red-300 hover:bg-red-500/10'
+                                }`}
+                            >
+                                {t('paramilitaryReview.alwaysAllow')}
+                            </button>
+                        )}
                     </div>
                     <div className="flex gap-2">
                         <button
@@ -373,6 +409,15 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                             {submitting ? t('paramilitaryReview.submitting') : t('paramilitaryReview.submit')}
                         </button>
                     </div>
+                    {alwaysAllowUnavailable && (
+                        <p
+                            id={ALWAYS_ALLOW_UNAVAILABLE_ID}
+                            data-testid="paramilitary-always-allow-unavailable"
+                            className="basis-full text-[14px] leading-snug text-[#9c917b]"
+                        >
+                            {t('paramilitaryReview.alwaysAllowUnavailable')}
+                        </p>
+                    )}
                 </div>
             </div>
         </Modal>

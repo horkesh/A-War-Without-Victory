@@ -64,6 +64,7 @@ import { countHeldOgsByCorps } from '../utils/heldOg.js';
 import { computeFullVerdict } from '../../../sim/negotiation/scoring.js';
 import { DIMENSION_WEIGHTS } from '../../../sim/events/strategic_dimensions.js';
 import { ANSWER_AHEAD_EVENT_IDS } from '../../../sim/events/answer_ahead_of_firing.js';
+import { paramilitaryStandingOrderCap, readParamilitaryStandingOrder } from '../../../sim/events/paramilitary_policy_card.js';
 import type { GameVerdict } from '../../../state/negotiation_types.js';
 import { buildCostLedger } from '../../../sim/endgame/cost_ledger.js';
 import { compareToHistorical, endingBasisForState } from '../../../sim/endgame/endgame_comparison.js';
@@ -3001,9 +3002,10 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         paramilitaryUnrequested,
         officerDecisionHistory,
         pendingParamilitaryRequests,
-        paramilitaryPolicy: state.paramilitary_policy === 'always_allow' || state.paramilitary_policy === 'always_deny' || state.paramilitary_policy === 'ask'
-            ? state.paramilitary_policy
-            : undefined,
+        // §6 M-a: the order in force (never above the policy card's applied answer) and the cap, both through
+        // the one accessor the engine and the review IPC read; the projection carries the player's own card flag.
+        paramilitaryPolicy: readParamilitaryStandingOrder(state, playerFaction),
+        paramilitaryPolicyCap: paramilitaryStandingOrderCap(state, playerFaction),
         armyReserveQueue,
         operationOpportunityRecords,
         operationOpportunitySummary,

@@ -46,6 +46,7 @@
 import { strictCompare } from '../../state/validateGameState.js';
 import { CANONICAL_FACTIONS } from '../../state/game_state.js';
 import { authoredWarCrimeIncidents, authoredWarCrimeIncidentTerms } from '../events/authored_war_crimes.js';
+import { readParamilitaryStandingOrder } from '../events/paramilitary_policy_card.js';
 import type { GameState, FactionId } from '../../state/game_state.js';
 import {
     buildRealizedConsequenceReceipts,
@@ -357,16 +358,19 @@ function eventFiredOperand(
     };
 }
 
+/** The player's standing order in force, read through the §6 M-a cap (never above the policy card's applied answer). */
 function policyOperand(
     state: GhostEntryStateView,
+    faction: FactionId,
     expected: Exclude<GameState['paramilitary_policy'], undefined>,
 ): ClaimPredicateOperand | null {
-    if (state.paramilitary_policy !== expected) return null;
+    const order = readParamilitaryStandingOrder(state, faction);
+    if (order !== expected) return null;
     return {
         owner_path: 'state.paramilitary_policy',
         operator: 'equals',
         expected_value: expected,
-        observed_value: state.paramilitary_policy,
+        observed_value: order,
         expression: `state.paramilitary_policy=${expected}`,
     };
 }
@@ -472,7 +476,7 @@ function predCleansingRefused(
     currentTurn: number,
     faction: FactionId,
 ): GhostPredicateMatch | null {
-    const policy = policyOperand(state, 'always_deny');
+    const policy = policyOperand(state, faction, 'always_deny');
     const cleanHands = authoredWarCrimesZeroOperands(state, faction);
     if (!policy || !cleanHands) return null;
     return matchGhost([policy, ...cleanHands], cleanHands, currentTurn, 100);

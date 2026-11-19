@@ -61,7 +61,11 @@ import type { EdgeRecord } from '../../map/settlements.js';
 // shipped main-path split (KIA 0.22 / WIA 0.74 / MIA 0.04), byte-identical to before.
 import { getMainCasualtySplit } from './casualty_realism_v2_gate.js';
 import { selectStaffControlledFactions } from '../bot/staff_control.js';
-import { PARAMILITARY_POLICY_CARD_BY_FACTION, hasParamilitaryPolicyCardApplied } from '../events/paramilitary_policy_card.js';
+import {
+    PARAMILITARY_POLICY_CARD_BY_FACTION,
+    hasParamilitaryPolicyCardApplied,
+    readParamilitaryStandingOrder,
+} from '../events/paramilitary_policy_card.js';
 /** Casualty multiplier when paramilitary retreats from defended OSID (heavy losses). */
 const DEFENDED_RETREAT_CASUALTY_MULT = 3;
 const OFFENSIVE_PARAMILITARY_FACTIONS = new Set<FactionId>(['HRHB', 'RS']);
@@ -541,9 +545,10 @@ export function detectParamilitaryTargets(
             const deploymentsInMunicipality = municipalityDeploymentCounts.get(candidate.municipalityId) ?? 0;
             if (deploymentsInMunicipality >= PARAMILITARY_MAX_DEPLOYMENTS_PER_MUNICIPALITY_TURN) continue;
 
-            // Player faction: create request instead of auto-spawning
+            // Player faction: create request instead of auto-spawning. The standing order is read through
+            // the §6 M-a cap (never above the policy card's applied answer; `ask` before it applies).
             if (faction === playerFaction) {
-                const policy = state.paramilitary_policy ?? 'ask';
+                const policy = readParamilitaryStandingOrder(state, faction);
                 if (policy === 'always_deny') continue;
                 if (policy === 'always_allow') {
                     spawnParamilitary(state, faction, candidate.osid, turn, spawnIndex, report);
@@ -585,7 +590,8 @@ function resolveStandingPolicyPendingParamilitaryRequests(
     state: GameState,
     playerFaction: FactionId | null,
 ): void {
-    const policy = state.paramilitary_policy ?? 'ask';
+    // §6 M-a: a standing order above the card's applied answer (an old save's modal order) never auto-approves.
+    const policy = readParamilitaryStandingOrder(state, playerFaction);
     if (policy === 'ask' || !playerFaction || !Array.isArray(state.pending_paramilitary_requests)) return;
     let changed = false;
     for (const request of state.pending_paramilitary_requests) {
@@ -830,9 +836,9 @@ export function detectOffensiveParamilitaryTargets(
             if (deploymentsInMunicipality >= PARAMILITARY_MAX_DEPLOYMENTS_PER_MUNICIPALITY_TURN) continue;
             const osid = candidate.osid;
 
-            // Player faction: respect paramilitary policy
+            // Player faction: respect paramilitary policy, read through the §6 M-a cap
             if (isPlayer) {
-                const policy = state.paramilitary_policy ?? 'ask';
+                const policy = readParamilitaryStandingOrder(state, faction);
                 if (policy === 'always_deny') continue;
                 if (policy === 'always_allow') {
                     spawnParamilitary(state, faction, osid, turn, spawnIndex, report, 'offensive');
