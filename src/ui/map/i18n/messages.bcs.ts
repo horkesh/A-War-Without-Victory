@@ -5533,10 +5533,9 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'eventDecision.turnPaused.title': 'Potez je zaustavljen prije borbi',
     'eventDecision.turnPaused.body': 'Odgovorite sada i vaša odluka djeluje ove sedmice, prije pokreta i borbi. Ako nastavite bez odgovora, odluka ostaje na vašem stolu i djeluje tek od sljedeće sedmice.',
     'eventDecision.turnPaused.continue': 'Nastavi potez',
-    // PENDING §4 copy panel: EN draft copied until the signed BCS string (s6_tm_ui_ux.md F2).
-    'eventDecision.filedAhead.label': 'Filed now, in force when due',
-    // PENDING §4 copy panel: EN draft copied until the signed BCS string (s6_tm_ui_ux.md F2).
-    'eventDecision.filedAhead.body': 'Your answer is filed in the record now. It takes effect when this decision comes due in the opening weeks of the war. The effects listed with each response apply then, not today.',
+    // §6 design T, signed by the §4 copy panel 2026-11-19 (s6_tm_copy_narrative.md rows 1-2).
+    'eventDecision.filedAhead.label': 'Stupa na snagu kad dođe na red',
+    'eventDecision.filedAhead.body': 'Vaš odgovor se arhivira čim ga date. Stupa na snagu kad ova odluka dođe na red. Efekti navedeni uz svaki odgovor primjenjuju se tada, a ne sada. Do tada se po ovom odgovoru ništa ne traži niti šalje u vaše ime.',
     'eventDecision.historicalDefault': 'Historijski zadano',
     'eventDecision.historicalDefaultDescription': 'Ovo je historijski potvrđen izbor. Slobodno možete izabrati bilo koju opciju.',
     'eventDecision.staffDefault': 'Zadana opcija',
@@ -5591,8 +5590,8 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'eventModal.effect.default': '{faction}efekat kampanje zabilježen',
     'firedEvent.wrapper.narrative': 'Predsjednički odgovor arhiviran je u zapisu kampanje.',
     'firedEvent.wrapper.responseRecorded': 'Odgovor zabilježen: {response}.',
-    // PENDING §4 copy panel: EN draft copied until the signed BCS string (s6_tm_ui_ux.md F3).
-    'firedEvent.wrapper.filedAnswerApplied': 'Your answer filed on {date} took effect this week: {response}.',
+    // §6 design T, signed by the §4 copy panel 2026-11-19 (s6_tm_copy_narrative.md row 3).
+    'firedEvent.wrapper.filedAnswerApplied': 'Vaš odgovor od {filedDate} stupio je na snagu {appliedDate}: {response}.',
     'eventDecision.equipment.tanks': '{count} tenkova',
     'eventDecision.equipment.artillery': '{count} artiljerije',
     'eventDecision.equipment.aaSystems': '{count} PVO sistema',

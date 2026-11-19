@@ -469,8 +469,10 @@ function buildConsequenceReceiptEntries(
     return entries;
 }
 
-/** §6 design T (ui-ux F3): a player answer filed ahead of its card firing applies on a later turn. The ledger
- *  row stays dated at the filing; this line marks the week the answer took effect. Pending §4 copy panel. */
+/** §6 design T (ui-ux F3; §4 copy row 3): a player answer filed ahead of its card firing applies on a later
+ *  turn. The ledger row stays dated at the filing; this line dates the effect on the turn it applied. Only a
+ *  PLAYER answer carries `filedAnswerAppliedTurn` (GameStateAdapter `deriveFiredEvents`), so an automatic or
+ *  staff answer never reads as "Your answer" (historian condition). */
 function buildFiledAnswerAppliedEntries(state: any): ChronicleEntry[] {
     const entries: ChronicleEntry[] = [];
     for (const event of Array.isArray(state?.firedEvents) ? state.firedEvents : []) {
@@ -482,7 +484,8 @@ function buildFiledAnswerAppliedEntries(state: any): ChronicleEntry[] {
             headline: false,
             title: event.title,
             detail: t('firedEvent.wrapper.filedAnswerApplied', {
-                date: turnToDateString(event.turn),
+                filedDate: turnToDateString(event.turn),
+                appliedDate: turnToDateString(event.filedAnswerAppliedTurn),
                 response: event.responseLabel ?? '',
             }),
             metadata: {

@@ -3855,7 +3855,9 @@ function deriveFiredEvents(state: any, playerFaction: string | null): LoadedGame
         const response = decision
             ? staticInfo?.responseLabels.get(decision.responseId) ?? getPlayerSafeDisplayLabel(decision.responseId, 'response recorded')
             : null;
-        // §6 design T: a player answer filed ahead of its card firing applied on the card's fire turn.
+        // §6 design T: a player answer filed ahead of its card firing applied on the card's fire turn. Only a log
+        // row with decision_source 'player' qualifies (historian condition, §4 copy row 3): an automatic or staff
+        // answer never reads as "Your answer".
         const filedAnswerAppliedTurn = decision && decision.source === 'player' && ANSWER_AHEAD_EVENT_IDS.includes(id)
             && typeof recordedTurn === 'number' && recordedTurn > decision.turn
             ? recordedTurn
