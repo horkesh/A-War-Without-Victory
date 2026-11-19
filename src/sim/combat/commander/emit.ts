@@ -2192,7 +2192,9 @@ function findCommanderCreationOverlap(
         first_matched_clause: null,
         conflicting_operation: null,
     };
-    obs.overlap_detail = detail;
+    // First-reached overlap check wins (like obs.exit): since F1 a plan-path check can be followed
+    // by the fallback probe's check in the same call; the row keeps the plan-path detail.
+    if (obs.overlap_detail === undefined) obs.overlap_detail = detail;
     return activeOperations.find((existing) => operationsOverlap(existing, candidate, (predicates) => {
         const existingOperation = commanderCreationOperationTuple(hostCorpsId, existing);
         detail.checks.push({ existing_operation: existingOperation, ...predicates });
@@ -2372,8 +2374,12 @@ function buildOperationsImpl(
     // Pre-planned ops are passed through as-is since they have their own lifecycle
     // Active operations live on corps_command state, not here.
 
-    // If plan is executing or ready, create a new CorpsOperation from the plan
-    if (
+    // If plan is executing or ready, create a new CorpsOperation from the plan.
+    // F1 (2026-11-19): when the plan cannot be built this turn (Army HQ reservation, too few
+    // participants, no objective, too few eligible, overlap), the corps still probes locally: those
+    // exits leave this block and reach the probe/local-occupation fallback below with all of its
+    // gates unchanged. active_slot_full stays a terminal return (no slot, no new operation of any kind).
+    planBlock: if (
         planDecision.plan &&
         ACTIVE_PLAN_STATUSES.has(planDecision.plan.status) &&
         (planDecision.plan.target_osids.length > 0 || planDecision.plan.source === 'opportunity')
@@ -2416,7 +2422,7 @@ function buildOperationsImpl(
             && corpsHasDueArmyHqReservation(briefing.state_ref, briefing.corps_id, briefing.turn)
         ) {
             markCommanderCreationExit(obs, 'reserved_for_army_hq');
-            return ops;
+            break planBlock;
         }
         // Brigades the due queue head holds for its authored operation never join a commander
         // plan's operation (RF-L3d): the same rule as the probe paths below, so the launcher
@@ -2650,7 +2656,7 @@ function buildOperationsImpl(
         }
         if (participatingBrigades.length < effectiveMinForOp) {
             markCommanderCreationExit(obs, 'below_min_participants');
-            return ops;
+            break planBlock;
         }
 
         // Build the set of enemy OSIDs actually present in the primary sector's sub_segments.
@@ -2711,7 +2717,7 @@ function buildOperationsImpl(
         }
         if (objectives.length === 0) {
             markCommanderCreationExit(obs, 'no_objectives');
-            return ops;
+            break planBlock;
         }
 
         // ENCLAVE ELIGIBILITY — added 2026-08-26. This creation site had NO enclave awareness of
@@ -2735,7 +2741,7 @@ function buildOperationsImpl(
             if (obs) obs.eligible_count = eligible.length;
             if (eligible.length < effectiveMinForOp) {
                 markCommanderCreationExit(obs, 'below_min_after_eligibility');
-                return ops;
+                break planBlock;
             }
             participatingBrigades = eligible;
         }
@@ -2838,7 +2844,7 @@ function buildOperationsImpl(
         }
         if (conflictingOp) {
             markCommanderCreationExit(obs, 'general_overlap_suppressed');
-            return ops;
+            break planBlock;
         }
 
         // Phase 4 (Force Quality Foundation): copy the readiness trait snapshot
@@ -3551,8 +3557,12 @@ function buildOperationsImpl(
                             probeOp,
                             briefing.corps_id,
                         );
-                        obs.overlap_checked = true;
-                        obs.overlap_found = conflictingOp != null;
+                        // first-reached overlap check wins (see findCommanderCreationOverlap); the
+                        // fallback's own outcome after a plan exit stays visible in built/returned
+                        if (obs.overlap_checked !== true) {
+                            obs.overlap_checked = true;
+                            obs.overlap_found = conflictingOp != null;
+                        }
                         markCommanderCreationExit(obs, escalateToOperation
                             ? (conflictingOp ? 'reduction_overlap_suppressed' : 'reduction_created')
                             : (conflictingOp ? 'fallback_probe_overlap_suppressed' : 'fallback_probe_created'));
