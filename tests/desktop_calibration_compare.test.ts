@@ -9,6 +9,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { advanceTurn, serializeState, startNewCampaign } from '../src/desktop/desktop_sim.js';
 import type { GameState } from '../src/state/game_state.js';
 import { resolveTsxCli } from '../tools/test/vitest_shared_config.mjs';
+import { withoutComments } from './helpers/sourceComments.js';
 
 const cli = resolve(process.cwd(), 'tools', 'ai_play', 'desktop_calibration_compare.ts');
 const tsx = resolveTsxCli(process.cwd());
@@ -253,7 +254,7 @@ describe('desktop calibration comparison provenance', () => {
     // §6 design T4/D6: the identity answer puts the RBiH policy card on the desk; the harness must answer
     // it too before Advance 1 (the product would block that Advance), and never present a scripted answer
     // as the player's own choice.
-    const source = readFileSync(cli, 'utf8');
+    const source = withoutComments(readFileSync(cli, 'utf8'));
     expect(source).toContain('resolveDesktopEventDecisionInPlace(');
     expect(source).not.toMatch(/\bresolveEventDecision\(/);
 

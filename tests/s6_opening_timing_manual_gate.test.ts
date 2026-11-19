@@ -16,6 +16,7 @@ import type { FactionId, FactionState, GameState } from '../src/state/game_state
 import { initializeCasualtyLedger } from '../src/state/casualty_ledger.js';
 import { resolveParamilitaryReviewRequests } from '../src/desktop/paramilitary_review_ipc.js';
 import {
+    detectOffensiveParamilitaryTargets,
     detectParamilitaryTargets,
     isPlayerParamilitaryRequestGateHolding,
 } from '../src/sim/combat/paramilitary_sweep.js';
@@ -303,6 +304,25 @@ describe('T3 manual paramilitary gate (released only by the applied card answer)
         const headless = pocketState(null, 3);
         expect(isPlayerParamilitaryRequestGateHolding(headless)).toBe(false);
         expect(detect(headless).spawned.filter((spawn) => spawn.faction === 'RS').map((spawn) => spawn.target_osid)).toEqual([TARGET]);
+    });
+
+    it.each([1, 2])('offensive path: an RS player at autonomy %i gets no request and sends no sweep before the card applies (historian row 6)', (autonomy) => {
+        // detectOffensiveParamilitaryTargets gates on the raw player faction, so the hold also binds an RS player
+        // at Assisted (1) and Delegated (2) there. Card enabled (the goals answer applied) but not yet applied.
+        const state = pocketState('RS', 3, autonomy);
+        state.military.enabled_event_ids.push(RS_POLICY);
+        state.pending_paramilitary_requests = [{ ...staleRequest('RS'), mode: 'offensive' as const }];
+        const held = detectOffensiveParamilitaryTargets(state, edges(), reverseMap());
+        expect(held.pending_player_requests).toBe(0);
+        expect(held.spawned.filter((spawn) => spawn.faction === 'RS')).toHaveLength(0);
+        expect(ownRequests(state, 'RS')).toHaveLength(0);
+
+        // Once the card has applied with Review (ask), the offensive candidate comes to the player as a request.
+        applyCard(state, 'RS', 'ask', 2);
+        const released = detectOffensiveParamilitaryTargets(state, edges(), reverseMap());
+        expect(released.pending_player_requests).toBe(1);
+        expect(ownRequests(state, 'RS').map((request) => [request.target_osid, request.mode])).toEqual([[TARGET, 'offensive']]);
+        expect(released.spawned.filter((spawn) => spawn.faction === 'RS')).toHaveLength(0);
     });
 
     it('registers exactly the RBiH and RS cards, each pinned to the catalog flag its every option sets', () => {
