@@ -74,6 +74,9 @@ export interface ConsequenceReceipt {
     decisionOptionLabel: string;
     /** Turn the player made the decision. */
     decisionTurn: number;
+    /** Turn the decision's effects applied: the decision turn, or for an answer filed ahead of its
+     *  card firing (answer_ahead_of_firing.ts) the turn the card fired. Realized receipts only. */
+    appliedTurn?: number;
     /** The predicted downstream event id. */
     predictedEventId: string;
     /** Player-facing label of the predicted consequence (from the dossier's
@@ -360,6 +363,7 @@ export function buildConsequenceReceipts(
                     decisionTitle,
                     decisionOptionLabel,
                     decisionTurn: dec.turn,
+                    appliedTurn: realized.applied_turn,
                     predictedEventId: predictedId,
                     predictedLabel,
                     predictedExplanation: resolvePredictedExplanation(fc.explanation, locale),

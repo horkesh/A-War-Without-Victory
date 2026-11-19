@@ -37,7 +37,7 @@ import { getOsidAreas } from '../src/sim/osid_areas.js';
 import { strictCompare } from '../src/state/validateGameState.js';
 import { computeBotPlanResponse } from '../src/sim/negotiation/plan_answer.js';
 import { validatePlanAnswers } from '../src/sim/events/event_loader.js';
-import { OPENING_FOUNDATIONAL_EVENT_IDS } from '../src/sim/events/answer_ahead_of_firing.js';
+import { ANSWER_AHEAD_EVENT_IDS, OPENING_FOUNDATIONAL_EVENT_IDS } from '../src/sim/events/answer_ahead_of_firing.js';
 import { readFileSync } from 'node:fs';
 
 const FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
@@ -616,8 +616,11 @@ describe('§6 E3a2: load-time rules for routed cards', () => {
     it('a routed card is not an answer-ahead opening event; the shipped loader runs this rule', () => {
         const opener = { ...clone(VOPP_RS), id: 'rs_strategic_goals' } as EventDefinition;
         expect(() => validatePlanAnswers([opener], OPENING_FOUNDATIONAL_EVENT_IDS)).toThrow(/answer-ahead opening event/);
+        // §6 design T2: the RBiH policy card is answered ahead too, so the loader checks the full answer-ahead list.
+        const policyOpener = { ...clone(VOPP_RS), id: 'rbih_paramilitary_policy_1992' } as EventDefinition;
+        expect(() => validatePlanAnswers([policyOpener], ANSWER_AHEAD_EVENT_IDS)).toThrow(/answer-ahead opening event/);
         const loaderSource = readFileSync('src/sim/events/event_loader.ts', 'utf8');
-        expect(loaderSource).toContain('validatePlanAnswers(allEvents, OPENING_FOUNDATIONAL_EVENT_IDS);');
+        expect(loaderSource).toContain('validatePlanAnswers(allEvents, ANSWER_AHEAD_EVENT_IDS);');
     });
 });
 

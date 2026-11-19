@@ -101,6 +101,28 @@ function makeBaseState(overrides?: Partial<GameState>): GameState {
 } as GameState;
 }
 
+/**
+ * §6 design T3: a manual player's requests are held until the player's own policy card has APPLIED an
+ * answer (fired, receipted, valid flag). Player-path tests that exercise the request/standing-order path
+ * itself start from that applied state (tests/s6_opening_timing_manual_gate.test.ts pins the hold).
+ */
+function withAppliedPolicyCard(
+    state: GameState,
+    order: 'always_deny' | 'ask' | 'always_allow' = state.paramilitary_policy ?? 'ask',
+): GameState {
+    const faction = state.meta.player_faction;
+    const card = faction === 'RS' ? 'rs_paramilitary_policy_1992' : 'rbih_paramilitary_policy_1992';
+    const flag = faction === 'RS' ? 'rs_paramilitary_policy' : 'rbih_paramilitary_policy';
+    const military = state.military as any;
+    military.fired_event_ids = [...(military.fired_event_ids ?? []), card];
+    military.event_fire_counts = { ...(military.event_fire_counts ?? {}), [card]: 1 };
+    military.event_last_fired_turn = { ...(military.event_last_fired_turn ?? {}), [card]: 2 };
+    military.event_decision_log = [...(military.event_decision_log ?? []),
+        { event_id: card, response_id: order, decision_source: 'player', faction, turn: 2 }];
+    military.event_flags = { ...(military.event_flags ?? {}), [flag]: order };
+    return state;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Tests
 // ═══════════════════════════════════════════════════════════════════════════
@@ -217,12 +239,12 @@ describe('paramilitary_sweep', () => {
             // The eligible RS pocket is surfaced as a player request.
             const edges = makeEdges([['op:a', 'op:b'], ['op:a', 'op:c'], ['op:a', 'op:d'], ['op:b', 'op:d'], ['op:c', 'op:d']]);
             const reverseMap = makeReverseMap(['op:a', 'op:b', 'op:c', 'op:d']);
-            const state = makeBaseState({
+            const state = withAppliedPolicyCard(makeBaseState({
   meta: { turn: 5, phase: 'war', schema_version: 1, seed: 'test', player_faction: 'RS' } as GameState['meta'],
   political: {
     political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:c': 'RS', 'op:d': 'RBiH' },
   } as any,
-});
+}));
 
             const report = detectParamilitaryTargets(state, edges, reverseMap);
 
@@ -233,7 +255,7 @@ describe('paramilitary_sweep', () => {
             expect(state.pending_paramilitary_requests![0].target_osid).toBe('op:d');
         });
 
-        it('defers player requests until the enabled paramilitary policy decision is resolved', () => {
+        it('defers player requests until the paramilitary policy decision has applied (a receipt alone is not enough)', () => {
             const edges = makeEdges([['op:a', 'op:b'], ['op:a', 'op:c'], ['op:a', 'op:d'], ['op:b', 'op:d'], ['op:c', 'op:d']]);
             const reverseMap = makeReverseMap(['op:a', 'op:b', 'op:c', 'op:d']);
             const state = makeBaseState({
@@ -251,7 +273,13 @@ describe('paramilitary_sweep', () => {
             expect(beforePolicy.pending_player_requests).toBe(0);
             expect(state.pending_paramilitary_requests ?? []).toHaveLength(0);
 
-            state.military.event_decision_log = [{ event_id: 'rs_paramilitary_policy_1992' }] as any;
+            // §6 design T3: a receipt with the card unfired (an answer filed ahead) does not release.
+            state.military.event_decision_log = [{ event_id: 'rs_paramilitary_policy_1992', response_id: 'ask' }] as any;
+            const filedOnly = detectParamilitaryTargets(state, edges, reverseMap);
+            expect(filedOnly.pending_player_requests).toBe(0);
+
+            state.military.event_decision_log = [];
+            withAppliedPolicyCard(state, 'ask');
             const afterPolicy = detectParamilitaryTargets(state, edges, reverseMap);
 
             expect(afterPolicy.pending_player_requests).toBe(1);
@@ -261,13 +289,13 @@ describe('paramilitary_sweep', () => {
         it('respects always_deny policy', () => {
             const edges = makeEdges([['op:a', 'op:b'], ['op:a', 'op:c'], ['op:a', 'op:d'], ['op:b', 'op:d'], ['op:c', 'op:d']]);
             const reverseMap = makeReverseMap(['op:a', 'op:b', 'op:c', 'op:d']);
-            const state = makeBaseState({
+            const state = withAppliedPolicyCard(makeBaseState({
   meta: { turn: 5, phase: 'war', schema_version: 1, seed: 'test', player_faction: 'RS' } as GameState['meta'],
   paramilitary_policy: 'always_deny',
   political: {
     political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:c': 'RS', 'op:d': 'RBiH' },
   } as any,
-});
+}));
 
             const report = detectParamilitaryTargets(state, edges, reverseMap);
             expect(report.pending_player_requests).toBe(0);
@@ -572,7 +600,7 @@ describe('paramilitary_sweep', () => {
                 'op:vlasenica:first',
             ];
             const { edges, reverseMap } = makeHubAndTargets('op:hub:rs', targets);
-            const state = makeBaseState({
+            const state = withAppliedPolicyCard(makeBaseState({
                 meta: {
                     turn: 5,
                     phase: 'war',
@@ -586,7 +614,7 @@ describe('paramilitary_sweep', () => {
                         ...targets.map((target) => [target, 'RBiH'] as const),
                     ]),
                 } as any,
-            });
+            }));
 
             const first = detectParamilitaryTargets(state, edges, reverseMap);
             const second = detectParamilitaryTargets(state, edges, reverseMap);
@@ -663,6 +691,7 @@ describe('paramilitary_sweep', () => {
                     ]),
                 } as any,
             });
+            withAppliedPolicyCard(state, 'ask');
 
             const report = detectParamilitaryTargets(state, edges, reverseMap);
 
@@ -948,13 +977,13 @@ describe('paramilitary_sweep', () => {
         });
 
         it('consumes stale pending player requests when a standing paramilitary policy is active', () => {
-            const state = makeBaseState({
+            const state = withAppliedPolicyCard(makeBaseState({
                 paramilitary_policy: 'always_deny',
                 meta: { turn: 5, player_faction: 'RS', phase: 'war', seed: 1 } as any,
                 pending_paramilitary_requests: [
                     { target_osid: 'D', faction: 'RS', strength: 150 },
                 ],
-            });
+            }));
 
             detectParamilitaryTargets(state, [], new Map());
 
@@ -972,13 +1001,13 @@ describe('paramilitary_sweep', () => {
         });
 
         it('consumes stale pending player requests even after rear-pocket sweep has faded', () => {
-            const state = makeBaseState({
+            const state = withAppliedPolicyCard(makeBaseState({
                 paramilitary_policy: 'always_deny',
                 meta: { turn: 99, player_faction: 'RS', phase: 'war', seed: 1 } as any,
                 pending_paramilitary_requests: [
                     { target_osid: 'late-pocket', faction: 'RS', strength: 150 },
                 ],
-            });
+            }));
 
             detectParamilitaryTargets(state, [], new Map());
 
@@ -1181,7 +1210,7 @@ describe('paramilitary_sweep', () => {
         it('does not offer the player an offensive request against an exactly defended OSID', () => {
             const edges = makeEdges([['op:zvornik:a', 'op:zvornik:b']]);
             const reverseMap = makeReverseMap(['op:zvornik:a', 'op:zvornik:b']);
-            const state = makeBaseState({
+            const state = withAppliedPolicyCard(makeBaseState({
                 meta: {
                     turn: 3,
                     phase: 'war',
@@ -1210,7 +1239,7 @@ describe('paramilitary_sweep', () => {
                         'op:zvornik:b': 'RBiH',
                     },
                 } as any,
-            });
+            }));
 
             const report = detectOffensiveParamilitaryTargets(state, edges, reverseMap);
 
@@ -1350,7 +1379,7 @@ describe('paramilitary_sweep', () => {
         it('marks player offensive requests as offensive so the review modal is truthful', () => {
             const targets = ['op:zvornik:target', 'op:bratunac:target', 'op:vlasenica:target'];
             const { edges, reverseMap } = makeHubAndTargets('op:hub:rs', targets);
-            const state = makeBaseState({
+            const state = withAppliedPolicyCard(makeBaseState({
                 meta: { turn: 5, phase: 'war', schema_version: 1, seed: 'test', player_faction: 'RS' } as GameState['meta'],
                 political: {
                     political_controllers: Object.fromEntries([
@@ -1358,7 +1387,7 @@ describe('paramilitary_sweep', () => {
                         ...targets.map((target) => [target, 'RBiH'] as const),
                     ]),
                 } as any,
-            });
+            }));
 
             const report = detectOffensiveParamilitaryTargets(state, edges, reverseMap);
 
@@ -1390,7 +1419,7 @@ describe('paramilitary_sweep', () => {
         });
 
         it('consumes stale pending player requests before offensive sweep when a standing policy is active', () => {
-            const state = makeBaseState({
+            const state = withAppliedPolicyCard(makeBaseState({
                 paramilitary_policy: 'always_deny',
                 meta: { turn: 6, phase: 'war', schema_version: 1, seed: 'test', player_faction: 'RS' } as GameState['meta'],
                 pending_paramilitary_requests: [
@@ -1402,7 +1431,7 @@ describe('paramilitary_sweep', () => {
                         mode: 'offensive',
                     },
                 ],
-            });
+            }));
 
             detectOffensiveParamilitaryTargets(state, [], new Map());
 

@@ -24,7 +24,7 @@ import { stableStringify } from '../../utils/stable_json.js';
 import sourceTierContract from './source_tiers.json';
 import patronSupportAllowlist from './patron_support_allowlist.json';
 import { DAYTON_PLAN, PEACE_PLANS } from '../negotiation/peace_plan_data.js';
-import { OPENING_FOUNDATIONAL_EVENT_IDS } from './answer_ahead_of_firing.js';
+import { ANSWER_AHEAD_EVENT_IDS } from './answer_ahead_of_firing.js';
 
 /** §6 E4 round 3: plan ids a `peace_plan_response` condition may name. */
 const KNOWN_PEACE_PLAN_IDS: ReadonlySet<string> = new Set<string>([...PEACE_PLANS.map((plan) => plan.id), DAYTON_PLAN.id]);
@@ -1842,7 +1842,7 @@ export function loadEventDefinitionsFromDir(scenarioStartWeek: number, eventsDir
     validatePatronSupportRules(allEvents);
     validateOnePatronCarrier(allEvents);
     validatePatronSupplyCut(allEvents);
-    validatePlanAnswers(allEvents, OPENING_FOUNDATIONAL_EVENT_IDS);
+    validatePlanAnswers(allEvents, ANSWER_AHEAD_EVENT_IDS);
     // ─── Phase B Sub-slice B1 catalog-level passes. ────────────────────────
     validateCrossFactionOptionIds(allEvents);
     validateAllianceEffectParties(allEvents);

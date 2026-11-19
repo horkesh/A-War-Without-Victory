@@ -168,12 +168,13 @@ test('startNewCampaign records historical mode explicitly', async () => {
 }, 120_000);
 
 test('startNewCampaign queues the selected faction foundational decision at campaign birth', async () => {
-    // Every card is queued at birth. hrhb_political_goal (window t3-7) is NOT fired at birth: the
-    // player answers it at the start, and it fires (applying that answer) through evaluate-events
-    // in its window, the turn a bot answers it (preFiresOpeningDecisionAtBirth, answer_ahead_of_firing.ts).
+    // Every card is queued at birth and none is fired then (§6 design T1, 2026-11-19): the player
+    // answers at the start, and the card fires (applying that answer) through evaluate-events in its
+    // window, the turn a bot answers it (preFiresOpeningDecisionAtBirth, answer_ahead_of_firing.ts).
+    // Before T1 the RBiH and RS cards were fired at birth; only HRHB followed this rule.
     const cases = [
-        { faction: 'RBiH' as const, eventId: 'rbih_state_identity', atBirth: true },
-        { faction: 'RS' as const, eventId: 'rs_strategic_goals', atBirth: true },
+        { faction: 'RBiH' as const, eventId: 'rbih_state_identity', atBirth: false },
+        { faction: 'RS' as const, eventId: 'rs_strategic_goals', atBirth: false },
         { faction: 'HRHB' as const, eventId: 'hrhb_political_goal', atBirth: false },
     ];
     const allFoundationalIds = cases.map((entry) => entry.eventId);

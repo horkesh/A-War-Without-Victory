@@ -9,6 +9,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { advanceTurn, serializeState, startNewCampaign } from '../src/desktop/desktop_sim.js';
 import type { GameState } from '../src/state/game_state.js';
 import { resolveTsxCli } from '../tools/test/vitest_shared_config.mjs';
+import { withoutComments } from './helpers/sourceComments.js';
 
 const cli = resolve(process.cwd(), 'tools', 'ai_play', 'desktop_calibration_compare.ts');
 const tsx = resolveTsxCli(process.cwd());
@@ -241,11 +242,37 @@ describe('desktop calibration comparison provenance', () => {
         decision: 'bot_equivalent',
         value: 'always_allow',
         stage: 'paused_turn',
+        answer_author: 'harness_script',
       },
     ]);
     for (const row of output.turns) {
       expect(row.control_delta_player_minus_headless).toEqual({ HRHB: 0, RBiH: 0, RS: 0 });
     }
+  }, 180_000);
+
+  it('T4: answers through the product resolver until nothing blocking is pending, marking each answer as scripted', () => {
+    // §6 design T4/D6: the identity answer puts the RBiH policy card on the desk; the harness must answer
+    // it too before Advance 1 (the product would block that Advance), and never present a scripted answer
+    // as the player's own choice.
+    const source = withoutComments(readFileSync(cli, 'utf8'));
+    expect(source).toContain('resolveDesktopEventDecisionInPlace(');
+    expect(source).not.toMatch(/\bresolveEventDecision\(/);
+
+    const result = runComparison([
+      '--turns', '1',
+      '--faction', 'RBiH',
+      '--autonomy-level', 'production',
+      '--event-policy', 'historical_default',
+      '--paramilitary-policy', 'deny',
+      '--historical-operation-policy', 'accept',
+    ]);
+    expect(result.status, result.stderr).toBe(0);
+    const output = JSON.parse(result.stdout);
+    const opening = output.decision_transcript.filter((row: { family: string; turn: number }) => row.family === 'event' && row.turn === 0);
+    expect(opening).toEqual([
+      { turn: 0, family: 'event', id: 'rbih_state_identity', decision: 'historical_default', value: 'civic', answer_author: 'harness_script' },
+      { turn: 0, family: 'event', id: 'rbih_paramilitary_policy_1992', decision: 'historical_default', value: 'always_deny', answer_author: 'harness_script' },
+    ]);
   }, 180_000);
 
   it('emits byte-identical JSON for identical zero-turn inputs', () => {

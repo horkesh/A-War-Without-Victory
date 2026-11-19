@@ -81,6 +81,7 @@
     "tests/ui/r7_advance_turn_layout_readability.test.ts",
     "tests/ui/r7_president_desk_layout_readability.test.ts",
     "tests/ui/retired_chrome_removed.test.ts",
+    "tests/ui/s6_filed_ahead_note.test.ts",
     "tests/ui/settlement_supply_status.test.ts",
     "tests/ui/shell_navigation_ownership.test.ts",
     "tests/ui/stale_state_resets.test.ts",
