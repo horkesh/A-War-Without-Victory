@@ -62,8 +62,13 @@ type EventDecisionDossier = PendingEventDecision & {
     situation?: string;
 };
 
+/**
+ * The card's display localization for the active locale, English included: `localizations.en` is the
+ * corrected English display copy for strings the engine persists (event_types.ts), so an English player
+ * reads the panel-corrected wording too (Codex #763). The chain is the same for every locale: this
+ * override, then the catalog's current text, then the persisted copy (`localizedField`, `catalogText`).
+ */
 function eventLocalization(def: EventDefinition | undefined, locale: Locale) {
-    if (locale === 'en') return undefined;
     return def?.localizations?.[locale];
 }
 
