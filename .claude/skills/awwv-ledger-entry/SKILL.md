@@ -3,6 +3,8 @@ name: awwv-ledger-entry
 description: Append a PROJECT_LEDGER entry automatically. Use when the user runs /awwv_ledger_entry or when any change affects behavior, outputs, or scenarios — then write the entry into docs/PROJECT_LEDGER.md.
 ---
 
+> **Until 1.0:** `docs/PROJECT_LEDGER*`, `docs/ledger/`, `docs/plans/` and `docs/40_reports/` paths below mean `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>` (owner ruling 2026-11-18). Read and edit them there; open no docs PRs. See `docs/20_engineering/AGENT_WORKFLOW.md`.
+
 # /awwv_ledger_entry
 
 ## Trigger

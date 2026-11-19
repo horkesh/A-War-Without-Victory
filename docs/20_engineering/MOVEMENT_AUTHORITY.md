@@ -38,7 +38,7 @@ Every writer of `sector_reassignment_orders`, `brigade_movement_orders`, `brigad
 | `src/sim/combat/brigade_reconstitution.ts` | T5 | Places newly reconstituted brigades. |
 | `src/sim/combat/army_reserve_system.ts` | T5 | Applies reserve assignment and recall lifecycle effects. |
 | `src/sim/combat/commander_march_correction.ts` | T6 repair; dormant rejected T2 helper | Production repairs invalid march paths and transit state at T6. The rejected global pre-T3 reconciliation helper remains for local tests but is absent from the War pipeline. |
-| `src/sim/combat/brigade_front_distribution.ts` | T6 | Performs bounded local front distribution without paper transfers. |
+| `src/sim/combat/brigade_front_distribution.ts` | T6 | Performs bounded local front distribution without paper transfers, including the surplus-stack spread to an adjacent empty front cell (section 3b). |
 | `src/sim/combat/brigade_home_return.ts` | T6 | Routes eligible idle displaced brigades home. |
 | `src/sim/combat/corps_front_sectors.ts` | Derived truth | Classifies only roster-eligible, legally reachable formations as potential sector staff and marks a sector `unstaffed_front` when no legal donor exists. |
 
@@ -146,6 +146,24 @@ The dormant helper's local fixtures retain its deterministic selection and guard
 Observer-only topic `reconciliation_write` records actual command-owner pre/post assignment and existing guard outcomes before T3 consumption. `preplanned_eligibility` observes direct/queued historical-operation eligibility, commitment and admission boundaries. Both are default-off stable JSON stdout only; neither changes authority, thresholds, phase order, GameState/save/weekly fields or existing movement guards. Repeated context keys are not unique invocation IDs. See CODE_CANON observer boundaries and CALIBRATION_MASTER768–771 for proof and limits.
 
 **Current disposition (2026-10-23):** the global pre-T3 call/import was rejected and is absent from `war_phases.ts`; the helper remains dormant outside local tests. The accepted narrow behavior is T6 preservation of already-valid active elite-loan transit when the receiving corps owns one unique executing operation/axis and the completed-prefix proof is satisfied. Graz fallback lookup uses that same receiving-corps resolution only for a valid unique active elite-loan operation-owned attack. It does not authorize a global operation search, replace ordinary home policy, or relax participant, axis, objective, adjacency or destination guards.
+
+## 3b. Defence repairs (package P2, ruling D, 2026-11-17)
+
+- **Surplus-stack spread (T6, `brigade_front_distribution.ts`, `isStackSurplus`).** Phase A used to
+  spread only brigades on their arrival turn, so a stack that survived one turn stayed stacked beside
+  empty front cells. A brigade that is surplus on its cell may now spread to an adjacent empty front
+  cell. Surplus means another brigade on the cell outranks it (more entrenchment
+  turns, then more personnel, then id) and is staying: not an operation participant, not disrupted, no
+  movement order, not in transit. The top-ranked staying brigade never leaves, so the cell is never
+  emptied.
+- **Off-front stand-down (posture pass, `brigade_posture.ts` `applyPostureCosts`).** `dig_in` is a front
+  posture. A brigade off the front (reserve, rear or unassigned) and in no planning or execution operation
+  returns to `defend`. Off the front no posture order reaches it, so a brigade reclassified while dug in
+  used to keep `dig_in` for good, and every later multi-hop column order to it died at the dig_in lockout.
+  The lockout itself is unchanged. A live-operation participant keeps its posture.
+- **Not adopted.** An earlier draft of the ruling added a corps "breach answer" (a T6 move of a spare
+  brigade next to a fresh combat loss). Measured inert in same-attack replays, it was removed before merge
+  (orchestrator ruling, 2026-11-17), so 1.0 gets no new reserve-movement rule.
 
 ## 4. Pipeline constraints
 

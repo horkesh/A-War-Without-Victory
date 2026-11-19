@@ -100,8 +100,8 @@ describe('launch/operator artifact support', () => {
 
         const templatePaths = plan.evidenceTemplates.map(t => t.path).sort();
         expect(templatePaths).toContain('docs/50_launch/release/launch_day_automation_template.md');
-        expect(templatePaths).toContain('docs/40_reports/release/20260518_CLEAN_VM_OPERATOR_EVIDENCE_TEMPLATE.md');
-        expect(templatePaths).toContain('docs/40_reports/playtest/20260518_EXTERNAL_PLAYTEST_ARTIFACT_DRY_RUN_TEMPLATE.md');
+        expect(templatePaths).toContain('docs/50_launch/release/20260518_CLEAN_VM_OPERATOR_EVIDENCE_TEMPLATE.md');
+        expect(templatePaths).toContain('docs/50_launch/release/20260518_EXTERNAL_PLAYTEST_ARTIFACT_DRY_RUN_TEMPLATE.md');
         for (const template of plan.evidenceTemplates) {
             expect(template.exists, `${template.path} should exist`).toBe(true);
         }
@@ -110,8 +110,8 @@ describe('launch/operator artifact support', () => {
     it('keeps operator templates explicit about clean-VM and exact-artifact gates', () => {
         const requiredDocs = [
             'docs/50_launch/release/launch_day_automation_template.md',
-            'docs/40_reports/release/20260518_CLEAN_VM_OPERATOR_EVIDENCE_TEMPLATE.md',
-            'docs/40_reports/playtest/20260518_EXTERNAL_PLAYTEST_ARTIFACT_DRY_RUN_TEMPLATE.md',
+            'docs/50_launch/release/20260518_CLEAN_VM_OPERATOR_EVIDENCE_TEMPLATE.md',
+            'docs/50_launch/release/20260518_EXTERNAL_PLAYTEST_ARTIFACT_DRY_RUN_TEMPLATE.md',
         ];
 
         for (const doc of requiredDocs) {
@@ -127,12 +127,12 @@ describe('launch/operator artifact support', () => {
         expect(launchDay).toContain('npm.cmd run launch:artifacts:dry-run');
         expect(launchDay).toContain('distributionApproved');
 
-        const cleanVm = readFileSync(join(ROOT, 'docs/40_reports/release/20260518_CLEAN_VM_OPERATOR_EVIDENCE_TEMPLATE.md'), 'utf8');
+        const cleanVm = readFileSync(join(ROOT, 'docs/50_launch/release/20260518_CLEAN_VM_OPERATOR_EVIDENCE_TEMPLATE.md'), 'utf8');
         expect(cleanVm).toContain('SmartScreen wording captured');
         expect(cleanVm).toContain('Settings -> Apps entry shows correct name/version');
         expect(cleanVm).toContain('Registry uninstall entry removed');
 
-        const playtest = readFileSync(join(ROOT, 'docs/40_reports/playtest/20260518_EXTERNAL_PLAYTEST_ARTIFACT_DRY_RUN_TEMPLATE.md'), 'utf8');
+        const playtest = readFileSync(join(ROOT, 'docs/50_launch/release/20260518_EXTERNAL_PLAYTEST_ARTIFACT_DRY_RUN_TEMPLATE.md'), 'utf8');
         expect(playtest).toContain('Use only the exact artifact that passed clean-VM validation');
         expect(playtest).toContain('Feedback form matches schema');
         expect(playtest).toContain('External distribution approved: pending');

@@ -1,6 +1,6 @@
 import type { DimensionId } from './event_types.js';
 import { clamp } from '../../utils/math.js';
-import { CANONICAL_FACTIONS } from '../../state/game_state.js';
+import { CANONICAL_FACTIONS, type GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { PeacePlanResponse } from '../../state/negotiation_types.js';
 import { getPeacePlanById } from '../negotiation/peace_plan_data.js';
@@ -89,9 +89,31 @@ export function computeNegotiatingCapital(store: DimensionStore, faction: string
 }
 
 /**
- * The one owner of every dimension `base_value` (§6 E3a1 D2). Runs once per faction per
- * turn at the `compute-dimension-bases` pipeline step. No other function writes a
- * `base_value`; `computeNegotiationBreakdown` only rebuilds the raw capital record.
+ * Run the one base owner, `computeDimensionBaseValues`, for every faction in a fixed order.
+ * The only caller of the owner in src/. The war pipeline calls it at three fixed points each
+ * war turn (§6 phase-order ruling, 2026-11-17; Systems Manual §7.10.3):
+ *   - `refresh-dimension-bases-turn-start` (after ensure-negotiation-state): the turn's events
+ *     see every write made since the last turn, between-turn IPC writes included;
+ *   - `compute-dimension-bases` (after evaluate-events): a choice's base input reaches the
+ *     base before operations;
+ *   - `refresh-dimension-bases` (after compute-negotiation-capital): the Dayton menu is priced,
+ *     and the turn boundary saved, on the turn's plan, patron, capital and combat writes.
+ * A pure overwrite of `base_value`; no-op while the dimension store does not exist.
+ */
+export function recomputeDimensionBases(state: GameState): void {
+    const store = state.military?.negotiation?.strategic_dimensions;
+    if (!store) return;
+    for (const faction of ['RBiH', 'RS', 'HRHB'] as const) {
+        computeDimensionBaseValues(store, state, faction);
+    }
+}
+
+/**
+ * The one owner of every dimension `base_value` (§6 E3a1 D2). Called only through
+ * `recomputeDimensionBases`, which runs it for every faction at three fixed points each war
+ * turn (turn start, mid-turn after evaluate-events, after compute-negotiation-capital). No
+ * other function writes a `base_value`; `computeNegotiationBreakdown` only rebuilds the raw
+ * capital record.
  */
 export function computeDimensionBaseValues(store: DimensionStore, state: any, faction: string): void {
     if (!store[faction]) return;

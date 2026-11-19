@@ -1,7 +1,0 @@
-## 2026-11-16 — Pass 27: the CODE3 canon line, and the hash and stale-pins record for #703
-
-Canon wording (no behaviour change) and docs; no `src/` or `data/` change, no hash change. FORAWWV is not edited.
-
-- Canon, on the orchestrator's explicit instruction of 2026-11-16: "Scripted (authored and triggered) operations are not exhaustion-gated; discretionary plans are; exhaustion is a cost; Stop-op is the player's counter, from planning onward (CODE3, 2026-11-16)." Added to Engine Invariants §14.10b (paragraph on authored historical operations, with an Amended note) and Systems Manual §6.5, next to the sentences #705 amended. It records shipped behaviour: the exhaustion gate (`MAX_EXHAUSTION_FOR_OPERATION`) covers discretionary commander plans only.
-- Canon record: the Part 5 sitting of 2026-11-15 (game-designer and historian, each RATIFY WITH CONDITIONS, CODE3 accepted as final); the condition that a halt be accepted in planning was met by #705. Record: `docs/40_reports/governance/20261115_FINAL_BEHAVIOUR_AT_1_0.md`, section 1 and section 6 item 1 (now done).
-- #703's hash is recorded as its claimed hash, 1391f69248072728 (label-only), not as a measured main hash: #703 merged with the advisory baseline-pins check red and did not re-pin the manifest, so main's pins are stale. The RF-ROSTER lane's standalone re-pin PR follows #708; its measured hash becomes the main hash at the re-pin, and its run also confirms #705's byte-identity on top of #703. The #708 hash is recorded only after that lands.

@@ -2,6 +2,10 @@
 
 Use this as a routing page. Open only the topic needed for the current task. Detailed rules retain their original dates and wording in the linked topic files.
 
+## Working docs location (until 1.0)
+
+The ledger and fragments, plans, roadmap/board, reports and `*_MASTER.md` authorities moved out of the repo (owner, 2026-11-18). Any `docs/plans/…`, `docs/40_reports/…`, `docs/PROJECT_LEDGER*` or `docs/ledger/…` path in the topic files below means `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>`. See [AGENT_WORKFLOW.md](../docs/20_engineering/AGENT_WORKFLOW.md#working-docs-location-until-10).
+
 ## Universal boundaries
 
 1. **Continue authorized work.** Resolve routine reversible choices from canon and evidence. Stop only for a real authority, safety, acceptance-criterion, or costly-scope decision. See [user directives](napkin/entry_detail.md#user-directives).

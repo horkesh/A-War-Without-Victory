@@ -55,16 +55,9 @@ test('save migration fixture ownership stays aligned across docs and tracked leg
         return Number(match[1]);
     });
 
-    // v40 is reserved by another lane (batch-b) and is not registered on this branch, so it has
-    // no fixture yet; §6 E4 added the v41 fixture for its v42 migration. Mirrors
-    // UNREGISTERED_RESERVED_VERSIONS in save_migration_round_trip_contract.test.ts: remove 40
-    // from this set when v40 lands together with its v40 fixture.
-    const unregisteredReservedVersions = new Set<number>([40]);
-    const maxVersion = versionPrefixes.length === 0 ? 0 : Math.max(...versionPrefixes);
     assert.deepStrictEqual(
         versionPrefixes,
-        Array.from({ length: maxVersion }, (_, index) => index + 1)
-            .filter((version) => !unregisteredReservedVersions.has(version)),
-        'save migration fixture versions should be contiguous from v01 (apart from reserved, unregistered versions)',
+        Array.from({ length: versionPrefixes.length }, (_, index) => index + 1),
+        'save migration fixture versions should be contiguous from v01',
     );
 });

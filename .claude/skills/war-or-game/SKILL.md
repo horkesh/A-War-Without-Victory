@@ -3,6 +3,8 @@ name: war-or-game
 description: Realism auditor. Investigates sim outputs, AARs, battle logs, and calibration runs to find anything a real Bosnian War commander would find absurd. Primary owner of REAL_WAR_MASTER.md. Invoke during any calibration attempt, after scenario runs, or when evaluating combat outcomes.
 ---
 
+> **Until 1.0:** `docs/PROJECT_LEDGER*`, `docs/ledger/`, `docs/plans/` and `docs/40_reports/` paths below mean `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>` (owner ruling 2026-11-18). Read and edit them there; open no docs PRs. See `docs/20_engineering/AGENT_WORKFLOW.md`.
+
 # War or Game
 
 > **RETIRED from all panels, gates and routing (owner, 2026-11-15); explicit owner request only.** The owner's directive: "I want war-or-game removed from all seats. Too often he ignores history, is too cocky... I had to overrule him plenty of times." Calibration-run analysis and realism belong to `scenario-creator-runner-tester`, with `historian` ruling on historical fact; Operations Expert holds the former bright-line panel seat. Do not invoke this skill from another skill, a panel or a gate. This file is kept for history and for an explicit owner request.

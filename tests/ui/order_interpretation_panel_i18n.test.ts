@@ -34,7 +34,6 @@ function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
         turnSummaries: [],
         corpsFrontSectors: [],
         operations: [],
-        factionReserves: {},
         ...overrides,
     } as LoadedGameState;
 }

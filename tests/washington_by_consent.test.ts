@@ -59,6 +59,20 @@ describe('Path C — Federation by consent', () => {
         expect(s.political.war_alliance_rbih_hrhb).toBe(0.95);
     });
 
+    it('A2b: no consent after HRHB refuses the federation overture; the default answer keeps it open', () => {
+        const withOverture = (response: string) => {
+            const s = state({ turn: WASHINGTON_AGREEMENT_WEEK, alliance: 0.6, warStartedTurn: null });
+            (s.military as any).event_decision_log = [
+                { event_id: 'hrhb_federation_overture_1993', response_id: response, decision_source: 'player', faction: 'HRHB', turn: 88 },
+            ];
+            return evaluateWashingtonByConsent(s);
+        };
+        expect(withOverture('reject_federation_path')).toBe(false);
+        expect(withOverture('maintain_separate_state')).toBe(false);
+        expect(withOverture('extend_federation_overture')).toBe(true);
+        expect(withOverture('conditional_federation_with_canton_caveats')).toBe(true);
+    });
+
     it('does not fire before the Washington week, after a war, or below the allied threshold', () => {
         expect(evaluateWashingtonByConsent(state({ turn: WASHINGTON_AGREEMENT_WEEK - 1, alliance: 0.6, warStartedTurn: null }))).toBe(false);
         expect(evaluateWashingtonByConsent(state({ turn: WASHINGTON_AGREEMENT_WEEK, alliance: 0.6, warStartedTurn: 50 }))).toBe(false);

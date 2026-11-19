@@ -80,7 +80,7 @@ function makeState(): GameState {
 }
 
 describe('advanceSectorOffensives', () => {
-    it('force launch triggers execution, cohesion penalty, and artillery prep', () => {
+    it('force launch triggers execution and the cohesion penalty; artillery prep has no effect (reserve retired 2026-11-17)', () => {
         const state = makeState();
 
         advanceSectorOffensives(state, null);
@@ -88,9 +88,11 @@ describe('advanceSectorOffensives', () => {
         const op = state.military.corps_command?.['rs-corps-1']?.active_operations[0];
         expect(op?.phase).toBe('execution');
         expect(state.military.formations['rs-brig-1'].cohesion).toBe(55);
-        expect(state.military.formations['rbih-brig-1'].dig_in_progress).toBe(0);
-        expect(state.military.formations['rbih-brig-1'].cohesion).toBe(60);
-        expect(state.military.heavy_munitions_reserve?.RS).toBe(3);
+        // Artillery preparation drew on the retired heavy-munitions reserve (Fable consult 6):
+        // the defender is untouched and the old reserve value is not spent.
+        expect(state.military.formations['rbih-brig-1'].dig_in_progress).toBeUndefined();
+        expect(state.military.formations['rbih-brig-1'].cohesion).toBe(70);
+        expect(state.military.heavy_munitions_reserve?.RS).toBe(5);
     });
 
     it('all-out tempo applies extra execution cohesion cost each turn', () => {

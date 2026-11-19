@@ -73,20 +73,7 @@ turn pipeline or replace the player's negotiation. The signing narrative require
 
 - `stage-posture-order`: retired 2026-11-13. Under posture model option 2 the president does not set brigade posture; corps and OG stance changes reach the president as stance matters. The preload had already stopped exposing it, and it wrote a top-level `state.brigade_posture_orders` that no turn step reads.
 
-- `stage-move-order` (invoke)
-  - Payload: `{ brigadeId: string, targetMunicipalityId: string }`
-  - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: compatibility-era channel. Sets `state.brigade_mun_orders[brigadeId] = [targetMunicipalityId]`, reserializes, sends state via `game-state-updated`. As of 2026-06-19, the live React tactical map does not expose direct brigade `move` mode or OSID-click staging for this channel; movement intent is player-facing through Army HQ/corps-operation/sector systems and validated movement channels.
-
-- `stage-deploy-order` (invoke)
-  - Payload: `{ brigadeId: string }`
-  - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: stages deploy posture transition by setting `state.brigade_deploy_orders[brigadeId] = "deploy"`, reserializes, sends state via `game-state-updated`.
-
-- `stage-undeploy-order` (invoke)
-  - Payload: `{ brigadeId: string }`
-  - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: stages undeploy posture transition by setting `state.brigade_deploy_orders[brigadeId] = "undeploy"`, reserializes, sends state via `game-state-updated`.
+- `stage-move-order`, `stage-deploy-order`, `stage-undeploy-order`: retired 2026-11-17 (L7, dead IPC actions). They wrote the root fields `state.brigade_mun_orders` and `state.brigade_deploy_orders`, which are not GameState keys: `serializeGameState` rejects any top-level key outside the twelve canonical ones, so every call failed. None had a UI caller (the direct brigade move affordance went on 2026-06-19; the preload never exposed move or deploy). The shared helper `stageDeployOrder` went with them.
 
 - `assign-brigade-to-sector` (invoke)
   - Payload: `{ brigadeId: string, sectorId: string | null }`
@@ -108,10 +95,7 @@ turn pipeline or replace the player's negotiation. The signing narrative require
   - Returns: `{ ok: boolean, error?: string }`
   - Behavior: **retired compatibility channel.** Main process rejects the request with a player-facing error (`Brigade reposition orders are retired; use movement or sector assignment instead`) and does not mutate state.
 
-- `clear-orders` (invoke)
-  - Payload: `{ brigadeId: string }`
-  - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: removes brigade from `brigade_attack_orders`, `brigade_posture_orders`, `brigade_mun_orders`, `brigade_movement_orders`, retired `brigade_reposition_orders`, and `brigade_deploy_orders`; also removes any entries in `brigade_aor_orders` where `from_brigade === brigadeId` or `to_brigade === brigadeId`. Reserializes, sends state via `game-state-updated`.
+- `clear-orders`: retired 2026-11-17 (L7). It filtered root `brigade_attack_orders`, `brigade_posture_orders`, `brigade_mun_orders`, `brigade_reposition_orders`, `brigade_deploy_orders` and `brigade_aor_orders`, none of which is a GameState key, and nothing called it.
 
 - `stage-corps-stance-order` (invoke)
   - Payload: `{ corpsId: string, stance: string }`
@@ -129,10 +113,7 @@ turn pipeline or replace the player's negotiation. The signing narrative require
   - Behavior: writes the numeric priority to `state.military.logistics_priority[faction][edgeId]` for every `edgeId` in `state.corps_front_sectors[sectorId].edge_ids`, reserializes, and broadcasts the updated state.
   - Priority is clamped by simulation consumers to `[0.5, 1.5]`; `1.0` is the byte-stable neutral default.
 
-- `stage-airdrop-allocation` (invoke)
-  - Payload: `{ enclaveId: string, allocation: number }`
-  - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: writes deterministic enclave airdrop allocation into `state.airdrop_allocation`, reserializes, and broadcasts the updated state for enclave/supply UI surfaces.
+- `stage-airdrop-allocation`: retired 2026-11-17 with the supply-reserve economy (Fable consult 6). It wrote root `state.airdrop_allocation`, which nothing read.
 
 - `stage-convoy-decision` — **retired (F1i, 2026-11-16).** Humanitarian convoys are not modelled in 1.0; the channel, its handler and its preload method are removed. Old saves may still carry `military.pending_convoy_decisions` / `convoy_decision_history`; they load but no surface reads them.
 
@@ -142,9 +123,9 @@ turn pipeline or replace the player's negotiation. The signing narrative require
   - Behavior: validates the selected municipality against `state.military.militia_pools`, stages or replaces `state.military.municipality_support_orders[faction]`, reserializes, and broadcasts the updated state. When `meta.player_faction` is present, only that faction may stage support.
 
 - `stage-opsec-toggle` (invoke)
-  - Payload: `{ sectorId: string, enabled: boolean }`
+  - Payload: `{ sectorId: string, active: boolean }`
   - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: adds or removes the sector from `state.opsec_sectors`, reserializes, and broadcasts the updated state. OPSEC affects sector-intel buildup; it is not a direct combat modifier.
+  - Behavior: adds or removes the sector from `state.military.opsec_sectors` (fixed 2026-11-17: it used to write a root `state.opsec_sectors`, which serialization rejects, so the toggle always errored), reserializes, and broadcasts the updated state. OPSEC affects sector-intel buildup (an observer's passive buildup on that sector is halved); it is not a direct combat modifier. The engine also marks sectors itself while an operation is prepared and clears them when it ends.
 
 - `stage-corps-attack-axis-order` (invoke)
     - Payload: `{ corpsId: string, edgeIds: string[] }`
@@ -169,12 +150,9 @@ turn pipeline or replace the player's negotiation. The signing narrative require
 - `stage-assign-operation-commander` (invoke)
     - Payload: `{ corpsId: string, operationName: string, officerId: string }`
     - Returns: `{ ok: boolean, error?: string }`
-    - Behavior: assigns a named officer as commander for a specific operation. Sets `op.commander_officer_id` on the matching `CorpsOperation`, updates the officer's `assigned_operation` and `assigned_corps_id` in `state.named_officers`. Triggered from CommanderSelectionModal after player drafts a directive. Reserializes, sends state via `game-state-updated`.
+    - Behavior: assigns a named officer as commander for a specific operation. Sets `op.commander_officer_id` on the matching `CorpsOperation` in `state.military.corps_command[corpsId].active_operations`, updates the officer's `assigned_operation` and `assigned_corps_id` in `state.military.named_officers` (fixed 2026-11-17: it used to read the root `state.corps_command` and `state.named_officers`, which do not exist). Serves the PARKED operation planner (`ops_modal`, unmounted for the DLC): kept so the planner is correct if it is ever mounted. Reserializes, sends state via `game-state-updated`.
 
-- `stage-operation-decision` (invoke)
-    - Payload: `{ corpsId: string, operationName: string, decision: 'launch' | 'postpone' | 'abort' | 'probe' }`
-    - Returns: `{ ok: boolean, error?: string }`
-    - Behavior: player decision during Operation Briefing. `launch` sets `force_launch=true` on the operation; `postpone` increments `postponement_count`; `abort` sets `recovery_reason='commander_abort'`; `probe` creates `active_probe` on the operation. Triggered from OperationBriefingModal. Reserializes, sends state via `game-state-updated`.
+- `stage-operation-decision`: retired 2026-11-17 (L7). Launch / postpone / abort / probe on a planning operation are the corps commander's go/no-go moves, not the President's. The handler read the root `state.corps_command`, so every call answered "Operation not found", and the engine read none of what it would have written. The Operation Briefing modal is read-only; the President's levers over an operation (force-launch over an objection, stop-op) are Decision Room cards.
 
 - `resolve-operation-opportunity-decision` (invoke)
     - Payload: `{ reviewId: string, proposalId: string, decision: 'approve' | 'delay' | 'redirect' | 'under_resource' | 'decline', delayTurns?: number, redirectVariantId?: string, commitmentProfile?: 'minimum' | 'standard' | 'reinforced' }`

@@ -889,6 +889,19 @@ registerMigration({
     },
 });
 
+registerMigration({
+    version: 40,
+    description: 'The September 1991 peace start is retired (campaign structure decision 2026-03-23; '
+        + 'scenario, runner path and scenario fields removed 2026-11-16). Deletes '
+        + 'meta.peace_war_start_control_path: only the peace start ever set it (an ABSOLUTE '
+        + 'filesystem path, which made the hash depend on the checkout location), and only the '
+        + 'peace-to-war transition read it. Every war-start save holds null. Sensitive: no.',
+    migrate: (state) => {
+        const meta = asRecord(state.meta);
+        if (meta) delete meta.peace_war_start_control_path;
+    },
+});
+
 /** §6 E2: strip retired `negotiation_capital` effects from one pending response option.
  *  Self-contained so the migration can be renumbered without touching anything else. */
 function stripRetiredNegotiationCapitalEffects(option: Record<string, any>): void {
@@ -900,8 +913,7 @@ function stripRetiredNegotiationCapitalEffects(option: Record<string, any>): voi
     }
 }
 
-// v40 is owned by another lane (batch-b) and is not on this branch yet. applyMigrations
-// filters `version > current` and sorts, so the gap at 40 is tolerated.
+// v41 runs after v40 (the September 1991 peace start retirement, #773).
 registerMigration({
     version: 41,
     description: 'Section 6 E2: the negotiation_capital event effect kind is retired (every catalog '
@@ -959,6 +971,13 @@ export const S6_E4_PATRON_SUPPORT_DROP: ReadonlySet<string> = new Set([
     'visit_to_front_rs#visit_drina_front',
     'visit_to_front_rs#visit_press_rs',
     'visit_to_front_rs#visit_sarajevo_lines',
+    // P-B panel (historian, game designer, operations/engine; 3/3, two rounds, 2026-11-18):
+    // pressure-convention leftovers on the front-visit card; no recorded patron change.
+    'visit_to_front_hrhb#stay_mostar_hrhb',
+    'visit_to_front_rbih#stay_capital_rbih',
+    'visit_to_front_rbih#visit_press_rbih',
+    'visit_to_front_rbih#visit_sarajevo',
+    'visit_to_front_rs#stay_pale_rs',
 ]);
 export const S6_E4_PATRON_SUPPORT_SET: Readonly<Record<string, number>> = {
     'belgrade_embargo_rs_1994#defiant': -10,

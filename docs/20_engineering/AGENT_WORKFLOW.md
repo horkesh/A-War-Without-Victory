@@ -24,6 +24,10 @@ Start with the repository entrypoint and runtime skill catalog. Read `.claude/na
 | Release, package, deployment | active release plan; build/package authority; open-gate validator; release and provenance checks |
 | Documentation, process, roadmap | active plan when one exists; `COMMAND_BOARD.md` for current priority; `MASTER_ROADMAP.md` for roadmap history; ledger only when dated continuity or a required entry matters |
 
+### Working docs location (until 1.0)
+
+By owner ruling of 2026-11-18, the working docs left the repo until 1.0: `PROJECT_LEDGER*` and `docs/ledger/`, `docs/plans/` (roadmap, command board, plan index, plans), `docs/40_reports/` (reports and the `*_MASTER.md` authorities such as `CALIBRATION_MASTER.md`), `docs/60_visualisations/`, `docs/_old/`, `docs/70_archive/`, `docs/research/` and `docs/CANON_PROPAGATION_NEEDED.md`. They live in the coordination git repo at `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>` (backed up to the private GitHub repo `horkesh/AWWV-coordination`). Every `docs/<those paths>` named in this repo's skills, napkin, commands and older text means that location. Read and edit them there, commit in that repo, and open no docs PRs. After 1.0 they return to the repo once as a consolidated final set. Canon (`docs/10_canon`), engineering (`docs/20_engineering`), `docs/life_lessons*`, provenance, audio, knowledge, launch, research PDFs and `docs/open_gates.yml` stay in the repo, and canon records still land in the same change.
+
 Do not load all sources for every task. More specific `AGENTS.md` files, canon documents, active plans, and explicit owner instructions take precedence within their scope.
 
 ## Canon and protected boundaries
@@ -63,7 +67,7 @@ Reuse unaffected evidence. Passing another check never retires an unmet acceptan
 
 Diagnose the first unexpected failure across all visible categories. Correct the smallest established cause and verify it with the cheapest meaningful check before broadening. Escalate only after a consolidated unresolved diagnosis or when authority must change.
 
-Record behavioral/output/scenario or adopted process changes in the ledger when required by repository policy: add one fragment file, `docs/ledger/fragments/YYYY-MM-DD-<slug>.md`, first line `## YYYY-MM-DD — <title>`, instead of editing the top of `docs/PROJECT_LEDGER.md` (parallel PRs conflicted there). The integration steward compiles fragments into the ledger with `node tools/ledger_compile.cjs`; a PR that changes `src/` or `data/` must add a fragment (CI: Ledger Fragment Guard; label `no-ledger` to skip). See `docs/ledger/fragments/README.md`. Put reusable technical knowledge in the existing knowledge ledger or napkin topic; do not create parallel task journals such as `tasks/todo.md` or `tasks/lessons.md`.
+Record behavioral/output/scenario or adopted process changes in the ledger when required by repository policy. Until 1.0 the ledger is in the coordination repo (see "Working docs location"): add one fragment file, `docs/ledger/fragments/YYYY-MM-DD-<slug>.md` under `C:/Pyrrhic/AWWV-coordination/repo-docs/`, first line `## YYYY-MM-DD — <title>`, instead of editing the top of `PROJECT_LEDGER.md`. The integration steward compiles fragments with `node tools/ledger_compile.cjs --dir <fragments dir> --ledger <ledger file>`. A PR no longer needs a fragment: Ledger Fragment Guard is a no-op job that reports "ledger moved out of the repo until 1.0 (owner 2026-11-18)". Put reusable technical knowledge in the knowledge ledger (`PROJECT_LEDGER_KNOWLEDGE.md`, coordination repo) or a napkin topic; do not create parallel task journals such as `tasks/todo.md` or `tasks/lessons.md`.
 
 Before claiming completion, inspect the final diff, verify every applicable requirement with fresh evidence, report exits/counts/evidence paths, and obtain independent review where required. Keep previous failures and residual gates visible.
 

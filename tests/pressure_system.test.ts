@@ -7,13 +7,12 @@ import type { EventDefinition } from '../src/sim/events/event_types.js';
 
 function minState(): GameState {
     return {
-        meta: { supply_reserves_enabled: true, turn: 10, phase: 'war' },
+        meta: { turn: 10, phase: 'war' },
         political: { political_controllers: {}, war_alliance_rbih_hrhb: 0.5 },
         military: {
             formations: {},
             event_readiness: {},
             event_flags: {},
-            general_supply_reserve: { RBiH: 30 },
             negotiation: { capital: {}, patron_relationships: {}, peace_plan_history: [], strategic_dimensions: {} },
         },
     } as unknown as GameState;
@@ -70,11 +69,12 @@ describe('pressure system', () => {
 
     it('applies pressure modifiers when sub-conditions met', () => {
         const state = minState();
+        state.military.event_flags = { supply_route_strained: true };
         const eventWithMod: EventDefinition = {
             ...testEvent,
             pressure: {
                 base_rate: 1.0, threshold: 5, decay_rate: 0.3,
-                modifiers: [{ condition: { type: 'supply_below', faction: 'RBiH', threshold: 40 }, rate_bonus: 0.5 }],
+                modifiers: [{ condition: { type: 'flag_equals', flag: 'supply_route_strained', value: true }, rate_bonus: 0.5 }],
             },
         };
         updateEventReadiness(state, [eventWithMod]);

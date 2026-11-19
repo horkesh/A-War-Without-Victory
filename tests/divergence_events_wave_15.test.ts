@@ -353,11 +353,10 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-15: 6 Ring-1 divergence events'
             'territory_control', 'alliance_below', 'alliance_above',
             'faction_controls_municipality', 'operation_completed',
             'and', 'or', 'not',
-            'supply_below', 'supply_above', 'territory_percentage',
+            'territory_percentage',
             'dimension_above', 'dimension_below', 'flag_equals', 'flag_not_set',
             'patron_pressure_above', 'war_crimes_above', 'morale_average_below',
             'week_since_event', 'event_fire_count', 'enclave_supply_status',
-            'corridor_severed',
             'paramilitary_mode_equals', 'enclave_resilience_aggregate', 'flag_at_least',
             'metric_compare_factions', 'alliance_drift', 'territory_loss_window',
             'displaced_in_aggregate',
@@ -383,7 +382,7 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-15: 6 Ring-1 divergence events'
     // No new effect kinds: every Wave 15 effect uses pre-existing kinds (STOP rule)
     it('all 6 Wave 15 events use only pre-existing effect kinds (STOP rule)', () => {
         const ALLOWED_EFFECT_KINDS = new Set([
-            'narrative', 'morale_change', 'supply_delta', 'cohesion_change',
+            'narrative', 'morale_change', 'cohesion_change',
             'humanitarian_impact', 'patron_pressure', 'alliance_change',
             // 'negotiation_capital' retired (§6 E2): the loader rejects it.
             'equipment_grant', 'aggression_modifier',

@@ -2374,7 +2374,7 @@
     "corps": "vrs_1st_krajina",
     "home_mun": "doboj",
     "home_settlement": "Gornja Paklenica",
-    "home_osid": "op:doboj:boljanic_2",
+    "home_osid": "op:maglaj:donja_bocinja_2",
     "kind": "brigade",
     "default_equipment_class": "mountain",
     "available_from": 0,

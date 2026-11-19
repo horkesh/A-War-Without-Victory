@@ -12,7 +12,6 @@ import type { AxisReadinessDebugContext, BrigadePredictionFact } from './axis_re
 // REASON-CODE INSTRUMENTATION: env-gated, inert by default. See reason_code_debug.ts.
 import { isReasonCodeTopicEnabled } from './reason_code_debug.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supply_state_derivation.js';
-import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { OperationalToCanonicalReverseMap, OsidPopulationMap } from '../../data/operational_data.js';
 import type { OsidEthnicComposition } from './ethnic_defense.js';
@@ -1544,35 +1543,8 @@ export function hasExecutableOpeningAttack(
     );
 }
 
-export function computeSupplyReadiness(
-    state: GameState,
-    participatingBrigades: FormationId[],
-    faction: FactionId,
-    supplyByOsid?: SupplyStateByOsidReport | null
-): number {
-    if (!state.meta?.supply_reserves_enabled) return 1.0;
-    if (!supplyByOsid?.factions || participatingBrigades.length === 0) return 1.0;
-    const fac = supplyByOsid.factions.find(f => f.faction_id === faction);
-    if (!fac?.by_osid) return 1.0;
-    const osidState = new Map<string, SupplyStateLevel>();
-    for (const e of fac.by_osid) osidState.set(e.osid, e.state);
-
-    const reserveLevel = state.meta?.supply_reserves_enabled
-        ? ((state.military.general_supply_reserve as Record<string, number> | undefined)?.[faction] ?? 100)
-        : 100;
-
-    let score = 0;
-    for (const bid of participatingBrigades) {
-        const b = state.military.formations?.[bid];
-        if (!b || b.status !== 'active') continue;
-        const rawSt = b.location_osid ? (osidState.get(b.location_osid) ?? 'adequate') : 'adequate';
-        const st = state.meta?.supply_reserves_enabled
-            ? getEffectiveSupplyState(rawSt, reserveLevel)
-            : rawSt;
-        score += st === 'adequate' ? 1.0 : st === 'strained' ? 0.5 : 0.0;
-    }
-    return participatingBrigades.length > 0 ? score / participatingBrigades.length : 1.0;
-}
+// computeSupplyReadiness retired 2026-11-17 (Fable consult 6): it returned 1.0 unless the
+// supply-reserve economy was on. Callers now record a supply readiness of 1.0 directly.
 
 export function hasEligibleAttackersForLaunch(
     formations: GameState['military']['formations'],

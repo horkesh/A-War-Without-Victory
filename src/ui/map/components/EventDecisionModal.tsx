@@ -313,9 +313,11 @@ function describeEffect(effect: EventEffect): string {
     const faction = factionId ? eventDecisionStateShortLabel(factionId) : '';
     const army = factionId ? eventDecisionArmyLabel(factionId) : '';
     switch (effect.kind) {
-        case 'narrative': return effect.text;
+        // A narrative line never reaches this switch: `buildPreviewRows` keeps only
+        // `isDisplayEventEffect` rows, and that predicate excludes narrative. Narrative lines are
+        // shown by the acknowledgement card, through `resolveNarrativeEffectText`.
+        case 'narrative': return '';
         case 'morale_change': return t('eventDecision.effect.moraleChange', { faction: army, delta: signedDelta(effect.delta) });
-        case 'supply_delta': return t('eventDecision.effect.supplyDelta', { faction: army, delta: signedDelta(effect.delta) });
         case 'cohesion_change': return t('eventDecision.effect.cohesionChange', { faction: army, delta: signedDelta(effect.delta) });
         case 'humanitarian_impact': return formatWarCrimesRecordLine(factionId, effect.war_crimes_delta);
         case 'patron_support': return t('eventDecision.effect.patronSupport', { faction, delta: signedDelta(effect.delta) });

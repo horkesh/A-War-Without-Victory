@@ -246,19 +246,3 @@ describe('staleness is measured against base_commit, and does not apply to finis
     expect(errors).toEqual([]);
   });
 });
-
-describe('the committed manifests', () => {
-  it('all validate', () => {
-    const errors = validator.manifestPaths().flatMap((rel) => validator.validateManifest(rel));
-    expect(errors).toEqual([]);
-  });
-
-  it('every task kind matches the ledger categories, so routing stays derivable', () => {
-    for (const rel of validator.manifestPaths()) {
-      const manifest = validator.load(rel) as { tasks: Array<{ id: string; kind: string }> };
-      for (const task of manifest.tasks) {
-        expect(validator.KINDS, `${rel} ${task.id}`).toContain(task.kind);
-      }
-    }
-  });
-});

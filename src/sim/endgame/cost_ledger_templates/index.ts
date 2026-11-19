@@ -143,12 +143,9 @@ export const COST_LEDGER_TEMPLATES: readonly CostLedgerTemplate[] = Object.freez
         category: 'economic',
         title: 'Economic And Logistical Strain',
         description_template:
-            '{faction} closed the war with general supply reserve at {supply_final} and heavy munitions reserve at {munitions_final}. ' +
             '{strain_event_count} consequence events recorded supply or recruitment strain on this faction. ' +
             'Cumulative recruitment-modifier turns under value <1.0: {restrictive_recruitment_turns}.',
         data_sources: [
-            'state.military.general_supply_reserve[faction]',
-            'state.military.heavy_munitions_reserve[faction]',
             'state.military.recruitment_modifiers',
             'state.military.cost_ledger_annotations',
         ],

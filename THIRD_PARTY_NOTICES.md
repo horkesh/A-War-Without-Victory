@@ -43,8 +43,8 @@ system-ui) are system fonts. They are referenced, not bundled.
     forests, land and place labels. Extracted from the Protomaps basemap daily build of 2026-02-27
     (`pmtiles extract https://build.protomaps.com/20260227.pmtiles --bbox=15.7,42.5,19.7,45.3`),
     Protomaps basemap v4 schema. Records:
-    `docs/40_reports/handovers/AWWV_GUI_REWORK_PROGRESS_20260228.md`,
-    `docs/40_reports/implemented/20260302_GEOGRAPHY_LAYER_REINTRODUCTION_PMTILES.md`. The tile
+    `docs/provenance/geography_records/AWWV_GUI_REWORK_PROGRESS_20260228.md`,
+    `docs/provenance/geography_records/20260302_GEOGRAPHY_LAYER_REINTRODUCTION_PMTILES.md`. The tile
     build's other upstream sources, if any, are not recorded.
   - `data/derived/terrain/osm_roads_snapshot_h6_2.geojson.gz`,
     `data/derived/terrain/osm_waterways_snapshot_h6_2.geojson` (and `.gz`), and the terrain scalars
@@ -65,11 +65,11 @@ system-ui) are system fonts. They are referenced, not bundled.
   - `data/derived/tiles/terrain.pmtiles`: Terrain-RGB elevation tiles (zoom 6–10) for 3-D terrain in
     the operations view. Source recorded as Copernicus GLO-30 (30 m) from `data/source/dem/`, built
     with GDAL and `pmtiles convert`. Record:
-    `docs/40_reports/implemented/20260320_3D_TERRAIN_DECKGL_ARROWS_COMBAT_EFFECTIVENESS.md`.
+    `docs/provenance/geography_records/20260320_3D_TERRAIN_DECKGL_ARROWS_COMBAT_EFFECTIVENESS.md`.
   - `data/derived/tiles/hillshade.pmtiles`: hillshade raster tiles (zoom 6–12). Source recorded as
     `data/source/dem/raw/copernicus_dem_glo30_raw.tiff` (Copernicus GLO-30, 30 m resolution), via
     `gdaldem hillshade` and `pmtiles convert`. Record:
-    `docs/40_reports/handovers/AWWV_GUI_REWORK_PROGRESS_20260228.md`. The 2026-03-02 geography report
+    `docs/provenance/geography_records/AWWV_GUI_REWORK_PROGRESS_20260228.md`. The 2026-03-02 geography report
     records this source only as "DEM source (external)".
   - `data/derived/terrain/dem_clip_h6_2.tif` (clipped from `copernicus_dem_glo30_raw` by
     `scripts/map/phase_h6_2_snapshot_dem_clip.ts`), `data/derived/terrain/hillshade_bg.png` and the
@@ -93,7 +93,7 @@ system-ui) are system fonts. They are referenced, not bundled.
 ### 1.5 Other bundled data
 
 - **Opening map texture** (`src/ui/map/assets/opening/opening_map_portal.webp`): built from NOAA
-  ETOPO 2022 relief plus Natural Earth coastline and river centrelines (`docs/PROJECT_LEDGER_ARCHIVE_2026Q3.md`,
+  ETOPO 2022 relief plus Natural Earth coastline and river centrelines (the project ledger,
   entry for the 2026-08-29 opening art). The repository records the sources but not their terms.
   Natural Earth publishes its data in the public domain; ETOPO 2022 is U.S. Government data from
   NOAA's National Centers for Environmental Information.

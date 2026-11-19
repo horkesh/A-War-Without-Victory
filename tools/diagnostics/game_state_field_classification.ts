@@ -194,7 +194,6 @@ const LIVE_FIELD_CLASSIFICATION_GROUPS = {
         'GameState.turn_summaries',
         'MilitaryState.ai_army_decisions',
         'MilitaryState.ai_decision_log',
-        'MilitaryState.airdrop_allocation',
         'MilitaryState.alliance_locks',
         'MilitaryState.army_hq_last_op_turn',
         'MilitaryState.army_hq_op_count_by_year',
@@ -236,9 +235,7 @@ const LIVE_FIELD_CLASSIFICATION_GROUPS = {
         'MilitaryState.formation_lifecycle_events_fired',
         'MilitaryState.friction_events',
         'MilitaryState.front_edges',
-        'MilitaryState.general_supply_reserve',
         'MilitaryState.guerrilla_threats',
-        'MilitaryState.heavy_munitions_reserve',
         'MilitaryState.last_briefing',
         'MilitaryState.last_gathering_turn',
         'MilitaryState.logistics_priority',
@@ -271,8 +268,6 @@ const LIVE_FIELD_CLASSIFICATION_GROUPS = {
         'MilitaryState.sarajevo_tunnel_operational',
         'MilitaryState.sector_stance_orders',
         'MilitaryState.settlement_holdouts',
-        'MilitaryState.smuggling_allocation',
-        'MilitaryState.smuggling_routes',
         'MilitaryState.strategic_reserves',
         'MilitaryState.tactical_groups',
         'MilitaryState.tg_formations_by_corps',
@@ -294,6 +289,8 @@ const LIVE_FIELD_CLASSIFICATION_GROUPS = {
         'MilitaryState.unresolved_sector_brigades',
     ],
     'compatibility-only': [
+        // Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
+        'MilitaryState.airdrop_allocation',
         'MilitaryState.army_theatre_assignment',
         'MilitaryState.assignable_front_segments',
         'MilitaryState.brigade_desired_aor_cap',
@@ -301,9 +298,15 @@ const LIVE_FIELD_CLASSIFICATION_GROUPS = {
         'MilitaryState.brigade_reposition_orders',
         // Retired F1i 2026-11-16: humanitarian convoys are not modelled in 1.0; old saves still load them.
         'MilitaryState.convoy_decision_history',
+        // Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
+        'MilitaryState.general_supply_reserve',
+        'MilitaryState.heavy_munitions_reserve',
         'MilitaryState.pending_convoy_decisions',
         // Retired 2026-11-17 (§6 panel): siege counters not modelled in 1.0; kept so old saves load.
         'MilitaryState.siege_turn_counters',
+        // Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
+        'MilitaryState.smuggling_allocation',
+        'MilitaryState.smuggling_routes',
         'MilitaryState.theatres',
     ],
     dead: [],

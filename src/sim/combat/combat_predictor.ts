@@ -1,7 +1,7 @@
 import {getPostWashingtonJointPressureMultiplier} from '../early_war/washington_agreement.js';
 import {computeAttackForcePower} from './attack_force_power.js';
 import { getAttackIntelConfidence } from './attack_intel_context.js';
-import { collectSectorDefenseBrigades } from './sector_defense_roster.js';
+import { collectAverageDefenseRoster, collectSectorDefenseBrigades } from './sector_defense_roster.js';
 /**
  * OSID-native combat outcome predictor — read-only.
  *
@@ -366,7 +366,11 @@ export function predictCombatOutcome(
                 '.rankDefendersByPower',
                 () => rankDefendersByPowerWithEntries(sectorBrigades, sector, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus, profilePrefix, officerLookup),
             );
-            const avgBrigadePower = totalPower / sectorBrigades.length;
+            // Fable consult 7 bound (mirrors the resolver): seam brigades only add; the cap and floor average the owning roster.
+            const averageRoster = collectAverageDefenseRoster(state, sector, targetOsid, controller!, adjacency, physicalDefenders, sectorBrigades);
+            const avgBrigadePower = averageRoster
+                ? rankDefendersByPowerWithEntries(averageRoster, sector, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus, profilePrefix, officerLookup).totalPower / averageRoster.length
+                : totalPower / sectorBrigades.length;
             const attackerCount = attackerFormations.length;
             const targetMun = munFromOsid(targetOsid);
             const pc = state.political?.political_controllers ?? {};

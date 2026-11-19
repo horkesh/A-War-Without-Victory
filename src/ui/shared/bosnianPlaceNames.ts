@@ -237,7 +237,8 @@ export const BOSNIAN_PERSON_AND_PROPER_NAMES: ReadonlyArray<BosnianPlaceName> = 
     { ascii: 'Stojic', correct: 'Stojić' },
     { ascii: 'Susak', correct: 'Šušak' },
     { ascii: 'Tadic', correct: 'Tadić' },
-    { ascii: 'Uzdol', correct: 'Uždol' },
+    // No "Uzdol" entry: Uzdol carries no diacritic (the Halilović judgment spelling, IT-01-48;
+    // historian, SHDG §4 panel 2026-11-18; the settlement data agrees). "Uždol" is the misspelling.
     { ascii: 'Vasiljevic', correct: 'Vasiljević' },
     { ascii: 'Zupljanin', correct: 'Župljanin' },
 ];

@@ -3,6 +3,8 @@ name: data-pipeline-engineer
 description: "Owns derived data pipelines: contact graph, OSID derivation, polygon processing, micro-OSID merges, area computation. MANDATORY before any change to scripts in tools/ that generate derived data. Use when modifying derive_operational_settlements.ts, merge_micro_osids.cjs, enrich_contact_graph_min_dist.cjs, or any script that writes to data/derived/."
 ---
 
+> **Until 1.0:** `docs/PROJECT_LEDGER*`, `docs/ledger/`, `docs/plans/` and `docs/40_reports/` paths below mean `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>` (owner ruling 2026-11-18). Read and edit them there; open no docs PRs. See `docs/20_engineering/AGENT_WORKFLOW.md`.
+
 # Data Pipeline Engineer
 
 ## Required Reading (before any work)

@@ -3,6 +3,8 @@ name: balkan-battlegrounds-historical-extractor
 description: Extracts historical knowledge from Balkan Battlegrounds (BB1/BB2) for control, takeover, holdouts, enclaves, pockets, and JNA/VRS. Use when researching BiH war patterns, producing citation-backed findings for scenario and engine design.
 ---
 
+> **Until 1.0:** `docs/PROJECT_LEDGER*`, `docs/ledger/`, `docs/plans/` and `docs/40_reports/` paths below mean `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>` (owner ruling 2026-11-18). Read and edit them there; open no docs PRs. See `docs/20_engineering/AGENT_WORKFLOW.md`.
+
 # Balkan Battlegrounds Historical Extractor
 
 ## Mandate

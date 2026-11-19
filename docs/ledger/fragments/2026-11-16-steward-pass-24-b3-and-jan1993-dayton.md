@@ -1,6 +1,0 @@
-## 2026-11-16 — Pass 24: the B3 finding, B2-b, and jan1993_to_dayton registered
-
-Docs only; no `src/` or `data/` change, no hash change.
-
-- B3 (political-directive producer, Wave 6 coupling, RS corps-role overlay): the Batch B lane found the overlay is a hard plan gate, not a 0.02 weight (`plan.ts:173-176`): it locks all ARBiH corps to the economy role and lifts every RS and HRHB corps. Ruled B3-b (no produced directive for any faction, the human's staff included) with B2-b (stop producing `army_directive_pushback`, drain the old events on load). B3 lands after package P2 and before P3. Work list rows B2 and B3 and the final-behaviour record (section 6, item 6) updated.
-- `jan1993_to_dayton` cannot start on main: `data/source/municipalities_1990_initial_political_controllers_jan1993.json` has never existed in git history. Read-only check: it is not reachable by a player (the desktop New Game and IPC accept only `apr_1992`; no scenario picker renders; `SCENARIO_REGISTRY` has no consumer in `src/` besides tests). Registered in the work list (Part 4, J1) and ruled RETIRE by the orchestrator (inert, proves the hash unchanged, owner the first lane that frees up, may land after the freeze and before 1.0); a January 1993 start could return later as an add-on campaign (content with its own painted control), not as engine work.
