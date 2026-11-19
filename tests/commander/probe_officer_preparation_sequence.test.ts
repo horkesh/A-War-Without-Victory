@@ -32,10 +32,13 @@ function authoredOfficers(): NamedOfficer[] {
     // compatible). This sequence test is about preparation length, not eligibility, so the fixture
     // makes both authored officers (home 2nd Corps) compatible with the two corps they command here;
     // their authored competence and aggressiveness, which drive preparation, are unchanged.
+    // PR 2b retypes Hodžić (a Srebrenica unit founder) to tactical_commander, who never commands a
+    // corps operation; for the same reason the fixture keeps both officers corps-rank.
     return file.officers
         .filter((officer) => officer.id === S_DELIC || officer.id === HODZIC)
         .map((officer) => ({
             ...officer,
+            rank: 'corps_commander' as const,
             compatible_corps_ids: [...new Set([...(officer.compatible_corps_ids ?? []), THIRD_CORPS, FOURTH_CORPS])],
         }));
 }

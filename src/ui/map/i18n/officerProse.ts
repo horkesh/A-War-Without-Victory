@@ -49,6 +49,7 @@ export const OFFICER_PROSE_BCS: Readonly<Record<string, string>> = {
     'Forceful, offensive-minded central command': 'Snažno, ofanzivno usmjereno središnje komandovanje',
     'Skilled all-round corps command': 'Vješto sveobuhvatno komandovanje korpusom',
     'Cautious, steady corps defense': 'Oprezna, postojana odbrana korpusa',
+    'Steady corps defense': 'Postojana odbrana korpusa',
     'Methodical, defense-capable command': 'Metodično komandovanje, sposobno za odbranu',
     'Balanced line command': 'Uravnoteženo linijsko komandovanje',
     'Defensive, low-risk corps command': 'Odbrambeno komandovanje korpusom uz nizak rizik',

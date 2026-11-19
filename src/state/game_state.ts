@@ -1837,7 +1837,7 @@ export interface FormationSpawnDirective {
 export interface DisplacementState {
     mun_id: MunicipalityId;
     original_population: number; // immutable baseline from census or existing data
-    displaced_out: number; // cumulative, irreversible (people who left this municipality)
+    displaced_out: number; // cumulative people who left this municipality; reduced only when routed survivors return (RB9 return rule)
     displaced_in: number; // cumulative (people who arrived from other municipalities)
     /** When set, displaced_in is split by recruiting faction (Bosniak→RBiH, Serb→RS, Croat→HRHB) so pool population can add to the correct faction's pool at this mun. */
     displaced_in_by_faction?: Partial<Record<FactionId, number>>;
@@ -1892,6 +1892,12 @@ export interface DisplacementEvent {
     /** People who left BiH in this wave. */
     fled_abroad: number;
     settled: number;
+    /**
+     * RB9 return rule: routed survivors of an earlier expulsion who came home to `origin_osid` this
+     * turn (no expulsion; `displaced`, `killed` and `fled_abroad` are 0, and `refugees_created` is not
+     * touched). Absent on every other event.
+     */
+    returned?: number;
 }
 
 /**
@@ -1907,10 +1913,35 @@ export interface HostileTakeoverTimerState {
     matured_turn?: number;
     /**
      * Cumulative persons displaced from this OSID (initial + all sustained rounds). Set before
-     * maturation only when a capture replaces a fired RF-5B policy timer: it then carries the
-     * people that wave already expelled, and the new initial wave draws on those who remain.
+     * maturation only when a capture replaces a timer whose wave already fired (an RF-5B policy
+     * timer, or a dormant timer, RB9): it then carries the people already expelled, and the new
+     * initial wave draws on those who remain, never on the 1991 census again.
      */
     cumulative_displaced?: number;
+    /**
+     * RB9: set when a timer whose wave already fired would have been deleted (the expelled side
+     * retook the OSID, the sides made peace, a policy holder lost it, or the community ran out).
+     * A dormant timer never fires; it only remembers `cumulative_displaced`, so a later capture of
+     * the same OSID inherits it instead of counting the same people from the census a second time.
+     */
+    dormant_since_turn?: number;
+    /**
+     * RB9 return rule: the survivors of this timer's waves who were routed inside BiH (camp or
+     * another municipality), as opposed to the killed and the fled abroad. Only these people can
+     * come back. Carried with `cumulative_displaced` on inheritance.
+     */
+    cumulative_routed?: number;
+    /**
+     * RB9 return rule: militia the expulsion removed from the group's home pool at this municipality
+     * (the source-pool cut). When survivors return, their share of it goes back to the home pool, so
+     * manpower is not lost twice (engine seat E3). Carried on inheritance.
+     */
+    cumulative_pool_cut?: number;
+    /**
+     * RB9 return rule: the turn since which a dormant record's OSID has been held by the expelled
+     * group's own side or a side not at war with it. Cleared when a hostile side holds it again.
+     */
+    return_hold_since_turn?: number;
     /**
      * RF-5B: why the timer exists when no control change seeded it. 'policy_expulsion' =
      * seeded once by a faction's recorded minority policy ("expel") at the RBiH-HRHB war
