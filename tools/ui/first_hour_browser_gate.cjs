@@ -327,6 +327,20 @@ async function visibleSelectorText(page, selector, label) {
   return text;
 }
 
+// §6 design T: every opening card is answered at birth and applies later, so its card carries the filed-ahead
+// note. The signed §4 copy (s6_tm_copy_narrative.md rows 1-2, EN).
+const FILED_AHEAD_NOTE_LABEL = 'Takes effect when due';
+const FILED_AHEAD_NOTE_BODY = 'Your answer is filed when you give it. It takes effect when this decision comes due. The effects listed with each response apply then, not now. Until then nothing is requested or sent in your name under this answer.';
+
+function assertFiledAheadNote(summary, key, dialog) {
+  const evidence = { label: dialog.includes(FILED_AHEAD_NOTE_LABEL), body: dialog.includes(FILED_AHEAD_NOTE_BODY) };
+  summary.evidence.filedAheadNoteByCard ??= {};
+  summary.evidence.filedAheadNoteByCard[key] = evidence;
+  if (!evidence.label || !evidence.body) {
+    throw new Error(`${key} card did not show the signed filed-ahead note: ${JSON.stringify(evidence)}`);
+  }
+}
+
 async function dialogText(page) {
   return page.evaluate(() => {
     const dialog = document.querySelector('[role="dialog"], [aria-modal="true"]');
@@ -1353,6 +1367,7 @@ async function runFoundationalFlow(page, summary, flow) {
   }
   assertNoDecisionKnowledgeLeaks(`${flow.faction} foundational decision modal`, decisionDialog);
   assertNoFutureKnowledgeLeaks(`${flow.faction} foundational decision modal`, decisionDialog);
+  assertFiledAheadNote(summary, `${flow.faction}:${flow.eventId}`, decisionDialog);
   summary.evidence.decisionKnowledgeLeaksAbsentByFaction ??= {};
   summary.evidence.decisionKnowledgeLeaksAbsentByFaction[flow.faction] = true;
   await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_foundational_decision`);
@@ -1390,6 +1405,8 @@ async function resolveParamilitaryOpeningPolicyWithHistoricalDefault(page, summa
     summary.evidence.paramilitaryOpeningPolicyByFaction[flow.faction] = { presented: false };
     return;
   }
+  // §6 design T2: the card is put to the player before the first Advance but only filed then.
+  assertFiledAheadNote(summary, `${flow.faction}:rbih_paramilitary_policy_1992`, await dialogText(page));
   const chosen = await page.evaluate(() => {
     const buttons = Array.from(document.querySelectorAll('[data-testid="event-decision-response"]'))
       .filter((el) => {

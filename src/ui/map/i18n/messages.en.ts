@@ -6248,6 +6248,11 @@ export const enMessages = {
     'eventDecision.turnPaused.title': 'The turn is paused before combat',
     'eventDecision.turnPaused.body': 'Answer now and your decision takes effect this week, before movement and combat. If you continue without answering, the decision stays on your desk and takes effect only from next week.',
     'eventDecision.turnPaused.continue': 'Continue turn',
+    // §6 design T, signed by the §4 copy panel 2026-11-19 (s6_tm_copy_narrative.md rows 1-2); shown only while an
+    // answer-ahead card is unfired. "Under this answer" scopes the promise: staff sweeps at Assisted and above are
+    // disclosed separately, in the policy card's rule box.
+    'eventDecision.filedAhead.label': 'Takes effect when due',
+    'eventDecision.filedAhead.body': 'Your answer is filed when you give it. It takes effect when this decision comes due. The effects listed with each response apply then, not now. Until then nothing is requested or sent in your name under this answer.',
     'eventDecision.historicalDefault': 'Historical default',
     'eventDecision.historicalDefaultDescription': 'This is the historically attested choice. You are free to choose any option.',
     'eventDecision.staffDefault': 'Default option',
@@ -6303,6 +6308,9 @@ export const enMessages = {
     'eventModal.effect.default': '{faction}campaign effect recorded',
     'firedEvent.wrapper.narrative': 'Presidential response filed in the campaign record.',
     'firedEvent.wrapper.responseRecorded': 'Response recorded: {response}.',
+    // §6 design T, signed by the §4 copy panel 2026-11-19 (s6_tm_copy_narrative.md row 3): the Chronicle line on the
+    // turn a filed player answer applied; never for an automatic or staff answer (historian condition).
+    'firedEvent.wrapper.filedAnswerApplied': 'Your answer filed on {filedDate} took effect on {appliedDate}: {response}.',
     'eventDecision.equipment.tanks': '{count} tanks',
     'eventDecision.equipment.artillery': '{count} artillery',
     'eventDecision.equipment.aaSystems': '{count} AA systems',

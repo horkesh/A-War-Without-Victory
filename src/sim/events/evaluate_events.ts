@@ -887,8 +887,10 @@ export function evaluateEvents(
                 && (state.military.pending_event_decisions ?? []).some((pending) => pending.event_id === def.id);
             if (answeredAhead) {
                 // ANSWER AHEAD OF FIRING (answer_ahead_of_firing.ts): the player answered this
-                // opening decision at campaign birth and it was filed then. Apply it now, where and
-                // as a bot's answer is applied below; the decision is already in the log.
+                // opening decision at campaign birth (or, for the RBiH policy card, before the first
+                // Advance) and it was filed then. Apply it now, where and as a bot's answer is applied
+                // below; the decision is already in the log. It is checked before Observer's automatic
+                // answer, so a filed answer wins at Observer too.
                 applyEventEffects(state, answeredAhead.effects ?? []);
                 applyDefinitionFlags(state, answeredAhead.sets_flags);
                 applyDefinitionDimensionShifts(state, answeredAhead.dimension_shifts);

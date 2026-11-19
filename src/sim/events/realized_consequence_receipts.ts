@@ -1,5 +1,6 @@
 import { CANONICAL_FACTIONS, type FactionId, type GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { decisionAppliedTurn } from './answer_ahead_of_firing.js';
 
 export type ClaimPredicateOperator = 'equals' | 'truthy_equals' | 'at_least' | 'contains';
 export type ClaimPredicateValue = string | number | boolean | null;
@@ -28,6 +29,8 @@ export interface RealizedConsequenceReceipt {
     decision_event_id: string;
     response_id: string;
     decision_turn: number;
+    /** The turn the decision's response applied and wrote its causal edges (see `decisionAppliedTurn`). */
+    applied_turn: number;
     consequence_event_id: string;
     fired_turn: number;
     turns_elapsed: number;
@@ -48,6 +51,7 @@ function receiptPredicate(
     eventId: string,
     responseId: string,
     decisionTurn: number,
+    appliedTurn: number,
     consequenceId: string,
     firedTurn: number,
     playerFaction: FactionId,
@@ -72,11 +76,11 @@ function receiptPredicate(
         {
             owner_path: 'state.military.event_causality_log',
             operator: 'contains',
-            expected_value: `${eventId}::${consequenceId}::${responseId}::${decisionTurn}::enables`,
-            observed_value: `${eventId}::${consequenceId}::${responseId}::${decisionTurn}::enables`,
+            expected_value: `${eventId}::${consequenceId}::${responseId}::${appliedTurn}::enables`,
+            observed_value: `${eventId}::${consequenceId}::${responseId}::${appliedTurn}::enables`,
             expression:
                 `event_causality_log(kind=enables,from_event=${eventId},to_event=${consequenceId},` +
-                `source_response_id=${responseId},turn=${decisionTurn})`,
+                `source_response_id=${responseId},turn=${appliedTurn})`,
         },
         {
             owner_path: 'state.military.fired_event_ids',
@@ -88,9 +92,9 @@ function receiptPredicate(
         {
             owner_path: `state.military.event_last_fired_turn.${consequenceId}`,
             operator: 'at_least',
-            expected_value: decisionTurn,
+            expected_value: appliedTurn,
             observed_value: firedTurn,
-            expression: `event_last_fired_turn[${consequenceId}]=${firedTurn}>=${decisionTurn}`,
+            expression: `event_last_fired_turn[${consequenceId}]=${firedTurn}>=${appliedTurn}`,
         },
     ];
     const ownerPaths = operands.map((operand) => operand.owner_path);
@@ -125,17 +129,23 @@ export function buildRealizedConsequenceReceipts(
         if (decision.decision_source !== 'player') continue;
         if (decision.faction !== playerFaction) continue;
         if (!Number.isInteger(decision.turn)) continue;
+        // An answer filed ahead of its card firing is logged on the turn it was filed, but its
+        // response's edges are written on the turn the card fired and the answer applied
+        // (answer_ahead_of_firing.ts). Match the edges on that applied turn (§6 design T, ui-ux F1);
+        // the receipt keeps the filed turn in its id and source record.
+        const appliedTurn = decisionAppliedTurn(state, decision);
+        if (appliedTurn === null) continue;
 
         for (const edge of edges) {
             if (edge.kind !== 'enables' || edge.to_event === null) continue;
-            if (edge.turn !== decision.turn) continue;
+            if (edge.turn !== appliedTurn) continue;
             if (edge.from_event !== decision.event_id) continue;
             if (edge.source_response_id !== decision.response_id) continue;
 
             const consequenceId = edge.to_event;
             const firedTurn = firedTurns[consequenceId];
             if (!firedIds.has(consequenceId)) continue;
-            if (typeof firedTurn !== 'number' || firedTurn < decision.turn) continue;
+            if (typeof firedTurn !== 'number' || firedTurn < appliedTurn) continue;
 
             const id = receiptId(decision.event_id, decision.response_id, decision.turn, consequenceId);
             if (emitted.has(id)) continue;
@@ -146,6 +156,7 @@ export function buildRealizedConsequenceReceipts(
                 decision_event_id: decision.event_id,
                 response_id: decision.response_id,
                 decision_turn: decision.turn,
+                applied_turn: appliedTurn,
                 consequence_event_id: consequenceId,
                 fired_turn: firedTurn,
                 turns_elapsed: firedTurn - decision.turn,
@@ -153,6 +164,7 @@ export function buildRealizedConsequenceReceipts(
                     decision.event_id,
                     decision.response_id,
                     decision.turn,
+                    appliedTurn,
                     consequenceId,
                     firedTurn,
                     playerFaction,

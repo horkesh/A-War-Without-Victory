@@ -3551,6 +3551,13 @@ app.whenReady().then(() => {
         ? state.pending_paramilitary_requests
         : [];
       const playerFaction = state.meta?.player_faction ?? null;
+      // §6 design T3 (engine D5): while the manual gate holds (the player's policy card has not applied an
+      // answer), nothing may be approved, not even a request an older build left in the save; the next
+      // detect deletes such requests. The state is a deserialized copy, written only on success.
+      const approves = policy === 'always_allow' || [...decisionByTarget.values()].includes('allow');
+      if (approves && sim.isPlayerParamilitaryRequestGateHolding(state)) {
+        return { ok: false, error: 'paramilitary_policy_not_applied' };
+      }
       if (policy) state.paramilitary_policy = policy;
       let matched = 0;
 

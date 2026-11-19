@@ -469,6 +469,34 @@ function buildConsequenceReceiptEntries(
     return entries;
 }
 
+/** §6 design T (ui-ux F3; §4 copy row 3): a player answer filed ahead of its card firing applies on a later
+ *  turn. The ledger row stays dated at the filing; this line dates the effect on the turn it applied. Only a
+ *  PLAYER answer carries `filedAnswerAppliedTurn` (GameStateAdapter `deriveFiredEvents`), so an automatic or
+ *  staff answer never reads as "Your answer" (historian condition). */
+function buildFiledAnswerAppliedEntries(state: any): ChronicleEntry[] {
+    const entries: ChronicleEntry[] = [];
+    for (const event of Array.isArray(state?.firedEvents) ? state.firedEvents : []) {
+        if (event?.isDecision !== true || typeof event.filedAnswerAppliedTurn !== 'number') continue;
+        entries.push({
+            id: `filed-answer-applied:${event.id}`,
+            turn: event.filedAnswerAppliedTurn,
+            type: 'political',
+            headline: false,
+            title: event.title,
+            detail: t('firedEvent.wrapper.filedAnswerApplied', {
+                filedDate: turnToDateString(event.turn),
+                appliedDate: turnToDateString(event.filedAnswerAppliedTurn),
+                response: event.responseLabel ?? '',
+            }),
+            metadata: {
+                decisionRecordId: `event:${event.id}`,
+                decisionRecordSurface: 'chronicle',
+            },
+        });
+    }
+    return entries;
+}
+
 type RawDecisionLogEntry = {
     event_id?: unknown;
     decision_source?: unknown;
@@ -713,6 +741,7 @@ export function generateChronicleEntries(
     entries.push(...buildEndgameComparisonEntries(state));
     entries.push(...buildOperationHistoryEntries(state, playerFaction));
     entries.push(...buildDecisionLedgerEntries(state));
+    entries.push(...buildFiledAnswerAppliedEntries(state));
     entries.push(...buildConsequenceReceiptEntries(state, eventCatalog));
 
     // War-weariness feel surface (Collapse Repurpose Design A) — somber beats
