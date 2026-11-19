@@ -131,10 +131,19 @@ function validateCandidates(detail, label, errors) {
         ranked.forEach((candidate, index) => {
             if (candidate.sorted_rank !== index) errors.push(`${label}: candidate rank/comparator mismatch`);
         });
+        // F1b: the fallback walks the ranked survivors. The selected brigade is the walk's
+        // 'selected' entry, or the rank-zero survivor when the walk selected none.
+        const walkSelected = Array.isArray(detail.walk)
+            ? detail.walk.filter((entry) => isObject(entry) && entry.outcome === 'selected')
+            : [];
+        if (walkSelected.length > 1) errors.push(`${label}: walk selects more than one brigade`);
+        const expectedSelected = ranked[walkSelected.length === 1 ? walkSelected[0].sorted_rank : 0];
         if (ranked.length === 0) {
             if (selected.length !== 0 || detail.selected_brigade_id !== null) errors.push(`${label}: selected brigade without eligible survivor`);
-        } else if (selected.length !== 1 || selected[0] !== ranked[0] || detail.selected_brigade_id !== ranked[0].brigade_id) {
-            errors.push(`${label}: selected brigade must be the rank-zero survivor`);
+        } else if (!expectedSelected
+            || (walkSelected.length === 1 && walkSelected[0].brigade_id !== expectedSelected.brigade_id)
+            || selected.length !== 1 || selected[0] !== expectedSelected || detail.selected_brigade_id !== expectedSelected.brigade_id) {
+            errors.push(`${label}: selected brigade must be the walk's selected survivor (rank zero without one)`);
         }
     }
     return { eligible, selected };

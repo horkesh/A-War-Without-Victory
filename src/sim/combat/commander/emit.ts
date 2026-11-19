@@ -46,6 +46,7 @@ import type {
 import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../../state/formation_constants.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { spatialFriendlyDistance, spatialSameComponent } from '../../spatial_context.js';
+import { buildContactOsidsByFaction, standsOnContactCell, type ContactOsidsByFaction } from '../contact_cells.js';
 import { buildCommanderOperation, buildProbeOperation, derivePrimarySectorForBrigades, getMaxOperationSlots, getOperationSlotUsageForOperations } from '../corps_operation_helpers.js';
 import { isBrigadeEligibleForOperationObjectives } from '../enclave_resilience.js';
 import { pickOperationName } from '../operation_names.js';
@@ -2087,6 +2088,21 @@ interface CommanderCreationProbeTargetSelectionDetail {
     ranked_objective_ids: string[];
     targets: CommanderCreationProbeTargetDetail[];
     brigade_candidates: CommanderCreationProbeBrigadeCandidateDetail[];
+    /** F1b: every ranked survivor the generic fallback walked, in walk order. Absent for local occupation. */
+    walk?: CommanderCreationProbeWalkEntry[];
+}
+
+interface CommanderCreationProbeWalkEntry {
+    sorted_rank: number;
+    brigade_id: FormationId;
+    location_osid: string | null;
+    derived_sector_id: string | null;
+    outcome:
+        | 'selected'
+        | 'unreachable'
+        | 'skipped_contact_cell'
+        | 'skipped_duplicate_sector_location'
+        | CommanderCreationProbeTargetSelectionStatus;
 }
 
 type ReachedBoolean = boolean | 'NOT_REACHED';
@@ -2935,9 +2951,12 @@ function buildOperationsImpl(
                 selected: ev === localOccupationCandidate.brigade,
             }));
         }
-        const probeBrigade = botOrdersPerfTime(
+        // Receipt only: the candidate detail of each ranked survivor (identity, not id: the
+        // surplus pool can list a brigade id twice).
+        const survivorDetails = new Map<BrigadeEvaluation, CommanderCreationProbeBrigadeCandidateDetail>();
+        const probeSurvivors: BrigadeEvaluation[] = botOrdersPerfTime(
             `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.selectBrigade`,
-            () => localOccupationCandidate?.brigade ?? (() => {
+            (): BrigadeEvaluation[] => localOccupationCandidate ? [localOccupationCandidate.brigade] : (() => {
                 const queuedHistoricalParticipants = briefing.state_ref
                     ? getHeadQueuedPrePlannedBrigadeIds(briefing.state_ref)
                     : new Set<FormationId>();
@@ -2951,7 +2970,7 @@ function buildOperationsImpl(
                             const fitDiff = b.fitness_offense - a.fitness_offense;
                             if (fitDiff !== 0) return fitDiff;
                             return strictCompare(a.brigade_id, b.brigade_id);
-                        })[0];
+                        });
                 }
                 const candidates = allocation.surplus_pool.map((ev, original_ordinal) => ({
                     ev,
@@ -2999,327 +3018,419 @@ function buildOperationsImpl(
                         if (fitDiff !== 0) return fitDiff;
                         return strictCompare(a.ev.brigade_id, b.ev.brigade_id);
                     });
-                survivors.forEach((candidate, sortedRank) => { candidate.detail.sorted_rank = sortedRank; });
-                if (survivors[0]) survivors[0].detail.selected = true;
+                survivors.forEach((candidate, sortedRank) => {
+                    candidate.detail.sorted_rank = sortedRank;
+                    survivorDetails.set(candidate.ev, candidate.detail);
+                });
                 targetSelectionDetail.brigade_candidates = candidates.map((candidate) => candidate.detail);
-                return survivors[0]?.ev;
+                return survivors.map((candidate) => candidate.ev);
             })(),
         );
-        if (obs) obs.probe_brigade_selected = probeBrigade != null;
-        if (targetSelectionDetail && !probeBrigade) targetSelectionDetail.status = 'no_brigade';
 
-        if (probeBrigade) {
-            if (targetSelectionDetail) {
-                targetSelectionDetail.selected_brigade_id = probeBrigade.brigade_id;
-                targetSelectionDetail.selected_brigade_location = briefing.brigades.find(
-                    (brigade) => brigade.id === probeBrigade.brigade_id,
-                )?.location_osid ?? null;
-            }
-            const probeSectorId = localOccupationCandidate?.sector_id
-                ?? derivePrimarySectorForBrigades(
-                    briefing.sectors.filter((sector) => sector.corps_id === briefing.corps_id),
-                    briefing.corps_id,
-                    [probeBrigade.brigade_id],
-                    Object.fromEntries(briefing.brigades.map((brigade) => [brigade.id, brigade])),
-                );
-            if (targetSelectionDetail) targetSelectionDetail.derived_sector_id = probeSectorId ?? null;
-
-            // Derive probe objective: first enemy-adjacent OSID in the probe sector.
-            // Without objectives the probe op has no axis targets and would be ZEA.
-            const probeObjectives: string[] = botOrdersPerfTime(
-                `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives`,
-                () => {
-                    if (localOccupationCandidate) {
-                        if (targetSelectionDetail) {
-                            targetSelectionDetail.status = 'local_occupation_bypass';
-                            targetSelectionDetail.survivor_ids = [localOccupationCandidate.target_osid];
-                            targetSelectionDetail.ranked_objective_ids = [localOccupationCandidate.target_osid];
-                        }
-                        return [localOccupationCandidate.target_osid];
+        // Derive probe objective: first enemy-adjacent OSID in the probe sector.
+        // Without objectives the probe op has no axis targets and would be ZEA.
+        const deriveProbeObjectives = (probeBrigade: BrigadeEvaluation, probeSectorId: string | undefined): string[] => botOrdersPerfTime(
+            `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives`,
+            () => {
+                if (localOccupationCandidate) {
+                    if (targetSelectionDetail) {
+                        targetSelectionDetail.status = 'local_occupation_bypass';
+                        targetSelectionDetail.survivor_ids = [localOccupationCandidate.target_osid];
+                        targetSelectionDetail.ranked_objective_ids = [localOccupationCandidate.target_osid];
                     }
-                    let probeObjectives: string[] = [];
-                    if (probeSectorId) {
-                        const sector = briefing.sectors.find(s => s.sector_id === probeSectorId);
-                        if (sector) {
-                            const adjacency = briefing.spatial.adjacency;
-                            const friendlySet = briefing.spatial.friendlyOsidsByFaction?.get(briefing.faction);
-                            const probeBrigLoc = briefing.brigades.find(b => b.id === probeBrigade.brigade_id)?.location_osid;
-                            const terrainCache = botOrdersPerfTime(
-                                `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.terrainCache`,
-                                () => briefing.reverse_map ? buildTerrainCache(briefing.reverse_map, briefing.terrain_data) : null,
-                            );
-                            const slopeByOsid = briefing.reverse_map ? buildSlopeByOsid(briefing.reverse_map, briefing.terrain_data) : undefined;
-                            if (adjacency && friendlySet && probeBrigLoc) {
-                                const enemyTargets = botOrdersPerfTime(
-                                    `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.enemyTargets`,
-                                    () => {
-                                        const enemyTargets = new Set<string>();
-                                        for (const sub of sector.sub_segments ?? []) {
-                                            for (const fOsid of sub.friendly_osids ?? []) {
-                                                for (const neighbor of adjacency.get(fOsid) ?? []) {
-                                                    if (!friendlySet.has(neighbor)) {
-                                                        enemyTargets.add(neighbor);
-                                                    }
+                    return [localOccupationCandidate.target_osid];
+                }
+                let probeObjectives: string[] = [];
+                if (probeSectorId) {
+                    const sector = briefing.sectors.find(s => s.sector_id === probeSectorId);
+                    if (sector) {
+                        const adjacency = briefing.spatial.adjacency;
+                        const friendlySet = briefing.spatial.friendlyOsidsByFaction?.get(briefing.faction);
+                        const probeBrigLoc = briefing.brigades.find(b => b.id === probeBrigade.brigade_id)?.location_osid;
+                        const terrainCache = botOrdersPerfTime(
+                            `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.terrainCache`,
+                            () => briefing.reverse_map ? buildTerrainCache(briefing.reverse_map, briefing.terrain_data) : null,
+                        );
+                        const slopeByOsid = briefing.reverse_map ? buildSlopeByOsid(briefing.reverse_map, briefing.terrain_data) : undefined;
+                        if (adjacency && friendlySet && probeBrigLoc) {
+                            const enemyTargets = botOrdersPerfTime(
+                                `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.enemyTargets`,
+                                () => {
+                                    const enemyTargets = new Set<string>();
+                                    for (const sub of sector.sub_segments ?? []) {
+                                        for (const fOsid of sub.friendly_osids ?? []) {
+                                            for (const neighbor of adjacency.get(fOsid) ?? []) {
+                                                if (!friendlySet.has(neighbor)) {
+                                                    enemyTargets.add(neighbor);
                                                 }
                                             }
                                         }
-                                        return enemyTargets;
-                                    },
-                                );
-                                const targetDetailByOsid = targetSelectionDetail
-                                    ? new Map<string, CommanderCreationProbeTargetDetail>()
-                                    : null;
-                                if (targetSelectionDetail && targetDetailByOsid) {
-                                    targetSelectionDetail.enemy_candidate_ids = [...enemyTargets].sort(strictCompare);
-                                    for (const target of targetSelectionDetail.enemy_candidate_ids) {
-                                        const targetNeighbors = (adjacency.get(target) ?? []) as readonly string[];
-                                        const direct = targetNeighbors.includes(probeBrigLoc);
-                                        targetDetailByOsid.set(target, {
-                                            target_id: target,
-                                            cooldown_raw_present: null,
-                                            cooldown_raw_value: null,
-                                            cooldown_effective_value: null,
-                                            controller: null,
-                                            politically_blocked: null,
-                                            prediction_present: null,
-                                            prediction_outcome: null,
-                                            prediction_threshold: 'stalemate',
-                                            predicted_viable: null,
-                                            direct,
-                                            reachable: null,
-                                            approach_distance: null,
-                                            cooldown_filter_reached: false,
-                                            cooldown_filter_passed: null,
-                                            politics_filter_reached: false,
-                                            politics_filter_passed: null,
-                                            direct_filter_reached: true,
-                                            direct_filter_passed: direct,
-                                            reachable_filter_reached: false,
-                                            reachable_filter_passed: null,
-                                            prediction_filter_reached: false,
-                                            prediction_filter_passed: null,
-                                            passed: false,
-                                            first_rejecting_filter: direct ? null : 'direct',
-                                        });
                                     }
+                                    return enemyTargets;
+                                },
+                            );
+                            const targetDetailByOsid = targetSelectionDetail
+                                ? new Map<string, CommanderCreationProbeTargetDetail>()
+                                : null;
+                            if (targetSelectionDetail && targetDetailByOsid) {
+                                targetSelectionDetail.enemy_candidate_ids = [...enemyTargets].sort(strictCompare);
+                                for (const target of targetSelectionDetail.enemy_candidate_ids) {
+                                    const targetNeighbors = (adjacency.get(target) ?? []) as readonly string[];
+                                    const direct = targetNeighbors.includes(probeBrigLoc);
+                                    targetDetailByOsid.set(target, {
+                                        target_id: target,
+                                        cooldown_raw_present: null,
+                                        cooldown_raw_value: null,
+                                        cooldown_effective_value: null,
+                                        controller: null,
+                                        politically_blocked: null,
+                                        prediction_present: null,
+                                        prediction_outcome: null,
+                                        prediction_threshold: 'stalemate',
+                                        predicted_viable: null,
+                                        direct,
+                                        reachable: null,
+                                        approach_distance: null,
+                                        cooldown_filter_reached: false,
+                                        cooldown_filter_passed: null,
+                                        politics_filter_reached: false,
+                                        politics_filter_passed: null,
+                                        direct_filter_reached: true,
+                                        direct_filter_passed: direct,
+                                        reachable_filter_reached: false,
+                                        reachable_filter_passed: null,
+                                        prediction_filter_reached: false,
+                                        prediction_filter_passed: null,
+                                        passed: false,
+                                        first_rejecting_filter: direct ? null : 'direct',
+                                    });
                                 }
-                                const directEnemyTargets = botOrdersPerfTime(
-                                    `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.directEnemyTargets`,
-                                    () => {
-                                        const directEnemyTargets = new Set<string>();
-                                        for (const target of [...enemyTargets].sort(strictCompare)) {
-                                            const targetNeighbors = (adjacency.get(target) ?? []) as readonly string[];
-                                            if (targetNeighbors.includes(probeBrigLoc)) {
-                                                directEnemyTargets.add(target);
+                            }
+                            const directEnemyTargets = botOrdersPerfTime(
+                                `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.directEnemyTargets`,
+                                () => {
+                                    const directEnemyTargets = new Set<string>();
+                                    for (const target of [...enemyTargets].sort(strictCompare)) {
+                                        const targetNeighbors = (adjacency.get(target) ?? []) as readonly string[];
+                                        if (targetNeighbors.includes(probeBrigLoc)) {
+                                            directEnemyTargets.add(target);
+                                        }
+                                    }
+                                    return directEnemyTargets;
+                                },
+                            );
+                            if (targetSelectionDetail) {
+                                targetSelectionDetail.direct_candidate_ids = [...directEnemyTargets].sort(strictCompare);
+                            }
+                            const predictedTargets = botOrdersPerfTime(
+                                `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.predictDirectTargets`,
+                                () => predictDirectEnemyTargets(
+                                    briefing,
+                                    probeBrigade.brigade_id,
+                                    directEnemyTargets,
+                                    adjacency as Map<any, any>,
+                                    terrainCache,
+                                    briefing.osid_population_map,
+                                    slopeByOsid,
+                                ),
+                            );
+                            const predictedTargetByOsid = botOrdersPerfTime(
+                                `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.predictedTargetMap`,
+                                () => new Map(
+                                    predictedTargets.map((candidate) => [candidate.osid, candidate]),
+                                ),
+                            );
+                            const rankedTargets = botOrdersPerfTime(
+                                `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.rankTargets`,
+                                () => {
+                                    const mappedTargets = [...directEnemyTargets]
+                                    .map((target) => {
+                                        const cooldown = briefing.failed_offensive_objectives?.[target];
+                                        const targetController = briefing.reverse_map && briefing.state_ref
+                                            ? getPoliticalControllerOSID(briefing.state_ref, target, briefing.reverse_map)
+                                            : null;
+                                        const targetNeighbors = (adjacency.get(target) ?? []) as readonly string[];
+                                        const direct = true;
+                                        const directPrediction = predictedTargetByOsid.get(target);
+                                        let bestApproachDistance = direct ? 0 : Number.POSITIVE_INFINITY;
+                                        for (const approachOsid of targetNeighbors.filter(n => friendlySet.has(n)).sort(strictCompare)) {
+                                            const dist = spatialFriendlyDistance(
+                                                briefing.spatial,
+                                                briefing.faction,
+                                                probeBrigLoc,
+                                                approachOsid,
+                                                MAX_REACHABILITY_HOPS,
+                                            );
+                                            if (dist >= 0 && dist < bestApproachDistance) {
+                                                bestApproachDistance = dist;
                                             }
                                         }
-                                        return directEnemyTargets;
-                                    },
-                                );
-                                if (targetSelectionDetail) {
-                                    targetSelectionDetail.direct_candidate_ids = [...directEnemyTargets].sort(strictCompare);
-                                }
-                                const predictedTargets = botOrdersPerfTime(
-                                    `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.predictDirectTargets`,
-                                    () => predictDirectEnemyTargets(
-                                        briefing,
-                                        probeBrigade.brigade_id,
-                                        directEnemyTargets,
-                                        adjacency as Map<any, any>,
-                                        terrainCache,
-                                        briefing.osid_population_map,
-                                        slopeByOsid,
-                                    ),
-                                );
-                                const predictedTargetByOsid = botOrdersPerfTime(
-                                    `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.predictedTargetMap`,
-                                    () => new Map(
-                                        predictedTargets.map((candidate) => [candidate.osid, candidate]),
-                                    ),
-                                );
-                                const rankedTargets = botOrdersPerfTime(
-                                    `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.rankTargets`,
-                                    () => {
-                                        const mappedTargets = [...directEnemyTargets]
-                                        .map((target) => {
-                                            const cooldown = briefing.failed_offensive_objectives?.[target];
-                                            const targetController = briefing.reverse_map && briefing.state_ref
-                                                ? getPoliticalControllerOSID(briefing.state_ref, target, briefing.reverse_map)
-                                                : null;
-                                            const targetNeighbors = (adjacency.get(target) ?? []) as readonly string[];
-                                            const direct = true;
-                                            const directPrediction = predictedTargetByOsid.get(target);
-                                            let bestApproachDistance = direct ? 0 : Number.POSITIVE_INFINITY;
-                                            for (const approachOsid of targetNeighbors.filter(n => friendlySet.has(n)).sort(strictCompare)) {
-                                                const dist = spatialFriendlyDistance(
-                                                    briefing.spatial,
-                                                    briefing.faction,
-                                                    probeBrigLoc,
-                                                    approachOsid,
-                                                    MAX_REACHABILITY_HOPS,
-                                                );
-                                                if (dist >= 0 && dist < bestApproachDistance) {
-                                                    bestApproachDistance = dist;
+                                        const candidate = {
+                                            target,
+                                            onCooldown: (cooldown?.cooldown_until_turn ?? 0) > briefing.turn,
+                                            direct,
+                                            politicallyBlocked: briefing.state_ref != null
+                                                && targetController != null
+                                                && (
+                                                    isRbihHrhbCombatBlocked(
+                                                        briefing.state_ref,
+                                                        briefing.faction,
+                                                        targetController,
+                                                    )
+                                                    || shouldGrazBlockAttack(
+                                                        briefing.state_ref,
+                                                        briefing.corps_id,
+                                                        briefing.faction,
+                                                        target,
+                                                        targetController,
+                                                    )
+                                                ),
+                                            predictedViable: directPrediction == null
+                                                ? true
+                                                : isOutcomeSufficientForAttack(
+                                                    directPrediction.prediction.predicted_outcome,
+                                                    'stalemate',
+                                                ),
+                                            reachable: Number.isFinite(bestApproachDistance),
+                                            approachDistance: bestApproachDistance,
+                                        };
+                                        if (targetDetailByOsid) {
+                                            const cooldownRawPresent = cooldown != null
+                                                && Object.prototype.hasOwnProperty.call(cooldown, 'cooldown_until_turn');
+                                            const detail = targetDetailByOsid.get(target)!;
+                                            Object.assign(detail, {
+                                                cooldown_raw_present: cooldownRawPresent,
+                                                cooldown_raw_value: cooldownRawPresent
+                                                    ? cooldown?.cooldown_until_turn ?? null
+                                                    : null,
+                                                cooldown_effective_value: cooldown?.cooldown_until_turn ?? 0,
+                                                controller: targetController,
+                                                politically_blocked: candidate.politicallyBlocked,
+                                                prediction_present: directPrediction != null,
+                                                prediction_outcome: directPrediction?.prediction.predicted_outcome ?? null,
+                                                predicted_viable: candidate.predictedViable,
+                                                reachable: candidate.reachable,
+                                                approach_distance: candidate.approachDistance,
+                                            });
+                                        }
+                                        return candidate;
+                                    });
+                                    const filteredTargets = targetDetailByOsid
+                                        ? mappedTargets
+                                            .filter((candidate) => {
+                                                const detail = targetDetailByOsid.get(candidate.target)!;
+                                                detail.cooldown_filter_reached = true;
+                                                detail.cooldown_filter_passed = !candidate.onCooldown;
+                                                if (candidate.onCooldown) detail.first_rejecting_filter = 'cooldown';
+                                                return !candidate.onCooldown;
+                                            })
+                                            .filter((candidate) => {
+                                                const detail = targetDetailByOsid.get(candidate.target)!;
+                                                detail.politics_filter_reached = true;
+                                                detail.politics_filter_passed = !candidate.politicallyBlocked;
+                                                if (candidate.politicallyBlocked) detail.first_rejecting_filter = 'politics';
+                                                return !candidate.politicallyBlocked;
+                                            })
+                                            .filter((candidate) => {
+                                                const detail = targetDetailByOsid.get(candidate.target)!;
+                                                if (!candidate.direct) {
+                                                    detail.first_rejecting_filter = 'direct';
+                                                    return false;
                                                 }
-                                            }
-                                            const candidate = {
-                                                target,
-                                                onCooldown: (cooldown?.cooldown_until_turn ?? 0) > briefing.turn,
-                                                direct,
-                                                politicallyBlocked: briefing.state_ref != null
-                                                    && targetController != null
-                                                    && (
-                                                        isRbihHrhbCombatBlocked(
-                                                            briefing.state_ref,
-                                                            briefing.faction,
-                                                            targetController,
-                                                        )
-                                                        || shouldGrazBlockAttack(
-                                                            briefing.state_ref,
-                                                            briefing.corps_id,
-                                                            briefing.faction,
-                                                            target,
-                                                            targetController,
-                                                        )
-                                                    ),
-                                                predictedViable: directPrediction == null
-                                                    ? true
-                                                    : isOutcomeSufficientForAttack(
-                                                        directPrediction.prediction.predicted_outcome,
-                                                        'stalemate',
-                                                    ),
-                                                reachable: Number.isFinite(bestApproachDistance),
-                                                approachDistance: bestApproachDistance,
-                                            };
-                                            if (targetDetailByOsid) {
-                                                const cooldownRawPresent = cooldown != null
-                                                    && Object.prototype.hasOwnProperty.call(cooldown, 'cooldown_until_turn');
-                                                const detail = targetDetailByOsid.get(target)!;
-                                                Object.assign(detail, {
-                                                    cooldown_raw_present: cooldownRawPresent,
-                                                    cooldown_raw_value: cooldownRawPresent
-                                                        ? cooldown?.cooldown_until_turn ?? null
-                                                        : null,
-                                                    cooldown_effective_value: cooldown?.cooldown_until_turn ?? 0,
-                                                    controller: targetController,
-                                                    politically_blocked: candidate.politicallyBlocked,
-                                                    prediction_present: directPrediction != null,
-                                                    prediction_outcome: directPrediction?.prediction.predicted_outcome ?? null,
-                                                    predicted_viable: candidate.predictedViable,
-                                                    reachable: candidate.reachable,
-                                                    approach_distance: candidate.approachDistance,
-                                                });
-                                            }
-                                            return candidate;
-                                        });
-                                        const filteredTargets = targetDetailByOsid
-                                            ? mappedTargets
-                                                .filter((candidate) => {
-                                                    const detail = targetDetailByOsid.get(candidate.target)!;
-                                                    detail.cooldown_filter_reached = true;
-                                                    detail.cooldown_filter_passed = !candidate.onCooldown;
-                                                    if (candidate.onCooldown) detail.first_rejecting_filter = 'cooldown';
-                                                    return !candidate.onCooldown;
-                                                })
-                                                .filter((candidate) => {
-                                                    const detail = targetDetailByOsid.get(candidate.target)!;
-                                                    detail.politics_filter_reached = true;
-                                                    detail.politics_filter_passed = !candidate.politicallyBlocked;
-                                                    if (candidate.politicallyBlocked) detail.first_rejecting_filter = 'politics';
-                                                    return !candidate.politicallyBlocked;
-                                                })
-                                                .filter((candidate) => {
-                                                    const detail = targetDetailByOsid.get(candidate.target)!;
-                                                    if (!candidate.direct) {
-                                                        detail.first_rejecting_filter = 'direct';
-                                                        return false;
-                                                    }
-                                                    detail.reachable_filter_reached = true;
-                                                    detail.reachable_filter_passed = candidate.reachable;
-                                                    if (!candidate.reachable) {
-                                                        detail.first_rejecting_filter = 'reachable';
-                                                        return false;
-                                                    }
-                                                    detail.prediction_filter_reached = true;
-                                                    detail.prediction_filter_passed = candidate.predictedViable;
-                                                    if (!candidate.predictedViable) {
-                                                        detail.first_rejecting_filter = 'predicted_viable';
-                                                        return false;
-                                                    }
-                                                    detail.passed = true;
-                                                    return true;
-                                                })
-                                            : mappedTargets
-                                                .filter((candidate) => !candidate.onCooldown)
-                                                .filter((candidate) => !candidate.politicallyBlocked)
-                                        // Probe ops are one-brigade recon-by-force, not small marches.
-                                        // Only launch when the chosen brigade is already on a valid
-                                        // approach node for the target this turn and the brigade can
-                                        // already clear the probe threshold on that exact target.
-                                                .filter((candidate) => candidate.direct && candidate.reachable && candidate.predictedViable);
-                                        const ranked = filteredTargets.sort((a, b) =>
-                                            Number(b.direct) - Number(a.direct)
-                                            || a.approachDistance - b.approachDistance
-                                            || strictCompare(a.target, b.target)
-                                        );
-                                        if (targetSelectionDetail && targetDetailByOsid) {
-                                            targetSelectionDetail.targets = [...targetDetailByOsid.values()];
-                                            targetSelectionDetail.survivor_ids = ranked.map((candidate) => candidate.target);
-                                        }
-                                        return ranked;
-                                    },
-                                );
-                                probeObjectives = botOrdersPerfTime(
-                                    `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.pickObjective`,
-                                    () => rankedTargets.slice(0, 1).map((candidate) => candidate.target),
-                                );
-                                if (targetSelectionDetail) {
-                                    targetSelectionDetail.ranked_objective_ids = [...probeObjectives];
-                                    targetSelectionDetail.status = enemyTargets.size === 0
-                                        ? 'empty_enemy_set'
-                                        : directEnemyTargets.size === 0
-                                            ? 'empty_direct_set'
-                                            : rankedTargets.length === 0
-                                                ? 'all_filtered'
-                                                : 'generic_search';
-                                }
-                            } else if (targetSelectionDetail) {
-                                targetSelectionDetail.status = 'missing_adjacency_or_friendly_set_or_location';
+                                                detail.reachable_filter_reached = true;
+                                                detail.reachable_filter_passed = candidate.reachable;
+                                                if (!candidate.reachable) {
+                                                    detail.first_rejecting_filter = 'reachable';
+                                                    return false;
+                                                }
+                                                detail.prediction_filter_reached = true;
+                                                detail.prediction_filter_passed = candidate.predictedViable;
+                                                if (!candidate.predictedViable) {
+                                                    detail.first_rejecting_filter = 'predicted_viable';
+                                                    return false;
+                                                }
+                                                detail.passed = true;
+                                                return true;
+                                            })
+                                        : mappedTargets
+                                            .filter((candidate) => !candidate.onCooldown)
+                                            .filter((candidate) => !candidate.politicallyBlocked)
+                                    // Probe ops are one-brigade recon-by-force, not small marches.
+                                    // Only launch when the chosen brigade is already on a valid
+                                    // approach node for the target this turn and the brigade can
+                                    // already clear the probe threshold on that exact target.
+                                            .filter((candidate) => candidate.direct && candidate.reachable && candidate.predictedViable);
+                                    const ranked = filteredTargets.sort((a, b) =>
+                                        Number(b.direct) - Number(a.direct)
+                                        || a.approachDistance - b.approachDistance
+                                        || strictCompare(a.target, b.target)
+                                    );
+                                    if (targetSelectionDetail && targetDetailByOsid) {
+                                        targetSelectionDetail.targets = [...targetDetailByOsid.values()];
+                                        targetSelectionDetail.survivor_ids = ranked.map((candidate) => candidate.target);
+                                    }
+                                    return ranked;
+                                },
+                            );
+                            probeObjectives = botOrdersPerfTime(
+                                `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.pickObjective`,
+                                () => rankedTargets.slice(0, 1).map((candidate) => candidate.target),
+                            );
+                            if (targetSelectionDetail) {
+                                targetSelectionDetail.ranked_objective_ids = [...probeObjectives];
+                                targetSelectionDetail.status = enemyTargets.size === 0
+                                    ? 'empty_enemy_set'
+                                    : directEnemyTargets.size === 0
+                                        ? 'empty_direct_set'
+                                        : rankedTargets.length === 0
+                                            ? 'all_filtered'
+                                            : 'generic_search';
                             }
                         } else if (targetSelectionDetail) {
-                            targetSelectionDetail.status = 'no_sector';
+                            targetSelectionDetail.status = 'missing_adjacency_or_friendly_set_or_location';
                         }
                     } else if (targetSelectionDetail) {
                         targetSelectionDetail.status = 'no_sector';
                     }
-                    return probeObjectives;
-                },
-            );
+                } else if (targetSelectionDetail) {
+                    targetSelectionDetail.status = 'no_sector';
+                }
+                return probeObjectives;
+            },
+        );
 
+        // Reachability check for a derived objective (post-selection, unchanged).
+        const isProbeReachable = (probeBrigade: BrigadeEvaluation, probeObjectives: readonly string[]): boolean => botOrdersPerfTime(
+            `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.reachability`,
+            () => {
+                // Reachability check: probe brigade must BFS-reach the target within MAX_REACHABILITY_HOPS.
+                const probeTarget = probeObjectives[0]!;
+                const probeAdj = briefing.spatial.sharedBoundaryAdjacency ?? briefing.spatial.adjacency;
+                const probeFriendly = briefing.spatial.friendlyOsidsByFaction?.get(briefing.faction);
+                const probeBrigLoc = briefing.brigades.find(b => b.id === probeBrigade.brigade_id)?.location_osid;
+                if (probeAdj && probeFriendly && probeBrigLoc) {
+                    const targetNeighbors = (probeAdj.get(probeTarget) ?? []) as readonly string[];
+                    const approachOsids = targetNeighbors.filter(n => probeFriendly.has(n)).sort(strictCompare);
+                    for (const approachOsid of approachOsids) {
+                        const dist = spatialFriendlyDistance(briefing.spatial, briefing.faction, probeBrigLoc, approachOsid, MAX_REACHABILITY_HOPS);
+                        if (dist >= 0) return true;
+                    }
+                }
+                return false;
+            }
+        );
+
+        // F1b: walk the ranked survivors (fitness, then id: the order above, unchanged) to the
+        // first brigade whose (derived sector, location) yields an objective that passes the
+        // UNCHANGED target filters and the post-selection reachability check. Rank 0 behaves
+        // exactly as before. A walked brigade (rank >= 1) standing on its own faction's contact
+        // cell is skipped, and each (sector, location) is evaluated once. Local occupation keeps
+        // precedence: its single candidate is the whole list, so there is no walk. The logged
+        // and unlogged paths run this same loop; only the receipt differs.
+        const formationById = Object.fromEntries(briefing.brigades.map((brigade) => [brigade.id, brigade]));
+        const walkReceipt: CommanderCreationProbeWalkEntry[] | null = targetSelectionDetail && !localOccupationCandidate ? [] : null;
+        const evaluatedSectorLocations = new Set<string>();
+        let contactByFaction: ContactOsidsByFaction | undefined;
+        let selectedProbe: { brigade: BrigadeEvaluation; sectorId: string | undefined; objectives: string[] } | null = null;
+        let rankZeroObjectives: string[] | null = null;
+        let rankZeroReachable: boolean | null = null;
+        let rankZeroDetail: CommanderCreationProbeTargetSelectionDetail | null = null;
+        for (let sortedRank = 0; sortedRank < probeSurvivors.length; sortedRank++) {
+            const walked = probeSurvivors[sortedRank]!;
+            const walkedLocation = formationById[walked.brigade_id]?.location_osid ?? null;
+            if (sortedRank > 0) {
+                contactByFaction ??= buildContactOsidsByFaction(
+                    briefing.state_ref?.military.formations,
+                    briefing.state_ref?.political.political_controllers,
+                    briefing.state_ref?.meta.turn,
+                );
+                if (standsOnContactCell(formationById[walked.brigade_id], contactByFaction)) {
+                    walkReceipt?.push({
+                        sorted_rank: sortedRank,
+                        brigade_id: walked.brigade_id,
+                        location_osid: walkedLocation,
+                        derived_sector_id: null,
+                        outcome: 'skipped_contact_cell',
+                    });
+                    continue;
+                }
+            }
+            const walkedSectorId = localOccupationCandidate?.sector_id
+                ?? derivePrimarySectorForBrigades(
+                    briefing.sectors.filter((sector) => sector.corps_id === briefing.corps_id),
+                    briefing.corps_id,
+                    [walked.brigade_id],
+                    formationById,
+                );
+            const sectorLocationKey = `${walkedSectorId ?? ''}|${walkedLocation ?? ''}`;
+            if (evaluatedSectorLocations.has(sectorLocationKey)) {
+                walkReceipt?.push({
+                    sorted_rank: sortedRank,
+                    brigade_id: walked.brigade_id,
+                    location_osid: walkedLocation,
+                    derived_sector_id: walkedSectorId ?? null,
+                    outcome: 'skipped_duplicate_sector_location',
+                });
+                continue;
+            }
+            evaluatedSectorLocations.add(sectorLocationKey);
+            if (targetSelectionDetail) {
+                Object.assign(targetSelectionDetail, {
+                    selected_brigade_id: walked.brigade_id,
+                    selected_brigade_location: walkedLocation,
+                    derived_sector_id: walkedSectorId ?? null,
+                    enemy_candidate_ids: [],
+                    direct_candidate_ids: [],
+                    survivor_ids: [],
+                    ranked_objective_ids: [],
+                    targets: [],
+                });
+            }
+            const walkedObjectives = deriveProbeObjectives(walked, walkedSectorId);
+            const walkedReachable = walkedObjectives.length > 0 && isProbeReachable(walked, walkedObjectives);
+            if (sortedRank === 0) {
+                rankZeroObjectives = walkedObjectives;
+                rankZeroReachable = walkedObjectives.length > 0 ? walkedReachable : null;
+                if (targetSelectionDetail) rankZeroDetail = { ...targetSelectionDetail };
+            }
+            walkReceipt?.push({
+                sorted_rank: sortedRank,
+                brigade_id: walked.brigade_id,
+                location_osid: walkedLocation,
+                derived_sector_id: walkedSectorId ?? null,
+                outcome: walkedReachable
+                    ? 'selected'
+                    : walkedObjectives.length > 0
+                        ? 'unreachable'
+                        : targetSelectionDetail?.status ?? 'not_reached',
+            });
+            if (walkedReachable) {
+                selectedProbe = { brigade: walked, sectorId: walkedSectorId, objectives: walkedObjectives };
+                break;
+            }
+        }
+        if (targetSelectionDetail) {
+            // With no selection the receipt keeps rank 0's evaluation, as before the walk.
+            if (!selectedProbe && rankZeroDetail) Object.assign(targetSelectionDetail, rankZeroDetail);
+            // The selected candidate is the walk's pick, or rank 0 when the walk found none.
+            const selectedDetail = survivorDetails.get(selectedProbe?.brigade ?? probeSurvivors[0]!);
+            if (selectedDetail) selectedDetail.selected = true;
+            if (walkReceipt) targetSelectionDetail.walk = walkReceipt;
+        }
+        if (obs) obs.probe_brigade_selected = probeSurvivors.length > 0;
+        if (targetSelectionDetail && probeSurvivors.length === 0) targetSelectionDetail.status = 'no_brigade';
+        const probeBrigade = selectedProbe?.brigade;
+        const probeSectorId = selectedProbe?.sectorId;
+        const probeObjectives: string[] = selectedProbe?.objectives ?? rankZeroObjectives ?? [];
+        const probeReachable = selectedProbe != null;
+
+        if (probeSurvivors.length > 0) {
             // Skip probe if no enemy-adjacent OSIDs found — empty objectives cause immediate ZEA.
             if (obs) obs.probe_objective_ids = [...probeObjectives].sort(strictCompare);
+            if (obs && probeObjectives.length > 0) obs.probe_reachable = selectedProbe != null || rankZeroReachable === true;
+        }
+        if (probeBrigade) {
             if (probeObjectives.length > 0) {
-                const probeReachable = botOrdersPerfTime(
-                    `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.reachability`,
-                    () => {
-                        // Reachability check: probe brigade must BFS-reach the target within MAX_REACHABILITY_HOPS.
-                        const probeTarget = probeObjectives[0]!;
-                        const probeAdj = briefing.spatial.sharedBoundaryAdjacency ?? briefing.spatial.adjacency;
-                        const probeFriendly = briefing.spatial.friendlyOsidsByFaction?.get(briefing.faction);
-                        const probeBrigLoc = briefing.brigades.find(b => b.id === probeBrigade.brigade_id)?.location_osid;
-                        if (probeAdj && probeFriendly && probeBrigLoc) {
-                            const targetNeighbors = (probeAdj.get(probeTarget) ?? []) as readonly string[];
-                            const approachOsids = targetNeighbors.filter(n => probeFriendly.has(n)).sort(strictCompare);
-                            for (const approachOsid of approachOsids) {
-                                const dist = spatialFriendlyDistance(briefing.spatial, briefing.faction, probeBrigLoc, approachOsid, MAX_REACHABILITY_HOPS);
-                                if (dist >= 0) return true;
-                            }
-                        }
-                        return false;
-                    }
-                );
-
-                if (obs) obs.probe_reachable = probeReachable;
                 if (probeReachable) {
                     const commandState = briefing.state_ref?.military.corps_command?.[briefing.corps_id];
                     const sectorIntelConfidence = briefing.state_ref && probeSectorId

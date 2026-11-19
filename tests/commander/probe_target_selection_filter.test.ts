@@ -510,6 +510,14 @@ describe('fallback probe target production filters', () => {
             passed: true,
             first_rejecting_filter: null,
         });
+        // F1b: the single survivor is walked at rank 0 and selected.
+        const selectedWalkEntry = (corpsId: string) => ({
+            sorted_rank: 0,
+            brigade_id: 'probe',
+            location_osid: APPROACH,
+            derived_sector_id: `sector:${corpsId}:0`,
+            outcome: 'selected',
+        });
         const brigadeCandidates = [{
             original_ordinal: 0,
             brigade_id: 'probe',
@@ -538,6 +546,7 @@ describe('fallback probe target production filters', () => {
                     ranked_objective_ids: [TARGET],
                     targets: [passedTarget(TARGET, 'RBiH', true, 'decisive_victory')],
                     brigade_candidates: brigadeCandidates,
+                    walk: [selectedWalkEntry(CORPS_ID)],
                 },
             },
             ...([
@@ -560,6 +569,7 @@ describe('fallback probe target production filters', () => {
                     ranked_objective_ids: [TARGET],
                     targets: [passedTarget(TARGET, 'RS', true, 'stalemate')],
                     brigade_candidates: brigadeCandidates,
+                    walk: [selectedWalkEntry(corpsId)],
                 },
             })),
         ]) {
