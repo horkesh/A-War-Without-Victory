@@ -28,7 +28,9 @@ export function getStandingOgEngagedDefenseBrigadeIds(
 export function isStandingOgDefenseBrigadeAvailable(
     state: Pick<GameState, 'military'>,
     brigadeId: FormationId,
+    options: { planningParticipantsDefend?: boolean } = {},
 ): boolean {
+    const planningParticipantsDefend = options.planningParticipantsDefend ?? true;
     const formation = state.military.formations?.[brigadeId];
     if (!formation || formation.status !== 'active') return false;
     if ((formation.disrupted_turns ?? 0) > 0) return false;
@@ -44,10 +46,13 @@ export function isStandingOgDefenseBrigadeAvailable(
     // while it stood at Boljanić, and a morale-20 brigade became primary and lost
     // Donja Bočinja at pr 1.16. Executing and recovering participants stay excluded.
     // The resolver and the predictor share this roster, so they stay consistent.
+    // Scope: the brigade's OWN sector roster only. The empty-sector fallback, which borrows an
+    // adjacent brigade into another sector's defence, passes planningParticipantsDefend=false
+    // and keeps excluding every operation participant.
     const corpsCommands = state.military.corps_command ?? {};
     for (const corpsId of Object.keys(corpsCommands).sort(strictCompare)) {
         for (const operation of corpsCommands[corpsId]?.active_operations ?? []) {
-            if (operation.phase === 'planning') continue;
+            if (planningParticipantsDefend && operation.phase === 'planning') continue;
             if (operation.participating_brigades?.includes(brigadeId)) return false;
         }
     }
