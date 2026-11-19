@@ -185,17 +185,15 @@
         "id": "accept",
         "branch_tag": "rbih_vopp_accept",
         "label": "Accept the Vance-Owen Plan",
+        "plan_answer": {
+          "plan_id": "vance_owen",
+          "response": "accepted"
+        },
         "description": "Accepting improves international credibility and may bring relief, but legitimizes territorial losses.",
         "historical_marker": "historical_default",
         "aggression_affinity": -0.5,
         "risk_level": 0.5,
-        "effects": [
-          {
-            "kind": "patron_pressure",
-            "faction": "RBiH",
-            "delta": -5
-          }
-        ],
+        "effects": [],
         "sets_flags": {
           "vance_owen_accepted": true
         }
@@ -204,6 +202,10 @@
         "id": "reject",
         "branch_tag": "rbih_vopp_reject",
         "label": "Reject the Vance-Owen Plan",
+        "plan_answer": {
+          "plan_id": "vance_owen",
+          "response": "rejected"
+        },
         "description": "Rejection preserves territorial claims but damages standing with the international community.",
         "historical_marker": "counterfactual",
         "aggression_affinity": 0.4,
@@ -478,11 +480,6 @@
         "delta": 2
       },
       {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
-      {
         "kind": "narrative",
         "text": "The killing of Turajlić inside a UN vehicle exposes the fragility of UNPROFOR's protection and the VRS's disregard for international norms."
       }
@@ -580,11 +577,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 3
-      },
-      {
         "kind": "narrative",
         "text": "American diplomacy enters the Bosnian arena. The 'lift and strike' proposal fails in Europe, but Washington's trajectory toward intervention has begun."
       }
@@ -676,17 +668,6 @@
       "phase": "war"
     },
     "once": true,
-    "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "HRHB",
-        "delta": 3
-      },
-      {
-        "kind": "narrative",
-        "text": "Resolution 808 puts all commanders on notice: the international community is documenting crimes and building the architecture for prosecution."
-      }
-    ],
     "dimension_shifts": [
       {
         "faction": "RS",
@@ -701,9 +682,8 @@
     ],
     "historical_source": "UN Security Council Resolution 808 (1993), S/RES/808.",
     "effect": {
-      "kind": "patron_pressure",
-      "faction": "RS",
-      "delta": 5
+      "kind": "narrative",
+      "text": "Resolution 808 puts all commanders on notice: the international community is documenting crimes and building the architecture for prosecution."
     }
   },
   {
@@ -831,6 +811,15 @@
         "historical_marker": "counterfactual",
         "aggression_affinity": 0.5,
         "risk_level": 0.7,
+        "effects": [
+          {
+            "kind": "patron_supply_cut",
+            "faction": "HRHB",
+            "multiplier": 0.95,
+            "duration_turns": 13,
+            "tag": "zagreb_restrains_boban_vopp#resist_patron"
+          }
+        ],
         "dimension_shifts": [
           {
             "faction": "HRHB",
@@ -870,11 +859,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
       {
         "kind": "narrative",
         "text": "Morillon's dramatic declaration creates an obligation the UN cannot fulfill. The gap between his promise and UNPROFOR's means defines the enclave's tragic position."
@@ -922,13 +906,7 @@
       "kind": "narrative",
       "text": "Srebrenica is bombarded relentlessly. International outcry mounts as the enclave's humanitarian situation deteriorates."
     },
-    "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      }
-    ]
+    "effects": []
   },
   {
     "id": "hrhb_vance_owen_acceptance_1993",
@@ -992,6 +970,10 @@
         "branch_tag": "hrhb_vopp_acknowledge",
         "historical_marker": "historical_default",
         "label": "Accept the Vance-Owen ten-province framework",
+        "plan_answer": {
+          "plan_id": "vance_owen",
+          "response": "accepted"
+        },
         "description": "Acknowledge the VOPP map: three Croat-majority provinces (Mostar, Central Bosnia, Western Herzegovina) are ratified inside the decentralized Bosnia framework. Mate Boban signs for HZ HB at Athens; Zagreb's directive is honored.",
         "effects": [
           {
@@ -1007,11 +989,6 @@
           {
             "faction": "HRHB",
             "dimension": "patron_confidence",
-            "delta": 10
-          },
-          {
-            "faction": "HRHB",
-            "dimension": "international_standing",
             "delta": 10
           },
           {
@@ -1033,6 +1010,10 @@
         "branch_tag": "hrhb_vopp_resist",
         "historical_marker": "counterfactual",
         "label": "Condition acceptance on provincial-boundary amendments",
+        "plan_answer": {
+          "plan_id": "vance_owen",
+          "response": "rejected"
+        },
         "description": "Acknowledge the ten-province framework but condition the signature on amendments to the Central Bosnia and Western Herzegovina provincial boundaries. Zagreb tolerates the conditional posture without full alignment; the central-Bosnia frictions remain unresolved.",
         "effects": [
           {
@@ -1045,11 +1026,6 @@
           "hrhb_vance_owen_response": "amendments"
         },
         "dimension_shifts": [
-          {
-            "faction": "HRHB",
-            "dimension": "patron_confidence",
-            "delta": -5
-          },
           {
             "faction": "HRHB",
             "dimension": "negotiating_leverage",
@@ -1069,6 +1045,16 @@
         "branch_tag": "hrhb_vopp_acknowledge",
         "historical_marker": "counterfactual",
         "label": "Condition signature on reciprocal ARBiH acceptance",
+        "plan_answer": {
+          "plan_id": "vance_owen",
+          "response": "rejected",
+          "accepted_if": {
+            "type": "peace_plan_response",
+            "plan_id": "vance_owen",
+            "faction": "RBiH",
+            "response": "accepted"
+          }
+        },
         "description": "Sign the VOPP framework only if Sarajevo signs simultaneously. A paradoxical joint-front overture: the central-Bosnia friction can be contained if Sarajevo reciprocates, but Zagreb reads the conditional signature as deferring patron direction to a Bosniak counter-signature rather than transmitting it cleanly.",
         "effects": [
           {
@@ -1085,11 +1071,6 @@
           "hrhb_vance_owen_response": "condition_on_reciprocity"
         },
         "dimension_shifts": [
-          {
-            "faction": "HRHB",
-            "dimension": "patron_confidence",
-            "delta": -10
-          },
           {
             "faction": "HRHB",
             "dimension": "negotiating_leverage",
@@ -1109,6 +1090,10 @@
         "branch_tag": "hrhb_vopp_resist",
         "historical_marker": "counterfactual",
         "label": "Reject the Vance-Owen ten-province framework",
+        "plan_answer": {
+          "plan_id": "vance_owen",
+          "response": "rejected"
+        },
         "description": "Refuse the VOPP map. The HZ HB Presidency defies Zagreb's directive — Tudjman's patron-confidence collapses, the alliance with RBiH breaks further, and international standing falls. The central-Bosnia war continues without a settlement frame; the Croat-majority provinces remain a contested claim rather than a ratified allocation.",
         "effects": [
           {
@@ -1125,16 +1110,6 @@
           "hrhb_vance_owen_response": "reject"
         },
         "dimension_shifts": [
-          {
-            "faction": "HRHB",
-            "dimension": "patron_confidence",
-            "delta": -25
-          },
-          {
-            "faction": "HRHB",
-            "dimension": "international_standing",
-            "delta": -15
-          },
           {
             "faction": "HRHB",
             "dimension": "negotiating_leverage",
@@ -1210,16 +1185,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 2
-      },
-      {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 3
-      },
-      {
         "kind": "narrative",
         "text": "NATO combat aircraft now patrol Bosnian airspace. The VRS loses its fixed-wing air support but retains overwhelming ground-based fire superiority."
       }
@@ -1233,9 +1198,9 @@
     ],
     "historical_source": "UN Security Council Resolution 816 (1993), S/RES/816. Operation Deny Flight USAF history.",
     "effect": {
-      "kind": "patron_pressure",
-      "faction": "RS",
-      "delta": 5
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": 2
     }
   },
   {
@@ -1764,11 +1729,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
-      {
         "kind": "narrative",
         "text": "Srebrenica is declared a UN safe area. The VRS ignores the ceasefire demand while the UN lacks any credible enforcement mechanism."
       }
@@ -1801,12 +1761,6 @@
       "phase": "war"
     },
     "once": true,
-    "effects": [
-      {
-        "kind": "narrative",
-        "text": "The tightened embargo enters force. Milošević's patience with Pale is running thin."
-      }
-    ],
     "dimension_shifts": [
       {
         "faction": "RS",
@@ -1821,9 +1775,8 @@
     ],
     "historical_source": "UN Security Council Resolution 820 (1993), S/RES/820.",
     "effect": {
-      "kind": "patron_pressure",
-      "faction": "RS",
-      "delta": 10
+      "kind": "narrative",
+      "text": "The tightened embargo enters force. Milošević's patience with Pale is running thin."
     }
   },
   {
@@ -1917,11 +1870,6 @@
             "kind": "morale_change",
             "faction": "RBiH",
             "delta": -5
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "RS",
-            "delta": 5
           }
         ],
         "dimension_shifts": [
@@ -1955,11 +1903,6 @@
             "kind": "morale_change",
             "faction": "RBiH",
             "delta": 3
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "RBiH",
-            "delta": 10
           }
         ],
         "dimension_shifts": [
@@ -2077,6 +2020,15 @@
         "label": "Maintain our position",
         "aggression_affinity": 0.5,
         "risk_level": 0.7,
+        "effects": [
+          {
+            "kind": "patron_supply_cut",
+            "faction": "RS",
+            "multiplier": 0.95,
+            "duration_turns": 13,
+            "tag": "milosevic_vopp_pressure#resist_patron"
+          }
+        ],
         "dimension_shifts": [
           {
             "faction": "RS",
@@ -2185,7 +2137,7 @@
     "bot_response_logic": "historical",
     "historical_default_response_id": "accept_rejection",
     "source_note": "Karadžić judgment and RS Assembly proceedings summarize the Pale rejection of Vance-Owen and the follow-on referendum.",
-    "staff_assessment": "Pale leadership can preserve assembly cohesion by accepting the rejection, but doing so deepens patron pressure and leaves the international plan dead.",
+    "staff_assessment": "Pale leadership can preserve assembly cohesion by accepting the rejection, but doing so costs Belgrade's backing and leaves the international plan dead.",
     "trigger_evidence": [
       "Vance-Owen has already been presented in the event chain.",
       "The RS Assembly rejected the plan at Pale after Karadžić's signature."
@@ -2200,17 +2152,16 @@
         "branch_tag": "rs_vopp_accept_rejection",
         "historical_marker": "historical_default",
         "label": "Accept the assembly's vote",
+        "plan_answer": {
+          "plan_id": "vance_owen",
+          "response": "rejected"
+        },
         "description": "The people have spoken. Reject international pressure and continue the war. Internal cohesion is preserved but Serbia is furious.",
         "effects": [
           {
             "kind": "morale_change",
             "faction": "RS",
             "delta": 5
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "RS",
-            "delta": 10
           }
         ],
         "sets_flags": {
@@ -2223,23 +2174,12 @@
             "timing": "future",
             "certainty": "guaranteed",
             "material_effect_refs": [
-              "morale_change.RS",
-              "patron_pressure.RS"
+              "morale_change.RS"
             ],
-            "explanation": "Accepting the Assembly's vote does not open or close any other decisions; its cost shows up in Republika Srpska morale and in pressure from Belgrade. Karadžić had signed the Vance-Owen Plan in Athens on 2 May 1993, subject to the Assembly's approval. The Assembly rejected it, Milošević urged acceptance in vain, and a referendum on 15-16 May confirmed the rejection. (ICTY, Karadžić trial judgment, paras 372, 375 and 3283.)"
+            "explanation": "Accepting the Assembly's vote does not open or close any other decisions; it lifts Republika Srpska morale but costs Belgrade's backing. Karadžić had signed the Vance-Owen Plan in Athens on 2 May 1993, subject to the Assembly's approval. The Assembly rejected it, Milošević urged acceptance in vain, and a referendum on 15-16 May confirmed the rejection. (ICTY, Karadžić trial judgment, paras 372, 375 and 3283.)"
           }
         ],
         "dimension_shifts": [
-          {
-            "faction": "RS",
-            "dimension": "international_standing",
-            "delta": -15
-          },
-          {
-            "faction": "RS",
-            "dimension": "patron_confidence",
-            "delta": -10
-          },
           {
             "faction": "RS",
             "dimension": "internal_cohesion",
@@ -2254,6 +2194,10 @@
         "branch_tag": "rs_vopp_override_assembly",
         "historical_marker": "counterfactual",
         "label": "Attempt to override the assembly",
+        "plan_answer": {
+          "plan_id": "vance_owen",
+          "response": "accepted"
+        },
         "description": "Defy the nationalist vote and push for acceptance. Historically impossible — risks fracturing the RS political structure.",
         "effects": [
           {
@@ -2262,9 +2206,9 @@
             "delta": -5
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
-            "delta": -5
+            "delta": 5
           }
         ],
         "sets_flags": {
@@ -2278,22 +2222,12 @@
             "certainty": "risk",
             "material_effect_refs": [
               "morale_change.RS",
-              "patron_pressure.RS"
+              "patron_support.RS"
             ],
-            "explanation": "Attempting to override the assembly does not open or close catalog events by metadata; it makes the internal-fracture branch visible through the existing RS morale and patron-pressure effects. Krajišnik IT-00-39-T §§995-1019 (the earlier cite is imprecise: Krajišnik §§995-1019 says Assembly deputies took their cues from Karadžić and Krajišnik, not that the leadership deferred to the Assembly; it serves only for centre-periphery coordination) records the SDS Assembly architecture and the leadership's structural deference; override fractures the legitimating institution at the cost-floor levels documented in the R7 worksheet (internal_cohesion ≤-15, patron_confidence ≤-20)."
+            "explanation": "Attempting to override the assembly does not open or close catalog events by metadata; it makes the internal-fracture branch visible through the existing RS morale effect and a small rise in Belgrade's backing. Krajišnik IT-00-39-T §§995-1019 (the earlier cite is imprecise: Krajišnik §§995-1019 says Assembly deputies took their cues from Karadžić and Krajišnik, not that the leadership deferred to the Assembly; it serves only for centre-periphery coordination) records the SDS Assembly architecture and the leadership's structural deference; override fractures the legitimating institution at the cost-floor levels documented in the R7 worksheet (internal cohesion down at least 15)."
           }
         ],
         "dimension_shifts": [
-          {
-            "faction": "RS",
-            "dimension": "international_standing",
-            "delta": 10
-          },
-          {
-            "faction": "RS",
-            "dimension": "patron_confidence",
-            "delta": -20
-          },
           {
             "faction": "RS",
             "dimension": "internal_cohesion",
@@ -2367,11 +2301,6 @@
     },
     "effects": [
       {
-        "kind": "patron_pressure",
-        "faction": "HRHB",
-        "delta": 5
-      },
-      {
         "kind": "narrative",
         "text": "Mostar is divided between the HVO on the west bank and the ARBiH on the east."
       }
@@ -2398,11 +2327,6 @@
     },
     "effects": [
       {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
-      {
         "kind": "narrative",
         "text": "Six UN safe areas are declared. The promise of protection raises hope among besieged populations, but no credible enforcement mechanism exists."
       }
@@ -2423,17 +2347,6 @@
       "phase": "war"
     },
     "once": true,
-    "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "HRHB",
-        "delta": 3
-      },
-      {
-        "kind": "narrative",
-        "text": "The ICTY is established by Security Council Resolution 827, with its seat in The Hague. Every commander who orders atrocities now does so knowing that a court exists to try them."
-      }
-    ],
     "dimension_shifts": [
       {
         "faction": "RS",
@@ -2453,9 +2366,8 @@
     ],
     "historical_source": "UN Security Council Resolution 827 (1993), S/RES/827.",
     "effect": {
-      "kind": "patron_pressure",
-      "faction": "RS",
-      "delta": 5
+      "kind": "narrative",
+      "text": "The ICTY is established by Security Council Resolution 827, with its seat in The Hague. Every commander who orders atrocities now does so knowing that a court exists to try them."
     }
   },
   {
@@ -2534,11 +2446,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 2
-      },
-      {
         "kind": "narrative",
         "text": "NATO now has legal authority to strike VRS positions. Whether it has the political will to use it is another question entirely."
       }
@@ -2557,9 +2464,9 @@
     ],
     "historical_source": "UN Security Council Resolution 836 (1993), S/RES/836.",
     "effect": {
-      "kind": "patron_pressure",
-      "faction": "RS",
-      "delta": 5
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": 2
     }
   },
   {
@@ -2609,11 +2516,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "HRHB",
-        "delta": 10
-      },
       {
         "kind": "narrative",
         "text": "Images of Bosniak men crowded behind Heliodrom wire reach the international press. Herceg-Bosna's standing in the West suffers severe damage."
@@ -3087,11 +2989,6 @@
     },
     "effects": [
       {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
-      {
         "kind": "narrative",
         "text": "VRS artillery continues to target civilian areas in Sarajevo. International pressure for intervention builds steadily."
       }
@@ -3156,6 +3053,15 @@
         "label": "Maintain our position",
         "aggression_affinity": 0.5,
         "risk_level": 0.7,
+        "effects": [
+          {
+            "kind": "patron_supply_cut",
+            "faction": "RS",
+            "multiplier": 0.97,
+            "duration_turns": 13,
+            "tag": "milosevic_owen_stoltenberg_distancing#resist_patron"
+          }
+        ],
         "dimension_shifts": [
           {
             "faction": "RS",
@@ -3192,11 +3098,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 3
-      },
-      {
         "kind": "aggression_modifier",
         "faction": "RS",
         "delta": -0.05,
@@ -3222,9 +3123,9 @@
     "historical_source": "NATO Council decision, August 9 1993. Operation Deny Flight history.",
     "source_note": "This exogenous NATO Council notice records authorization and pressure only. It neither depends on nor resolves the separate RS decision over the Igman positions.",
     "effect": {
-      "kind": "patron_pressure",
-      "faction": "RS",
-      "delta": 10
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": 3
     }
   },
   {
@@ -3264,14 +3165,9 @@
         "id": "accept",
         "historical_marker": "historical_default",
         "label": "Record the Presidency's Conditional Acceptance",
+        "plan_answer": null,
         "description": "Keep the framework alive while reserving the Drina enclaves and Posavina corridor for the Assembly's final vote.",
-        "effects": [
-          {
-            "kind": "patron_pressure",
-            "faction": "RBiH",
-            "delta": -5
-          }
-        ],
+        "effects": [],
         "sets_flags": {
           "owen_stoltenberg_accepted": true
         }
@@ -3280,6 +3176,10 @@
         "id": "reject",
         "historical_marker": "counterfactual",
         "label": "Reject at the Presidency Stage",
+        "plan_answer": {
+          "plan_id": "owen_stoltenberg",
+          "response": "rejected"
+        },
         "description": "End Sarajevo's participation before the documented Assembly vote, defending sovereignty while frustrating the mediators.",
         "effects": [
           {
@@ -3401,28 +3301,20 @@
       "kind": "narrative",
       "text": "The Owen-Stoltenberg plan reaches the Sarajevo Assembly, which must accept it on conditions or reject the partition framework."
     },
-    "dimension_shifts": [
-      {
-        "faction": "RBiH",
-        "dimension": "patron_confidence",
-        "delta": -5
-      }
-    ],
     "response_options": [
       {
         "id": "reject_via_assembly",
         "branch_tag": "rbih_owen_stoltenberg_reject_via_assembly",
         "historical_marker": "historical_default",
         "label": "Assembly rejects outright (Drina enclaves & Posavina non-negotiable)",
+        "plan_answer": {
+          "plan_id": "owen_stoltenberg",
+          "response": "rejected"
+        },
         "description": "The Sarajevo Assembly votes down the package. The plan collapses; the war continues, but the legal claim to Bosnia's full territory is preserved.",
         "aggression_affinity": 0.4,
         "risk_level": 0.6,
         "dimension_shifts": [
-          {
-            "faction": "RBiH",
-            "dimension": "international_standing",
-            "delta": -8
-          },
           {
             "faction": "RBiH",
             "dimension": "negotiating_leverage",
@@ -3441,15 +3333,14 @@
         "branch_tag": "rbih_owen_stoltenberg_accept_for_optics",
         "historical_marker": "counterfactual",
         "label": "Assembly ratifies the package",
+        "plan_answer": {
+          "plan_id": "owen_stoltenberg",
+          "response": "accepted"
+        },
         "description": "An alternative parliamentary majority ratifies the package. Sarajevo gains international standing while legitimizing the partition formula in principle.",
         "aggression_affinity": -0.2,
         "risk_level": 0.4,
         "dimension_shifts": [
-          {
-            "faction": "RBiH",
-            "dimension": "international_standing",
-            "delta": 10
-          },
           {
             "faction": "RBiH",
             "dimension": "patron_confidence",
@@ -3562,7 +3453,7 @@
             "delta": 3
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RBiH",
             "delta": 5
           }
@@ -3819,6 +3710,10 @@
         "branch_tag": "hrhb_vopp_acknowledge",
         "historical_marker": "historical_default",
         "label": "Accept the Union of Three Republics framework",
+        "plan_answer": {
+          "plan_id": "owen_stoltenberg",
+          "response": "accepted"
+        },
         "description": "Acknowledge the Owen-Stoltenberg map: HZ HB is one of three constitutive ethnic republics with a favorable central-Bosnia and western Herzegovina territorial allocation. Mate Boban signs for the HZ HB Presidency; Zagreb's directive is honored.",
         "effects": [
           {
@@ -3835,11 +3730,6 @@
             "faction": "HRHB",
             "dimension": "patron_confidence",
             "delta": 10
-          },
-          {
-            "faction": "HRHB",
-            "dimension": "international_standing",
-            "delta": 8
           },
           {
             "faction": "HRHB",
@@ -3860,6 +3750,10 @@
         "branch_tag": "hrhb_vopp_resist",
         "historical_marker": "counterfactual",
         "label": "Condition acceptance on central Bosnia amendments",
+        "plan_answer": {
+          "plan_id": "owen_stoltenberg",
+          "response": "rejected"
+        },
         "description": "Acknowledge the Union of Three Republics framework but condition the signature on central Bosnia territorial amendments — Vitez, Kiseljak, Busovača, Prozor. Zagreb tolerates the conditional posture without full alignment; the central Bosnia frictions remain unresolved.",
         "effects": [
           {
@@ -3872,11 +3766,6 @@
           "hrhb_owen_stoltenberg_response": "amendments"
         },
         "dimension_shifts": [
-          {
-            "faction": "HRHB",
-            "dimension": "patron_confidence",
-            "delta": -5
-          },
           {
             "faction": "HRHB",
             "dimension": "negotiating_leverage",
@@ -3896,6 +3785,10 @@
         "branch_tag": "hrhb_vopp_resist",
         "historical_marker": "counterfactual",
         "label": "Reject the Union of Three Republics",
+        "plan_answer": {
+          "plan_id": "owen_stoltenberg",
+          "response": "rejected"
+        },
         "description": "Refuse the Owen-Stoltenberg map. The HZ HB Presidency defies Zagreb's directive — Tudjman's patron-confidence collapses, but a paradoxical opening to RBiH joint-front diplomacy materializes as the Zagreb-backed plan is rejected from the HVO side. International standing falls; the central-Bosnia war continues without a settlement frame.",
         "effects": [
           {
@@ -3912,16 +3805,6 @@
           "hrhb_owen_stoltenberg_response": "reject"
         },
         "dimension_shifts": [
-          {
-            "faction": "HRHB",
-            "dimension": "patron_confidence",
-            "delta": -25
-          },
-          {
-            "faction": "HRHB",
-            "dimension": "international_standing",
-            "delta": -10
-          },
           {
             "faction": "HRHB",
             "dimension": "internal_cohesion",
@@ -4019,7 +3902,7 @@
       "text": "The Pale Assembly records its posture toward the Owen-Stoltenberg Union of Three Republics framework."
     },
     "source_note": "The Owen-Stoltenberg Union of Three Republics plan was tabled aboard HMS Invincible on 20 September 1993; the Pale leadership accepted the framework as the diplomatic legitimization of Republika Srpska, with Belgrade-blessed pressure transmitted via Milošević. Sources: David Owen, Balkan Odyssey (Harcourt 1995) Ch. 7 (Invincible package; RS Assembly acceptance); ICTY Karadžić IT-95-5/18-T Trial Judgment (24 March 2016) paras 377-383 (the earlier cite \"Vol. III §§4263-4310\" is Markale II of 28 August 1995 and the \"Vol. III\" label is unverified; autumn 1993 Owen-Stoltenberg outcomes; Pale acceptance posture); ICTY Karadžić IT-95-5/18-T §§3447-3526 (the earlier cite is imprecise: Karadžić §§3447-3526 is the conclusion on the overarching JCE and the Accused's contribution; the Six Strategic Goals presented on 12 May 1992 are Vol. I ¶57 and the analysis Vol. II ¶¶2856-2857) (Six Strategic Goals platform context); Balkan Battlegrounds Vol. II Ch. 11 (the earlier cite: BB Vol. II has annexes and addenda, not chapters, and the claim has no BB anchor; Balkan Battlegrounds Vol. II Ch. 11 is not a BB location) (RS Owen-Stoltenberg posture via Belgrade channel; corridor narrowed, Drina-valley preserved, Sarajevo-division retained in tripartite frame). The X3 packet completes the Owen-Stoltenberg cross-faction trio: B4 (`os_rbih_tactical_acceptance_1993`, Packet 10) RBiH side; `hrhb_owen_stoltenberg_response_1993` HRHB side; this row RS side. All three are gated on `owen_stoltenberg_plan_1993` and on the responding faction's foundational flag (X1 London Conference / X4 Contact Group cross-faction pattern from Packets 6/25). §3.6 forward-looking guard: any future `csq_rs_owen_stoltenberg_*` row consuming this row's outcomes MUST NOT re-author cleansing, forced-displacement, hostage-taking, civilian-targeting, paramilitary deployment, or any sensitive-act response option. The Owen-Stoltenberg response is a diplomatic/patron-axis posture decision; Drina-corridor cleansing, Sarajevo-siege fires, and any associated atrocity surfaces remain canon-gated through their existing event surfaces (rs_drina_campaign; rs_camp_exposure_response; un_safe_area_enforcement; un_hostage_crisis_1995 family slugs). Engine vocabulary substitutions per memory/engine_dimension_vocabulary.md: Belgrade patron-pressure spike on reject counterfactual captured via `patron_pressure +20`; international-standing penalty per X1 London pattern; negotiating-leverage shifts inline with the documented Pale calculus.",
-    "staff_assessment": "Acceptance is the documented Pale leadership posture and Belgrade's directive — the map legitimizes Republika Srpska as a constitutive ethnic republic with the Drina-valley axis preserved. Rejection defies Belgrade-blessed diplomacy and incurs the patron-pressure spike that foreshadows the 1994 Contact Group rupture. Conditional acceptance preserves the corridor and Sarajevo-division claims while signaling territorial reservations.",
+    "staff_assessment": "Acceptance is the documented Pale leadership posture and Belgrade's directive — the map legitimizes Republika Srpska as a constitutive ethnic republic with the Drina-valley axis preserved. Rejection defies Belgrade-blessed diplomacy and costs Belgrade's backing. Conditional acceptance preserves the corridor and Sarajevo-division claims while signaling territorial reservations.",
     "trigger_evidence": [
       "The Owen-Stoltenberg plan has reached the Pale Assembly.",
       "Milošević has signaled FRY willingness; Pale must record its posture in writing.",
@@ -4031,6 +3914,10 @@
         "branch_tag": "rs_owen_stoltenberg_acknowledge",
         "historical_marker": "historical_default",
         "label": "Accept the Union of Three Republics framework",
+        "plan_answer": {
+          "plan_id": "owen_stoltenberg",
+          "response": "accepted"
+        },
         "description": "Acknowledge the Owen-Stoltenberg map: Republika Srpska is legitimized as a constitutive ethnic republic in a tripartite Bosnia. The corridor is narrowed but the Drina-valley axis is preserved; Sarajevo division is retained inside the tripartite frame. Karadžić signs; Belgrade's directive is honored.",
         "effects": [
           {
@@ -4046,11 +3933,6 @@
           {
             "faction": "RS",
             "dimension": "patron_confidence",
-            "delta": 10
-          },
-          {
-            "faction": "RS",
-            "dimension": "international_standing",
             "delta": 10
           },
           {
@@ -4072,6 +3954,10 @@
         "branch_tag": "rs_owen_stoltenberg_resist",
         "historical_marker": "counterfactual",
         "label": "Accept with territorial modifications",
+        "plan_answer": {
+          "plan_id": "owen_stoltenberg",
+          "response": "rejected"
+        },
         "description": "Acknowledge the Union of Three Republics framework but condition the signature on corridor widening and Sarajevo allocation amendments. Belgrade tolerates the conditional posture without full alignment; the channel remains open but the deal is not closed.",
         "effects": [
           {
@@ -4082,11 +3968,6 @@
             "kind": "morale_change",
             "faction": "RS",
             "delta": 2
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "RS",
-            "delta": 5
           }
         ],
         "sets_flags": {
@@ -4112,13 +3993,12 @@
         "branch_tag": "rs_owen_stoltenberg_resist",
         "historical_marker": "counterfactual",
         "label": "Reject the Union of Three Republics",
-        "description": "Refuse the Owen-Stoltenberg map despite Belgrade's directive. The Pale Assembly defies Milošević; the patron-pressure spike foreshadows the 1994 Contact Group rupture and Belgrade's August 1994 embargo. International standing falls; negotiating leverage erodes.",
+        "plan_answer": {
+          "plan_id": "owen_stoltenberg",
+          "response": "rejected"
+        },
+        "description": "Refuse the Owen-Stoltenberg map despite Belgrade's directive. The Pale Assembly defies Milošević and Belgrade's backing drops. International standing falls; negotiating leverage erodes.",
         "effects": [
-          {
-            "kind": "patron_pressure",
-            "faction": "RS",
-            "delta": 20
-          },
           {
             "kind": "morale_change",
             "faction": "RS",
@@ -4129,11 +4009,6 @@
           "rs_owen_stoltenberg_response": "reject"
         },
         "dimension_shifts": [
-          {
-            "faction": "RS",
-            "dimension": "international_standing",
-            "delta": -10
-          },
           {
             "faction": "RS",
             "dimension": "negotiating_leverage",
@@ -4173,7 +4048,7 @@
       "reject_plan": {
         "RBiH": {
           "headline": "Pale rejects Union of Three Republics",
-          "body": "RS refuses the Owen-Stoltenberg framework despite Belgrade's directive. Sarajevo reads the patron-pressure spike as a leading indicator of the 1994 Contact Group rupture; the Drina-valley and corridor claims harden."
+          "body": "RS refuses the Owen-Stoltenberg framework despite Belgrade's directive. Sarajevo reads a widening gap between Pale and Belgrade; the Drina-valley and corridor claims harden."
         },
         "HRHB": {
           "headline": "Pale defies Belgrade on Owen-Stoltenberg",
@@ -4237,13 +4112,7 @@
       "faction": "HRHB",
       "war_crimes_delta": 3
     },
-    "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "HRHB",
-        "delta": 15
-      }
-    ],
+    "effects": [],
     "requires_player_response": true,
     "responding_faction": "HRHB",
     "bot_response_logic": "historical",
@@ -4267,9 +4136,9 @@
         "description": "Continue framing Heliodrom/Dretelj/Gabela detentions as 'POW arrangements' and 'voluntary collection centers.' The historical pattern — delay disclosure, contest ICRC framings.",
         "effects": [
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "HRHB",
-            "delta": 10
+            "delta": -10
           }
         ],
         "sets_flags": {
@@ -4298,9 +4167,9 @@
         "description": "Permit limited inspection while delaying access to key sites and detainee transfers between Heliodrom, Dretelj, and Gabela.",
         "effects": [
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "HRHB",
-            "delta": 5
+            "delta": -5
           }
         ],
         "sets_flags": {
@@ -4327,13 +4196,7 @@
         "historical_marker": "counterfactual",
         "label": "Permit unrestricted ICRC inspection",
         "description": "Open Heliodrom, Dretelj, and Gabela to full ICRC and international press access. The documented detention regime enters the international record on its actual terms.",
-        "effects": [
-          {
-            "kind": "patron_pressure",
-            "faction": "HRHB",
-            "delta": 20
-          }
-        ],
+        "effects": [],
         "sets_flags": {
           "hrhb_camps_response": "cooperate"
         },
@@ -4347,11 +4210,6 @@
             "faction": "HRHB",
             "dimension": "military_credibility",
             "delta": -10
-          },
-          {
-            "faction": "HRHB",
-            "dimension": "patron_confidence",
-            "delta": -15
           }
         ],
         "aggression_affinity": -0.8,
@@ -4362,7 +4220,7 @@
       "deny": {
         "RBiH": {
           "headline": "HVO Presidency denies detention regime (ICTY Prlic IT-04-74-T)",
-          "body": "HZ HB Presidency continues to frame Heliodrom, Dretelj, and Gabela as 'POW arrangements' and 'voluntary collection centers.' Sarajevo registers Zagreb patron pressure rising as international attention fixes on the Herzegovina detention sites."
+          "body": "HZ HB Presidency continues to frame Heliodrom, Dretelj, and Gabela as 'POW arrangements' and 'voluntary collection centers.' Sarajevo registers Zagreb's backing for Mostar cooling as international attention fixes on the Herzegovina detention sites."
         },
         "RS": {
           "headline": "HVO Presidency denies detention regime (ICTY Prlic IT-04-74-T)",
@@ -4376,7 +4234,7 @@
         },
         "RS": {
           "headline": "HVO command restricts ICRC access to detention facilities (ICTY Prlic Vol. 3)",
-          "body": "HZ HB authorities stage selective inspections of the Heliodrom and Dretelj sites. Pale sees Mostar adopting the access-obstruction posture under Zagreb patron pressure."
+          "body": "HZ HB authorities stage selective inspections of the Heliodrom and Dretelj sites. Pale sees Mostar adopting the access-obstruction posture as Zagreb's backing slips."
         }
       },
       "cooperate": {
@@ -4386,7 +4244,7 @@
         },
         "RS": {
           "headline": "HVO permits unrestricted ICRC inspection of detention facilities",
-          "body": "HZ HB Presidency permits ICRC inspection and press access at the Herzegovina detention sites. Pale reads the counterfactual posture as patron-channel rupture on the Croat side; the international record on the HVO detention regime hardens."
+          "body": "HZ HB Presidency permits ICRC inspection and press access at the Herzegovina detention sites. Pale reads the move as Mostar breaking with the denial line; the international record on the HVO detention regime hardens."
         }
       }
     },
@@ -4501,6 +4359,13 @@
             "kind": "morale_change",
             "faction": "RS",
             "delta": 2
+          },
+          {
+            "kind": "patron_supply_cut",
+            "faction": "RS",
+            "multiplier": 0.95,
+            "duration_turns": 13,
+            "tag": "rs_belgrade_pressure_response_1993#defy_belgrade_directive"
           }
         ],
         "sets_flags": {
@@ -4542,6 +4407,13 @@
             "kind": "morale_change",
             "faction": "RS",
             "delta": 0
+          },
+          {
+            "kind": "patron_supply_cut",
+            "faction": "RS",
+            "multiplier": 0.98,
+            "duration_turns": 13,
+            "tag": "rs_belgrade_pressure_response_1993#partial_compliance"
           }
         ],
         "sets_flags": {
@@ -4779,7 +4651,7 @@
     "bot_response_logic": "historical",
     "historical_default_response_id": "suppress_apwb",
     "source_note": "B8 worksheet 2026-05-28 + v1.3 packet §3.6 forward-looking guard: B8 is Ring-2 internal RBiH political posture and Bihać-pocket operational decision (no atrocity authorization surface; Velika Kladuša 1994 clearance narration is OUT-OF-SCOPE and remains canon-gated). Any future `csq_rbih_apwb_*` row consuming `rbih_abdic_relationship` outcomes MUST NOT re-author atrocity, cleansing, forced-displacement, hostage-taking, or any other sensitive-act response option; APWB suppression is well-attested Bihać-pocket warfare but downstream consequence rows must stay within legitimate military lanes. Branch-tag mapping into existing RBIH_BRANCH_TAGS vocabulary: suppress_apwb -> rbih_abdic_press_offensive; tolerate_apwb -> rbih_abdic_consolidate_defend; federation_offer -> rbih_abdic_accept_ceasefire; negotiated_autonomy -> rbih_abdic_seek_negotiation. The worksheet's `national_identity` cost-floor framing is encoded engine-side as `internal_cohesion` shifts (the canonical proxy in `strategic_dimensions.ts`, since `national_identity` is not a registered DimensionId). Cost floors per task spec + Game Designer Wave 1 review on packet v1.1 precedent (B-A batch) prevent counterfactual dominance of the historical `suppress_apwb` line. BB Vol. II Bihać-pocket / Krajina chronology (APWB declaration 27 September 1993; Operation Spider/Pauk August 1995 final clearance window; 5th Corps Velika Kladuša clearance August 1994); ARBiH 5th Corps autonomy from Sarajevo posture; ICTY Karadžić Trial Judgment (IT-95-5/18-T) Bihać-pocket strategic chronology references; Karlovac County Court State Prosecutor v. Fikret Abdić verdict 31 July 2002.",
-    "staff_assessment": "Suppressing the breakaway mirrors the documented Sarajevo posture of non-recognition and 5th Corps clearance operations; Velika Kladuša is briefly cleared in August 1994 and the post-Storm clearance in August 1995 closes the lane. Tolerating the split preserves immediate 5th Corps capacity for the external siege but lets the APWB internal front fester, paying recruitment and cohesion costs as the SDA hardline current reads the decision as Sarajevo accepting fragmentation. Offering Federation-line channels signals openness to a U.S.-backed dual-track solution but Belgrade-aligned Abdić reads it as Sarajevo weakness; patron pressure rises and negotiating leverage drops. Opening formal autonomy talks functionally legitimizes the APWB and pays heavy cohesion / recruitment costs as 5th Corps cadres read the decision as Sarajevo betrayal at the moment of crisis.",
+    "staff_assessment": "Suppressing the breakaway mirrors the documented Sarajevo posture of non-recognition and 5th Corps clearance operations; Velika Kladuša is briefly cleared in August 1994 and the post-Storm clearance in August 1995 closes the lane. Tolerating the split preserves immediate 5th Corps capacity for the external siege but lets the APWB internal front fester, paying recruitment and cohesion costs as the SDA hardline current reads the decision as Sarajevo accepting fragmentation. Offering Federation-line channels signals openness to a dual-track solution, but Belgrade-aligned Abdić reads it as Sarajevo weakness; Sarajevo's backers grow doubtful and negotiating leverage drops. Opening formal autonomy talks functionally legitimizes the APWB and pays heavy cohesion / recruitment costs as 5th Corps cadres read the decision as Sarajevo betrayal at the moment of crisis.",
     "trigger_evidence": [
       "Abdić's APWB declaration of 27 September 1993 at Velika Kladuša is on the record.",
       "5th Corps in Bihać faces a documented internal front to the north plus the external siege to the south and west.",
@@ -4863,13 +4735,8 @@
         "branch_tag": "rbih_abdic_accept_ceasefire",
         "historical_marker": "counterfactual",
         "label": "Federation-line offer — open dual-track channels",
-        "description": "Open U.S.-backed Federation-line channels to Abdić with conditional autonomy framings short of formal recognition. The signal is conditional military pressure on the Bihać-pocket axis. Belgrade-aligned Abdić reads the offer as Sarajevo weakness; patron pressure on Sarajevo rises as backers question the discipline of the line, and negotiating leverage drops on the Owen-Stoltenberg / Washington-track follow-through.",
+        "description": "Open Federation-line channels to Abdić with conditional autonomy framings short of formal recognition. The signal is conditional military pressure on the Bihać-pocket axis. Belgrade-aligned Abdić reads the offer as Sarajevo weakness; Sarajevo's backers question the discipline of the line, and negotiating leverage drops on the Owen-Stoltenberg / Washington-track follow-through.",
         "effects": [
-          {
-            "kind": "patron_pressure",
-            "faction": "RBiH",
-            "delta": 10
-          },
           {
             "kind": "narrative",
             "text": "Sarajevo opens Federation-line channels to Abdić; the offer is read in Belgrade-aligned Velika Kladuša as conditional pressure."
@@ -4960,11 +4827,11 @@
       "federation_offer": {
         "RS": {
           "headline": "Sarajevo opens Federation channels to Abdic",
-          "body": "The Presidency signals a dual-track posture with conditional autonomy framings short of formal recognition. Pale reads the signal as conditional Sarajevo pressure on the Bihać-pocket axis and as patron-driven weakness."
+          "body": "The Presidency signals a dual-track posture with conditional autonomy framings short of formal recognition. Pale reads the signal as conditional Sarajevo pressure on the Bihać-pocket axis and as weakness."
         },
         "HRHB": {
           "headline": "RBiH offers Federation-track engagement to Abdic",
-          "body": "Sarajevo opens conditional channels to APWB through Federation-line framings. Mostar weighs the precedent for parallel-track diplomacy and patron pressure on the unitary-state position."
+          "body": "Sarajevo opens conditional channels to APWB through Federation-line framings. Mostar weighs the precedent for parallel-track diplomacy and the doubts it raises among Sarajevo's backers."
         }
       },
       "negotiated_autonomy": {
@@ -5005,11 +4872,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "RBiH",
-        "delta": 5
-      },
       {
         "kind": "narrative",
         "text": "The Bosnian Assembly in Sarajevo accepts the Owen-Stoltenberg plan only if territory seized by force is returned. The war goes on, and Bosnia keeps its legal claim to its whole territory."
@@ -5102,11 +4964,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "HRHB",
-        "delta": 5
-      },
       {
         "kind": "narrative",
         "text": "Stupni Do is added to the growing list of documented HVO atrocities. Rajic will eventually plead guilty at The Hague."
@@ -5555,14 +5412,8 @@
       {
         "id": "seek_negotiation",
         "label": "Signal openness to negotiations",
-        "description": "Engage the international community. Signal willingness to negotiate. International standing improves and patron pressure eases, but hardliners in your own government are furious.",
-        "effects": [
-          {
-            "kind": "patron_pressure",
-            "faction": "RBiH",
-            "delta": -5
-          }
-        ],
+        "description": "Engage the international community. Signal willingness to negotiate. International standing improves and your hand at the table strengthens, but hardliners in your own government are furious.",
+        "effects": [],
         "dimension_shifts": [
           {
             "faction": "RBiH",
@@ -5807,13 +5658,7 @@
         "id": "negotiate_strength",
         "label": "Negotiate from strength",
         "description": "Engage the international mediators from a position of military advantage. Belgrade's pressure becomes manageable if you demonstrate willingness to talk — while holding every kilometer.",
-        "effects": [
-          {
-            "kind": "patron_pressure",
-            "faction": "RS",
-            "delta": -8
-          }
-        ],
+        "effects": [],
         "dimension_shifts": [
           {
             "faction": "RS",
@@ -5846,11 +5691,6 @@
             "kind": "cohesion_change",
             "faction": "RS",
             "delta": -8
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "RS",
-            "delta": -12
           }
         ],
         "dimension_shifts": [
@@ -6101,7 +5941,7 @@
             "delta": -10
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "HRHB",
             "delta": -10
           }
@@ -6115,11 +5955,6 @@
           {
             "faction": "HRHB",
             "dimension": "international_standing",
-            "delta": 15
-          },
-          {
-            "faction": "HRHB",
-            "dimension": "patron_confidence",
             "delta": 15
           }
         ],
@@ -6248,11 +6083,6 @@
             "kind": "cohesion_change",
             "faction": "RBiH",
             "delta": 3
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "RBiH",
-            "delta": -3
           }
         ],
         "dimension_shifts": [
@@ -6344,11 +6174,6 @@
         "description": "The diplomatic calendar is full. The UN is negotiating. The army will understand. You remain at the Presidency and conduct the visit through your chief of staff.",
         "effects": [
           {
-            "kind": "patron_pressure",
-            "faction": "RBiH",
-            "delta": -2
-          },
-          {
             "kind": "morale_change",
             "faction": "RBiH",
             "delta": -2
@@ -6378,11 +6203,6 @@
             "kind": "morale_change",
             "faction": "RBiH",
             "delta": 3
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "RBiH",
-            "delta": -8
           }
         ],
         "dimension_shifts": [
@@ -6561,11 +6381,6 @@
             "faction": "RS",
             "delta": 0.05,
             "duration_turns": 6
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "RS",
-            "delta": 3
           }
         ],
         "dimension_shifts": [
@@ -6597,11 +6412,6 @@
             "kind": "morale_change",
             "faction": "RS",
             "delta": 5
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "RS",
-            "delta": 3
           }
         ],
         "dimension_shifts": [
@@ -6629,11 +6439,6 @@
         "label": "Stay in Pale — governance demands it",
         "description": "The Assembly is in session. International contacts require your attention. The front will see you another time. Your staff relays your greetings to the corps commanders.",
         "effects": [
-          {
-            "kind": "patron_pressure",
-            "faction": "RS",
-            "delta": -2
-          },
           {
             "kind": "morale_change",
             "faction": "RS",
@@ -6664,11 +6469,6 @@
             "kind": "morale_change",
             "faction": "RS",
             "delta": 3
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "RS",
-            "delta": 2
           }
         ],
         "dimension_shifts": [
@@ -6805,11 +6605,6 @@
             "kind": "cohesion_change",
             "faction": "HRHB",
             "delta": 3
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "HRHB",
-            "delta": 2
           }
         ],
         "dimension_shifts": [
@@ -6901,11 +6696,6 @@
         "description": "The Zagreb line is active. The European monitors want a meeting. You remain in the capital and conduct the visit through your deputy commander. The front will understand.",
         "effects": [
           {
-            "kind": "patron_pressure",
-            "faction": "HRHB",
-            "delta": -3
-          },
-          {
             "kind": "morale_change",
             "faction": "HRHB",
             "delta": -2
@@ -6935,11 +6725,6 @@
             "kind": "morale_change",
             "faction": "HRHB",
             "delta": 3
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "HRHB",
-            "delta": 2
           }
         ],
         "dimension_shifts": [
@@ -7141,7 +6926,7 @@
             "delta": 3
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RBiH",
             "delta": -6
           }
@@ -7231,7 +7016,7 @@
     "image": "event_wartime_broadcast.webp",
     "source_tier": "design_counterfactual",
     "title": "Address the Nation",
-    "narrative": "Pale radio is ready to carry your words to every Serb household from Banja Luka to the Drina. An address can bind a tired people to the project and steady the assembly — but defiance commits Republika Srpska to a course its sponsors may not fund, and any line you draw tonight you will have to defend or disown. A measured speech spends credit you are short of; a hard one invites the patron's displeasure at being committed without consultation. What does the president tell his nation?",
+    "narrative": "Pale radio is ready to carry your words to every Serb household from Banja Luka to the Drina. An address can bind a tired people to the project and steady the assembly, but any line you draw tonight you will have to defend or disown. A hard speech rallies the home front and narrows your room at the table; a measured one opens that room and unsettles the hardliners. What does the president tell his nation?",
     "category": "command",
     "trigger": {
       "turn_min": 84,
@@ -7244,7 +7029,7 @@
     "staff_recommended_response_id": "address_endurance_rs",
     "historical_source": "Design provenance: fictionalized recurring command-presence abstraction approved by docs/40_reports/proposals/20260527_EVENT_FOUNDATIONAL_DECISIONS_PACKET.md. Wartime RS leadership broadcasts from Pale are attested; no specific speech or its content is claimed here.",
     "source_note": "Abstracted leadership-broadcast action; the staff recommendation is a command judgment, not a sourced historical default. No specific address is reproduced.",
-    "staff_assessment": "Staff recommends a measured address when assembly and sponsor relations are delicate; a defiant broadcast can harden the home front at the cost of patron goodwill and committed lines.",
+    "staff_assessment": "Staff recommends a measured address while the assembly is restless; a defiant broadcast can harden the home front at the cost of negotiating room and committed lines.",
     "trigger_evidence": [
       "Recurring leadership-presence pressure is active after prolonged front-line strain.",
       "The staff recommendation is an abstract command judgment, not a sourced historical default."
@@ -7289,7 +7074,7 @@
       {
         "id": "address_defiance_rs",
         "label": "A defiant address — the project endures",
-        "description": "You speak of the nation's survival and its right to exist. The home front rallies and the assembly closes ranks. But you have committed Republika Srpska in public to a maximal line, and the sponsor in Belgrade did not approve the words before you spoke them.",
+        "description": "You speak of the nation's survival and its right to exist. The home front rallies and the assembly closes ranks. But you have committed Republika Srpska in public to a maximal line, and every mediator now knows how little room you have left to give.",
         "effects": [
           {
             "kind": "morale_change",
@@ -7300,11 +7085,6 @@
             "kind": "cohesion_change",
             "faction": "RS",
             "delta": 3
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "RS",
-            "delta": 4
           }
         ],
         "dimension_shifts": [
@@ -7355,18 +7135,13 @@
       },
       {
         "id": "address_reassure_patron_rs",
-        "label": "Signal restraint — reassure the sponsor",
-        "description": "You pitch the address toward Belgrade and the watching world: a sober, responsible Republika Srpska open to settlement. The sponsor is reassured and pressure eases — but the hardliners at home hear surrender in the careful phrasing.",
+        "label": "Signal restraint — open the door to talks",
+        "description": "You pitch the address toward Belgrade and the watching world: a sober, responsible Republika Srpska open to settlement. It gives your negotiators room, but the hardliners at home hear surrender in the careful phrasing.",
         "effects": [
           {
             "kind": "morale_change",
             "faction": "RS",
             "delta": -2
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "RS",
-            "delta": -6
           }
         ],
         "dimension_shifts": [
@@ -7414,17 +7189,17 @@
         },
         "RBiH": {
           "headline": "Pale broadcasts a defiant address",
-          "body": "The RS presidency calls for the project to endure. Sarajevo sees Pale hardening its posture and binding itself against compromise, with sponsor friction implied."
+          "body": "The RS presidency calls for the project to endure. Sarajevo sees Pale hardening its posture and binding itself against compromise."
         }
       },
       "address_reassure_patron_rs": {
         "HRHB": {
           "headline": "Pale signals restraint",
-          "body": "The RS presidency pitches a responsible, settlement-open posture toward its sponsor and the world. Mostar reads eased external pressure and unsettled hardliners in Pale."
+          "body": "The RS presidency pitches a responsible, settlement-open posture toward Belgrade and the world. Mostar reads more room for talks and unsettled hardliners in Pale."
         },
         "RBiH": {
           "headline": "Pale signals restraint",
-          "body": "The RS presidency strikes a measured public tone aimed at Belgrade and the West. Sarajevo sees Pale trading home-front confidence for patron goodwill."
+          "body": "The RS presidency strikes a measured public tone aimed at Belgrade and the West. Sarajevo sees Pale trading home-front confidence for room at the table."
         }
       },
       "address_endurance_rs": {
@@ -7454,7 +7229,7 @@
     "image": "event_wartime_broadcast.webp",
     "source_tier": "design_counterfactual",
     "title": "Address the Nation",
-    "narrative": "Herceg-Bosna's airwaves wait for the president. An address can steady a Croat community stretched between Herzegovina and the central-Bosnia pockets, and reassure Zagreb that the project is in steady hands — but a defiant line commits the HVO publicly and tightens the noose around any reconciliation with Sarajevo, while a conciliatory one risks the hardliners and Zagreb's patrons reading weakness. What does the president of the Croatian Community tell his people?",
+    "narrative": "Herceg-Bosna's airwaves wait for the president. An address can steady a Croat community stretched between Herzegovina and the central-Bosnia pockets, but a defiant line commits the HVO publicly and narrows any reconciliation with Sarajevo, while a conciliatory one opens talks and risks the hardliners reading weakness. What does the president of the Croatian Community tell his people?",
     "category": "command",
     "trigger": {
       "turn_min": 84,
@@ -7574,17 +7349,12 @@
       {
         "id": "address_conciliation_hrhb",
         "label": "Signal conciliation — open the door to Sarajevo",
-        "description": "You speak of coexistence and a shared framework, pitching toward Zagreb's federation pressure and the watching West. It opens negotiating room and eases patron friction — but the hardliners hear capitulation, and central-Bosnia commanders wonder what their dead were for.",
+        "description": "You speak of coexistence and a shared framework, pitching toward Zagreb's federation pressure and the watching West. It opens negotiating room, but the hardliners hear capitulation, and central-Bosnia commanders wonder what their dead were for.",
         "effects": [
           {
             "kind": "morale_change",
             "faction": "HRHB",
             "delta": -2
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "HRHB",
-            "delta": -6
           }
         ],
         "dimension_shifts": [
@@ -8488,7 +8258,7 @@
       "text": "Pale crystallizes its general posture decision between independence trajectory and negotiated-autonomy fallback frameworks."
     },
     "source_note": "Between the May 1993 Pale Assembly's rejection of Vance-Owen at Bijeljina (5-6 May 1993) and the August 1994 Pale Assembly's rejection of the Contact Group 51/49 framework, RS leadership had repeated decision moments about whether to pursue full independent state status or accept a negotiated-autonomy fallback framework within BiH (Knin-style autonomous province, asymmetric federation entity status, or minority-rights-only constitutional package). Karadžić, Krajišnik, and Mladić consistently chose the independence path, even when Belgrade signalled willingness to accept negotiated autonomy as the path of least international resistance and the route to ending the FRY sanctions regime. This R12 row is DISTINCT from R1 (`rs_strategic_goals`, war_1992.json turn 1-3 — foundational Six Strategic Goals 1992 platform), R6 (`rs_assembly_rejects_voplan_1993`, war_1993.json turn 39 — specific VOPP plan-response window at Bijeljina May 1993), R7 (`rs_belgrade_pressure_response_1993`, war_1993.json turn 76-79 — soft Belgrade diplomatic-pressure phase on Owen-Stoltenberg envelope autumn 1993), and R8 (`belgrade_embargo_rs_1994`, war_1994.json — hard Belgrade material embargo response August 1994). R12 captures the GENERAL posture decision between specific plan-response windows: the discrete RS leadership decision lane between independence trajectory vs negotiated-autonomy fallback, sitting in the policy window between the May 1993 VOPP rejection and the August 1994 Contact Group rejection. Sources: ICTY Krajišnik IT-00-39-T Trial Judgment (27 September 2006) §§1006-1040 (the earlier cite: Krajišnik §§1006-1040 is his knowledge of 1992 events (information flows, travel, reports of expulsions and detention) and the judgment ends at 30 December 1992, so it cannot carry a 1993-94 claim; Owen-Stoltenberg is Karadžić ¶¶377-383 and the Belgrade-Pale rift and Drina blockade ¶¶3289-3297) (Pale leadership posture decisions on diplomatic envelope, 1993-1994); ICTY Karadžić IT-95-5/18-T Trial Judgment (24 March 2016) paras 3283-3295 (the earlier cite \"Vol. III §§4263-4310\" is Markale II of 28 August 1995; FRY-RS channel friction across the autumn 1993 - August 1994 corridor; Pale leadership Six-Goals defence pattern); Richard Holbrooke, To End a War (Random House 1998) chs. 4-5 (Belgrade-Pale split as defining political-military thread of the war's mid-period; negotiated-autonomy options surveyed and rejected); David Owen, Balkan Odyssey (Harcourt 1995) chs. 7-8 (Belgrade-brokered tripartite frameworks; Knin-style autonomous province proposals; Pale's consistent rejection pattern of fallback frameworks); Balkan Battlegrounds Vol. II 1993-1994 Ch. 11 (the earlier cite: BB Vol. II has annexes and addenda, not chapters, and the claim has no BB anchor; Balkan Battlegrounds Vol. II 1993-1994 Ch. 11 is not a BB location) chronology (RS leadership posture across the 1993-1994 mid-period; FRY-RS channel modulation through autonomy framework signalling). Engine vocabulary substitutions per memory/engine_dimension_vocabulary.md: counterfactual cost floors use canonical DimensionIds (patron_pressure, international_standing, negotiating_leverage, internal_cohesion, military_credibility, territorial_legitimacy, alliance_change, morale_change); no new DimensionIds introduced. Per Wave 2 Canon §3.6 forward-looking guard, any future `csq_rs_autonomy_*` row consuming this row's outcomes MUST NOT re-author cleansing, forced-displacement, civilian-targeting, hostage-taking, paramilitary deployment, ethnic-targeting, or any sensitive-act response option; the autonomy-path decision lane is constitutional-political crisis scope, NOT operational ethnic-targeting. The Drina-corridor cleansing, Sarajevo-siege fires, Srebrenica enclave operations, Prijedor camps exposure, Drina valley campaign and any associated atrocity surfaces (drina_valley_ethnic_cleansing_1992, prijedor_camps_revealed_1992, srebrenica_falls_1995, un_hostage_crisis_1995, deliberate_force_rs_compliance_1995, drina_cleansing_decision_1992, concentration_camps_revealed_1992) remain canon-gated through their existing event surfaces and may not be re-opened or re-authored by any csq_rs_autonomy_* descendant. New event reuses existing RS_BRANCH_TAGS entries (`rs_all_six`, `rs_selective`, `rs_belgrade_pale_acknowledge`, `rs_dayton_accept`) and one CARRIER_FLAGS entry pattern — no vocabulary additions; no new carrier flags.",
-    "staff_assessment": "Pursuing independence is the documented Pale posture across the entire 1993-1995 mid-period: Karadžić, Krajišnik, and Mladić agreed the platform mattered more than the patron channel or the international framework. The maximum-cost counterfactual is accepting minority rights only, which concedes the entire Six Strategic Goals platform: patron pressure spikes (+30) and international standing rises sharply (+30), but internal cohesion collapses (-40), military credibility falls (-20), territorial legitimacy concedes the maximalist claim (-30), and the entire Pale leadership faces revolt. Negotiating autonomy within BiH is the moderate counterfactual: a Knin-style autonomous province within BiH preserves some of the territorial claim at the cost of independent statehood; Pale hawks revolt (internal cohesion -15) but the patron channel and negotiating leverage hold. Accepting federation status is the asymmetric-entity counterfactual closest to what the Dayton framework eventually produced, but accepting it in 1993-94 would have produced a massive Pale-hawk revolt (internal cohesion -30) and a fall in military credibility (-10) even as patron pressure and international standing rose. The Russian channel and the Patriarchate soften the cost of negotiating autonomy within BiH (negotiating leverage +15).",
+    "staff_assessment": "Pursuing independence is the documented Pale posture across the entire 1993-1995 mid-period: Karadžić, Krajišnik, and Mladić agreed the platform mattered more than the patron channel or the international framework. The maximum-cost counterfactual is accepting minority rights only, which concedes the entire Six Strategic Goals platform: patron support jumps (+30) and international standing rises sharply (+30), but internal cohesion collapses (-40), military credibility falls (-20), territorial legitimacy concedes the maximalist claim (-30), and the entire Pale leadership faces revolt. Negotiating autonomy within BiH is the moderate counterfactual: a Knin-style autonomous province within BiH preserves some of the territorial claim at the cost of independent statehood; Pale hawks revolt (internal cohesion -15) but Belgrade's backing and negotiating leverage rise. Accepting federation status is the asymmetric-entity counterfactual closest to what the Dayton framework eventually produced, but accepting it in 1993-94 would have produced a massive Pale-hawk revolt (internal cohesion -30) and a fall in military credibility (-10) even as patron support and international standing rose. The Russian channel and the Patriarchate soften the cost of negotiating autonomy within BiH (negotiating leverage +15).",
     "trigger_evidence": [
       "The May 1993 Pale Assembly rejection of Vance-Owen is in the rear-view mirror and the Contact Group framework is forming on the horizon.",
       "Belgrade has signalled willingness to accept negotiated autonomy through the Owen-Stoltenberg envelope, the Patriarch Pavle channel, and Milošević's private envoys.",
@@ -8508,7 +8278,7 @@
             "delta": 3
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
             "delta": -5
           }
@@ -8549,7 +8319,7 @@
             "delta": -2
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
             "delta": 15
           }
@@ -8599,7 +8369,7 @@
             "delta": -4
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
             "delta": 20
           },
@@ -8646,7 +8416,7 @@
             "delta": -6
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
             "delta": 30
           },

@@ -444,6 +444,10 @@ As exhaustion rises, actions become harder to execute and outcomes more unpredic
 
 External patrons provide conditional support and apply pressure. Patron objectives may change over time and may not align fully with player goals.
 
+Support and pressure are two separate things (§6 E4, 2026-11-17). **Patron support** is how much material and political backing the patron gives; event choices raise or lower it (the `patron_support` effect, positive = backing rises), and it is the base of the faction's patron confidence. Condemnation, UN, NATO and atrocity events do not raise a perpetrator's patron support. **Patron pressure** is how hard the patron pushes the faction toward peace. It is the patron override, recomputed every turn, and it already reflects war crimes and atrocities. The `patron_pressure_above` event condition is named for pressure because it reads the override, not support.
+
+Each patron change is charged once (§6 E4 round 3, 2026-11-17): an event choice that moves patron support does not also move patron confidence. **Belgrade's break follows a rejection.** Belgrade breaks with Pale (support falls, sanctions start) only after Republika Srpska has rejected the Contact Group plan; if Pale accepts the plan, neither the break nor the Belgrade embargo decision comes. Sanctions no longer wear support down week after week: the break is charged once. A cost that would take support below zero is not lost; the remainder lowers the faction's patron confidence instead.
+
 ## 15. Negotiation and War Termination
 
 ### 15.1 Opening negotiation windows

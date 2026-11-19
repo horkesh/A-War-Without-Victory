@@ -16,12 +16,22 @@ import type { EventResponseOption } from '../events/event_types.js';
 import type { FactionId } from '../../state/game_state.js';
 import type { PoliticalAssessment, PoliticalPersonality } from './political_personality.js';
 
+/** Sum of an option's `patron_support` deltas for one faction (§6 E4 round 3). */
+export function patronSupportDelta(option: EventResponseOption, faction: string): number {
+    let sum = 0;
+    for (const effect of option.effects ?? []) {
+        if (effect.kind === 'patron_support' && effect.faction === faction) sum += effect.delta;
+    }
+    return sum;
+}
+
 /**
  * Scores a single response option for a given faction, using personality weights
  * and the current political assessment.
  *
  * Components:
- *   dimensionScore — weighted sum of dimension_shifts that apply to respondingFaction
+ *   dimensionScore — weighted sum of dimension_shifts that apply to respondingFaction,
+ *                    plus its patron_support delta at the patron_confidence weight
  *   riskScore      — bonus when personality tolerates more risk than the option demands
  *   aggressionScore — positive when (winning + aggressive option) or (losing + defensive option)
  *   patronScore    — high patron pressure + sensitive faction → prefer low-aggression options
@@ -43,6 +53,11 @@ export function scorePoliticalOption(
             dimensionScore += shift.delta * weight;
         }
     }
+    // §6 E4 round 3 (Q1, one carrier per patron change): a scope that carries patron_support
+    // carries no patron_confidence twin, so the responding faction's patron_support delta is
+    // scored at that faction's patron_confidence weight, as the dimension shift it replaces.
+    dimensionScore += patronSupportDelta(option, respondingFaction)
+        * (personality.dimension_weights['patron_confidence'] ?? 0);
 
     // riskScore: positive when personality tolerates more risk than option requires
     const riskScore = (personality.risk_tolerance - (option.risk_level ?? 0.5)) * 2.0;

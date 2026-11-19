@@ -86,6 +86,13 @@ function displayedEffectRow(effect: EventEffect): string | null {
   if (effect.kind === 'morale_change') return `${armyLabel(effect.faction)} morale ${signedDelta(effect.delta)}`;
   if (effect.kind === 'alliance_change') return `RBiH–HRHB alliance ${signedDelta(Math.round(effect.delta * 100))}`;
   if (effect.kind === 'aggression_modifier') return `${armyLabel(effect.faction)} offensive drive ${signedDelta(Math.round(effect.delta * 100))}% for ${effect.duration_turns} weeks (noted in the record; it does not change army planning)`;
+  // Patron-defiance panel: the united-front answer shows Zagreb's cut before the choice.
+  if (effect.kind === 'patron_supply_cut') {
+    const patron = effect.faction === 'RS'
+      ? 'Belgrade holds back part of its fuel and ammunition'
+      : 'Zagreb holds back some of its ammunition, fuel and seconded officers';
+    return `${patron}: ${armyLabel(effect.faction)} combat effectiveness -${Math.round((1 - effect.multiplier) * 100)}% for ${effect.duration_turns} weeks`;
+  }
   throw new Error(`Unhandled display-safe foundational effect: ${effect.kind}`);
 }
 

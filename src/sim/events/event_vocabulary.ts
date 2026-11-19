@@ -27,7 +27,17 @@ export const KNOWN_EVENT_EFFECT_KINDS = [
     // so every catalog use was a silent no-op. Strategic-dimension effects are
     // authored as `dimension_shifts`; the loader now rejects the old kind.
     'offensive_ops_suppression',
-    'patron_pressure',
+    // §6 E4 (2026-11-17): renamed from 'patron_pressure'. One semantics, SUPPORT:
+    // a positive delta means the patron's material and political backing rises
+    // (`patron_relationships[faction].support_level`). Pressure toward peace is the
+    // per-turn patron override (state/patron_pressure.ts), which keeps its name, as
+    // does the `patron_pressure_above` condition that reads it. The loader rejects
+    // the old kind name.
+    'patron_support',
+    // Patron-defiance panel (2026-11-17): a defiance answer's one live material
+    // carrier (combat power for N weeks plus a patron-panel receipt). Rules in
+    // event_loader.ts `validatePatronSupplyCut`.
+    'patron_supply_cut',
     'recruitment_modifier',
 ] as const;
 
@@ -56,6 +66,8 @@ export const KNOWN_EVENT_CONDITION_TYPES = [
     'paramilitary_deployments_at_most',
     'paramilitary_mode_equals',
     'patron_pressure_above',
+    // §6 E4 round 3 (Q3): reads negotiation.peace_plan_history (resolved entries).
+    'peace_plan_response',
     'rbih_hrhb_war_started',
     'territory_control',
     'territory_loss_window',

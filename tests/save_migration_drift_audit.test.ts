@@ -29,7 +29,9 @@ describe('save migration drift audit diagnostic', () => {
             fields: Array<{ field: string }>;
         };
 
-        expect(report.latest_schema_version).toBe(41);
+        // v40 retired the September 1991 peace start (#773), §6 E2 took 41, §6 E4 took 42, §6 E3a2 took 43,
+        // the patron-defiance panel took 44.
+        expect(report.latest_schema_version).toBe(44);
         expect(report.anonymous_default_count).toBe(0);
         expect(report.fields).toEqual([]);
     });

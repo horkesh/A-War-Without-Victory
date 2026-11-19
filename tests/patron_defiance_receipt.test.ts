@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { FactionId, GameState, InternationalVisibilityPressure } from '../src/state/game_state.js';
 import { ensureInternationalVisibilityPressure, updatePatronState } from '../src/state/patron_pressure.js';
 import { applyDimensionShift, initializeStrategicDimensions } from '../src/sim/events/strategic_dimensions.js';
+import { applyEventEffects } from '../src/sim/events/apply_effects.js';
 import {
     buildConsequenceReceipts,
     receiptsRealizedOnTurn,
@@ -9,28 +10,23 @@ import {
 import type { EventDefinition } from '../src/sim/events/event_types.js';
 
 /**
- * Slice 4a — patron-defiance consequence-receipt.
+ * Patron-defiance receipts (patron-defiance panel, 2026-11-17).
  *
- * When (and only when) the emergent patron-defiance penalty actually CUTS a
- * faction's material support, `updatePatronState` must record the realized cut
- * in `state.military.patron_defiance_supply_cuts`, and `buildConsequenceReceipts`
- * must project it into a one-shot ConsequenceReceipt surfaced by the existing
- * Turn-Aftermath "Consequences Realized" section (receiptsRealizedOnTurn).
- *
- * In historical/unset (calibration) mode NOTHING is recorded → byte-identical.
- * RBiH (severity 0) earns no cut → no receipt even in emergent mode.
+ * A receipt is written only when a defiance answer's `patron_supply_cut` effect applies
+ * (one per answer), and `buildConsequenceReceipts` projects the player faction's receipts
+ * into one-shot ConsequenceReceipts for the Turn-Aftermath "Consequences Realized" section.
+ * The retired per-turn defiance term never writes one, in any decision mode.
  */
 
-const TURN = 12;
+const TURN = 95;
 
 function makeState(opts: {
     decision_mode?: 'historical' | 'emergent';
     playerFaction?: FactionId;
-    /** patron_confidence delta applied to every faction (negative = defiance). */
     confidenceDelta?: number;
 }): GameState {
     const store = initializeStrategicDimensions();
-    if (opts.confidenceDelta && opts.confidenceDelta !== 0) {
+    if (opts.confidenceDelta) {
         for (const f of ['RS', 'RBiH', 'HRHB'] as FactionId[]) {
             applyDimensionShift(store, f, 'patron_confidence', opts.confidenceDelta);
         }
@@ -53,7 +49,10 @@ function makeState(opts: {
             front_posture_regions: {},
             front_pressure: {},
             militia_pools: {},
-            negotiation: { strategic_dimensions: store }
+            negotiation: {
+                strategic_dimensions: store,
+                patron_relationships: { RS: { support_level: 35 }, HRHB: { support_level: 62 } },
+            }
         } as any,
         political: {} as any,
         displacement: {} as any
@@ -72,89 +71,51 @@ function neutralIvp(state: GameState): InternationalVisibilityPressure {
     return ivp;
 }
 
-// Catalog can be empty — patron-defiance receipts need no event catalog.
 const EMPTY_CATALOG = new Map<string, EventDefinition>();
 
-describe('patron-defiance consequence-receipt (Slice 4a)', () => {
-    it.each(['RS', 'HRHB'] as FactionId[])(
-        'EMERGENT + defiant: records both patron cuts but projects only selected-player %s',
-        (playerFaction) => {
-            const state = makeState({
-                decision_mode: 'emergent',
-                confidenceDelta: -40,
-                playerFaction,
-            });
-            updatePatronState(state, undefined, neutralIvp(state));
+function defyZagreb(state: GameState): void {
+    applyEventEffects(state, [{
+        kind: 'patron_supply_cut', faction: 'HRHB', multiplier: 0.85, duration_turns: 52,
+        tag: 'zagreb_orders_hrhb_ceasefire#resist_patron',
+    }]);
+}
 
-            const cuts = state.military.patron_defiance_supply_cuts ?? [];
-            const factions = cuts.map((c) => c.faction).sort();
-            expect(factions).toEqual(['HRHB', 'RS']);
-            for (const c of cuts) {
-                expect(c.turn).toBe(TURN);
-                expect(c.cut_fraction).toBeGreaterThan(0);
-                expect(c.support_after).toBeGreaterThanOrEqual(0);
-            }
-
-            const receipts = buildConsequenceReceipts(state, EMPTY_CATALOG);
-            expect(receipts).toHaveLength(1);
-            expect(receipts[0]!.decisionEventId).toContain(playerFaction);
-            expect(receipts[0]!.status).toBe('confirmed');
-            expect(receipts[0]!.firedTurn).toBe(TURN);
-            expect(receipts[0]!.decisionTurn).toBe(TURN);
-            expect(receipts[0]!.claimPredicate.operands[0]?.owner_path).toBe('state.meta.player_faction');
-            // Sober/factual; never a reward.
-            expect(receipts[0]!.predictedLabel.toLowerCase()).toContain('cut');
-
-            // Surfaces in the existing aftermath "realized this turn" filter.
-            const realized = receiptsRealizedOnTurn(receipts, TURN);
-            expect(realized).toHaveLength(1);
-        },
-    );
-
-    it('EMERGENT + defiant: records engine cuts but projects none without a selected player', () => {
-        const state = makeState({ decision_mode: 'emergent', confidenceDelta: -40 });
-        updatePatronState(state, undefined, neutralIvp(state));
-
-        expect(state.military.patron_defiance_supply_cuts).toHaveLength(2);
-        expect(buildConsequenceReceipts(state, EMPTY_CATALOG)).toEqual([]);
-    });
-
-    it('HISTORICAL mode: defiance records NO cut and projects NO receipt (byte-identical)', () => {
-        const state = makeState({ decision_mode: 'historical', confidenceDelta: -40 });
-        updatePatronState(state, undefined, neutralIvp(state));
-
-        expect(state.military.patron_defiance_supply_cuts).toBeUndefined();
-        expect(buildConsequenceReceipts(state, EMPTY_CATALOG)).toEqual([]);
-    });
-
-    it('UNSET mode: defiance records NO cut and projects NO receipt (byte-identical)', () => {
-        const state = makeState({ confidenceDelta: -40 });
-        updatePatronState(state, undefined, neutralIvp(state));
-
-        expect(state.military.patron_defiance_supply_cuts).toBeUndefined();
-        expect(buildConsequenceReceipts(state, EMPTY_CATALOG)).toEqual([]);
-    });
-
-    it('EMERGENT but neutral confidence (no cut): records NO cut and projects NO receipt', () => {
-        const state = makeState({ decision_mode: 'emergent', confidenceDelta: 0 });
-        updatePatronState(state, undefined, neutralIvp(state));
-
-        expect(state.military.patron_defiance_supply_cuts).toBeUndefined();
-        expect(buildConsequenceReceipts(state, EMPTY_CATALOG)).toEqual([]);
-    });
-
-    it('EMERGENT + defiant: RBiH (severity 0) earns NO cut → no RBiH receipt', () => {
-        const state = makeState({
-            decision_mode: 'emergent',
-            confidenceDelta: -40,
-            playerFaction: 'RBiH',
-        });
-        updatePatronState(state, undefined, neutralIvp(state));
-
-        const cuts = state.military.patron_defiance_supply_cuts ?? [];
-        expect(cuts.some((c) => c.faction === 'RBiH')).toBe(false);
+describe('patron-defiance receipts', () => {
+    it('a defiance answer writes one receipt, projected for the selected player and realized that turn', () => {
+        const state = makeState({ decision_mode: 'emergent', playerFaction: 'HRHB' });
+        defyZagreb(state);
+        expect(state.military.patron_defiance_supply_cuts).toHaveLength(1);
 
         const receipts = buildConsequenceReceipts(state, EMPTY_CATALOG);
-        expect(receipts.some((r) => r.decisionEventId.includes('RBiH'))).toBe(false);
+        expect(receipts).toHaveLength(1);
+        expect(receipts[0]!.decisionEventId).toContain('HRHB');
+        expect(receipts[0]!.status).toBe('confirmed');
+        expect(receipts[0]!.firedTurn).toBe(TURN);
+        expect(receipts[0]!.claimPredicate.operands[0]?.owner_path).toBe('state.meta.player_faction');
+        expect(receipts[0]!.predictedLabel).toContain('combat effectiveness -15%');
+        expect(receiptsRealizedOnTurn(receipts, TURN)).toHaveLength(1);
     });
+
+    it('another faction\'s receipt is never projected for the player', () => {
+        const state = makeState({ decision_mode: 'emergent', playerFaction: 'RS' });
+        defyZagreb(state);
+        expect(buildConsequenceReceipts(state, EMPTY_CATALOG)).toEqual([]);
+    });
+
+    it('no selected player: the receipt is recorded but not projected', () => {
+        const state = makeState({ decision_mode: 'emergent' });
+        defyZagreb(state);
+        expect(state.military.patron_defiance_supply_cuts).toHaveLength(1);
+        expect(buildConsequenceReceipts(state, EMPTY_CATALOG)).toEqual([]);
+    });
+
+    it.each(['historical', 'emergent', undefined] as const)(
+        '%s mode: low patron_confidence alone writes no receipt (the per-turn term is retired)',
+        (mode) => {
+            const state = makeState({ decision_mode: mode, playerFaction: 'HRHB', confidenceDelta: -40 });
+            updatePatronState(state, undefined, neutralIvp(state));
+            expect(state.military.patron_defiance_supply_cuts).toBeUndefined();
+            expect(buildConsequenceReceipts(state, EMPTY_CATALOG)).toEqual([]);
+        },
+    );
 });

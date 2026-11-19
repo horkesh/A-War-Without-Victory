@@ -888,31 +888,38 @@ export function buildDecisionConsequenceLedger(
   const patronCuts = Array.isArray(state.rawGameState?.military?.patron_defiance_supply_cuts)
     ? state.rawGameState.military.patron_defiance_supply_cuts
     : [];
+  // Patron-defiance panel (2026-11-17): one record per defiance answer whose patron_supply_cut
+  // applied. Pre-panel entries (no tag) recorded a term that never reached combat and are skipped.
   for (const cut of patronCuts) {
     if (!playerFaction || cut?.faction !== playerFaction) continue;
+    if (typeof cut.tag !== 'string' || cut.tag.length === 0) continue;
     const turn = finiteReceiptNumber(cut.turn);
     const cutFraction = finiteReceiptNumber(cut.cut_fraction);
-    const supportAfter = finiteReceiptNumber(cut.support_after);
-    if (turn == null || cutFraction == null || supportAfter == null) continue;
+    const expiresTurn = finiteReceiptNumber(cut.expires_turn);
+    if (turn == null || cutFraction == null || expiresTurn == null) continue;
+    const weeks = expiresTurn - turn;
+    const cutPct = Math.round(cutFraction * 100);
+    const combinedPct = Math.round((1 - (finiteReceiptNumber(cut.combined_multiplier) ?? 1)) * 100);
+    const floorBinding = cut.floor_binding === true;
     const forceLabel = getPlayerSafeMilitaryFactionName(playerFaction, playerFaction);
+    const patron = patronLabelForFaction(playerFaction);
     records.push({
-      id: `patron-defiance:${playerFaction}:${turn}:${cutFraction}:${supportAfter}`,
+      id: `patron-defiance:${playerFaction}:${turn}:${cut.tag}`,
       turn,
       familyId: 'patron-relations',
       family: 'Patron relations',
-      title: 'Patron defiance supply cut',
+      title: 'Patron supply cut',
       titleToken: { key: 'decisionConsequences.title.patron.defianceSupplyCut' },
-      outcome: 'Material support reduced',
-      outcomeToken: { key: 'decisionConsequences.outcome.materialSupportReduced' },
-      detail: `${patronLabelForFaction(playerFaction)} cut ${Math.round(cutFraction * 100)}% of material support for ${forceLabel}; support after cut ${Math.round(supportAfter * 100)}%.`,
+      outcome: 'Combat effectiveness reduced',
+      outcomeToken: { key: 'decisionConsequences.outcome.combatEffectivenessReduced' },
+      detail: floorBinding
+        ? `${forceLabel}: ${patron} held back part of its materiel; -${cutPct}% for ${weeks} weeks. With earlier cuts in force, the combined cut reached its limit: combat effectiveness -${combinedPct}% in all.`
+        : `${forceLabel}: ${patron} held back part of its materiel; combat effectiveness -${cutPct}% for ${weeks} weeks.`,
       detailToken: {
-        key: 'decisionConsequences.detail.patron.defianceSupplyCut',
-        params: {
-          patron: patronLabelForFaction(playerFaction),
-          cutPct: Math.round(cutFraction * 100),
-          force: forceLabel,
-          supportPct: Math.round(supportAfter * 100),
-        },
+        key: floorBinding
+          ? 'decisionConsequences.detail.patron.defianceSupplyCutFloor'
+          : 'decisionConsequences.detail.patron.defianceSupplyCut',
+        params: { patron, cutPct, force: forceLabel, weeks, combinedPct },
       },
       recordTarget: 'records',
     });

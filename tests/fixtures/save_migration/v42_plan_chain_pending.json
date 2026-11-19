@@ -1,0 +1,616 @@
+{
+  "schema_version": 42,
+  "meta": {
+    "turn": 56,
+    "seed": "v42-plan-chain-pending",
+    "referendum_held": false,
+    "referendum_turn": null,
+    "war_start_turn": null,
+    "peace_scheduled_referendum_turn": null,
+    "peace_scheduled_war_start_turn": null,
+    "referendum_eligible_turn": null,
+    "referendum_deadline_turn": null,
+    "game_over": false,
+    "player_faction": "RS",
+    "decision_mode": "historical"
+  },
+  "factions": [
+    {
+      "id": "RBiH",
+      "profile": {
+        "authority": 1,
+        "legitimacy": 1,
+        "control": 1,
+        "logistics": 1,
+        "exhaustion": 0
+      },
+      "areasOfResponsibility": [],
+      "supply_sources": [],
+      "command_capacity": 0,
+      "negotiation": {
+        "pressure": 0,
+        "last_change_turn": null,
+        "capital": 0,
+        "spent_total": 0,
+        "last_capital_change_turn": null
+      },
+      "declaration_pressure": 0,
+      "declared": false,
+      "declaration_turn": null
+    }
+  ],
+  "paramilitary_decision_history": [],
+  "military": {
+    "front_segments": {},
+    "theatres": {},
+    "army_theatre_assignment": {},
+    "formations": {},
+    "front_posture": {},
+    "front_posture_regions": {},
+    "front_pressure": {},
+    "assignable_front_segments": [],
+    "brigade_front_assignment": {},
+    "militia_pools": {
+      "gorazde:RBiH": {
+        "mun_id": "gorazde",
+        "faction": "RBiH",
+        "available": 1200,
+        "committed": 340,
+        "exhausted": 75,
+        "updated_turn": 12,
+        "wounded_pending": 0
+      },
+      "prijedor:RS": {
+        "mun_id": "prijedor",
+        "faction": "RS",
+        "available": 0,
+        "committed": 5100,
+        "exhausted": 820,
+        "updated_turn": 12,
+        "wounded_pending": 0
+      }
+    },
+    "war_militia_strength": {},
+    "war_jna": {
+      "transition_begun": false,
+      "withdrawal_progress": 0,
+      "asset_transfer_rs": 0
+    },
+    "army_co_decision_traces": {
+      "RBiH": [
+        {
+          "turn": 120,
+          "campaign_role": "AUTONOMOUS_LAUNCH_PROPOSAL",
+          "rationale": "legacy proposal",
+          "raw_directive_id": "legacy_op"
+        }
+      ]
+    },
+    "army_corps_directives_by_faction": {},
+    "event_decision_log": [
+      {
+        "event_id": "vance_owen_plan_1993",
+        "response_id": "accept",
+        "decision_source": "bot_ai_default",
+        "faction": "RBiH",
+        "turn": 39
+      }
+    ],
+    "fired_event_ids": [
+      "vance_owen_plan_1993",
+      "hrhb_vance_owen_acceptance_1993",
+      "rs_assembly_rejects_voplan_1993"
+    ],
+    "event_readiness": {},
+    "event_fire_counts": {
+      "vance_owen_plan_1993": 1,
+      "hrhb_vance_owen_acceptance_1993": 1,
+      "rs_assembly_rejects_voplan_1993": 1
+    },
+    "event_last_fired_turn": {
+      "vance_owen_plan_1993": 39,
+      "hrhb_vance_owen_acceptance_1993": 52,
+      "rs_assembly_rejects_voplan_1993": 56
+    },
+    "event_flags": {},
+    "enabled_event_ids": [],
+    "event_overflow_queue": [],
+    "pending_event_decisions": [
+      {
+        "event_id": "rs_assembly_rejects_voplan_1993",
+        "event_title": "The Pale Assembly Votes on Vance-Owen",
+        "turn_fired": 56,
+        "faction": "RS",
+        "requires_player_response": true,
+        "historical_default_response_id": "accept_rejection",
+        "response_options": [
+          {
+            "id": "accept_rejection",
+            "label": "Accept the Assembly rejection",
+            "effects": [
+              {
+                "kind": "morale_change",
+                "faction": "RS",
+                "delta": 5
+              },
+              {
+                "kind": "patron_support",
+                "faction": "RS",
+                "delta": -10
+              }
+            ],
+            "dimension_shifts": [
+              {
+                "faction": "RS",
+                "dimension": "international_standing",
+                "delta": -15
+              },
+              {
+                "faction": "RS",
+                "dimension": "internal_cohesion",
+                "delta": 10
+              }
+            ],
+            "future_consequences": [
+              {
+                "id": "vopp_rejection_visibility",
+                "label": "Rejection",
+                "timing": "future",
+                "certainty": "guaranteed",
+                "material_effect_refs": [
+                  "morale_change.RS",
+                  "patron_support.RS",
+                  "dimension_shift.RS.international_standing"
+                ],
+                "explanation": "Probe."
+              }
+            ]
+          },
+          {
+            "id": "override_assembly",
+            "label": "Override the Assembly",
+            "effects": [
+              {
+                "kind": "morale_change",
+                "faction": "RS",
+                "delta": -5
+              },
+              {
+                "kind": "patron_support",
+                "faction": "RS",
+                "delta": 5
+              }
+            ],
+            "dimension_shifts": [
+              {
+                "faction": "RS",
+                "dimension": "international_standing",
+                "delta": 10
+              },
+              {
+                "faction": "RS",
+                "dimension": "internal_cohesion",
+                "delta": -20
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "event_id": "hrhb_vance_owen_acceptance_1993",
+        "event_title": "Vance-Owen: Mostar Records Its Posture",
+        "turn_fired": 52,
+        "faction": "HRHB",
+        "requires_player_response": true,
+        "historical_default_response_id": "accept_vance_owen_plan",
+        "response_options": [
+          {
+            "id": "accept_vance_owen_plan",
+            "label": "Accept",
+            "effects": [
+              {
+                "kind": "morale_change",
+                "faction": "HRHB",
+                "delta": 4
+              }
+            ],
+            "dimension_shifts": [
+              {
+                "faction": "HRHB",
+                "dimension": "patron_confidence",
+                "delta": 10
+              },
+              {
+                "faction": "HRHB",
+                "dimension": "international_standing",
+                "delta": 10
+              },
+              {
+                "faction": "HRHB",
+                "dimension": "negotiating_leverage",
+                "delta": 8
+              }
+            ]
+          },
+          {
+            "id": "accept_with_modifications",
+            "label": "Amend",
+            "effects": [
+              {
+                "kind": "morale_change",
+                "faction": "HRHB",
+                "delta": 2
+              }
+            ],
+            "dimension_shifts": [
+              {
+                "faction": "HRHB",
+                "dimension": "patron_confidence",
+                "delta": -5
+              },
+              {
+                "faction": "HRHB",
+                "dimension": "negotiating_leverage",
+                "delta": -5
+              }
+            ]
+          },
+          {
+            "id": "condition_on_arbih_reciprocity",
+            "label": "Reciprocity",
+            "effects": [
+              {
+                "kind": "alliance_change",
+                "delta": 0.1
+              }
+            ],
+            "dimension_shifts": [
+              {
+                "faction": "HRHB",
+                "dimension": "patron_confidence",
+                "delta": -10
+              },
+              {
+                "faction": "HRHB",
+                "dimension": "negotiating_leverage",
+                "delta": 5
+              }
+            ]
+          },
+          {
+            "id": "reject_plan",
+            "label": "Reject",
+            "effects": [
+              {
+                "kind": "morale_change",
+                "faction": "HRHB",
+                "delta": -3
+              }
+            ],
+            "dimension_shifts": [
+              {
+                "faction": "HRHB",
+                "dimension": "patron_confidence",
+                "delta": -25
+              },
+              {
+                "faction": "HRHB",
+                "dimension": "international_standing",
+                "delta": -15
+              },
+              {
+                "faction": "HRHB",
+                "dimension": "internal_cohesion",
+                "delta": -5
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "event_id": "contact_group_plan_1994",
+        "event_title": "Contact Group Plan Presented",
+        "turn_fired": 117,
+        "faction": "RBiH",
+        "requires_player_response": true,
+        "historical_default_response_id": "accept",
+        "response_options": [
+          {
+            "id": "accept",
+            "label": "Accept the Contact Group Plan",
+            "effects": [
+              {
+                "kind": "patron_support",
+                "faction": "RBiH",
+                "delta": 10
+              }
+            ]
+          },
+          {
+            "id": "reject",
+            "label": "Reject the Territorial Division",
+            "effects": [
+              {
+                "kind": "patron_support",
+                "faction": "RBiH",
+                "delta": -10
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "event_id": "rbih_contact_group_response_1994",
+        "event_title": "The Contact Group Map in Sarajevo",
+        "turn_fired": 118,
+        "faction": "RBiH",
+        "requires_player_response": true,
+        "historical_default_response_id": "accept_51_49_plan",
+        "response_options": [
+          {
+            "id": "accept_51_49_plan",
+            "label": "Accept",
+            "effects": [],
+            "dimension_shifts": [
+              {
+                "faction": "RBiH",
+                "dimension": "international_standing",
+                "delta": 15
+              },
+              {
+                "faction": "RBiH",
+                "dimension": "negotiating_leverage",
+                "delta": 5
+              }
+            ]
+          },
+          {
+            "id": "reject_51_49_plan",
+            "label": "Reject",
+            "effects": [
+              {
+                "kind": "morale_change",
+                "faction": "RBiH",
+                "delta": 3
+              }
+            ],
+            "dimension_shifts": [
+              {
+                "faction": "RBiH",
+                "dimension": "international_standing",
+                "delta": -15
+              },
+              {
+                "faction": "RBiH",
+                "dimension": "negotiating_leverage",
+                "delta": -10
+              }
+            ]
+          },
+          {
+            "id": "accept_with_public_reservations",
+            "label": "Reservations",
+            "effects": [],
+            "dimension_shifts": [
+              {
+                "faction": "RBiH",
+                "dimension": "international_standing",
+                "delta": 5
+              },
+              {
+                "faction": "RBiH",
+                "dimension": "internal_cohesion",
+                "delta": 5
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "event_id": "rs_owen_stoltenberg_response_1993",
+        "event_title": "The Union of Three Republics",
+        "turn_fired": 75,
+        "faction": "RS",
+        "requires_player_response": true,
+        "historical_default_response_id": "accept_union_three_republics",
+        "response_options": [
+          {
+            "id": "accept_union_three_republics",
+            "label": "Accept",
+            "effects": [
+              {
+                "kind": "morale_change",
+                "faction": "RS",
+                "delta": 4
+              }
+            ],
+            "dimension_shifts": [
+              {
+                "faction": "RS",
+                "dimension": "patron_confidence",
+                "delta": 10
+              },
+              {
+                "faction": "RS",
+                "dimension": "international_standing",
+                "delta": 10
+              }
+            ]
+          },
+          {
+            "id": "accept_with_modifications",
+            "label": "Amend",
+            "effects": [
+              {
+                "kind": "morale_change",
+                "faction": "RS",
+                "delta": 2
+              },
+              {
+                "kind": "patron_support",
+                "faction": "RS",
+                "delta": 5
+              }
+            ],
+            "dimension_shifts": [
+              {
+                "faction": "RS",
+                "dimension": "negotiating_leverage",
+                "delta": -5
+              }
+            ]
+          },
+          {
+            "id": "reject_plan",
+            "label": "Reject",
+            "effects": [
+              {
+                "kind": "patron_support",
+                "faction": "RS",
+                "delta": -20
+              },
+              {
+                "kind": "morale_change",
+                "faction": "RS",
+                "delta": -2
+              }
+            ],
+            "dimension_shifts": [
+              {
+                "faction": "RS",
+                "dimension": "international_standing",
+                "delta": -10
+              },
+              {
+                "faction": "RS",
+                "dimension": "internal_cohesion",
+                "delta": 5
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "pending_event_notifications": [],
+    "event_aggression_modifiers": [],
+    "recruitment_modifiers": [],
+    "equipment_quality_modifiers": [],
+    "cost_ledger_annotations": [],
+    "pending_convoy_decisions": [],
+    "convoy_decision_history": [],
+    "phantoms_spawned": [],
+    "pending_reserve_requests": [],
+    "reserve_request_history": [],
+    "triggered_operations_accepted": {},
+    "declined_operations": {},
+    "used_operation_names": {},
+    "pending_officer_events": [],
+    "officer_decision_history": [],
+    "cascade_penalties": [],
+    "offensive_ops_suppressions": [],
+    "alliance_locks": [],
+    "bot_priority_shifts": [],
+    "closed_event_ids": [],
+    "event_causality_log": [],
+    "tactical_groups": {},
+    "army_hq_operations": {},
+    "army_hq_last_op_turn": {},
+    "army_hq_op_count_by_year": {},
+    "sector_intel": {},
+    "corps_front_sectors": {},
+    "casualty_ledger": {
+      "RBiH": {
+        "killed": 120,
+        "wounded": 404,
+        "missing_captured": 22,
+        "equipment_lost": {
+          "tanks": 3,
+          "artillery": 5,
+          "aa_systems": 1
+        },
+        "per_formation": {
+          "arbih_1st_brigade": {
+            "killed": 120,
+            "wounded": 404,
+            "missing_captured": 22
+          }
+        },
+        "per_militia_pool": {}
+      },
+      "RS": {
+        "killed": 90,
+        "wounded": 303,
+        "missing_captured": 16,
+        "equipment_lost": {
+          "tanks": 2,
+          "artillery": 4,
+          "aa_systems": 0
+        },
+        "per_formation": {
+          "vrs_1st_brigade": {
+            "killed": 90,
+            "wounded": 303,
+            "missing_captured": 16
+          }
+        },
+        "per_militia_pool": {}
+      }
+    },
+    "negotiation": {
+      "capital": {},
+      "patron_relationships": {},
+      "peace_plan_history": [
+        {
+          "plan_id": "vance_owen",
+          "turn_offered": 40,
+          "responses": {
+            "RBiH": "accepted",
+            "RS": "rejected",
+            "HRHB": "accepted"
+          },
+          "resolved": true,
+          "resolved_turn": 40
+        }
+      ],
+      "pending_counter_offers": []
+    }
+  },
+  "political": {
+    "political_controllers": {},
+    "negotiation_status": {
+      "ceasefire_active": false,
+      "ceasefire_since_turn": null,
+      "last_offer_turn": null,
+      "last_counter_turn": {}
+    },
+    "ceasefire": {},
+    "negotiation_ledger": [],
+    "supply_rights": {
+      "corridors": []
+    },
+    "municipalities": {},
+    "war_consolidation_until": {},
+    "war_control_strain": {},
+    "war_supply_pressure": {},
+    "war_supply_condition": {},
+    "war_exhaustion": {},
+    "war_exhaustion_local": {}
+  },
+  "displacement": {
+    "displacement_state": {},
+    "displacement_event_log": [],
+    "displacement_humanitarian_aggregates": {},
+    "displacement_origin_dest_arrivals": {},
+    "displacement_recent_by_turn": {},
+    "minority_flight_state": {},
+    "war_displacement_initiated": {},
+    "hostile_takeover_timers": {},
+    "displacement_camp_state": {},
+    "settlement_displacement": {},
+    "settlement_displacement_started_turn": {},
+    "municipality_displacement": {},
+    "sustainability_state": {},
+    "civilian_casualties": {},
+    "displacement_flows_by_osid": {}
+  }
+}

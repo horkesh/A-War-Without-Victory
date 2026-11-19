@@ -1,25 +1,7 @@
 import type { FactionId, GameState, InternationalVisibilityPressure, PatronState, SarajevoState } from './game_state.js';
 import { clamp01 } from '../utils/math.js';
 import { getYearForTurn } from '../utils/time.js';
-import { getDimensionEffective } from '../sim/events/strategic_dimensions.js';
 import { strictCompare } from './validateGameState.js';
-
-/**
- * Emergent-only severity of the patron-defiance supply penalty by faction.
- * RS and HRHB have coercive patrons (Belgrade / Zagreb) that can throttle materiel;
- * RBiH is under arms embargo with no single coercive state patron, so refusal cannot
- * cost what was never supplied → severity 0 (RBiH path is also pinned-historical).
- */
-function patronDefianceSeverity(factionId: FactionId): number {
-    switch (factionId) {
-        case 'HRHB':
-            return 0.6;
-        case 'RS':
-            return 0.5;
-        default:
-            return 0.0;
-    }
-}
 
 export const EXHAUSTION_DIPLOMATIC_MULTIPLIER = 0.1;
 export const NEGOTIATION_MOMENTUM_MULTIPLIER = 0.05;
@@ -297,41 +279,14 @@ export function updatePatronState(
             materialSupport = clamp01(materialSupport * 0.8);
         }
 
-        // ── Patron-defiance supply penalty (emergent-only) ──────────────────────
-        // Refusing a patron demand (resist_patron) collapses patron_confidence (the
-        // strategic dimension). Historically this also throttled materiel: Belgrade's
-        // 1994 Drina embargo on the VRS, Zagreb's leverage over the HVO. We read the
-        // *effective* patron_confidence (0..100, 50=neutral) directly from the dimension
-        // store — no new persisted field, no save-migration. The penalty is HARD-GATED on
-        // decision_mode === 'emergent': in historical/unset (calibration) mode it never
-        // applies, so material_support_level stays byte-identical by construction (the 3
-        // live RS strategic-weighted patron events reach the scorer only outside emergent).
-        if (state.meta?.decision_mode === 'emergent') {
-            const store = state.military?.negotiation?.strategic_dimensions;
-            const conf = store ? getDimensionEffective(store, faction.id, 'patron_confidence') : 50;
-            const defiance = clamp01((50 - conf) / 50); // 0 at neutral → 1 as confidence collapses
-            const severity = patronDefianceSeverity(faction.id); // RBiH no coercive patron → 0
-            const cutFraction = defiance * severity; // 0..1 realized cut
-            if (cutFraction > 0) {
-                materialSupport = clamp01(materialSupport * (1 - cutFraction));
-                // ── Consequence-receipt (Slice 4a) ──────────────────────────────
-                // The defiance cut just STARVED supply because the player refused /
-                // distanced from the patron. Record the realized cut so the existing
-                // Turn-Aftermath "Consequences Realized" section surfaces a sober,
-                // factual receipt (never a reward — this is the negative-sum cost of
-                // defiance). Append-only; written ONLY here, inside the emergent gate,
-                // and ONLY when the cut is non-zero (RBiH severity 0 is excluded by
-                // construction) → historical/calibration state stays byte-identical.
-                if (state.military) {
-                    (state.military.patron_defiance_supply_cuts ??= []).push({
-                        faction: faction.id,
-                        turn,
-                        cut_fraction: cutFraction,
-                        support_after: materialSupport,
-                    });
-                }
-            }
-        }
+        // The emergent per-turn "defiance cut" that scaled this value by low effective
+        // patron_confidence is retired (patron-defiance panel, 2026-11-17). Its signal was
+        // not defiance: a hands-off RS that answered every Belgrade demand with compliance
+        // logged 90 weeks of cuts, and the HRHB 1992 compact answers, which carry their own
+        // live combat cut, were charged again from turn 4. Its only reader was the retired
+        // supply-reserve module. A defiance answer now carries its own bounded live cost,
+        // the `patron_supply_cut` event effect (apply_effects.ts), which also writes the
+        // `patron_defiance_supply_cuts` receipt. material_support_level is a display value.
 
         const constraintSeverity = clamp01(
             0.3 +

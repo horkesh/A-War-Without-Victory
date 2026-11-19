@@ -3,7 +3,7 @@
  *
  * A leadership/morale gesture (Presidential Command Surface design §10): the
  * president visits the front, force-queuing the authored visit_to_front_<faction>
- * event (morale +5 / cohesion +3 / patron_pressure -3 / standing shifts) so the
+ * event (morale +5 / cohesion +3 / standing shifts) so the
  * EventDecisionModal surfaces the branch choice. Costs FRONT_VISIT_COST (10) CA;
  * cooldown/cap use the event's voluntary action cadence (max_fires 5 / cooldown 10t).
  *

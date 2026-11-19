@@ -13,6 +13,7 @@ import type { GameState, FactionId } from '../../state/game_state.js';
 import type { PatronRelationship } from '../../state/negotiation_types.js';
 import { clamp } from '../../utils/math.js';
 import { applyDimensionShift } from '../events/strategic_dimensions.js';
+import { applyPatronSupportDelta } from './patron_pressure.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Event definitions
@@ -58,13 +59,31 @@ export interface PatronEventEffect {
 // ── Historical patron events ──
 
 /**
+ * True once the Contact Group plan is resolved on the plan record with RS's answer
+ * 'rejected'. Reads `peace_plan_history` (the single source, §6 E3a1 D3), never the card.
+ */
+export function rsRejectedContactGroupPlan(state: GameState): boolean {
+    return (state.military.negotiation?.peace_plan_history ?? []).some(
+        (h) => h.plan_id === 'contact_group' && h.resolved && h.responses?.RS === 'rejected',
+    );
+}
+
+/**
  * Contact Group Plan rejection (July 1994, ~week 118 from April 1992).
  * RS rejects the 51/49 plan → Belgrade sanctions RS.
  * Historically: Milošević closed border, cut off supplies.
+ *
+ * §6 E4 round 3 (Q3): the one carrier of Belgrade's break. It fires only after RS has
+ * rejected the plan on the record, at the first war week ≥118 where that holds. Hands-off,
+ * the three contact-group response cards answer at week 118 and evaluate-peace-plans
+ * resolves the plan from the log that same step (§6 E3a2), before update-patron-pressure
+ * runs, so the event still fires at 118. If a card slips (cap, gate), the plan resolves at
+ * its close week (120) and the event fires then. An RS acceptance never fires it.
  */
 export const CONTACT_GROUP_REJECTION: PatronEvent = {
     id: 'contact_group_rejection',
     trigger_week: 118,
+    requires: rsRejectedContactGroupPlan,
     description: 'RS rejects the Contact Group Plan. Belgrade imposes sanctions on Pale.',
     effects: [
         {
@@ -120,6 +139,13 @@ export const SREBRENICA_AFTERMATH: PatronEvent = {
 /**
  * NATO bombing campaign (August-September 1995, ~week 175 from April 1992).
  * Operation Deliberate Force. RS military capability degraded, patron pressure peaks.
+ *
+ * §6 E4 round 5 (2026-11-17, unanimous): carries the override only. Its former
+ * `support_delta: -20` charged Belgrade's backing for a NATO act, and charged it a second
+ * time: the card `deliberate_force_rs_compliance_1995` is the one carrier of the Deliberate
+ * Force patron change (its net depends on RS's answer). Belgrade's backing of the VRS held
+ * through autumn 1995 (BB1 pp.376, 383, 389). The 29 Aug 1995 transfer of negotiating
+ * authority to Milošević is override, not support.
  */
 export const NATO_BOMBING: PatronEvent = {
     id: 'nato_bombing',
@@ -129,7 +155,6 @@ export const NATO_BOMBING: PatronEvent = {
         {
             faction: 'RS',
             override_delta: 20,
-            support_delta: -20,
         },
     ],
 };
@@ -221,13 +246,10 @@ export function applyPatronEvent(state: GameState, event: PatronEvent): void {
             pr.override_authority = Math.max(pr.override_authority, effect.override_max);
         }
 
-        // Support level changes
+        // Support level changes: the one support writer (§6 E4 round 3), so a cost below
+        // the floor spills into patron_confidence.
         if (effect.support_delta !== undefined) {
-            pr.support_level = clamp(
-                pr.support_level + effect.support_delta,
-                0,
-                100
-            );
+            applyPatronSupportDelta(neg, effect.faction, effect.support_delta);
         }
 
         // Sanctions
