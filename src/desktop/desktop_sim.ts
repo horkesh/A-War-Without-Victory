@@ -950,6 +950,8 @@ export {
     serializeRuntimeState,
     serializeState,
 };
+// §6 design M (M-a1): the paramilitary review IPC's decision logic (validation, the T3 gate, the standing-order cap).
+export { resolveParamilitaryReviewRequests } from './paramilitary_review_ipc.js';
 export {
     PLAYER_DECISION_FAMILIES,
     summarizePlayerDecisions,

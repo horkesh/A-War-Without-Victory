@@ -403,11 +403,24 @@ describe('desktop persistence contract', () => {
     const handlerStart = electronMain.indexOf("ipcMain.handle('resolve-paramilitary-requests'");
     const handlerEnd = electronMain.indexOf("ipcMain.handle('resolve-dayton'");
     const handler = electronMain.slice(handlerStart, handlerEnd);
+    // §6 design M (M-a1): the handler's decision logic lives in the sim bundle so tests call it directly
+    // (tests/s6_modal_cost_cap.test.ts); the handler reads the canonical copy and writes it back only on ok.
+    const reviewModule = readFileSync(
+      resolve(process.cwd(), 'src/desktop/paramilitary_review_ipc.ts'),
+      'utf8',
+    );
+    const desktopSim = readFileSync(
+      resolve(process.cwd(), 'src/desktop/desktop_sim.ts'),
+      'utf8',
+    );
 
-    expect(handler).toContain('const state = readCanonicalCurrentState(sim);');
-    expect(handler).toContain('state.paramilitary_policy = policy;');
-    expect(handler).toContain('sim.resolvePlayerParamilitaryDecisions(state)');
-    expect(handler).toContain('writeCanonicalCurrentState(sim, state)');
+    expect(handler).toContain('readCanonicalCurrentState(sim)');
+    expect(handler).toContain('sim.resolveParamilitaryReviewRequests(state, payload)');
+    expect(handler).toContain('if (result.ok) writeCanonicalCurrentState(sim, state);');
+    expect(handler).not.toContain('state.paramilitary_policy =');
+    expect(desktopSim).toContain("export { resolveParamilitaryReviewRequests } from './paramilitary_review_ipc.js';");
+    expect(reviewModule).toContain('if (policy) state.paramilitary_policy = policy;');
+    expect(reviewModule).toContain('resolvePlayerParamilitaryDecisions(state)');
   });
 
   it('event-decision IPC resolves through the desktop sim bundle instead of source-only dynamic imports', () => {

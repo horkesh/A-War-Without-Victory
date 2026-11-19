@@ -2,6 +2,16 @@
 
 const PLAYER_FACTIONS = new Set(['RBiH', 'RS', 'HRHB']);
 const PUBLIC_EVENT_FLAGS = new Set(['jna_withdrawn']);
+/**
+ * §6 design M (M-a): the player's own paramilitary-policy card flag (the card's APPLIED answer) rides with the
+ * projection, so the renderer reads the standing-order cap through the same accessor as the engine and the
+ * review IPC (`src/sim/events/paramilitary_policy_card.ts`; pinned equal to its registry by
+ * tests/s6_modal_cost_cap.test.ts). Never another side's flag. HRHB has no card.
+ */
+const OWN_PARAMILITARY_POLICY_FLAG_BY_FACTION = Object.freeze({
+  RBiH: 'rbih_paramilitary_policy',
+  RS: 'rs_paramilitary_policy',
+});
 
 function strictCompare(a, b) {
   return a < b ? -1 : a > b ? 1 : 0;
@@ -447,10 +457,15 @@ function projectEventState(military, playerFaction) {
   }
 
   const allowedEventIds = new Set([...visibleEventIds, ...causedEventIds]);
+  const ownPolicyFlag = playerFaction && Object.prototype.hasOwnProperty.call(OWN_PARAMILITARY_POLICY_FLAG_BY_FACTION, playerFaction)
+    ? OWN_PARAMILITARY_POLICY_FLAG_BY_FACTION[playerFaction]
+    : null;
   const eventFlags = {};
   if (isRecord(military?.event_flags)) {
     for (const key of Object.keys(military.event_flags).sort(strictCompare)) {
-      if (PUBLIC_EVENT_FLAGS.has(key) || causedFlags.has(key)) eventFlags[key] = cloneJson(military.event_flags[key]);
+      if (PUBLIC_EVENT_FLAGS.has(key) || causedFlags.has(key) || key === ownPolicyFlag) {
+        eventFlags[key] = cloneJson(military.event_flags[key]);
+      }
     }
   }
 
@@ -930,6 +945,8 @@ function projectPlayerVisibleState(state, fallbackFaction, opportunityOwnership)
     paramilitary_deployment_count: playerFaction ? scopeRecordToKey(state.paramilitary_deployment_count, playerFaction) : {},
   };
 
+  // Copied as recorded: the renderer's one reader (GameStateAdapter) clamps it through the §6 M-a accessor,
+  // from the player's own card flag carried in projected event state.
   if (state.paramilitary_policy === 'always_allow' || state.paramilitary_policy === 'always_deny' || state.paramilitary_policy === 'ask') {
     projected.paramilitary_policy = state.paramilitary_policy;
   }
@@ -999,6 +1016,7 @@ function projectPlayerVisibleReplaySequenceJson(sequenceJson, fallbackFaction, o
 }
 
 module.exports = {
+  OWN_PARAMILITARY_POLICY_FLAG_BY_FACTION,
   projectPlayerVisibleReplaySequenceJson,
   projectPlayerVisibleState,
   projectPlayerVisibleStateJson,

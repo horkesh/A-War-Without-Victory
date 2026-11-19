@@ -1515,6 +1515,12 @@ export interface LoadedGameState {
     /** Pending paramilitary deployment requests awaiting player decision. */
     pendingParamilitaryRequests?: LoadedParamilitaryRequest[];
     paramilitaryPolicy?: 'always_allow' | 'always_deny' | 'ask';
+    /**
+     * §6 design M (M-a): the highest standing paramilitary order the player may set, read through the one cap
+     * accessor (`paramilitaryStandingOrderCap`): the side's policy card's APPLIED answer, `ask` before it
+     * applies; null when the side has no policy card (HRHB) or there is no player.
+     */
+    paramilitaryPolicyCap?: 'always_allow' | 'always_deny' | 'ask' | null;
     /** Per-elite-brigade deployment history. */
     eliteBrigadeTracker?: Record<string, {
         total_loans: number;
