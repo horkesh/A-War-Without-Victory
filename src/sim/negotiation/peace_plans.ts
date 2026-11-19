@@ -177,18 +177,22 @@ export function evaluatePeacePlans(state: GameState, eventDefinitions: readonly 
     }
 }
 
-/** The pending fallback: Observer answers it; a routed answer already on the log settles it. */
+/**
+ * The pending fallback: Observer answers it (the turn's step only); a routed answer already on
+ * the log settles it.
+ */
 function settlePendingFallback(
     state: GameState,
     neg: NegotiationState,
     routedCards: ReadonlyMap<string, EventDefinition>,
+    observerAnswers = true,
 ): void {
     const pending = neg.pending_peace_plan;
     if (!pending) return;
     const plan = getPeacePlanById(pending.plan_id);
     const playerFaction = state.meta.player_faction;
     if (!plan || playerFaction == null) return;
-    if ((state.meta.autonomy_level ?? 0) >= 3) {
+    if (observerAnswers && (state.meta.autonomy_level ?? 0) >= 3) {
         resolvePeacePlan(state, plan.id, planOwnerResponse(state, plan, playerFaction, true));
         return;
     }
@@ -201,6 +205,25 @@ function settlePendingFallback(
     }
     const final = finalizePlanAnswers(answers);
     resolvePeacePlan(state, plan.id, final[playerFaction]!);
+}
+
+/**
+ * Codex #827: settle a pending fallback from the player's routed answer as soon as the card is
+ * answered, outside the turn. A v42 save can hold the pointer beside the player's own routed card
+ * (the old rule opened the pointer at the trigger week; v43 keeps both). The desktop advance gate
+ * blocks on the pointer before evaluate-peace-plans can read that answer, so the player would
+ * otherwise answer the fallback modal a second time, and could contradict the card.
+ *
+ * The turn's own settle step, minus the Observer answer: the record is the logged answer. A no-op
+ * without a pointer or without a recorded answer (a null answer, such as the Owen-Stoltenberg
+ * Presidency accept, leaves the pointer to its modal). Fresh play never settles anything here: the
+ * engine opens no pointer while the player's card is pending or answered, and the gate has every
+ * pointer answered before the next turn runs.
+ */
+export function settlePendingPeacePlanFromRecord(state: GameState, eventDefinitions: readonly EventDefinition[]): void {
+    const neg = state.military.negotiation;
+    if (state.meta.phase !== 'war' || state.meta.game_over || !neg?.pending_peace_plan) return;
+    settlePendingFallback(state, neg, collectRoutedPeacePlanCards(eventDefinitions), false);
 }
 
 /**
