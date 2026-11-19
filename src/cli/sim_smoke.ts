@@ -211,13 +211,14 @@ async function main(): Promise<void> {
         }
     }
 
-    // Invariant: Displacement should be monotonic (never decrease)
+    // Invariant: the dead and the fled abroad never come back. (`displaced_out` may fall when routed
+    // survivors return under the RB9 return rule, so only lost_population is monotonic.)
     if (state.displacement.displacement_state && currentState.displacement.displacement_state) {
         for (const munId of Object.keys(currentState.displacement.displacement_state)) {
             const initial = state.displacement.displacement_state[munId];
             const final = currentState.displacement.displacement_state[munId];
             if (initial && final) {
-                if (final.displaced_out < initial.displaced_out || final.lost_population < initial.lost_population) {
+                if (final.lost_population < initial.lost_population) {
                     process.stderr.write(`Invariant violation: displacement decreased for ${munId}\n`);
                     invariantFailed = true;
                 }

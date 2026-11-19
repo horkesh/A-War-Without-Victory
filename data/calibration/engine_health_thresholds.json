@@ -20,7 +20,7 @@
     "consistency_failures_max": 3,
     "matched_osids_min": 644,
     "checkpoint_matched_min": {
-      "jan1993": 694,
+      "jan1993": 691,
       "apr1994": 674,
       "apr1995": 668,
       "oct1995": 641
@@ -29,5 +29,6 @@
     "kw_ratio_hi": 4.358
   },
   "_note_sequential_calibration_2026_08_26_superseded_2026_08_31": "HISTORICAL POLICY, superseded by the owner-authorized 2026-08-31 full canonical rebaseline. checkpoint_matched_min was reset by hand under the owner's 2026-08-26 sequential-calibration directive: January first, then apr1994, apr1995, oct1995. Values were measured on n374 (697/673/667/640), with later lanes held loose. The current 188w block no longer implements those loose floors; see _note_rebaseline_2026_08_31.",
+  "_note_jan1993_knife_edge_2026_11_19": "checkpoint_matched_min.jan1993 HAND-EDITED 694 -> 691, NOT via --update or --force (orchestrator ruling, ORCHESTRATION section 8 rule 8, 2026-11-18). The 2026-08-31 rebaseline set 694 = 697 - 3 under the 3-OSID turn-boundary jitter design of _note_checkpoints_2026_08_24. Main later measured exactly 694, so the floor had zero headroom, while apr1994/apr1995/oct1995 keep 12-27. The last jan1993 matches hang on VRS 1st Krajina one-cell 1992 fallback operations (Sipovo volari_2, Jajce jezero_2 and lupnica), whose capture turn crosses week 39 when an unrelated change reshuffles who leads them. Train 2 (#800 + #822 + #747 on 9b70aa8bc) loses volari_2 that way: captured at t36 on main, and by the t38-44 fallback operation with #800. 691 restores the 3-OSID band. Every other floor and ceiling is unchanged.",
   "_note_checkpoints_2026_08_24": "checkpoint_matched_min ADDED BY HAND, not via --update. The gate previously read only historical_fit.osid_pair_match.matched_osids -- the TERMINAL (oct1995) figure -- so a change could regress jan1993 by 20 OSIDs and pass green. Values are n287 measured (677/663/662/647) minus a 3-OSID turn-boundary jitter tolerance; jitter is endemic (two captures at t9/t10 moved ~two dozen unrelated captures by one turn, and sanski_most:kljevci lands on turn 188 in one run and falls off the end in the next), and an exact pin would just teach everyone to pass --force. Done by hand because a blanket --update on n287 would ALSO have loosened ghost_destroyed_max 4 -> 5 and raised matched_osids_min 622 -> 647; the first is a silent weakening and the second is an owner posture decision. Both were declined."
 }

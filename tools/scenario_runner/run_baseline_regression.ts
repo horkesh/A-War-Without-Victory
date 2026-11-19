@@ -13,7 +13,7 @@ import { join } from 'node:path';
 import { checkDataPrereqs, formatMissingRemediation } from '../../src/data_prereq/check_data_prereqs.js';
 import { loadScenario } from '../../src/scenario/scenario_loader.js';
 import { runScenario } from '../../src/scenario/scenario_runner.js';
-import { WASHINGTON_AGREEMENT_WEEK } from '../../src/sim/early_war/washington_agreement.js';
+import { WASH_QUIET_FRONT_OPENS_WEEK } from '../../src/sim/early_war/washington_agreement.js';
 import { stableStringify } from '../../src/utils/stable_json.js';
 
 
@@ -92,17 +92,19 @@ const HISTORICAL_SCENARIO_PATH = 'data/scenarios/apr1992_definitive_188w.json';
 
 /**
  * Path A' guard (B5, 2026-11-16). Washington Path A' (`evaluateWashingtonQuietFront`) needs an
- * unsigned agreement at or after WASHINGTON_AGREEMENT_WEEK, so it stays out of the historical run
- * only while that run signs earlier. If the historical run ever signs late, or not at all, Path A'
+ * unsigned agreement at or after WASH_QUIET_FRONT_OPENS_WEEK (t103), so it stays out of the historical
+ * run only while that run signs earlier. The signing path is not recorded in the save, so the turn
+ * stands in for it: a signing by t102 (the Washington week, the historical date) cannot be Path A'
+ * (orchestrator ruling, 2026-11-19). If the historical run ever signs later, or not at all, Path A'
  * could fire in it; fail loudly here (on compare AND on re-pin) instead of letting a re-pin bless it.
  */
 export function assertHistoricalWashingtonBeforeQuietFrontWindow(finalSave: unknown): void {
     const rhs = (finalSave as { political?: { rbih_hrhb_state?: { washington_signed?: boolean; washington_turn?: number | null } } })
         ?.political?.rbih_hrhb_state;
     const turn = rhs?.washington_turn ?? null;
-    if (rhs?.washington_signed !== true || turn === null || turn >= WASHINGTON_AGREEMENT_WEEK) {
+    if (rhs?.washington_signed !== true || turn === null || turn >= WASH_QUIET_FRONT_OPENS_WEEK) {
         throw new Error(
-            `Historical 188w run must sign Washington before week ${WASHINGTON_AGREEMENT_WEEK} ` +
+            `Historical 188w run must sign Washington before week ${WASH_QUIET_FRONT_OPENS_WEEK} ` +
             `(signed=${String(rhs?.washington_signed)}, turn=${String(turn)}); otherwise Washington ` +
             `Path A' can fire in history. See evaluateWashingtonQuietFront (washington_agreement.ts).`,
         );
