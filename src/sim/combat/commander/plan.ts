@@ -59,6 +59,7 @@ import { BESIEGED_SURPLUS_HOP_LIMIT } from './allocate.js';
 import { CRITICAL_MORALE_THRESHOLD } from '../combat_math.js';
 import { MAX_EXHAUSTION_FOR_OPERATION } from '../bot_constants.js';
 import { getHeadQueuedPrePlannedBrigadeIds } from '../pre_planned_operations.js';
+import { RECENT_RECAPTURE_WINDOW_TURNS } from '../contact_cells.js';
 import { corpsHoldForbidsNewPlans } from '../stance_matter_holds.js';
 import { isCorpsBoundByOct1995Ceasefire } from '../oct1995_ceasefire.js';
 import {
@@ -1499,7 +1500,6 @@ export type OpportunityTargetPurpose =
     | 'cut_enemy_salient'
     | 'relieve_must_hold';
 
-const RECENT_RECAPTURE_WINDOW_TURNS = 8;
 const MAX_ISOLATED_POSITION_OSIDS = 6;
 const DEFENDER_PATRON_BORDER_STATES: Readonly<Record<FactionId, readonly string[]>> = {
     HRHB: ['HRV'],
