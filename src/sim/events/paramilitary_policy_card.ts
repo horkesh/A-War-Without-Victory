@@ -66,9 +66,13 @@ export function isParamilitaryPolicyOrder(value: unknown): value is Paramilitary
     return value === 'always_deny' || value === 'ask' || value === 'always_allow';
 }
 
+/** The faction's card, matched on the registry's own keys only (never an inherited property). */
 function paramilitaryPolicyCardFor(faction: string | null | undefined): ParamilitaryPolicyCard | null {
-    if (!faction || !Object.prototype.hasOwnProperty.call(PARAMILITARY_POLICY_CARD_BY_FACTION, faction)) return null;
-    return PARAMILITARY_POLICY_CARD_BY_FACTION[faction as FactionId] ?? null;
+    if (!faction) return null;
+    for (const [registered, card] of Object.entries(PARAMILITARY_POLICY_CARD_BY_FACTION)) {
+        if (registered === faction) return card ?? null;
+    }
+    return null;
 }
 
 /** The order the faction's policy card applied, or null when it has not applied (or the faction has no card). */

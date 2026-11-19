@@ -549,21 +549,8 @@ describe('M-a2 paramilitary_order_clamp_legacy_save: an old save whose modal ord
     });
 });
 
-// ─── Copy-row 6 condition (historian): the T3 gate also covers the offensive path ───
-
-describe('the request gate covers the offensive path at every command level (copy row 6 condition)', () => {
-    it('RS at Delegated gets no offensive request before its card applies, and gets one after', () => {
-        const held = pocketState('RS', 3, 2);
-        const report = detectOffensiveParamilitaryTargets(held, edges(), reverseMap());
-        expect(report.pending_player_requests).toBe(0);
-        expect(ownRequests(held, 'RS')).toHaveLength(0);
-        expect(spawnedFor(report, 'RS')).toHaveLength(0);
-
-        const released = pocketState('RS', 5, 2);
-        applyCard(released, 'RS', 'ask');
-        expect(detectOffensiveParamilitaryTargets(released, edges(), reverseMap()).pending_player_requests).toBe(1);
-    });
-});
+// (Copy-row 6 condition, the T3 gate on the offensive path at Assisted/Delegated, is pinned by T in
+// tests/s6_opening_timing_manual_gate.test.ts.)
 
 // ─── M-a3: no reader bypasses the accessor ───
 

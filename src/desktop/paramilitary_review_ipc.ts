@@ -43,7 +43,7 @@ function policyDecision(policy: ParamilitaryPolicyOrder | null): ReviewDecision 
 
 export function resolveParamilitaryReviewRequests(state: GameState | null, payload: unknown): ParamilitaryReviewResult {
     const input = (payload !== null && typeof payload === 'object' ? payload : {}) as { decisions?: unknown; policy?: unknown };
-    const decisions = Array.isArray(input.decisions) ? (input.decisions as unknown[]) : null;
+    const decisions: unknown[] | null = Array.isArray(input.decisions) ? input.decisions : null;
     const policy = isParamilitaryPolicyOrder(input.policy) ? input.policy : null;
     if (input.policy !== undefined && !policy) return { ok: false, error: 'invalid_policy' };
     if (!state || !decisions) return { ok: false, error: 'no_state_or_invalid_payload' };
