@@ -218,16 +218,19 @@ describe('T2: the RBiH policy card is asked at t0, filed, and applied when it fi
         }
     });
 
-    it('D1: the lane queues the card only when the filed identity option enables it and satisfies its trigger', () => {
+    it('D1: the lane queues the card only when the filed identity option enables it and satisfies its trigger', async () => {
+        const state = await newCampaign('RBiH');
         const identity = eventDef(IDENTITY);
         const policy = eventDef(RBIH_POLICY);
         for (const option of identity.response_options ?? []) {
-            expect(filedIdentityOptionEnablesPolicy(option, policy), option.id).toBe(true);
+            expect(filedIdentityOptionEnablesPolicy(option, policy, state), option.id).toBe(true);
         }
         const civic = identity.response_options!.find((option) => option.id === 'civic')!;
-        expect(filedIdentityOptionEnablesPolicy({ ...civic, enables_events_runtime: [] }, policy)).toBe(false);
-        expect(filedIdentityOptionEnablesPolicy({ ...civic, sets_flags: { ...civic.sets_flags, rbih_state_identity: 'unlisted' } }, policy)).toBe(false);
-        expect(filedIdentityOptionEnablesPolicy(undefined, policy)).toBe(false);
+        expect(filedIdentityOptionEnablesPolicy({ ...civic, enables_events_runtime: [] }, policy, state)).toBe(false);
+        expect(filedIdentityOptionEnablesPolicy({ ...civic, sets_flags: { ...civic.sets_flags, rbih_state_identity: 'unlisted' } }, policy, state)).toBe(false);
+        expect(filedIdentityOptionEnablesPolicy(undefined, policy, state)).toBe(false);
+        // The probe never writes the state it reads.
+        expect(state.military.event_flags?.rbih_state_identity).toBeUndefined();
     });
 
     it('D3: a birth card that outlives t0 stays answerable, before and after its card fires', async () => {

@@ -63,6 +63,7 @@ import { strictCompare } from '../../../state/validateGameState.js';
 import { countHeldOgsByCorps } from '../utils/heldOg.js';
 import { computeFullVerdict } from '../../../sim/negotiation/scoring.js';
 import { DIMENSION_WEIGHTS } from '../../../sim/events/strategic_dimensions.js';
+import { ANSWER_AHEAD_EVENT_IDS } from '../../../sim/events/answer_ahead_of_firing.js';
 import type { GameVerdict } from '../../../state/negotiation_types.js';
 import { buildCostLedger } from '../../../sim/endgame/cost_ledger.js';
 import { compareToHistorical, endingBasisForState } from '../../../sim/endgame/endgame_comparison.js';
@@ -3854,6 +3855,11 @@ function deriveFiredEvents(state: any, playerFaction: string | null): LoadedGame
         const response = decision
             ? staticInfo?.responseLabels.get(decision.responseId) ?? getPlayerSafeDisplayLabel(decision.responseId, 'response recorded')
             : null;
+        // §6 design T: a player answer filed ahead of its card firing applied on the card's fire turn.
+        const filedAnswerAppliedTurn = decision && decision.source === 'player' && ANSWER_AHEAD_EVENT_IDS.includes(id)
+            && typeof recordedTurn === 'number' && recordedTurn > decision.turn
+            ? recordedTurn
+            : undefined;
         entries.push({
             id,
             turn,
@@ -3865,6 +3871,8 @@ function deriveFiredEvents(state: any, playerFaction: string | null): LoadedGame
             category: decision ? 'political' : 'military',
             effects: decision && response ? [{ kind: 'decision', description: t('firedEvent.wrapper.responseRecorded', { response }) }] : [],
             isDecision: Boolean(decision),
+            ...(response ? { responseLabel: response } : {}),
+            ...(filedAnswerAppliedTurn !== undefined ? { filedAnswerAppliedTurn } : {}),
         });
     }
 

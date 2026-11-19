@@ -19,6 +19,7 @@ import type {
 } from '../../../sim/events/event_types';
 import type { GameState } from '../../../state/game_state';
 import { getCausalAncestors } from '../../../sim/events/causality_query';
+import { isAnswerAheadOfFiringDecision } from '../../../sim/events/answer_ahead_of_firing';
 import { getPlayerSafePoliticalFactionName, getPlayerSafeOfficerName, getPlayerSafeDecisionTitle } from '../utils/playerSafeText';
 import { useGameStore } from '../store/gameStore';
 import { Z } from '../../shared/zIndex';
@@ -626,6 +627,10 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
     // the assessment block speaks in a named officer's voice; otherwise it falls
     // back to the generic "Staff assessment". (See deriveAssessmentLabel.)
     const assessmentLabel = deriveAssessmentLabel(localizedDecision.category, advisor);
+    // §6 design T (ui-ux F2/F4): an answer-ahead card whose event has not fired only FILES the answer;
+    // it applies when the card comes due. Keyed on "not fired", so an old save's card fired at birth
+    // (applied at once) shows no note. Pending §4 copy panel for the wording.
+    const filedAhead = state ? isAnswerAheadOfFiringDecision(state, decision.event_id) : false;
     const decisionDate = turnToDateString(localizedDecision.turn_fired);
     const safeSourceNote = sourceNote ? playerSafeDossierText(sourceNote, diagMode) : null;
     // Art: the event's own documentary still when it authors one, otherwise the
@@ -771,6 +776,20 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                             <div className={SURFACE_LABEL}>
                                 {t('eventDecision.presidentialResponse')}
                             </div>
+                            {filedAhead && (
+                                <div
+                                    className="flex flex-col gap-1.5 rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-4"
+                                    role="note"
+                                    data-testid="event-decision-filed-ahead"
+                                >
+                                    <div className={SURFACE_LABEL_MUTED}>
+                                        {t('eventDecision.filedAhead.label')}
+                                    </div>
+                                    <p className="m-0 text-[17px] leading-relaxed text-[#ddd1b3]">
+                                        {t('eventDecision.filedAhead.body')}
+                                    </p>
+                                </div>
+                            )}
                             {localizedDecision.response_options.map(option => (
                                 <ResponseButton
                                     key={option.id}
@@ -793,9 +812,12 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                                     <div className={SURFACE_LABEL}>
                                         {t('eventDecision.turnPaused.title')}
                                     </div>
-                                    <p className="m-0 text-[15px] leading-relaxed text-[#c2b69c]">
-                                        {t('eventDecision.turnPaused.body')}
-                                    </p>
+                                    {/* "Takes effect this week" is false for a card that will only be filed (F4). */}
+                                    {!filedAhead && (
+                                        <p className="m-0 text-[15px] leading-relaxed text-[#c2b69c]">
+                                            {t('eventDecision.turnPaused.body')}
+                                        </p>
+                                    )}
                                 </div>
                                 <button
                                     type="button"

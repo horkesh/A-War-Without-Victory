@@ -61,6 +61,7 @@ import type { EdgeRecord } from '../../map/settlements.js';
 // shipped main-path split (KIA 0.22 / WIA 0.74 / MIA 0.04), byte-identical to before.
 import { getMainCasualtySplit } from './casualty_realism_v2_gate.js';
 import { selectStaffControlledFactions } from '../bot/staff_control.js';
+import { PARAMILITARY_POLICY_CARD_BY_FACTION, hasParamilitaryPolicyCardApplied } from '../events/paramilitary_policy_card.js';
 /** Casualty multiplier when paramilitary retreats from defended OSID (heavy losses). */
 const DEFENDED_RETREAT_CASUALTY_MULT = 3;
 const OFFENSIVE_PARAMILITARY_FACTIONS = new Set<FactionId>(['HRHB', 'RS']);
@@ -82,19 +83,27 @@ function emptyReport(): ParamilitarySweepReport {
     return { spawned: [], captured: [], dissolved: [], pending_player_requests: 0 };
 }
 
-const PLAYER_PARAMILITARY_POLICY_EVENT: Partial<Record<FactionId, string>> = {
-    RS: 'rs_paramilitary_policy_1992',
-    RBiH: 'rbih_paramilitary_policy_1992',
-};
-
-function isPlayerParamilitaryPolicyDecisionPending(
-    state: GameState,
-    playerFaction: FactionId | null,
-): boolean {
-    if (!playerFaction) return false;
-    const eventId = PLAYER_PARAMILITARY_POLICY_EVENT[playerFaction];
-    if (!eventId || !(state.military.enabled_event_ids ?? []).includes(eventId)) return false;
-    return !(state.military.event_decision_log ?? []).some((entry) => entry.event_id === eventId);
+/**
+ * THE MANUAL REQUEST GATE (§6 design T3, signed 2026-11-19, round 2 R2-1).
+ *
+ * A player with a registered paramilitary-policy card (RBiH, RS) gets no paramilitary request, and no stale
+ * request is approved or kept, until that card has APPLIED an answer: fired, receipted, and its policy flag a
+ * valid order (`hasParamilitaryPolicyCardApplied`, the one accessor M-a's cap and D1 also read). A FILED
+ * answer is not an applied one: under T2 the RBiH card is answered at t0 and applies at t4, and releasing on
+ * the t0 receipt would let the player approve t1-t3 sweeps and then collect the refusal's credit at t4.
+ *
+ * There is no turn test and no "window passed" or "closed" exit: a card that never applies (its enabling card
+ * left unanswered, a lapse, a closure) holds the player through the sweep fade week, so no act is ever bought
+ * at zero card price. The gate runs before the fade check in both detect steps; once nothing more is made
+ * after the fade, holding and not holding are the same. Held requests are deleted, never replayed: after the
+ * card applies, requests are built afresh from the current map by the normal detection.
+ *
+ * Binds only a manual (autonomy 0) player in `detectParamilitaryTargets` (staff control and headless have no
+ * gate player). HRHB has no card and is never held (the registered §6 gap).
+ */
+function paramilitaryRequestGateHolds(state: GameState, playerFaction: FactionId | null): boolean {
+    if (!playerFaction || !PARAMILITARY_POLICY_CARD_BY_FACTION[playerFaction]) return false;
+    return !hasParamilitaryPolicyCardApplied(state, playerFaction);
 }
 
 /** The player the request gate binds: a manual (autonomy 0) player only; null for staff control and headless. */
@@ -105,9 +114,13 @@ function selectRequestGatePlayer(state: GameState): FactionId | null {
         : rawPlayerFaction;
 }
 
-/** Whether the manual player's paramilitary requests are held this turn (read by the request IPC too). */
+/**
+ * Whether the manual player's paramilitary requests are held this turn. The request IPC reads it too
+ * (engine D5): a save loaded while the gate holds may still carry requests an older build made, and none of
+ * them may be approved before the next detect deletes them.
+ */
 export function isPlayerParamilitaryRequestGateHolding(state: GameState): boolean {
-    return isPlayerParamilitaryPolicyDecisionPending(state, selectRequestGatePlayer(state));
+    return paramilitaryRequestGateHolds(state, selectRequestGatePlayer(state));
 }
 
 function removePrematurePlayerParamilitaryRequests(state: GameState, playerFaction: FactionId): void {
@@ -437,8 +450,8 @@ export function detectParamilitaryTargets(
     // consolidation exactly as bot staff do (no pending window, no per-request gate). Only a
     // manual (autonomy 0) player keeps the request/policy path. Headless has no player: inert.
     const playerFaction = selectRequestGatePlayer(state);
-    const playerPolicyDecisionPending = isPlayerParamilitaryPolicyDecisionPending(state, playerFaction);
-    if (playerPolicyDecisionPending && playerFaction) {
+    const requestGateHolds = paramilitaryRequestGateHolds(state, playerFaction);
+    if (requestGateHolds && playerFaction) {
         removePrematurePlayerParamilitaryRequests(state, playerFaction);
     } else {
         resolveStandingPolicyPendingParamilitaryRequests(state, playerFaction);
@@ -465,7 +478,7 @@ export function detectParamilitaryTargets(
     }
 
     for (const faction of factions) {
-        if (faction === playerFaction && playerPolicyDecisionPending) continue;
+        if (faction === playerFaction && requestGateHolds) continue;
         // LANE-NIGHTSHIFT-ANALYZE-FACTION-GRAPH-DEDUPE bisect (2026-05-05): this call site
         // MUST stay on legacy `analyzeFactionGraph`. Routing it through `analyzeFactionGraphCached`
         // produced reproducible 40w hash drift (`51dca710b9db7d37` cached vs baseline
@@ -699,8 +712,8 @@ export function detectOffensiveParamilitaryTargets(
     const report = emptyReport();
     const turn = state.meta?.turn ?? 0;
     const playerFaction = state.meta?.player_faction ?? null;
-    const playerPolicyDecisionPending = isPlayerParamilitaryPolicyDecisionPending(state, playerFaction);
-    if (playerPolicyDecisionPending && playerFaction) {
+    const requestGateHolds = paramilitaryRequestGateHolds(state, playerFaction);
+    if (requestGateHolds && playerFaction) {
         removePrematurePlayerParamilitaryRequests(state, playerFaction);
     } else {
         resolveStandingPolicyPendingParamilitaryRequests(state, playerFaction);
@@ -748,7 +761,7 @@ export function detectOffensiveParamilitaryTargets(
 
     for (const faction of factions) {
         if (!OFFENSIVE_PARAMILITARY_FACTIONS.has(faction)) continue;
-        if (faction === playerFaction && playerPolicyDecisionPending) continue;
+        if (faction === playerFaction && requestGateHolds) continue;
 
         const isPlayer = faction === playerFaction;
         const scopeMuns = isPlayer ? null : (OFFENSIVE_PARA_MUNICIPALITY_SCOPE[faction] ?? null);
