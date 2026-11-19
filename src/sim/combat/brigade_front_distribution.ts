@@ -874,6 +874,12 @@ function pinGarrisonToMustHoldFrontEdge(
 // commander's recapture window, read from persisted brigade_history (contact_cells.ts).
 // R1: an EMPTY contact cell is taken by the nearest eligible same-corps brigade of the
 // same friendly component (distance, then power at the cell, then id).
+// R2: when a candidate valued at the cell as arrived (entrenchment 0) strictly outpowers
+// the lone occupant valued as it stands (dug in), the candidate marches in (power, then
+// distance, then id). The occupant leaves only once the relief stands on the cell (G2):
+// the weaker of the two then takes the cell the relief vacated when that is known
+// (adjacent relief), otherwise the nearest vacant quiet front cell of its corps; failing
+// both it stays. The entrenchment-0 comparison is the hysteresis against swapping back.
 // Faction-blind. No new state: "relief on the way" is read from movement orders/state.
 
 function isFieldBrigadeKind(kind: FormationState['kind']): boolean {
@@ -891,6 +897,8 @@ interface ContactReliefContext {
     pendingDigIn: Set<string>;
     /** Every sector front cell, by faction ("is this donor on a front cell?"). */
     frontOsidsByFaction: Map<string, Set<string>>;
+    /** Every sector front cell, by corps (where a relieved brigade may go). */
+    frontOsidsByCorps: Map<string, Set<string>>;
     /** Own active field brigades per cell, by faction; kept current on direct moves. */
     occupantsByFaction: Map<string, Map<string, string[]>>;
     /** Cells with a relief on the way or already relieved in this pass, by faction. */
@@ -934,10 +942,15 @@ function buildContactReliefContext(
     );
 
     const frontOsidsByFaction = new Map<string, Set<string>>();
+    const frontOsidsByCorps = new Map<string, Set<string>>();
     for (const sector of sectors) {
         const set = nestedSet(frontOsidsByFaction, sector.faction);
+        const corpsSet = nestedSet(frontOsidsByCorps, sector.corps_id);
         for (const subSegment of sector.sub_segments ?? []) {
-            for (const osid of subSegment.friendly_osids ?? []) set.add(osid);
+            for (const osid of subSegment.friendly_osids ?? []) {
+                set.add(osid);
+                corpsSet.add(osid);
+            }
         }
     }
 
@@ -975,6 +988,7 @@ function buildContactReliefContext(
         mustHoldOsids,
         pendingDigIn,
         frontOsidsByFaction,
+        frontOsidsByCorps,
         occupantsByFaction,
         reliefInboundByFaction,
         used: new Set<string>(),
@@ -1166,10 +1180,140 @@ function relieveEmptyContactCell(
     nestedSet(ctx.reliefInboundByFaction, sector.faction).add(cell);
 }
 
+/** G1 binds the relieved brigade too; a disrupted, moving or ordered brigade stays where it is. */
+function canRelievedBrigadeLeave(
+    ctx: ContactReliefContext,
+    bid: string,
+    formation: FormationState | undefined,
+): formation is FormationState {
+    if (!formation || formation.status !== 'active' || !isFieldBrigadeKind(formation.kind)) return false;
+    if (ctx.used.has(bid) || ctx.protectedIds.has(bid)) return false;                   // G1
+    if ((formation.disrupted_turns ?? 0) > 0 || formation.disrupted === true) return false;
+    if (ctx.state.military.brigade_movement_state?.[bid]?.status === 'in_transit') return false;
+    if (ctx.state.military.brigade_movement_orders?.[bid]) return false;
+    return true;
+}
+
+/**
+ * Where a relieved brigade goes when the cell its relief vacated is not known (the
+ * relief marched in and its order is consumed): the nearest vacant quiet front cell of
+ * its corps, own-held, in the same component, with nothing heading to it.
+ */
+function nearestVacantQuietFrontCell(
+    ctx: ContactReliefContext,
+    faction: string,
+    formation: FormationState,
+    cell: string,
+): { target: string; dist: number } | null {
+    const corpsFront = ctx.frontOsidsByCorps.get(formation.corps_id ?? '');
+    if (!corpsFront || corpsFront.size === 0) return null;
+    const contact = ctx.contactByFaction.get(faction);
+    const friendlySet = ctx.friendlyByFaction.get(faction);
+    const inbound = ctx.reliefInboundByFaction.get(faction);
+    const distances = friendlyDistancesTo(cell, ctx.adjacency, friendlySet);
+    return [...corpsFront]
+        .filter((target) => target !== cell && !contact?.has(target))
+        .filter((target) => !friendlySet || friendlySet.has(target))
+        .filter((target) => occupantsAt(ctx, faction, target).length === 0 && !inbound?.has(target))
+        .filter((target) => isFormationDestinationAllowed(formation, target))
+        .map((target) => ({ target, dist: distances.get(target) ?? Infinity }))
+        .filter((entry) => entry.dist > 0 && entry.dist <= MAX_REDISTRIBUTION_DISTANCE)
+        .sort((a, b) => a.dist - b.dist || strictCompare(a.target, b.target))[0] ?? null;
+}
+
+/**
+ * R2, second half (G2): the relief stands on the cell, so of the two brigades on it the
+ * strictly weaker (both valued as they stand) leaves: to the cell the relief vacated when
+ * known, else the nearest vacant quiet front cell of its corps. Failing both it stays, and
+ * the cell keeps two defenders. Equal power: nobody leaves.
+ */
+function releaseWeakerOfReliefPair(
+    ctx: ContactReliefContext,
+    sector: CorpsFrontSector,
+    cell: string,
+    pair: readonly string[],
+    opParticipants: Set<string>,
+    recorder?: FrontDistributionRecorder,
+    vacatedOsid?: string,
+): void {
+    const formations = ctx.state.military.formations ?? {};
+    const [firstId, secondId] = [...pair].sort(strictCompare);
+    const first = firstId ? formations[firstId] : undefined;
+    const second = secondId ? formations[secondId] : undefined;
+    if (!firstId || !secondId || !first || !second) return;
+    const firstPower = defenderPowerAtCell(ctx, first, cell, false);
+    const secondPower = defenderPowerAtCell(ctx, second, cell, false);
+    if (firstPower === secondPower) return;
+    const firstIsWeaker = firstPower < secondPower;
+    const leaverId = firstIsWeaker ? firstId : secondId;
+    const leaver = firstIsWeaker ? first : second;
+    const keeperId = firstIsWeaker ? secondId : firstId;
+    if (!canRelievedBrigadeLeave(ctx, leaverId, leaver)) return;
+
+    let destination: { target: string; dist: number } | null = null;
+    if (vacatedOsid
+        && occupantsAt(ctx, sector.faction, vacatedOsid).length === 0
+        && isFormationDestinationAllowed(leaver, vacatedOsid)) {
+        destination = { target: vacatedOsid, dist: 1 };
+    }
+    destination ??= nearestVacantQuietFrontCell(ctx, sector.faction, leaver, cell);
+    if (!destination) return;
+
+    recorder?.recordWrite({ helper: 'contact_cell_relief', action_kind: destination.dist <= 1 ? 'direct_location' : 'column_order',
+        formation_id: leaverId, sectors: [sector], op_participants: opParticipants,
+        candidate_ids: [firstId, secondId], target_ids: [destination.target], target_osid: destination.target,
+        distance: destination.dist, score: Math.min(firstPower, secondPower),
+        feature_inputs: { rule: 'r2_relieved_brigade_leaves', sector_id: sector.sector_id, contact_osid: cell,
+            keeper_id: keeperId, keeper_power: Math.max(firstPower, secondPower), leaver_power: Math.min(firstPower, secondPower),
+            vacated_osid: vacatedOsid ?? null } });
+    executeContactRelief(ctx, sector.faction, leaverId, leaver, destination.target, destination.dist);
+    nestedSet(ctx.reliefInboundByFaction, sector.faction).add(destination.target);
+}
+
+/**
+ * R2, first half: a candidate that strictly outpowers the lone occupant at the cell (the
+ * candidate as arrived, the occupant as it stands) marches in; the occupant stays until
+ * the relief is on the cell (G2). G1: an occupant in an operation is never relieved.
+ */
+function relieveOutpoweredOccupant(
+    ctx: ContactReliefContext,
+    sector: CorpsFrontSector,
+    cell: string,
+    occupantId: string,
+    opParticipants: Set<string>,
+    recorder?: FrontDistributionRecorder,
+): void {
+    const formations = ctx.state.military.formations ?? {};
+    const occupant = formations[occupantId];
+    if (!occupant || occupant.status !== 'active') return;
+    if (ctx.protectedIds.has(occupantId)) return;                                       // G1
+    if (ctx.state.military.brigade_movement_orders?.[occupantId]) return;
+    if (ctx.state.military.brigade_movement_state?.[occupantId]?.status === 'in_transit') return;
+    const occupantPower = defenderPowerAtCell(ctx, occupant, cell, false);
+    const candidates = collectContactReliefCandidates(ctx, sector, cell)
+        .filter((candidate) => candidate.power > occupantPower)                          // strict
+        .sort((a, b) => b.power - a.power || a.dist - b.dist || strictCompare(a.bid, b.bid));
+    const best = candidates[0];
+    if (!best) return;
+    recorder?.recordWrite({ helper: 'contact_cell_relief', action_kind: best.dist <= 1 ? 'direct_location' : 'column_order',
+        formation_id: best.bid, sectors: [sector], op_participants: opParticipants,
+        candidate_ids: candidates.map((entry) => entry.bid), target_ids: [cell], target_osid: cell,
+        distance: best.dist, score: best.power,
+        feature_inputs: { rule: 'r2_outpowered_occupant', sector_id: sector.sector_id, origin_osid: best.origin,
+            occupant_id: occupantId, occupant_power: occupantPower, power_as_arrived: best.power } });
+    executeContactRelief(ctx, sector.faction, best.bid, best.formation, cell, best.dist);
+    nestedSet(ctx.reliefInboundByFaction, sector.faction).add(cell);
+    // An adjacent relief is on the cell now: the occupant takes the cell it vacated.
+    if (best.dist <= 1) {
+        releaseWeakerOfReliefPair(ctx, sector, cell, [occupantId, best.bid], opParticipants, recorder, best.origin);
+    }
+}
+
 /**
  * D3 step: relief in place on every sector's contact cells. Sectors and cells in
  * strictCompare order; one relief per cell at a time (a cell with a relief already on
- * the way is skipped).
+ * the way is skipped). Empty cell: R1. One occupant: R2. Two (a relief has arrived):
+ * the weaker leaves. Larger stacks are left alone.
  */
 function relieveContactCells(
     state: GameState,
@@ -1195,6 +1339,11 @@ function relieveContactCells(
             const occupants = occupantsAt(ctx, sector.faction, cell);
             if (occupants.length === 0) {
                 relieveEmptyContactCell(ctx, sector, cell, opParticipants, recorder);
+            } else if (occupants.length === 1) {
+                const [occupantId] = occupants;
+                if (occupantId) relieveOutpoweredOccupant(ctx, sector, cell, occupantId, opParticipants, recorder);
+            } else if (occupants.length === 2) {
+                releaseWeakerOfReliefPair(ctx, sector, cell, occupants, opParticipants, recorder);
             }
         }
     }

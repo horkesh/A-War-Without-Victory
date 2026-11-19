@@ -408,6 +408,132 @@ describe('D3 R1: an empty contact cell is taken by the nearest eligible same-cor
     });
 });
 
+describe('D3 R2: a stronger brigade relieves an outpowered occupant', () => {
+    it('marches in a candidate that outpowers the occupant as arrived; the occupant stays until the relief is on the cell (G2)', () => {
+        const state = makeState({
+            hist: historyCarrier([defenderEngagement('f1', TURN - 1)]),
+            spent: brigade('spent', 'f1', { personnel: 400, morale: 20, entrenchment_turns: 6 }),
+            fresh: brigade('fresh', 'r3', { personnel: 2500, morale: 80 }),
+        });
+        run(state, [sector()]);
+
+        expect(orderTarget(state, 'fresh')).toBe('f1');
+        expect(state.military.formations.spent.location_osid).toBe('f1');
+        expect(orderTarget(state, 'spent')).toBeUndefined();
+    });
+
+    it('an adjacent relief moves onto the cell, then the occupant takes the cell the relief vacated', () => {
+        const state = makeState({
+            hist: historyCarrier([defenderEngagement('f1', TURN - 1)]),
+            spent: brigade('spent', 'f1', { personnel: 400, morale: 20, entrenchment_turns: 6 }),
+            fresh: brigade('fresh', 'r1', { personnel: 2500, morale: 80 }),
+        });
+        run(state, [sector()]);
+
+        expect(state.military.formations.fresh.location_osid).toBe('f1');
+        expect(state.military.formations.spent.location_osid).toBe('r1');
+        expect(state.military.formations.spent.entrenchment_turns).toBe(0);
+    });
+
+    it('once both stand on the cell, the weaker leaves for the nearest vacant quiet front cell of its corps', () => {
+        const state = makeState({
+            hist: historyCarrier([defenderEngagement('f1', TURN - 1)]),
+            spent: brigade('spent', 'f1', { personnel: 400, morale: 20, entrenchment_turns: 6 }),
+            arrived: brigade('arrived', 'f1', { personnel: 2500, morale: 80, entrenchment_turns: 1 }),
+        });
+        run(state, [sector()]);
+
+        expect(state.military.formations.arrived.location_osid).toBe('f1');
+        expect(state.military.formations.spent.location_osid).toBe('f2');
+    });
+
+    it('is strict: a candidate weaker as arrived than the dug-in occupant does not displace it', () => {
+        const state = makeState({
+            hist: historyCarrier([defenderEngagement('f1', TURN - 1), defenderEngagement('f5', TURN - 1)]),
+            // Larger on paper, but at entrenchment 0 weaker than the dug-in occupant.
+            dug_in_occupant: brigade('dug_in_occupant', 'f1', { personnel: 1000, entrenchment_turns: 12 }),
+            paper_stronger: brigade('paper_stronger', 'r1', { personnel: 1050, home_osid: 'r1' }),
+            // Positive control (home distance keeps each candidate on its own cell).
+            weak_occupant: brigade('weak_occupant', 'f5', { personnel: 300, morale: 20 }),
+            strong_candidate: brigade('strong_candidate', 'r5', { personnel: 2500, morale: 80, home_osid: 'r5' }),
+        });
+        run(state, [sector()]);
+
+        expect(state.military.formations.dug_in_occupant.location_osid).toBe('f1');
+        expect(state.military.formations.paper_stronger.location_osid).toBe('r1');
+        expect(orderTarget(state, 'paper_stronger')).toBeUndefined();
+        expect(state.military.formations.strong_candidate.location_osid).toBe('f5');
+        expect(state.military.formations.weak_occupant.location_osid).toBe('r5');
+    });
+
+    it('is strict: an exactly equal candidate does not displace the occupant', () => {
+        const state = makeState({
+            hist: historyCarrier([defenderEngagement('f1', TURN - 1), defenderEngagement('f5', TURN - 1)]),
+            equal_occupant: brigade('equal_occupant', 'f1', { personnel: 1100, entrenchment_turns: 0 }),
+            equal_candidate: brigade('equal_candidate', 'r1', { personnel: 1100, entrenchment_turns: 0, home_osid: 'r1' }),
+            weak_occupant: brigade('weak_occupant', 'f5', { personnel: 300, morale: 20 }),
+            strong_candidate: brigade('strong_candidate', 'r5', { personnel: 2500, morale: 80, home_osid: 'r5' }),
+        });
+        run(state, [sector()]);
+
+        expect(state.military.formations.equal_occupant.location_osid).toBe('f1');
+        expect(state.military.formations.equal_candidate.location_osid).toBe('r1');
+        expect(state.military.formations.strong_candidate.location_osid).toBe('f5');
+    });
+
+    it('G1: never displaces an occupant in an operation (any phase), and a participant on the cell does not leave it', () => {
+        const state = makeState({
+            hist: historyCarrier([defenderEngagement('f1', TURN - 1), defenderEngagement('f3', TURN - 1), defenderEngagement('f5', TURN - 1)]),
+            op_occupant: brigade('op_occupant', 'f1', { personnel: 300, morale: 20 }),
+            strong_1: brigade('strong_1', 'r1', { personnel: 2500, morale: 80 }),
+            op_pair_weak: brigade('op_pair_weak', 'f3', { personnel: 300, morale: 20 }),
+            pair_strong: brigade('pair_strong', 'f3', { personnel: 2500, morale: 80, entrenchment_turns: 1 }),
+            weak_5: brigade('weak_5', 'f5', { personnel: 300, morale: 20 }),
+            strong_5: brigade('strong_5', 'r5', { personnel: 2500, morale: 80 }),
+        }, {
+            corps_command: {
+                [CORPS]: {
+                    active_operations: [{
+                        id: 'op_hold', name: 'hold', type: 'probe', phase: 'planning',
+                        participating_brigades: ['op_occupant', 'op_pair_weak'],
+                    }],
+                },
+            },
+        });
+        run(state, [sector()]);
+
+        expect(state.military.formations.op_occupant.location_osid).toBe('f1');
+        expect(state.military.formations.strong_1.location_osid).toBe('r1');
+        expect(orderTarget(state, 'strong_1')).toBeUndefined();
+        expect(state.military.formations.op_pair_weak.location_osid).toBe('f3');
+        expect(state.military.formations.pair_strong.location_osid).toBe('f3');
+        expect(state.military.formations.strong_5.location_osid).toBe('f5');
+        expect(state.military.formations.weak_5.location_osid).toBe('r5');
+    });
+
+    it('does not oscillate: the relieved brigade does not swap back over the next five turns', () => {
+        const state = makeState({
+            hist: historyCarrier([defenderEngagement('f1', TURN - 1)]),
+            spent: brigade('spent', 'f1', { personnel: 700, morale: 40, entrenchment_turns: 6 }),
+            fresh: brigade('fresh', 'r1', { personnel: 2500, morale: 80 }),
+        });
+        const positions: string[] = [];
+        for (let turn = TURN; turn < TURN + 5; turn++) {
+            state.meta.turn = turn;
+            // The cell keeps being attacked every turn.
+            state.military.formations.hist.brigade_history.engagements.push(defenderEngagement('f1', turn - 1));
+            run(state, [sector()]);
+            positions.push(`${state.military.formations.fresh.location_osid}/${state.military.formations.spent.location_osid}`);
+            for (const id of ['fresh', 'spent']) {
+                const formation = state.military.formations[id];
+                formation.entrenchment_turns = Math.min(12, (formation.entrenchment_turns ?? 0) + 1.2);
+                formation.morale = Math.min(100, (formation.morale ?? 50) + 5);   // the relieved brigade recovers
+            }
+        }
+        expect(positions).toEqual(['f1/r1', 'f1/r1', 'f1/r1', 'f1/r1', 'f1/r1']);
+    });
+});
+
 describe('D3: the coverage passes respect "a donor never leaves a contact cell"', () => {
     function coverageSector(id: string, front: string[], assigned: string[], threat: number): CorpsFrontSector {
         const subSegment: CorpsFrontSubSegment = {
