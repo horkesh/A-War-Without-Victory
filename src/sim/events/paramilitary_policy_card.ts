@@ -53,3 +53,31 @@ export function appliedParamilitaryPolicyCardAnswer(
 export function hasParamilitaryPolicyCardApplied(state: GameState, faction: FactionId | null | undefined): boolean {
     return appliedParamilitaryPolicyCardAnswer(state, faction) !== null;
 }
+
+// §6 design M (M-a) compile-only seams for the RED tests: no cap yet (current behaviour).
+
+/** The IPC error code for a refused attempt to loosen the side's paramilitary policy. */
+export const PARAMILITARY_POLICY_CANNOT_LOOSEN = 'paramilitary_policy_cannot_loosen';
+
+/** The minimal read shape of the standing-order accessors. */
+export interface ParamilitaryPolicyStateView {
+    readonly paramilitary_policy?: unknown;
+}
+
+export function paramilitaryStandingOrderCap(
+    _state: ParamilitaryPolicyStateView,
+    _faction: string | null | undefined,
+): ParamilitaryPolicyOrder | null {
+    return null;
+}
+
+export function isParamilitaryOrderWithinCap(_order: ParamilitaryPolicyOrder, _cap: ParamilitaryPolicyOrder | null): boolean {
+    return true;
+}
+
+export function readParamilitaryStandingOrder(
+    state: ParamilitaryPolicyStateView,
+    _faction: string | null | undefined,
+): ParamilitaryPolicyOrder {
+    return isParamilitaryPolicyOrder(state.paramilitary_policy) ? state.paramilitary_policy : 'ask';
+}

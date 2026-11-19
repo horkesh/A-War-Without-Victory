@@ -14,6 +14,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { FactionId, FactionState, GameState } from '../src/state/game_state.js';
 import { initializeCasualtyLedger } from '../src/state/casualty_ledger.js';
+import { resolveParamilitaryReviewRequests } from '../src/desktop/paramilitary_review_ipc.js';
 import {
     detectParamilitaryTargets,
     isPlayerParamilitaryRequestGateHolding,
@@ -319,12 +320,21 @@ describe('T3 manual paramilitary gate (released only by the applied card answer)
     });
 
     it('D5: the paramilitary IPC refuses an approval while the gate holds, through the shared predicate', () => {
+        // §6 design M (M-a1) moved the handler's decision logic out of electron-main.cjs into
+        // src/desktop/paramilitary_review_ipc.ts, so the refusal is checked by calling it directly.
         const electronMain = readFileSync(resolve(process.cwd(), 'src/desktop/electron-main.cjs'), 'utf8');
         const start = electronMain.indexOf("ipcMain.handle('resolve-paramilitary-requests'");
         const handler = electronMain.slice(start, electronMain.indexOf('ipcMain.handle(', start + 10));
-        expect(handler).toContain('sim.isPlayerParamilitaryRequestGateHolding(state)');
-        expect(handler).toContain("error: 'paramilitary_policy_not_applied'");
-        const desktopSim = readFileSync(resolve(process.cwd(), 'src/desktop/desktop_sim.ts'), 'utf8');
-        expect(desktopSim).toMatch(/isPlayerParamilitaryRequestGateHolding/);
+        expect(handler).toContain('sim.resolveParamilitaryReviewRequests(state, payload)');
+        const reviewModule = readFileSync(resolve(process.cwd(), 'src/desktop/paramilitary_review_ipc.ts'), 'utf8');
+        expect(reviewModule).toContain('isPlayerParamilitaryRequestGateHolding(state)');
+
+        const state = pocketState('RBiH', 2);
+        state.pending_paramilitary_requests = [staleRequest('RBiH')];
+        expect(isPlayerParamilitaryRequestGateHolding(state)).toBe(true);
+        const before = JSON.stringify(state);
+        const result = resolveParamilitaryReviewRequests(state, { decisions: [{ target_osid: 'op:stale:target', decision: 'allow' }] });
+        expect(result).toEqual({ ok: false, error: 'paramilitary_policy_not_applied' });
+        expect(JSON.stringify(state)).toBe(before);
     });
 });
