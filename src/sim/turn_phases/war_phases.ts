@@ -1786,6 +1786,7 @@ export const warPhases: NamedPhase[] = [
             const adjacency = spatial.preCombat.adjacency as Map<Osid, Osid[]>;
             const diagnostics = distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency, {
                 population1991ByMun: context.input.municipalityPopulation1991,
+                supplyStateByOsid: context.report?.supply_resolution?.supply_state_by_osid ?? null,
                 diagnosticCallsite: 'distribute-brigades-to-front', completedTurn: context.state.meta.turn,
                 invocationOrdinal: nextFrontDistributionInvocationOrdinal(context.report.front_distribution_diagnostics),
             });
