@@ -4,6 +4,10 @@
  * 2nd Corps officers (Sead Delić) and, after his Srebrenica lock ended, Naser Orić led 7th Corps
  * operations. The historian's table gives the 7th Corps its own officers (Alagić, Čuskić; Cikotić
  * compatible).
+ *
+ * PR 2b (rank retype; panel Q1, 2-1): OG, division and brigade commanders are `tactical_commander`.
+ * They lead TG anchors, never a corps operation. A corps operation with no free corps-rank officer of
+ * its corps has no named commander and runs on the corps commander's modifier.
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -29,13 +33,20 @@ describe('operation commander corps pool', () => {
         expect(selectOperationCommander(state, 'arbih_7th_corps', 'RBiH')).toBeNull();
     });
 
-    it("draws the 7th Corps' own officers once they are free", () => {
-        const state = stateWith(['arbih_s_delic', 'arbih_cuskic', 'arbih_oric']);
-        expect(selectOperationCommander(state, 'arbih_7th_corps', 'RBiH')).toBe('arbih_cuskic');
+    it("draws the 7th Corps' own corps-rank officer once he is free", () => {
+        const state = stateWith(['arbih_s_delic', 'arbih_alagic', 'arbih_oric']);
+        expect(selectOperationCommander(state, 'arbih_7th_corps', 'RBiH')).toBe('arbih_alagic');
     });
 
     it('lets a compatible officer serve when no home officer is free', () => {
-        const state = stateWith(['arbih_cikotic', 'arbih_s_delic']);
-        expect(selectOperationCommander(state, 'arbih_7th_corps', 'RBiH')).toBe('arbih_cikotic');
+        // Alagić: home 7th Corps, compatible 3rd. No 3rd Corps home officer is free.
+        const state = stateWith(['arbih_alagic', 'arbih_s_delic']);
+        expect(selectOperationCommander(state, 'arbih_3rd_corps', 'RBiH')).toBe('arbih_alagic');
+    });
+
+    it("never hands a corps operation to one of the corps' tactical commanders (PR 2b, panel Q1)", () => {
+        // Čuskić (OG Bosanska Krajina) and Cikotić (OG West) are the 7th Corps' tactical commanders.
+        const state = stateWith(['arbih_cuskic', 'arbih_cikotic']);
+        expect(selectOperationCommander(state, 'arbih_7th_corps', 'RBiH')).toBeNull();
     });
 });

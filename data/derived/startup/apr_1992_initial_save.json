@@ -1406,7 +1406,7 @@
                 "status": "executing"
               }
             ],
-            "commander_officer_id": "vrs_lisica",
+            "commander_officer_id": "vrs_kelecevic",
             "consecutive_failures_on_current": 0,
             "current_objective_index": 0,
             "failure_count": 0,
@@ -1498,7 +1498,6 @@
                 "status": "executing"
               }
             ],
-            "commander_officer_id": "vrs_samardzija",
             "consecutive_failures_on_current": 0,
             "current_objective_index": 0,
             "failure_count": 0,
@@ -1614,7 +1613,6 @@
                 "status": "executing"
               }
             ],
-            "commander_officer_id": "vrs_pandurevic",
             "consecutive_failures_on_current": 0,
             "current_objective_index": 0,
             "failure_count": 0,
@@ -1724,7 +1722,7 @@
                 ]
               }
             ],
-            "commander_officer_id": "vrs_despotovic",
+            "commander_officer_id": "vrs_gavric",
             "consecutive_failures_on_current": 0,
             "current_objective_index": 0,
             "failure_count": 0,
@@ -1803,7 +1801,6 @@
                 ]
               }
             ],
-            "commander_officer_id": "vrs_gusic_n",
             "consecutive_failures_on_current": 0,
             "current_objective_index": 0,
             "failure_count": 0,
@@ -1938,7 +1935,7 @@
                 ]
               }
             ],
-            "commander_officer_id": "vrs_lizdek",
+            "commander_officer_id": "vrs_sladoje",
             "consecutive_failures_on_current": 0,
             "current_objective_index": 0,
             "failure_count": 0,
@@ -31274,47 +31271,47 @@
       },
       {
         "aggressiveness": 2,
-        "available_from_turn": 0,
-        "available_until_turn": 110,
-        "bio_short": "JNA-background officer assigned to 2nd Krajina Corps at scenario start.",
+        "available_from_turn": 135,
         "can_improve": false,
         "casualty_vulnerability": 0.1,
-        "command_style": "Cautious, steady corps defense",
         "competence": 2,
         "defensive_skill": 3,
         "faction": "RS",
-        "historical_corps_id": "vrs_2nd_krajina",
         "home_corps_id": "vrs_2nd_krajina",
         "id": "vrs_tomanic",
         "improvement_rate": 0,
-        "is_historical_start": true,
-        "known_for": "2nd Krajina Corps opening command",
+        "is_historical_start": false,
         "name": "Radivoje Tomanić",
         "origin": "jna",
         "override_tolerance": 3,
-        "political_alignment_note": "Regular RS corps command appointment.",
         "political_reliability": 3,
-        "pool_tier": "starter",
+        "pool_tier": "tier_a",
         "rank": "corps_commander",
         "stubbornness": 3
       },
       {
         "aggressiveness": 3,
-        "available_from_turn": 110,
+        "available_from_turn": 0,
+        "available_until_turn": 135,
+        "bio_short": "JNA-background officer assigned to 2nd Krajina Corps at scenario start.",
         "can_improve": false,
         "casualty_vulnerability": 0.1,
+        "command_style": "Steady corps defense",
         "competence": 3,
         "defensive_skill": 3,
         "faction": "RS",
+        "historical_corps_id": "vrs_2nd_krajina",
         "home_corps_id": "vrs_2nd_krajina",
         "id": "vrs_boric",
         "improvement_rate": 0,
-        "is_historical_start": false,
+        "is_historical_start": true,
+        "known_for": "2nd Krajina Corps opening command",
         "name": "Grujo Borić",
         "origin": "jna",
         "override_tolerance": 3,
+        "political_alignment_note": "Regular RS corps command appointment.",
         "political_reliability": 3,
-        "pool_tier": "tier_a",
+        "pool_tier": "starter",
         "rank": "corps_commander",
         "stubbornness": 3
       },
@@ -31346,7 +31343,7 @@
       {
         "aggressiveness": 3,
         "available_from_turn": 0,
-        "available_until_turn": 18,
+        "available_until_turn": 23,
         "bio_short": "JNA-background officer assigned to Sarajevo-Romanija Corps at scenario start.",
         "can_improve": false,
         "casualty_vulnerability": 0.1,
@@ -31374,8 +31371,8 @@
       },
       {
         "aggressiveness": 4,
-        "available_from_turn": 18,
-        "available_until_turn": 118,
+        "available_from_turn": 23,
+        "available_until_turn": 123,
         "can_improve": false,
         "casualty_vulnerability": 0.1,
         "competence": 3,
@@ -31405,7 +31402,7 @@
       },
       {
         "aggressiveness": 3,
-        "available_from_turn": 118,
+        "available_from_turn": 123,
         "can_improve": false,
         "casualty_vulnerability": 0.1,
         "competence": 3,
@@ -31435,8 +31432,8 @@
       },
       {
         "aggressiveness": 3,
-        "available_from_turn": 28,
-        "available_until_turn": 170,
+        "available_from_turn": 30,
+        "available_until_turn": 171,
         "can_improve": false,
         "casualty_vulnerability": 0.1,
         "competence": 3,
@@ -31463,7 +31460,7 @@
       },
       {
         "aggressiveness": 4,
-        "available_from_turn": 170,
+        "available_from_turn": 171,
         "can_improve": false,
         "casualty_vulnerability": 0.15,
         "competence": 3,
@@ -31533,7 +31530,7 @@
         "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_a",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -31671,7 +31668,7 @@
         "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_b",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Aiding and abetting murder and persecution",
@@ -31686,9 +31683,7 @@
         "available_from_turn": 0,
         "can_improve": false,
         "casualty_vulnerability": 0.15,
-        "compatible_corps_ids": [
-          "vrs_east_bosnian"
-        ],
+        "compatible_corps_ids": [],
         "competence": 4,
         "defensive_skill": 4,
         "faction": "RS",
@@ -31701,7 +31696,7 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_b",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -31721,7 +31716,7 @@
         "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_b",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -31729,9 +31724,7 @@
         "available_from_turn": 0,
         "can_improve": false,
         "casualty_vulnerability": 0.15,
-        "compatible_corps_ids": [
-          "vrs_1st_krajina"
-        ],
+        "compatible_corps_ids": [],
         "competence": 4,
         "defensive_skill": 4,
         "faction": "RS",
@@ -31744,7 +31737,7 @@
         "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_b",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -31764,7 +31757,7 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_b",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -31784,7 +31777,7 @@
         "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_b",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -31807,7 +31800,7 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_b",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -31827,7 +31820,7 @@
         "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_b",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -31850,7 +31843,7 @@
         "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_b",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -31858,9 +31851,7 @@
         "available_from_turn": 0,
         "can_improve": false,
         "casualty_vulnerability": 0.15,
-        "compatible_corps_ids": [
-          "vrs_east_bosnian"
-        ],
+        "compatible_corps_ids": [],
         "competence": 3,
         "defensive_skill": 3,
         "faction": "RS",
@@ -31873,7 +31864,7 @@
         "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_b",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -31893,7 +31884,7 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_c",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Crimes against humanity (persecution, inhumane acts), aiding forcible transfer",
@@ -31920,7 +31911,7 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_c",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Persecution as crime against humanity",
@@ -31950,7 +31941,7 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_c",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -32131,7 +32122,7 @@
       {
         "aggressiveness": 3,
         "available_from_turn": 22,
-        "available_until_turn": 80,
+        "available_until_turn": 82,
         "can_improve": true,
         "casualty_vulnerability": 0.1,
         "compatible_corps_ids": [],
@@ -32189,7 +32180,7 @@
       },
       {
         "aggressiveness": 4,
-        "available_from_turn": 110,
+        "available_from_turn": 99,
         "can_improve": true,
         "casualty_vulnerability": 0.1,
         "competence": 3,
@@ -32238,15 +32229,19 @@
       {
         "aggressiveness": 3,
         "available_from_turn": 0,
-        "available_until_turn": 80,
+        "available_until_turn": 174,
         "bio_short": "JNA-background officer assigned to 5th Corps in the Bihac pocket.",
         "can_improve": true,
         "casualty_vulnerability": 0.1,
         "command_style": "Defensive, enclave-oriented command",
+        "compatible_corps_ids": [
+          "arbih_4th_corps"
+        ],
         "competence": 3,
         "defensive_skill": 3,
         "enclave_lock": {
-          "enclave_id": "bihac"
+          "enclave_id": "bihac",
+          "locked_until_turn": 80
         },
         "faction": "RBiH",
         "historical_corps_id": "arbih_5th_corps",
@@ -32299,6 +32294,9 @@
         "available_from_turn": 0,
         "can_improve": true,
         "casualty_vulnerability": 0.1,
+        "compatible_corps_ids": [
+          "arbih_3rd_corps"
+        ],
         "competence": 3,
         "defensive_skill": 4,
         "enclave_lock": {
@@ -32314,7 +32312,7 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -32337,7 +32335,7 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -32403,7 +32401,7 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -32432,13 +32430,11 @@
       {
         "aggressiveness": 4,
         "available_from_turn": 0,
+        "available_until_turn": 183,
         "can_improve": false,
         "casualty_vulnerability": 0.2,
         "competence": 5,
         "defensive_skill": 5,
-        "enclave_lock": {
-          "enclave_id": "gorazde"
-        },
         "faction": "RBiH",
         "home_corps_id": "arbih_1st_corps",
         "id": "arbih_imamovic",
@@ -32449,7 +32445,7 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -32472,7 +32468,7 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -32496,7 +32492,7 @@
         "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_b",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Violations of laws of war (murder and cruel treatment of Serb prisoners)",
@@ -32522,7 +32518,7 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_b",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -32545,7 +32541,7 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_b",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -32585,7 +32581,7 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_b",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -32608,7 +32604,7 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_b",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -32628,12 +32624,13 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_b",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
         "aggressiveness": 5,
         "available_from_turn": 0,
+        "available_until_turn": 174,
         "can_improve": true,
         "casualty_vulnerability": 0.25,
         "competence": 4,
@@ -32651,12 +32648,13 @@
         "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_c",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
         "aggressiveness": 5,
         "available_from_turn": 0,
+        "available_until_turn": 65,
         "can_improve": true,
         "casualty_vulnerability": 0.3,
         "competence": 3,
@@ -32671,12 +32669,13 @@
         "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_c",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
         "aggressiveness": 4,
         "available_from_turn": 0,
+        "available_until_turn": 0,
         "can_improve": true,
         "casualty_vulnerability": 0.3,
         "competence": 3,
@@ -32694,7 +32693,7 @@
         "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_c",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -32714,12 +32713,13 @@
         "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_c",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
         "aggressiveness": 5,
         "available_from_turn": 0,
+        "available_until_turn": 0,
         "can_improve": true,
         "casualty_vulnerability": 0.3,
         "competence": 3,
@@ -32737,12 +32737,13 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_c",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
         "aggressiveness": 5,
         "available_from_turn": 0,
+        "available_until_turn": 0,
         "can_improve": true,
         "casualty_vulnerability": 0.25,
         "competence": 3,
@@ -32760,7 +32761,7 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_c",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -32897,7 +32898,7 @@
       {
         "aggressiveness": 4,
         "available_from_turn": 0,
-        "available_until_turn": 120,
+        "available_until_turn": 113,
         "bio_short": "JNA-background officer assigned to Central Bosnia HVO command at scenario start.",
         "can_improve": true,
         "casualty_vulnerability": 0.1,
@@ -32930,7 +32931,7 @@
       {
         "aggressiveness": 3,
         "available_from_turn": 0,
-        "available_until_turn": 44,
+        "available_until_turn": 26,
         "bio_short": "HV-background officer assigned to Tomislavgrad command in the opening OOB.",
         "can_improve": false,
         "casualty_vulnerability": 0.1,
@@ -32955,8 +32956,8 @@
       },
       {
         "aggressiveness": 4,
-        "available_from_turn": 44,
-        "available_until_turn": 96,
+        "available_from_turn": 26,
+        "available_until_turn": 89,
         "can_improve": false,
         "casualty_vulnerability": 0.1,
         "competence": 3,
@@ -32982,8 +32983,8 @@
       },
       {
         "aggressiveness": 4,
-        "available_from_turn": 96,
-        "available_until_turn": 120,
+        "available_from_turn": 89,
+        "available_until_turn": 143,
         "can_improve": false,
         "casualty_vulnerability": 0.15,
         "competence": 4,
@@ -33091,7 +33092,7 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Grave breaches of Geneva Conventions, violations of laws of war",
@@ -33138,7 +33139,7 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -33161,12 +33162,13 @@
         "override_tolerance": 3,
         "political_reliability": 5,
         "pool_tier": "tier_a",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
         "aggressiveness": 5,
         "available_from_turn": 0,
+        "available_until_turn": 0,
         "can_improve": false,
         "casualty_vulnerability": 0.05,
         "competence": 3,
@@ -33211,7 +33213,7 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Crimes against Serbian civilians in Orašje area 1992-1993",
@@ -33237,7 +33239,7 @@
         "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_a",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -33260,7 +33262,7 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -33283,7 +33285,7 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -33306,7 +33308,7 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -33326,7 +33328,7 @@
         "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_b",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Crimes against humanity (persecution), violations of laws of war",
@@ -33341,9 +33343,7 @@
         "available_from_turn": 0,
         "can_improve": true,
         "casualty_vulnerability": 0.1,
-        "compatible_corps_ids": [
-          "hvo_northwest_bosnia"
-        ],
+        "compatible_corps_ids": [],
         "competence": 3,
         "defensive_skill": 3,
         "faction": "HRHB",
@@ -33356,7 +33356,7 @@
         "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_b",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3
       },
       {
@@ -33376,7 +33376,7 @@
         "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_b",
-        "rank": "corps_commander",
+        "rank": "tactical_commander",
         "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Crimes against humanity (persecution, murder, rape), grave breaches of Geneva Conventions",
@@ -33406,18 +33406,6 @@
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "arbih_becirovic",
-        "penalty_turns_remaining": 0,
-        "recent_overrides": [],
-        "status": "reserve",
-        "turns_in_command": 0,
-        "victories": 0
-      },
-      "arbih_besic": {
-        "acting_commander": false,
-        "assigned_corps_id": null,
-        "battles": 0,
-        "effective_competence_penalty": 0,
-        "officer_id": "arbih_besic",
         "penalty_turns_remaining": 0,
         "recent_overrides": [],
         "status": "reserve",
@@ -33616,30 +33604,6 @@
         "turns_in_command": 0,
         "victories": 0
       },
-      "arbih_s_hadzic": {
-        "acting_commander": false,
-        "assigned_corps_id": null,
-        "battles": 0,
-        "effective_competence_penalty": 0,
-        "officer_id": "arbih_s_hadzic",
-        "penalty_turns_remaining": 0,
-        "recent_overrides": [],
-        "status": "reserve",
-        "turns_in_command": 0,
-        "victories": 0
-      },
-      "arbih_sehovic": {
-        "acting_commander": false,
-        "assigned_corps_id": null,
-        "battles": 0,
-        "effective_competence_penalty": 0,
-        "officer_id": "arbih_sehovic",
-        "penalty_turns_remaining": 0,
-        "recent_overrides": [],
-        "status": "reserve",
-        "turns_in_command": 0,
-        "victories": 0
-      },
       "arbih_selmanovic": {
         "acting_commander": false,
         "assigned_corps_id": null,
@@ -33706,18 +33670,6 @@
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "hvo_cerkez",
-        "penalty_turns_remaining": 0,
-        "recent_overrides": [],
-        "status": "reserve",
-        "turns_in_command": 0,
-        "victories": 0
-      },
-      "hvo_kordic": {
-        "acting_commander": false,
-        "assigned_corps_id": null,
-        "battles": 0,
-        "effective_competence_penalty": 0,
-        "officer_id": "hvo_kordic",
         "penalty_turns_remaining": 0,
         "recent_overrides": [],
         "status": "reserve",
@@ -33904,6 +33856,18 @@
         "turns_in_command": 0,
         "victories": 0
       },
+      "vrs_boric": {
+        "acting_commander": false,
+        "assigned_corps_id": "vrs_2nd_krajina",
+        "battles": 0,
+        "effective_competence_penalty": 0,
+        "officer_id": "vrs_boric",
+        "penalty_turns_remaining": 0,
+        "recent_overrides": [],
+        "status": "active",
+        "turns_in_command": 0,
+        "victories": 0
+      },
       "vrs_colic": {
         "acting_commander": false,
         "assigned_corps_id": null,
@@ -33919,25 +33883,25 @@
       "vrs_despotovic": {
         "acting_commander": false,
         "assigned_corps_id": null,
-        "assigned_operation": "Operation Koridor",
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "vrs_despotovic",
         "penalty_turns_remaining": 0,
         "recent_overrides": [],
-        "status": "active",
+        "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
       },
       "vrs_gavric": {
         "acting_commander": false,
         "assigned_corps_id": null,
+        "assigned_operation": "Operation Koridor",
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "vrs_gavric",
         "penalty_turns_remaining": 0,
         "recent_overrides": [],
-        "status": "reserve",
+        "status": "active",
         "turns_in_command": 0,
         "victories": 0
       },
@@ -33956,25 +33920,25 @@
       "vrs_gusic_n": {
         "acting_commander": false,
         "assigned_corps_id": null,
-        "assigned_operation": "Operation Visegrad",
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "vrs_gusic_n",
         "penalty_turns_remaining": 0,
         "recent_overrides": [],
-        "status": "active",
+        "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
       },
       "vrs_kelecevic": {
         "acting_commander": false,
         "assigned_corps_id": null,
+        "assigned_operation": "Operation Prijedor",
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "vrs_kelecevic",
         "penalty_turns_remaining": 0,
         "recent_overrides": [],
-        "status": "reserve",
+        "status": "active",
         "turns_in_command": 0,
         "victories": 0
       },
@@ -34005,26 +33969,24 @@
       "vrs_lisica": {
         "acting_commander": false,
         "assigned_corps_id": null,
-        "assigned_operation": "Operation Prijedor",
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "vrs_lisica",
         "penalty_turns_remaining": 0,
         "recent_overrides": [],
-        "status": "active",
+        "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
       },
       "vrs_lizdek": {
         "acting_commander": false,
         "assigned_corps_id": null,
-        "assigned_operation": "Operation Prsten",
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "vrs_lizdek",
         "penalty_turns_remaining": 0,
         "recent_overrides": [],
-        "status": "active",
+        "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
       },
@@ -34079,26 +34041,24 @@
       "vrs_pandurevic": {
         "acting_commander": false,
         "assigned_corps_id": null,
-        "assigned_operation": "Operation Drina",
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "vrs_pandurevic",
         "penalty_turns_remaining": 0,
         "recent_overrides": [],
-        "status": "active",
+        "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
       },
       "vrs_samardzija": {
         "acting_commander": false,
         "assigned_corps_id": null,
-        "assigned_operation": "Bosanska Krupa Takeover",
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "vrs_samardzija",
         "penalty_turns_remaining": 0,
         "recent_overrides": [],
-        "status": "active",
+        "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
       },
@@ -34129,12 +34089,13 @@
       "vrs_sladoje": {
         "acting_commander": false,
         "assigned_corps_id": null,
+        "assigned_operation": "Operation Prsten",
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "vrs_sladoje",
         "penalty_turns_remaining": 0,
         "recent_overrides": [],
-        "status": "reserve",
+        "status": "active",
         "turns_in_command": 0,
         "victories": 0
       },
@@ -34159,18 +34120,6 @@
         "penalty_turns_remaining": 0,
         "recent_overrides": [],
         "status": "reserve",
-        "turns_in_command": 0,
-        "victories": 0
-      },
-      "vrs_tomanic": {
-        "acting_commander": false,
-        "assigned_corps_id": "vrs_2nd_krajina",
-        "battles": 0,
-        "effective_competence_penalty": 0,
-        "officer_id": "vrs_tomanic",
-        "penalty_turns_remaining": 0,
-        "recent_overrides": [],
-        "status": "active",
         "turns_in_command": 0,
         "victories": 0
       },

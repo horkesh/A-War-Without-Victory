@@ -1,6 +1,6 @@
 import type { CorpsOperation, FactionId, GameState, PendingProposalReview } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { releaseOperationCommander, releaseTacticalCommander } from './officer_system.js';
+import { releaseOperationCommanders } from './officer_system.js';
 
 export type HistoricalOperationAuthorizationKind = 'preplanned' | 'triggered' | 'army_hq';
 export type HistoricalOperationAuthorizationStatus = 'not_required' | 'pending' | 'accepted' | 'declined';
@@ -192,8 +192,7 @@ export function deferUnauthorizedHistoricalOperationsForPlayer(state: GameState)
             }
             // Commander attribution hardening: a deferred operation releases its commanders, so the
             // officer pool a player sees matches a headless run (no commander left holding a dropped op).
-            releaseOperationCommander(state, operation);
-            releaseTacticalCommander(state, operation);
+            releaseOperationCommanders(state, operation);
             deferredAny = true;
         }
 
