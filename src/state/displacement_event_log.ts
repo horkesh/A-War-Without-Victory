@@ -150,6 +150,18 @@ export function appendDisplacementEvent(
     //    fled are additional, not subsets); lost = killed + fled_abroad; in = settled.
     //    Order-insensitive (sums commute); O(1) per event; bounded (~744 OSIDs).
     const flows = (state.displacement.displacement_flows_by_osid ??= {});
+    // RB9 return rule: people who came home leave the OSID's departed tally, so the per-OSID and the
+    // municipality figures agree (red-team R2). Nothing else changes: the expulsion stays recorded.
+    const returned = event.returned ?? 0;
+    if (event.origin_osid && returned > 0) {
+        const originFlow = flows[event.origin_osid];
+        if (originFlow) {
+            originFlow.out = Math.max(0, originFlow.out - returned);
+            if (originFlow.by_ethnicity?.[event.ethnicity] !== undefined) {
+                originFlow.by_ethnicity[event.ethnicity] = Math.max(0, (originFlow.by_ethnicity[event.ethnicity] ?? 0) - returned);
+            }
+        }
+    }
     const displaced = event.displaced ?? 0;
     const killedPlusFled = (event.killed ?? 0) + (event.fled_abroad ?? 0);
     if (event.origin_osid && (displaced > 0 || killedPlusFled > 0)) {

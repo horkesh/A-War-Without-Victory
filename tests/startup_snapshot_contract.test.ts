@@ -194,26 +194,23 @@ test('baked April 1992 UI read model shows opening commanders without backdating
     const view = parseGameState(state);
     const officers = state.military.named_officers ?? {};
 
-    // Reverted to the pre-R7P2 value. This pin was moved to "Vidoje Blagojević"
-    // only because the provenance pass had deleted 30 officers, which changed who
-    // won `compareOpeningOfficer` for vrs_drina. With the 22 attested officers
-    // restored, the opening read model resolves to Andrić again, as it did before
-    // the deletions — this is a revert, not a re-blessing.
-    assert.deepStrictEqual(resolveCorpsCommanderDisplay('vrs_drina', 'RS', view), {
-        name: 'Svetozar Andrić',
-        acting: true,
-        source: 'opening_read_model',
-    });
+    // Commander attribution PR 2b (#800, panel ruling): brigade, OG and division officers are
+    // tactical commanders, so Andrić, Pandurević, Blagojević and Obrenović (all home vrs_drina)
+    // are no longer corps-rank candidates. The only corps-rank Drina officers are Živanović
+    // (from t30, when the corps formed in November 1992) and Krstić (from t171). The opening read
+    // model therefore names no Drina commander at t0 rather than backdating Živanović or showing
+    // a brigade commander as the corps commander.
+    assert.strictEqual(resolveCorpsCommanderDisplay('vrs_drina', 'RS', view), null);
+    // Same rule: Cikotić (an OG commander) is a tactical commander now, so the opening read model
+    // falls to the 3rd Corps' corps-rank deputy commander, Merdan. Hujdur never held corps rank
+    // (deputy commander of the Mostar Battalion; Prlić TJ Vol.2 fn 1441), and Pašalić arrives at
+    // t24, so the 4th Corps has no opening commander at t0.
     assert.deepStrictEqual(resolveCorpsCommanderDisplay('arbih_3rd_corps', 'RBiH', view), {
-        name: 'Selmo Cikotić',
+        name: 'Džemal Merdan',
         acting: true,
         source: 'opening_read_model',
     });
-    assert.deepStrictEqual(resolveCorpsCommanderDisplay('arbih_4th_corps', 'RBiH', view), {
-        name: 'Midhad Hujdur "Hujka"',
-        acting: true,
-        source: 'opening_read_model',
-    });
+    assert.strictEqual(resolveCorpsCommanderDisplay('arbih_4th_corps', 'RBiH', view), null);
     assert.deepStrictEqual(resolveCorpsCommanderDisplay('jna_herzegovina_command', 'RS', view), {
         name: 'JNA forward command staff',
         acting: false,
