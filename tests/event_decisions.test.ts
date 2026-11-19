@@ -110,14 +110,14 @@ describe('Operation Lukavac 93 historical compatibility', () => {
                 {
                     id: 'comply',
                     label: 'Comply with withdrawal demand',
-                    effects: [{ kind: 'patron_pressure', faction: 'RS', delta: 10 }],
+                    effects: [{ kind: 'patron_support', faction: 'RS', delta: 10 }],
                 },
                 {
                     id: 'defy_nato',
                     label: 'Defy NATO — hold Igman',
                     effects: [
                         { kind: 'supply_delta', faction: 'RS', delta: -15 } as unknown as EventEffect,
-                        { kind: 'patron_pressure', faction: 'RS', delta: 20 },
+                        { kind: 'patron_support', faction: 'RS', delta: 20 },
                     ],
                 },
             ],
@@ -573,13 +573,15 @@ describe('Event Decisions', () => {
     it('diplomatic packet rows expose historical defaults and dossier fields for modal decisions', () => {
         const fixtures = [
             loadEventFromFile('data/scenarios/events/war_1994.json', 'hrhb_washington_agreement_1994'),
-            loadEventFromFile('data/scenarios/events/war_1994.json', 'contact_group_plan_1994'),
+            // §6 E3a2 (ruling item 4): Sarajevo's Contact Group answer is the Assembly card;
+            // contact_group_plan_1994 is now a no-choice presentation card.
+            loadEventFromFile('data/scenarios/events/war_1994.json', 'rbih_contact_group_response_1994'),
             loadEventFromFile('data/scenarios/events/war_1995.json', 'dayton_talks_begin_1995'),
         ];
 
         expect(fixtures.map((event) => [event.id, event.bot_response_logic, event.historical_default_response_id])).toEqual([
             ['hrhb_washington_agreement_1994', 'historical', 'accept'],
-            ['contact_group_plan_1994', 'historical', 'accept'],
+            ['rbih_contact_group_response_1994', 'historical', 'accept_51_49_plan'],
             ['dayton_talks_begin_1995', 'historical', 'accept'],
         ]);
 

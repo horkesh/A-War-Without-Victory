@@ -52,12 +52,76 @@ export function getActiveEquipmentQualityMultiplier(
     const mods = state.military.equipment_quality_modifiers;
     if (!mods || mods.length === 0) return 1.0;
     let product = 1.0;
+    let patronProduct = 1.0;
+    let hasPatronCut = false;
     for (const m of mods) {
         if (m.expires_turn <= currentTurn) continue;
         if (m.faction !== faction) continue;
+        if (m.source === 'patron_supply_cut') {
+            patronProduct *= m.multiplier;
+            hasPatronCut = true;
+            continue;
+        }
+        product *= m.multiplier;
+    }
+    // Patron-defiance panel (2026-11-17): the faction's patron cuts stack, but never below
+    // its patron floor. Clamped here, on read, so cuts that expire on different turns are
+    // each charged in full while active. Without a patron entry the result is the plain
+    // product in array order, bit-identical to the reader before patron cuts existed.
+    if (hasPatronCut) product *= Math.max(patronProduct, patronSupplyCutFloor(faction));
+    return product;
+}
+
+/** Lowest combined multiplier a patron's supply cuts can impose on its client
+ *  (patron-defiance panel, 2026-11-17; Systems Manual §7.10.3). RS 0.85: Belgrade's
+ *  VJ ammunition and officers' pay continued even under the August 1994 blockade
+ *  (Perišić TJ, IT-04-81-T). HRHB 0.75: the HVO depended on Zagreb's channel and HV
+ *  cadre, but kept local stocks. RBiH has no coercive patron and never carries a cut. */
+export const PATRON_SUPPLY_CUT_FLOOR: Readonly<Record<'RS' | 'HRHB', number>> = {
+    RS: 0.85,
+    HRHB: 0.75,
+};
+
+function patronSupplyCutFloor(faction: FactionId): number {
+    return faction === 'RS' || faction === 'HRHB' ? PATRON_SUPPLY_CUT_FLOOR[faction] : 1.0;
+}
+
+/** Raw product of a faction's active patron supply cuts, before the floor (1.0 with none). */
+export function getActivePatronSupplyCutProduct(
+    state: GameState,
+    faction: FactionId,
+    currentTurn: number,
+): number {
+    const mods = state.military.equipment_quality_modifiers;
+    if (!mods || mods.length === 0) return 1.0;
+    let product = 1.0;
+    for (const m of mods) {
+        if (m.expires_turn <= currentTurn) continue;
+        if (m.faction !== faction || m.source !== 'patron_supply_cut') continue;
         product *= m.multiplier;
     }
     return product;
+}
+
+/** The faction's combined patron cut as the combat reader applies it: the raw product,
+ *  floored at the faction's patron floor (1.0 with no active cut). */
+export function getEffectivePatronSupplyCutMultiplier(
+    state: GameState,
+    faction: FactionId,
+    currentTurn: number,
+): number {
+    const raw = getActivePatronSupplyCutProduct(state, faction, currentTurn);
+    return raw === 1.0 ? 1.0 : Math.max(raw, patronSupplyCutFloor(faction));
+}
+
+/** True when the faction's active patron cuts already reach its patron floor, so a
+ *  further cut adds nothing until an earlier one expires. */
+export function isPatronSupplyCutFloorBinding(
+    state: GameState,
+    faction: FactionId,
+    currentTurn: number,
+): boolean {
+    return getActivePatronSupplyCutProduct(state, faction, currentTurn) < patronSupplyCutFloor(faction);
 }
 
 /** Fall-1995 mechanic E-A5: true when the faction has an active

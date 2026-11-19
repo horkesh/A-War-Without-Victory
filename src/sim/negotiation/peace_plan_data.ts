@@ -18,6 +18,8 @@ const VANCE_OWEN_PLAN: PeacePlanDefinition = {
     id: 'vance_owen',
     name: 'Vance-Owen Peace Plan',
     trigger_week: 40,
+    // §6 E3a2: the last card window, rs_assembly_rejects_voplan_1993 (t56-58).
+    close_week: 58,
     historical_responses: {
         RBiH: 'accepted',
         RS: 'rejected',
@@ -35,11 +37,6 @@ const VANCE_OWEN_PLAN: PeacePlanDefinition = {
         HRHB: 25,
     },
     institutional_model: '10_provinces',
-    override_change_on_reject: {
-        RBiH: 5,
-        RS: 15,
-        HRHB: 5,
-    },
     credibility_change_on_reject: {
         RBiH: -5,
         RS: -20,
@@ -69,6 +66,8 @@ const OWEN_STOLTENBERG_PLAN: PeacePlanDefinition = {
     id: 'owen_stoltenberg',
     name: 'Owen-Stoltenberg Plan',
     trigger_week: 70,
+    // §6 E3a2: the last card windows, rs_/hrhb_owen_stoltenberg_response_1993 (t75-78).
+    close_week: 78,
     historical_responses: {
         RBiH: 'rejected',
         RS: 'accepted',
@@ -84,11 +83,6 @@ const OWEN_STOLTENBERG_PLAN: PeacePlanDefinition = {
         HRHB: 17.5,
     },
     institutional_model: 'union_3_republics',
-    override_change_on_reject: {
-        RBiH: 10,
-        RS: 5,
-        HRHB: 10,
-    },
     credibility_change_on_reject: {
         RBiH: -10,
         RS: -5,
@@ -112,6 +106,8 @@ const CONTACT_GROUP_PLAN: PeacePlanDefinition = {
     id: 'contact_group',
     name: 'Contact Group Plan',
     trigger_week: 118,
+    // §6 E3a2: the last card windows, the three contact-group response cards (t118-120).
+    close_week: 120,
     historical_responses: {
         RBiH: 'accepted',
         RS: 'rejected',
@@ -126,11 +122,6 @@ const CONTACT_GROUP_PLAN: PeacePlanDefinition = {
         HRHB: 16,
     },
     institutional_model: '51_49_entities',
-    override_change_on_reject: {
-        RBiH: 5,
-        RS: 30,
-        HRHB: 5,
-    },
     credibility_change_on_reject: {
         RBiH: -10,
         RS: -25,
@@ -149,8 +140,9 @@ const CONTACT_GROUP_PLAN: PeacePlanDefinition = {
 // proposed_split: RS=49% from Dayton Annex 2 IEBL (51/49 entity split).
 //   Within Federation: see the measured faction layer below (RBiH 32, HRHB 19); the Contact Group
 //   contributed only the 51:49 parameter (docs/40_reports/20261107_PEACE_PLANS_RESEARCH.md §6).
-// credibility_change_on_reject: RS=-30 (highest in sequence; rejecting Dayton post-Krajina
-//   post-Deliberate Force was diplomatic self-destruction; ICTY IT-95-5/18-T Vol. 4 §§4900–4940).
+// No rejection costs here (§6 E3a2 ruling item 7): the legacy scheduler never offers Dayton
+//   (peace_plans.ts skips it), so its credibility/override rows were dead data. A Dayton refusal
+//   is charged by us_forces_dayton_rbih_1995 (war_1995.json), on the decline path only.
 export const DAYTON_PLAN: PeacePlanDefinition = {
     id: 'dayton',
     name: 'Dayton Peace Agreement',
@@ -169,16 +161,6 @@ export const DAYTON_PLAN: PeacePlanDefinition = {
         HRHB: 19,
     },
     institutional_model: 'two_entities',
-    override_change_on_reject: {
-        RBiH: -5,
-        RS: -20,
-        HRHB: -5,
-    },
-    credibility_change_on_reject: {
-        RBiH: -15,
-        RS: -30,
-        HRHB: -15,
-    },
     narrative: 'The Dayton Peace Agreement (November 1995) establishes two entities — Republika Srpska (49%) and the Bosniak-Croat Federation (51%) — with IFOR enforcing the ceasefire. It keeps the Contact Group\'s 51:49 parameter on a new map: Sarajevo unified in the Federation with a corridor to Goražde, Srebrenica and Žepa in Republika Srpska, western Bosnia returned in part. For the first time Republika Srpska is recognised by name, keeps its army and the Posavina corridor; Brčko goes to arbitration.',
 };
 

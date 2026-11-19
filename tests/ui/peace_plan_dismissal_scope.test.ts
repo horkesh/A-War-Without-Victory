@@ -39,17 +39,23 @@ describe('peace plan dismissal scope', () => {
         expect(shouldShowPeacePlanModal(contactGroup, dismissedKey)).toBe(true);
     });
 
-    it('suppresses the legacy Owen-Stoltenberg modal while its canonical event stage is pending', () => {
+    it('suppresses the fallback modal while a routed card for that plan is pending (§6 E3a2: read from plan_answer)', () => {
         const plan = makePlan('owen_stoltenberg', 70);
         const pendingEventDecisions = [{
             event_id: 'owen_stoltenberg_plan_1993',
             event_title: 'Owen-Stoltenberg Presidency Review',
             turn_fired: 70,
             faction: 'RBiH',
-            response_options: [],
+            response_options: [
+                { id: 'accept', label: 'Conditionally accept', effects: [], plan_answer: null },
+                { id: 'reject', label: 'Reject', effects: [], plan_answer: { plan_id: 'owen_stoltenberg', response: 'rejected' as const } },
+            ],
         }];
 
         expect(shouldShowPeacePlanModal(plan, null, pendingEventDecisions)).toBe(false);
+        // A pending card that answers another plan (or none) does not own this one.
+        const other = [{ ...pendingEventDecisions[0]!, response_options: [{ id: 'x', label: 'X', effects: [] }] }];
+        expect(shouldShowPeacePlanModal(plan, null, other)).toBe(true);
     });
 
     it('guards App wiring against a single global dismissed boolean', () => {

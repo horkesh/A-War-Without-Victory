@@ -118,9 +118,10 @@ const SUBSTRATE_OWNERS = {
     consumer: 'sector_offensive launch-gate via isFactionOffensiveOpsSuppressed',
     status: 'live',
   },
-  patron_pressure: {
+  // §6 E4: renamed from patron_pressure; positive = the patron's backing rises.
+  patron_support: {
     class: 'mechanical',
-    writer: 'applyEventEffects -> patron pressure',
+    writer: 'applyEventEffects -> patron_relationships[faction].support_level',
     consumer: 'political logic / event pressure / briefing surfaces',
     status: 'live',
   },

@@ -258,6 +258,11 @@ export const EVENT_EFFECT_BCS: Readonly<Record<string, EventEffectBcsEntry>> = {
         en: "The VRS attacks the Goražde safe area. Limited NATO strikes fail to stop the offensive, exposing the fragility of safe area protection.",
         bcs: "VRS napada zaštićenu zonu Goražde. Ograničeni udari NATO-a ne zaustavljaju ofanzivu, što otkriva krhkost zaštite u zaštićenim zonama.",
     },
+    // §6 E3a2: a no-choice presentation card since the peace-plan chain, so its line now shows.
+    "contact_group_plan_1994#0": {
+        en: "The Contact Group demands acceptance of a 51/49 territorial split. Rejection risks further international isolation.",
+        bcs: "Kontakt grupa traži prihvatanje teritorijalne podjele 51/49. Odbijanje prijeti daljom međunarodnom izolacijom.",
+    },
     "milosevic_drina_warning#0": {
         en: "Milošević warns Pale that rejection of the Contact Group Plan means Belgrade will close the Drina.",
         bcs: "Milošević upozorava Pale da odbijanje plana Kontakt grupe znači da će Beograd zatvoriti Drinu.",

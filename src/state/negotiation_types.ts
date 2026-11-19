@@ -83,16 +83,26 @@ export interface PeacePlanDefinition {
     name: string;
     /** Week (from April 1992) when the plan is offered. */
     trigger_week: number;
+    /**
+     * §6 E3a2: the plan's last card window (war week). From trigger_week to close_week the
+     * plan resolves as soon as all three answers are on the decision log; at close_week a
+     * side with no recorded answer is answered by the fallback. Absent on Dayton, which the
+     * legacy scheduler never offers. Windows never overlap.
+     */
+    close_week?: number;
     /** Documented final response used by historical headless calibration. */
     historical_responses: Record<string, 'accepted' | 'rejected'>;
     /** Proposed territorial split (% per faction). */
     proposed_split: Record<string, number>;
     /** Institutional model description. */
     institutional_model: string;
-    /** Override authority change on rejection (per faction). */
-    override_change_on_reject: Record<string, number>;
-    /** International credibility change on rejection (per faction). */
-    credibility_change_on_reject: Record<string, number>;
+    /**
+     * International credibility change on rejection (per faction). Absent on Dayton, which
+     * the legacy plan scheduler never offers: its refusal cost is carried by
+     * `us_forces_dayton_rbih_1995` (§6 E3a2 ruling item 7). `override_change_on_reject`
+     * was retired by the same ruling (it was rebuilt away the same turn on the headless path).
+     */
+    credibility_change_on_reject?: Record<string, number>;
     /** Narrative text shown to player. */
     narrative: string;
 }

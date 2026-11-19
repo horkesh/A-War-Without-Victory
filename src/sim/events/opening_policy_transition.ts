@@ -23,8 +23,12 @@ const OPTIONS = ['always_deny', 'ask', 'always_allow'] as const;
 // Re-pinned 2026-11-17 (was 70875 / a3365d034c4c2ce9) by the §6 copy panel on latest final findings (SHDG §6 record "Latest
 // final findings for the Markale and Srebrenica figures"): the three Markale I explanations now read "68 killed, nearly all of
 // them civilians" (Mladić TJ G.8 para. 2097, upheld on appeal). String-only, as above.
-const REVIEWED_IDENTITY_CANONICAL_LENGTH = 70931;
-const REVIEWED_IDENTITY_FNV64 = 'f9e05e291c017954';
+// Re-pinned 2026-11-18 (was 70931 / f9e05e291c017954 on main; 70860 / b0b3c65da063ac99 on the §6 E4 branch) when §6 E4 merged
+// main: both string changes held. The §6 E4 rounds 3-4 panel (narrative seat's copy, Q4) rewrote three Federation-army
+// consequence `explanation` strings that spoke of patron pressure (the retired convention); the Markale I explanations above
+// are unchanged. String-only, as above.
+const REVIEWED_IDENTITY_CANONICAL_LENGTH = 70916;
+const REVIEWED_IDENTITY_FNV64 = '80be52532990ff34';
 // Re-pinned 2026-11-15 (was 10911 / 4db9c9795b1abb6d): three hidden provenance notes cited UN A/54/549 §35 (the Srebrenica enclave
 // before the safe areas) for the ARBiH chain of command; the two hidden notes now record the correction and the visible source
 // line drops the paragraph. Strings only; options, effects, flags and dimension shifts are byte-identical.

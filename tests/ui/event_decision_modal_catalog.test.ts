@@ -92,7 +92,7 @@ function describeEffect(effect: EventEffect): string | null {
     case 'morale_change': return `${army} morale ${signedDelta(effect.delta)}`;
     case 'cohesion_change': return `${army} cohesion ${signedDelta(effect.delta)}`;
     case 'humanitarian_impact': return `${faction} humanitarian impact${effect.war_crimes_delta ? ` (${signedDelta(effect.war_crimes_delta)})` : ''}`;
-    case 'patron_pressure': return `${faction} patron pressure ${signedDelta(effect.delta)}`;
+    case 'patron_support': return `${faction} patron support ${signedDelta(effect.delta)}`;
     case 'alliance_change': return `RBiH–HRHB alliance ${signedDelta(points(effect.delta))}`;
     // §6 E2: no 'negotiation_capital' case; the kind is retired and the loader rejects it.
     case 'equipment_grant': {
@@ -108,6 +108,10 @@ function describeEffect(effect: EventEffect): string | null {
     case 'guerrilla_threat': return `${faction} rear-area threat for ${effect.duration_turns} weeks`;
     case 'recruitment_modifier': return `${army} recruitment ${Math.round(effect.pool_multiplier * 100)}% for ${effect.duration_turns} weeks`;
     case 'equipment_quality_modifier': return `${army} combat effectiveness ${Math.round(effect.multiplier * 100)}% for ${effect.duration_turns} weeks`;
+    // Patron-defiance panel: the price of defying the patron, generated from the effect's numbers.
+    case 'patron_supply_cut': return effect.faction === 'RS'
+      ? `Belgrade holds back part of its fuel and ammunition: ${army} combat effectiveness -${Math.round((1 - effect.multiplier) * 100)}% for ${effect.duration_turns} weeks`
+      : `Zagreb holds back some of its ammunition, fuel and seconded officers: ${army} combat effectiveness -${Math.round((1 - effect.multiplier) * 100)}% for ${effect.duration_turns} weeks`;
     case 'doctrine_constraint': return `${army} doctrine constraint for ${effect.duration_turns} weeks`;
     case 'offensive_ops_suppression': return `${army} offensive operations suppressed for ${effect.duration_turns} weeks`;
     case 'alliance_lock': return `RBiH–HRHB alliance kept ${effect.mode === 'floor' ? 'at or above' : 'at or below'} ${points(effect.value)} for ${effect.duration_turns} weeks`;

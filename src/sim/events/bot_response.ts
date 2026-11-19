@@ -6,6 +6,11 @@ interface CommanderProfile {
     competence: number;      // 1-5
 }
 
+/** The weight the capital-based scorer gives one unit of a faction's dimension shift. */
+function dimensionWeight(faction: string, dimension: string): number {
+    return DIMENSION_WEIGHTS[faction]?.[dimension] ?? 0.10;
+}
+
 function getNumericDelta(effect: EventEffect): number | undefined {
     return 'delta' in effect && typeof effect.delta === 'number'
         ? effect.delta
@@ -75,9 +80,18 @@ export function pickBotResponseV1(
             // Score dimension shifts by faction weights
             if (opt.dimension_shifts && opt.dimension_shifts.length > 0) {
                 for (const shift of opt.dimension_shifts) {
-                    const factionWeights = DIMENSION_WEIGHTS[shift.faction];
-                    const weight = factionWeights?.[shift.dimension] ?? 0.10;
-                    score += shift.delta * weight;
+                    score += shift.delta * dimensionWeight(shift.faction, shift.dimension);
+                }
+            }
+
+            // §6 E4 round 3 (Q1, one carrier per patron change): a scope that carries
+            // patron_support carries no patron_confidence twin, so a patron_support delta is
+            // scored here as the patron_confidence shift it replaces, at the weight this loop
+            // gives that faction's patron_confidence (it scores every faction's shifts, so the
+            // responding faction's support is weighted exactly as its shift was).
+            for (const eff of opt.effects ?? []) {
+                if (eff.kind === 'patron_support') {
+                    score += eff.delta * dimensionWeight(eff.faction, 'patron_confidence');
                 }
             }
 

@@ -937,3 +937,470 @@ registerMigration({
         }
     },
 });
+
+/** §6 E4 static lists, by `${event_id}#${option_id}`. Embedded here on purpose: the
+ *  migration never loads the event catalog. Every flip in the ruling is expressed as
+ *  an absolute SET value, so there is no separate FLIP list. */
+export const S6_E4_PATRON_SUPPORT_DROP: ReadonlySet<string> = new Set([
+    // Round 3 (Q2): authored in the pressure convention; no recorded patron change.
+    'abdic_apwb_declared_1993#federation_offer',
+    'address_to_nation_hrhb#address_conciliation_hrhb',
+    'address_to_nation_rs#address_defiance_rs',
+    'address_to_nation_rs#address_reassure_patron_rs',
+    'bihac_5th_corps_offensive_1994#seek_negotiation',
+    'concentration_camps_revealed_1992#cooperate',
+    'hrhb_camp_exposure_response_1993#cooperate',
+    'hrhb_federation_army_integration_1994#refuse_integration',
+    'hv_hvo_cooperation_1995#arbih_coordination',
+    'london_conference_1992#accept_principles',
+    'owen_stoltenberg_plan_1993#accept',
+    'rbih_contact_group_response_1994#accept_51_49_plan',
+    // Round 3 (Q3/R4-4): Belgrade's break has one carrier (CONTACT_GROUP_REJECTION), and
+    // the RBiH reject is carried by contact_group_plan_1994#reject; both cards drop theirs.
+    'rbih_contact_group_response_1994#reject_51_49_plan',
+    'rs_contact_group_response_1994#reject_51_49_plan',
+    'srebrenica_demilitarization_1993#comply_fully',
+    'srebrenica_demilitarization_1993#refuse',
+    'strategic_posture_review_rbih#seek_negotiation',
+    'strategic_posture_review_rs#accept_partition_framework',
+    'strategic_posture_review_rs#negotiate_strength',
+    'un_hostage_crisis_1995#release_gradually',
+    'vance_owen_plan_1993#accept',
+    'visit_to_front_hrhb#visit_mostar_front',
+    'visit_to_front_hrhb#visit_press_hrhb',
+    'visit_to_front_rs#visit_drina_front',
+    'visit_to_front_rs#visit_press_rs',
+    'visit_to_front_rs#visit_sarajevo_lines',
+    // P-B panel (historian, game designer, operations/engine; 3/3, two rounds, 2026-11-18):
+    // pressure-convention leftovers on the front-visit card; no recorded patron change.
+    'visit_to_front_hrhb#stay_mostar_hrhb',
+    'visit_to_front_rbih#stay_capital_rbih',
+    'visit_to_front_rbih#visit_press_rbih',
+    'visit_to_front_rbih#visit_sarajevo',
+    'visit_to_front_rs#stay_pale_rs',
+]);
+export const S6_E4_PATRON_SUPPORT_SET: Readonly<Record<string, number>> = {
+    'belgrade_embargo_rs_1994#defiant': -10,
+    'concentration_camps_revealed_1992#deny': -10,
+    'concentration_camps_revealed_1992#obstruct': -5,
+    'contact_group_plan_1994#accept': 10,
+    'hrhb_camp_exposure_response_1993#deny': -10,
+    'hrhb_camp_exposure_response_1993#obstruct': -5,
+    'rbih_federation_army_integration_1994#refuse_integration': -10,
+    'rbih_minority_retention_1992#mandatory_purge': -20,
+    'rbih_nato_ultimatum_compliance_1994#rbih_defy_hwez_regime': -10,
+    'rs_assembly_rejects_voplan_1993#override_assembly': 5,
+    'un_hostage_crisis_1995#maintain_hostages': -10,
+    'us_halts_federation_advance_1995#push_further': -15,
+    // Interim carriers until E3a2 routes these peace-plan cards into the plan resolution
+    // (today only the Vance-Owen and Owen-Stoltenberg Presidency/Assembly cards reach
+    // resolvePeacePlan): the authored magnitude with the sign corrected to SUPPORT.
+    // E3a2 strips them when it routes the cards. (The two contact-group reject_51_49_plan
+    // rows moved to DROP in round 3; contact_group_plan_1994#reject is the RBiH carrier.)
+    'contact_group_plan_1994#reject': -10,
+    'rs_assembly_rejects_voplan_1993#accept_rejection': -10,
+    'rs_contact_group_response_1994#negotiate_amendments': -5,
+    'rs_owen_stoltenberg_response_1993#reject_plan': -20,
+};
+/**
+ * One carrier per patron change (§6 E4 Q1): the option-scope patron_confidence shifts the
+ * ruling strips, keyed by option and the faction whose shift goes. The HRHB camp options
+ * (E4 round 1), the 16 option scopes that keep patron_support and lose their twin (round 3
+ * Q1/Q2), and the two contact-group reject cards (round 3 Q3/R4-4, −15 RS and −25 RBiH).
+ * Card-level scopes need nothing: a pending decision stores only its response options.
+ */
+export const S6_E4_PATRON_CONFIDENCE_SHIFT_DROP: Readonly<Record<string, string>> = {
+    'belgrade_embargo_rs_1994#defiant': 'RS',
+    'concentration_camps_revealed_1992#deny': 'RS',
+    'concentration_camps_revealed_1992#obstruct': 'RS',
+    'csq_patron_recovery_offer#accept_recovery': 'RS',
+    'csq_separate_peace_overture#press_bilateral': 'RBiH',
+    'hrhb_camp_exposure_response_1993#cooperate': 'HRHB',
+    'hrhb_camp_exposure_response_1993#deny': 'HRHB',
+    'hrhb_herceg_bosna_consolidation_1992#minimal_entity': 'HRHB',
+    'hrhb_posavina_orasje_posture_1992#counterattack_brod': 'HRHB',
+    'hrhb_zagreb_supply_channel_1992#assert_autonomy': 'HRHB',
+    'hrhb_zagreb_supply_channel_1992#diversify_supply': 'HRHB',
+    'rbih_contact_group_response_1994#reject_51_49_plan': 'RBiH',
+    'rbih_federation_army_integration_1994#refuse_integration': 'RBiH',
+    'rs_assembly_rejects_voplan_1993#accept_rejection': 'RS',
+    'rs_assembly_rejects_voplan_1993#override_assembly': 'RS',
+    'rs_contact_group_response_1994#accept_51_49_plan': 'RS',
+    'rs_contact_group_response_1994#negotiate_amendments': 'RS',
+    'rs_contact_group_response_1994#reject_51_49_plan': 'RS',
+    'strategic_posture_review_hrhb#sue_for_peace_hrhb': 'HRHB',
+    'un_hostage_crisis_1995#maintain_hostages': 'RS',
+};
+
+/** §6 E4: transform one stored effect that still has the old kind. Returns false to drop it. */
+function migrateLegacyPatronEffect(effect: Record<string, any>, key: string): boolean {
+    if (S6_E4_PATRON_SUPPORT_DROP.has(key)) return false;
+    effect.kind = 'patron_support';
+    const setValue = S6_E4_PATRON_SUPPORT_SET[key];
+    if (setValue !== undefined) effect.delta = setValue;
+    return true;
+}
+
+const LEGACY_PATRON_REF = /^patron_pressure(\.|$)/;
+const ANY_PATRON_SUPPORT_REF = /^patron_(pressure|support)(\.|$)/;
+
+/**
+ * §6 E4 round 3: the stored `future_consequences[].material_effect_refs` follow the effects.
+ * A ref to a dropped patron effect goes; a ref to a kept one is renamed; a ref to a stripped
+ * patron_confidence shift (`dimension_shift.<faction>.patron_confidence`) goes.
+ */
+function migratePatronMaterialRefs(option: Record<string, any>, key: string): void {
+    if (!Array.isArray(option.future_consequences)) return;
+    const dropped = S6_E4_PATRON_SUPPORT_DROP.has(key);
+    const shiftFaction = S6_E4_PATRON_CONFIDENCE_SHIFT_DROP[key];
+    for (const consequence of option.future_consequences) {
+        const fc = asRecord(consequence);
+        if (!fc || !Array.isArray(fc.material_effect_refs)) continue;
+        fc.material_effect_refs = fc.material_effect_refs
+            .filter((ref: unknown) => !(typeof ref === 'string' && (
+                (dropped && ANY_PATRON_SUPPORT_REF.test(ref))
+                || (shiftFaction !== undefined && ref === `dimension_shift.${shiftFaction}.patron_confidence`)
+            )))
+            .map((ref: unknown) => (typeof ref === 'string' && LEGACY_PATRON_REF.test(ref)
+                ? ref.replace(/^patron_pressure/, 'patron_support')
+                : ref));
+    }
+}
+
+/** §6 E4: migrate one pending response option. Self-contained so it can be renumbered. */
+function migratePendingOptionToPatronSupport(option: Record<string, any>, key: string): void {
+    if (Array.isArray(option.effects)) {
+        option.effects = option.effects.filter((effect: unknown) => {
+            const e = asRecord(effect);
+            if (!e || e.kind !== 'patron_pressure') return true;
+            return migrateLegacyPatronEffect(e, key);
+        });
+    }
+    const single = asRecord(option.effect);
+    if (single && single.kind === 'patron_pressure' && !migrateLegacyPatronEffect(single, key)) {
+        delete option.effect;
+    }
+    const shiftFaction = S6_E4_PATRON_CONFIDENCE_SHIFT_DROP[key];
+    if (shiftFaction !== undefined && Array.isArray(option.dimension_shifts)) {
+        option.dimension_shifts = option.dimension_shifts.filter((shift: unknown) => {
+            const s = asRecord(shift);
+            return !(s && s.dimension === 'patron_confidence' && s.faction === shiftFaction);
+        });
+    }
+    migratePatronMaterialRefs(option, key);
+}
+
+registerMigration({
+    version: 42,
+    description: 'Section 6 E4: the patron_pressure event effect kind is renamed patron_support, with one '
+        + 'sign (positive = the patron\'s backing rises); pressure toward peace is the per-turn patron '
+        + 'override. In military.pending_event_decisions[].response_options[], only effects whose kind is '
+        + 'still patron_pressure are transformed: renamed, then the static DROP and SET lists apply by '
+        + '(event_id, option_id), SET as absolute values (the lists are disjoint). Round 3 (one carrier per '
+        + 'patron change): the faction-keyed shift-drop list strips the option-scope patron_confidence '
+        + 'shifts the ruling removed (the camp options, the options that keep patron_support, and the two '
+        + 'contact-group reject cards); material_effect_refs of dropped effects go and patron_pressure refs '
+        + 'are renamed. Never loads the catalog; idempotent. Known limits: a mid-war save keeps the support '
+        + 'it already accumulated, and a pending decision keeps its old copy. Sensitive: yes (atrocity and '
+        + 'condemnation cards).',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        if (!mil || !Array.isArray(mil.pending_event_decisions)) return;
+        for (const decision of mil.pending_event_decisions) {
+            const d = asRecord(decision);
+            if (!d || !Array.isArray(d.response_options)) continue;
+            for (const option of d.response_options) {
+                const o = asRecord(option);
+                if (o) migratePendingOptionToPatronSupport(o, `${String(d.event_id)}#${String(o.id)}`);
+            }
+        }
+    },
+});
+
+/** §6 E3a2 (v43) static lists, by `${event_id}#${option_id}`. Embedded on purpose: the
+ *  migration never loads the event catalog (the v42 precedent). Kept equal to the catalog by
+ *  tests/s6_e3a2_save_v43.test.ts. */
+type S6E3a2PlanAnswer = {
+    plan_id: string;
+    response: 'accepted' | 'rejected';
+    accepted_if?: { type: 'peace_plan_response'; plan_id: string; faction: FactionId; response: 'accepted' | 'rejected' };
+};
+const e3a2Answer = (plan_id: string, response: 'accepted' | 'rejected'): S6E3a2PlanAnswer => ({ plan_id, response });
+export const S6_E3A2_PLAN_ANSWERS: Readonly<Record<string, S6E3a2PlanAnswer | null>> = {
+    // contact_group_plan_1994 is a no-choice presentation card since E3a2 (ruling item 4): a
+    // pending snapshot keeps its two options, which now write nothing and cost nothing.
+    'contact_group_plan_1994#accept': null,
+    'contact_group_plan_1994#reject': null,
+    'hrhb_contact_group_response_1994#accept_51_49_plan': e3a2Answer('contact_group', 'accepted'),
+    'hrhb_contact_group_response_1994#accept_with_amendments': e3a2Answer('contact_group', 'rejected'),
+    'hrhb_contact_group_response_1994#reject_51_49_plan': e3a2Answer('contact_group', 'rejected'),
+    'hrhb_owen_stoltenberg_response_1993#accept_union_three_republics': e3a2Answer('owen_stoltenberg', 'accepted'),
+    'hrhb_owen_stoltenberg_response_1993#accept_with_modifications': e3a2Answer('owen_stoltenberg', 'rejected'),
+    'hrhb_owen_stoltenberg_response_1993#reject_plan': e3a2Answer('owen_stoltenberg', 'rejected'),
+    'hrhb_vance_owen_acceptance_1993#accept_vance_owen_plan': e3a2Answer('vance_owen', 'accepted'),
+    'hrhb_vance_owen_acceptance_1993#accept_with_modifications': e3a2Answer('vance_owen', 'rejected'),
+    'hrhb_vance_owen_acceptance_1993#condition_on_arbih_reciprocity': {
+        plan_id: 'vance_owen',
+        response: 'rejected',
+        accepted_if: { type: 'peace_plan_response', plan_id: 'vance_owen', faction: 'RBiH', response: 'accepted' },
+    },
+    'hrhb_vance_owen_acceptance_1993#reject_plan': e3a2Answer('vance_owen', 'rejected'),
+    'os_rbih_tactical_acceptance_1993#accept_for_optics': e3a2Answer('owen_stoltenberg', 'accepted'),
+    'os_rbih_tactical_acceptance_1993#reject_via_assembly': e3a2Answer('owen_stoltenberg', 'rejected'),
+    'owen_stoltenberg_plan_1993#accept': null,
+    'owen_stoltenberg_plan_1993#reject': e3a2Answer('owen_stoltenberg', 'rejected'),
+    'rbih_contact_group_response_1994#accept_51_49_plan': e3a2Answer('contact_group', 'accepted'),
+    'rbih_contact_group_response_1994#accept_with_public_reservations': e3a2Answer('contact_group', 'rejected'),
+    'rbih_contact_group_response_1994#reject_51_49_plan': e3a2Answer('contact_group', 'rejected'),
+    'rs_assembly_rejects_voplan_1993#accept_rejection': e3a2Answer('vance_owen', 'rejected'),
+    'rs_assembly_rejects_voplan_1993#override_assembly': e3a2Answer('vance_owen', 'accepted'),
+    'rs_contact_group_response_1994#accept_51_49_plan': e3a2Answer('contact_group', 'accepted'),
+    'rs_contact_group_response_1994#negotiate_amendments': e3a2Answer('contact_group', 'rejected'),
+    'rs_contact_group_response_1994#reject_51_49_plan': e3a2Answer('contact_group', 'rejected'),
+    'rs_owen_stoltenberg_response_1993#accept_union_three_republics': e3a2Answer('owen_stoltenberg', 'accepted'),
+    'rs_owen_stoltenberg_response_1993#accept_with_modifications': e3a2Answer('owen_stoltenberg', 'rejected'),
+    'rs_owen_stoltenberg_response_1993#reject_plan': e3a2Answer('owen_stoltenberg', 'rejected'),
+    'vance_owen_plan_1993#accept': e3a2Answer('vance_owen', 'accepted'),
+    'vance_owen_plan_1993#reject': e3a2Answer('vance_owen', 'rejected'),
+};
+/** Options whose `international_standing` shifts the E3a2 strip removed (the record is the one carrier). */
+export const S6_E3A2_STRIP_STANDING: ReadonlySet<string> = new Set([
+    'hrhb_contact_group_response_1994#accept_51_49_plan',
+    'hrhb_contact_group_response_1994#accept_with_amendments',
+    'hrhb_contact_group_response_1994#reject_51_49_plan',
+    'hrhb_owen_stoltenberg_response_1993#accept_union_three_republics',
+    'hrhb_owen_stoltenberg_response_1993#reject_plan',
+    'hrhb_vance_owen_acceptance_1993#accept_vance_owen_plan',
+    'hrhb_vance_owen_acceptance_1993#reject_plan',
+    'os_rbih_tactical_acceptance_1993#accept_for_optics',
+    'os_rbih_tactical_acceptance_1993#reject_via_assembly',
+    'rbih_contact_group_response_1994#accept_51_49_plan',
+    'rbih_contact_group_response_1994#accept_with_public_reservations',
+    'rbih_contact_group_response_1994#reject_51_49_plan',
+    'rs_assembly_rejects_voplan_1993#accept_rejection',
+    'rs_assembly_rejects_voplan_1993#override_assembly',
+    'rs_contact_group_response_1994#accept_51_49_plan',
+    'rs_contact_group_response_1994#reject_51_49_plan',
+    'rs_owen_stoltenberg_response_1993#accept_union_three_republics',
+    'rs_owen_stoltenberg_response_1993#reject_plan',
+]);
+/** Options whose own patron effects (patron_support, patron_confidence shifts) the E3a2 strip removed
+ *  (ruling item 6: one patron carrier per routed answer). Includes the four E4 interim carriers
+ *  that v42 SETs, and contact_group_plan_1994's two (its +10 moved to Sarajevo's Assembly card). */
+export const S6_E3A2_STRIP_PATRON: ReadonlySet<string> = new Set([
+    'contact_group_plan_1994#accept',
+    'contact_group_plan_1994#reject',
+    'hrhb_contact_group_response_1994#accept_with_amendments',
+    'hrhb_contact_group_response_1994#reject_51_49_plan',
+    'hrhb_owen_stoltenberg_response_1993#accept_with_modifications',
+    'hrhb_owen_stoltenberg_response_1993#reject_plan',
+    'hrhb_vance_owen_acceptance_1993#accept_with_modifications',
+    'hrhb_vance_owen_acceptance_1993#condition_on_arbih_reciprocity',
+    'hrhb_vance_owen_acceptance_1993#reject_plan',
+    'rs_assembly_rejects_voplan_1993#accept_rejection',
+    'rs_contact_group_response_1994#negotiate_amendments',
+    'rs_owen_stoltenberg_response_1993#accept_with_modifications',
+    'rs_owen_stoltenberg_response_1993#reject_plan',
+]);
+/** The contact-group +10 (E4), moved to Sarajevo's Assembly card at the same size (ruling item 4). */
+export const S6_E3A2_ADD_SUPPORT: Readonly<Record<string, { faction: FactionId; delta: number }>> = {
+    'rbih_contact_group_response_1994#accept_51_49_plan': { faction: 'RBiH', delta: 10 },
+};
+
+const E3A2_PATRON_REF = /^patron_(pressure|support)(\.|$)/;
+const E3A2_STANDING_REF = /^dimension_shift\.[A-Za-z]+\.international_standing$/;
+const E3A2_CONFIDENCE_REF = /^dimension_shift\.[A-Za-z]+\.patron_confidence$/;
+
+/** §6 E3a2: migrate one pending response option. Self-contained so it can be renumbered. */
+function migratePendingOptionToPlanAnswer(option: Record<string, any>, key: string): void {
+    if (!Object.prototype.hasOwnProperty.call(S6_E3A2_PLAN_ANSWERS, key)) return;
+    const answer = S6_E3A2_PLAN_ANSWERS[key];
+    option.plan_answer = answer === null ? null : JSON.parse(JSON.stringify(answer));
+    const stripStanding = S6_E3A2_STRIP_STANDING.has(key);
+    const stripPatron = S6_E3A2_STRIP_PATRON.has(key);
+    if (Array.isArray(option.dimension_shifts)) {
+        option.dimension_shifts = option.dimension_shifts.filter((shift: unknown) => {
+            const s = asRecord(shift);
+            if (!s) return true;
+            if (stripStanding && s.dimension === 'international_standing') return false;
+            if (stripPatron && s.dimension === 'patron_confidence') return false;
+            return true;
+        });
+        if (option.dimension_shifts.length === 0) delete option.dimension_shifts;
+    }
+    if (stripPatron) {
+        if (Array.isArray(option.effects)) {
+            option.effects = option.effects.filter((effect: unknown) => {
+                const kind = asRecord(effect)?.kind;
+                return kind !== 'patron_support' && kind !== 'patron_pressure';
+            });
+        }
+        const single = asRecord(option.effect);
+        if (single && (single.kind === 'patron_support' || single.kind === 'patron_pressure')) delete option.effect;
+    }
+    const add = S6_E3A2_ADD_SUPPORT[key];
+    if (add) {
+        const effects = Array.isArray(option.effects) ? option.effects : (option.effects = []);
+        const present = effects.some((effect: unknown) => {
+            const e = asRecord(effect);
+            return e?.kind === 'patron_support' && e.faction === add.faction && e.delta === add.delta;
+        });
+        if (!present) effects.push({ kind: 'patron_support', faction: add.faction, delta: add.delta });
+    }
+    if ((stripStanding || stripPatron) && Array.isArray(option.future_consequences)) {
+        for (const consequence of option.future_consequences) {
+            const fc = asRecord(consequence);
+            if (!fc || !Array.isArray(fc.material_effect_refs)) continue;
+            fc.material_effect_refs = fc.material_effect_refs.filter((ref: unknown) => !(typeof ref === 'string' && (
+                (stripStanding && E3A2_STANDING_REF.test(ref))
+                || (stripPatron && (E3A2_PATRON_REF.test(ref) || E3A2_CONFIDENCE_REF.test(ref)))
+            )));
+        }
+    }
+}
+
+registerMigration({
+    version: 43,
+    description: 'Section 6 E3a2: the peace-plan chain. Each routed card option now declares plan_answer '
+        + '(the side\'s answer, or null for no write) and evaluate-peace-plans reads the answer from '
+        + 'event_decision_log. In military.pending_event_decisions[].response_options[], by static '
+        + '(event_id, option_id) lists run after v42: plan_answer is added; the routed options\' own '
+        + 'international_standing shifts are stripped (the plan record carries the standing); the '
+        + 'patron effects of options that can be recorded rejected are stripped (the plan\'s -5 at '
+        + 'resolution is the one carrier), including the four E4 interim carriers v42 sets and both '
+        + 'options of contact_group_plan_1994 (now a no-choice presentation card, so a pending '
+        + 'snapshot of it writes nothing); its +10 is added to a pending '
+        + 'rbih_contact_group_response_1994#accept_51_49_plan; material_effect_refs follow. Never loads '
+        + 'the catalog; idempotent. peace_plan_history and pending_peace_plan are not rewritten: a '
+        + 'plan already resolved keeps its row (a later card for it writes nothing and costs nothing) '
+        + 'and a pending plan stays the fallback pointer, answered by the modal or by the player\'s '
+        + 'routed answer. Known limits: a mid-war save keeps the standing modifier its earlier '
+        + 'plan rejections and card shifts already wrote, and a pending decision keeps its old copy. '
+        + 'Sensitive: no (peace-plan cards; no atrocity or condemnation row).',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        if (!mil || !Array.isArray(mil.pending_event_decisions)) return;
+        for (const decision of mil.pending_event_decisions) {
+            const d = asRecord(decision);
+            if (!d || !Array.isArray(d.response_options)) continue;
+            for (const option of d.response_options) {
+                const o = asRecord(option);
+                if (o) migratePendingOptionToPlanAnswer(o, `${String(d.event_id)}#${String(o.id)}`);
+            }
+        }
+    },
+});
+
+/** A patron supply cut as the catalog carries it (patron-defiance panel, 2026-11-17). */
+interface PatronSupplyCutSpec {
+    faction: 'RS' | 'HRHB';
+    multiplier: number;
+    duration_turns: number;
+    /** The old carrier this answer had before the panel, rewritten in place (exact numbers). */
+    replaces?: { kind: 'equipment_quality_modifier' | 'recruitment_modifier'; value: number; duration_turns: number };
+}
+
+/** Patron-defiance panel static list, by `${event_id}#${option_id}`. Embedded on purpose:
+ *  the migration never loads the event catalog. Mirrors the ruling's table. */
+export const PATRON_SUPPLY_CUT_PENDING: Readonly<Record<string, PatronSupplyCutSpec>> = {
+    'belgrade_embargo_rs_1994#defiant': {
+        faction: 'RS', multiplier: 0.93, duration_turns: 26,
+        replaces: { kind: 'recruitment_modifier', value: 0.9, duration_turns: 52 },
+    },
+    'hrhb_1992_graz_cooperation_collapse#formal_alliance_persists': {
+        faction: 'HRHB', multiplier: 0.9, duration_turns: 26,
+        replaces: { kind: 'equipment_quality_modifier', value: 0.9, duration_turns: 26 },
+    },
+    'hrhb_political_goal#united_front': {
+        faction: 'HRHB', multiplier: 0.85, duration_turns: 52,
+        replaces: { kind: 'equipment_quality_modifier', value: 0.85, duration_turns: 52 },
+    },
+    'hrhb_zagreb_supply_channel_1992#assert_autonomy': { faction: 'HRHB', multiplier: 0.9, duration_turns: 26 },
+    'hrhb_zagreb_supply_channel_1992#diversify_supply': { faction: 'HRHB', multiplier: 0.97, duration_turns: 13 },
+    'milosevic_drina_warning#resist_patron': { faction: 'RS', multiplier: 0.95, duration_turns: 13 },
+    'milosevic_isolation_warning_aug92#resist_patron': { faction: 'RS', multiplier: 0.97, duration_turns: 13 },
+    'milosevic_owen_stoltenberg_distancing#resist_patron': { faction: 'RS', multiplier: 0.97, duration_turns: 13 },
+    'milosevic_vopp_pressure#resist_patron': { faction: 'RS', multiplier: 0.95, duration_turns: 13 },
+    'rs_belgrade_pressure_response_1993#defy_belgrade_directive': { faction: 'RS', multiplier: 0.95, duration_turns: 13 },
+    'rs_belgrade_pressure_response_1993#partial_compliance': { faction: 'RS', multiplier: 0.98, duration_turns: 13 },
+    'zagreb_orders_hrhb_ceasefire#resist_patron': { faction: 'HRHB', multiplier: 0.85, duration_turns: 52 },
+    'zagreb_restrains_boban_vopp#resist_patron': { faction: 'HRHB', multiplier: 0.95, duration_turns: 13 },
+};
+
+/** Patron-defiance panel: give one pending response option its patron supply cut. Self-contained
+ *  so it can be renumbered. Idempotent: an option that already carries the cut is left alone. */
+function migratePendingOptionToPatronSupplyCut(option: Record<string, any>, key: string): void {
+    const spec = PATRON_SUPPLY_CUT_PENDING[key];
+    if (!spec) return;
+    const effects: unknown[] = Array.isArray(option.effects) ? option.effects : [];
+    if (effects.some((effect) => asRecord(effect)?.kind === 'patron_supply_cut')) return;
+    const cut = {
+        kind: 'patron_supply_cut',
+        faction: spec.faction,
+        multiplier: spec.multiplier,
+        duration_turns: spec.duration_turns,
+        tag: key,
+    };
+    let kept = effects;
+    let renamedRefKind: string | null = null;
+    if (spec.replaces) {
+        const old = spec.replaces;
+        const numberField = old.kind === 'recruitment_modifier' ? 'pool_multiplier' : 'multiplier';
+        kept = effects.filter((effect) => {
+            const e = asRecord(effect);
+            return !(e && e.kind === old.kind && e.faction === spec.faction
+                && e[numberField] === old.value && e.duration_turns === old.duration_turns);
+        });
+        if (kept.length !== effects.length) renamedRefKind = old.kind;
+    }
+    option.effects = [...kept, cut];
+    if (!Array.isArray(option.future_consequences)) return;
+    for (const consequence of option.future_consequences) {
+        const fc = asRecord(consequence);
+        if (!fc || !Array.isArray(fc.material_effect_refs)) continue;
+        if (renamedRefKind) {
+            fc.material_effect_refs = fc.material_effect_refs.map((ref: unknown) => (
+                typeof ref === 'string' && (ref === renamedRefKind || ref.startsWith(`${renamedRefKind}.`))
+                    ? ref.replace(renamedRefKind, 'patron_supply_cut')
+                    : ref
+            ));
+        }
+    }
+}
+
+registerMigration({
+    version: 44,
+    description: 'Patron-defiance panel (2026-11-17): defying a patron carries one live material cost, the '
+        + 'patron_supply_cut event effect (combat power for N weeks, floored per patron in the combat reader; '
+        + 'Systems Manual §7.10.3). In military.pending_event_decisions[].response_options[] the static list '
+        + 'gives each defiance answer its cut; united_front and formal_alliance_persists have their '
+        + 'equipment_quality_modifier, and belgrade_embargo_rs_1994#defiant its recruitment_modifier, rewritten '
+        + 'only when the stored numbers match the old carrier exactly. The per-turn receipts of the retired '
+        + 'pc-based defiance term (patron_defiance_supply_cuts entries without a tag) are dropped: they recorded a '
+        + 'cut that never reached combat. Never loads the catalog; idempotent. Known limit, recorded: '
+        + 'equipment-quality entries a mid-war save already applied carry no source, so they stay unfloored and '
+        + 'have no receipt; they expire within 52 weeks. Runs after v43 (§6 E3a2); its static list shares '
+        + 'no (event_id, option_id) key with the v43 lists, and v43 strips no patron_supply_cut.',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        if (!mil) return;
+        if (Array.isArray(mil.pending_event_decisions)) {
+            for (const decision of mil.pending_event_decisions) {
+                const d = asRecord(decision);
+                if (!d || !Array.isArray(d.response_options)) continue;
+                for (const option of d.response_options) {
+                    const o = asRecord(option);
+                    if (o) migratePendingOptionToPatronSupplyCut(o, `${String(d.event_id)}#${String(o.id)}`);
+                }
+            }
+        }
+        if (Array.isArray(mil.patron_defiance_supply_cuts)) {
+            const tagged = mil.patron_defiance_supply_cuts.filter((cut: unknown) => {
+                const c = asRecord(cut);
+                return c != null && typeof c.tag === 'string' && c.tag.length > 0;
+            });
+            if (tagged.length > 0) mil.patron_defiance_supply_cuts = tagged;
+            else delete mil.patron_defiance_supply_cuts;
+        }
+    },
+});

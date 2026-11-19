@@ -458,7 +458,10 @@ describe('PresidentDeskShell', () => {
         rawGameState: {
           military: {
             patron_defiance_supply_cuts: [
-              { faction: 'RS', turn: 9, cut_fraction: 0.25, support_after: 0.5 },
+              {
+                faction: 'RS', turn: 9, cut_fraction: 0.05, support_after: 0.8,
+                tag: 'milosevic_isolation_warning_aug92#resist_patron', expires_turn: 22, combined_multiplier: 0.95,
+              },
             ],
           },
         } as any,
@@ -466,10 +469,10 @@ describe('PresidentDeskShell', () => {
     });
 
     fireEvent.click(screen.getByText('Cabinet crisis response'));
-    fireEvent.click(screen.getByText('Patron defiance supply cut'));
+    fireEvent.click(screen.getByText('Patron supply cut'));
 
     expect(onOpenChronicle).toHaveBeenCalledWith('event:cabinet-crisis');
-    expect(onOpenDecisionRecords).toHaveBeenCalledWith('patron-defiance:RS:9:0.25:0.5');
+    expect(onOpenDecisionRecords).toHaveBeenCalledWith('patron-defiance:RS:9:milosevic_isolation_warning_aug92#resist_patron');
     expect(onOpenRecords).not.toHaveBeenCalled();
   });
 
@@ -508,7 +511,10 @@ describe('PresidentDeskShell', () => {
         rawGameState: {
           military: {
             patron_defiance_supply_cuts: [
-              { faction: 'RS', turn: 9, cut_fraction: 0.25, support_after: 0.5 },
+              {
+                faction: 'RS', turn: 9, cut_fraction: 0.05, support_after: 0.8,
+                tag: 'milosevic_isolation_warning_aug92#resist_patron', expires_turn: 22, combined_multiplier: 0.95,
+              },
             ],
           },
         } as any,

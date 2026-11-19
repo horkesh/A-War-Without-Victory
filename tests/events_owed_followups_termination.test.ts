@@ -7,7 +7,7 @@
  * its t77 date, through the same path the desktop uses before persisting the terminal state.
  */
 import { describe, expect, it } from 'vitest';
-import { resolveEventDecision } from '../src/sim/events/resolve_decision.js';
+import { resolvePeacePlan } from '../src/sim/negotiation/peace_plans.js';
 import { fireOwedFollowUpsAtTermination } from '../src/sim/events/evaluate_events.js';
 import { loadEventDefinitions } from '../src/sim/events/event_loader.js';
 import {
@@ -65,9 +65,19 @@ function terminalCandidateState(neretvaFiredTurn: number | null): GameState {
     } as unknown as GameState;
 }
 
-/** The desktop IPC sequence: resolve the decision, then the save choke point writes owed records. */
+/**
+ * The desktop IPC sequence: answer the peace plan between turns, then the save choke point
+ * writes owed records. §6 E3a2: a routed card only logs its answer and the plan resolves inside
+ * the next turn's evaluate-peace-plans step, so the between-turns acceptance that ends play is
+ * the fallback modal (resolve-peace-plan IPC) answering a pending Owen-Stoltenberg pointer.
+ */
 function acceptPeaceAtT76(state: GameState): string[] {
-    resolveEventDecision(state, 'os_rbih_tactical_acceptance_1993', 'accept_for_optics');
+    state.military.negotiation!.pending_peace_plan = {
+        plan_id: 'owen_stoltenberg',
+        turn_offered: 70,
+        bot_responses: { RS: 'accepted', HRHB: 'accepted' },
+    };
+    resolvePeacePlan(state, 'owen_stoltenberg', 'accepted');
     return writeOwedTerminationRecords(state, process.cwd());
 }
 

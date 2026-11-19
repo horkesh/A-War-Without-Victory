@@ -16,7 +16,7 @@ import {
  * Real catalog events are used so the historical-default join is exercised
  * against actual data:
  *   - vance_owen_plan_1993        historical default = 'accept'
- *   - contact_group_plan_1994     historical default = 'accept'
+ *   - rbih_contact_group_response_1994  historical default = 'accept_51_49_plan'
  *   - karadzic_mladic_split_1995  historical default = 'back_down'
  *   - arms_embargo_impact_1992    NO historical default (must be skipped)
  */
@@ -68,10 +68,10 @@ describe('buildDistanceFromHistory', () => {
                 { event_id: 'vance_owen_plan_1993', response_id: 'accept', turn: 39, decision_source: 'bot_political' },
                 // SKIPPED (foreign player) — another faction's row is not this player's history.
                 { event_id: 'karadzic_mladic_split_1995', response_id: 'purge', turn: 180, decision_source: 'player', faction: 'RS' },
-                // DIVERGED + PLAYER-AUTHORED (default 'accept', chose 'reject').
+                // DIVERGED + PLAYER-AUTHORED (default 'accept_51_49_plan', chose 'reject_51_49_plan').
                 {
-                    event_id: 'contact_group_plan_1994',
-                    response_id: 'reject',
+                    event_id: 'rbih_contact_group_response_1994',
+                    response_id: 'reject_51_49_plan',
                     turn: 60,
                     decision_source: 'player',
                     faction: 'RBiH',
@@ -91,7 +91,7 @@ describe('buildDistanceFromHistory', () => {
         assert.strictEqual(view.playerDiverged, 1);
 
         assert.strictEqual(view.divergences.length, 1);
-        assert.strictEqual(view.divergences[0].eventId, 'contact_group_plan_1994');
+        assert.strictEqual(view.divergences[0].eventId, 'rbih_contact_group_response_1994');
         assert.strictEqual(view.divergences[0].source, 'player');
         assert.strictEqual(view.divergences[0].faction, 'RBiH');
 

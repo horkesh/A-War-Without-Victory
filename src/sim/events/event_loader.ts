@@ -22,6 +22,12 @@ import {
 import { DIMENSION_IDS } from './strategic_dimensions.js';
 import { stableStringify } from '../../utils/stable_json.js';
 import sourceTierContract from './source_tiers.json';
+import patronSupportAllowlist from './patron_support_allowlist.json';
+import { DAYTON_PLAN, PEACE_PLANS } from '../negotiation/peace_plan_data.js';
+import { OPENING_FOUNDATIONAL_EVENT_IDS } from './answer_ahead_of_firing.js';
+
+/** §6 E4 round 3: plan ids a `peace_plan_response` condition may name. */
+const KNOWN_PEACE_PLAN_IDS: ReadonlySet<string> = new Set<string>([...PEACE_PLANS.map((plan) => plan.id), DAYTON_PLAN.id]);
 
 /**
  * Phase D Packet 44 — typed DimensionId vocabulary as a runtime Set. Mirrors
@@ -167,6 +173,10 @@ function validateKindedObject(value: unknown, path: string, filename: string, ro
     }
     if (!isNonEmptyString(value.kind)) {
         failRow(filename, rowIndex, `${path}.kind must be a non-empty string`);
+    }
+    if (value.kind === 'patron_pressure') {
+        // §6 E4 (rule d): the kind was renamed; its sign is now SUPPORT (positive = backing rises).
+        failRow(filename, rowIndex, `${path}.kind 'patron_pressure' was renamed to 'patron_support' (§6 E4; positive = the patron's backing rises)`);
     }
     if (!KNOWN_EVENT_EFFECT_KIND_SET.has(value.kind)) {
         failRow(filename, rowIndex, `${path}.kind must be a known event effect kind: ${value.kind}`);
@@ -355,6 +365,18 @@ function validateCondition(value: unknown, path: string, filename: string, rowIn
         if (hasOwn(value, 'min_attacks')
             && !(Number.isInteger(value.min_attacks) && (value.min_attacks as number) >= 1)) {
             failRow(filename, rowIndex, `${path}.min_attacks must be an integer >= 1 when present`);
+        }
+    }
+    if (value.type === 'peace_plan_response') {
+        // §6 E4 round 3 (Q3): reads the resolved plan record.
+        if (!isNonEmptyString(value.plan_id) || !KNOWN_PEACE_PLAN_IDS.has(value.plan_id)) {
+            failRow(filename, rowIndex, `${path}.plan_id must be a known peace plan id (${[...KNOWN_PEACE_PLAN_IDS].sort(strictCompare).join(', ')}): ${String(value.plan_id)}`);
+        }
+        if (!isNonEmptyString(value.faction) || !VALID_EVENT_FACTION_SET.has(value.faction)) {
+            failRow(filename, rowIndex, `${path}.faction must be one of RBiH, RS, HRHB: ${String(value.faction)}`);
+        }
+        if (value.response !== 'accepted' && value.response !== 'rejected') {
+            failRow(filename, rowIndex, `${path}.response must be 'accepted' or 'rejected': ${String(value.response)}`);
         }
     }
 
@@ -1282,7 +1304,7 @@ function validateUnreachableGates(rows: EventDefinition[]): void {
  * apply time, so this load-time check names the row before a run can reach it.
  *
  * Common authoring failure mode is to pass an `EffectKind` (e.g.
- * `'patron_pressure'`, `'alliance_change'`) into a dimension slot. The error
+ * `'patron_support'`, formerly `'patron_pressure'`, or `'alliance_change'`) into a dimension slot. The error
  * message names the offending row/option/dimension and suggests authoring via
  * `effects[].kind` instead.
  */
@@ -1426,6 +1448,344 @@ function validateNoRepeatedEffect(rows: EventDefinition[]): void {
     }
 }
 
+/** §6 E4: one allowlist entry per positive `patron_support` row, keyed
+ *  `<event id>#<option id>` or `<event id>#card`. */
+export interface PatronSupportAllowlistEntry {
+    faction: string;
+    reason: string;
+}
+
+/** §6 E4: the data allowlist for positive `patron_support` rows (rule b). */
+export const PATRON_SUPPORT_ALLOWLIST: Readonly<Record<string, PatronSupportAllowlistEntry>> =
+    patronSupportAllowlist.entries as Record<string, PatronSupportAllowlistEntry>;
+
+function effectList(scope: unknown): unknown[] {
+    if (!isObject(scope)) return [];
+    const out: unknown[] = [];
+    if (isObject(scope.effect)) out.push(scope.effect);
+    if (Array.isArray(scope.effects)) out.push(...scope.effects);
+    return out;
+}
+
+/** Rule (a) markers for `faction` in one scope: humanitarian_impact, a
+ *  war_crimes_delta, or a negative international_standing shift. */
+function atrocityOrCondemnationMarkers(scope: unknown, faction: string): string[] {
+    if (!isObject(scope)) return [];
+    const markers: string[] = [];
+    for (const effect of effectList(scope)) {
+        if (!isObject(effect) || effect.faction !== faction) continue;
+        if (effect.kind === 'humanitarian_impact') markers.push('humanitarian_impact');
+        if (hasOwn(effect, 'war_crimes_delta')) markers.push('war_crimes_delta');
+    }
+    if (Array.isArray(scope.dimension_shifts)) {
+        for (const shift of scope.dimension_shifts) {
+            if (
+                isObject(shift)
+                && shift.faction === faction
+                && shift.dimension === 'international_standing'
+                && typeof shift.delta === 'number'
+                && shift.delta < 0
+            ) {
+                markers.push('negative international_standing');
+            }
+        }
+    }
+    return markers;
+}
+
+/**
+ * §6 E4 (2026-11-17): `patron_support` has one semantics, SUPPORT (positive =
+ * the patron's material and political backing rises). The 1992-95
+ * condemnation, UN, NATO and atrocity cards were authored in the old pressure
+ * convention, so each one raised the perpetrator's patron support: a reward for
+ * atrocity. Pressure toward peace is the per-turn patron override.
+ *
+ * - (a) a positive `patron_support` for faction X fails on any row (card, or
+ *   option together with its card) where X also has `humanitarian_impact`, a
+ *   `war_crimes_delta`, or a negative `international_standing` shift, or where
+ *   the row's family is Ring-3 sensitive. The allowlist can NEVER override (a).
+ * - (b) every other positive `patron_support` must be on the allowlist.
+ * - (c) a zero-delta `patron_support` fails (an effect with no effect).
+ * - (d) the old kind name is rejected by the vocabulary check.
+ *
+ * Exported with an injectable allowlist so tests can prove (a) wins over it.
+ */
+export function validatePatronSupportRules(
+    rows: EventDefinition[],
+    allowlist: Readonly<Record<string, PatronSupportAllowlistEntry>> = PATRON_SUPPORT_ALLOWLIST,
+): void {
+    const ruleA: string[] = [];
+    const ruleB: string[] = [];
+    const ruleC: string[] = [];
+    const sortedRows = [...rows].sort((a, b) => strictCompare(a.id, b.id));
+    function check(scopes: unknown[], label: string, ring3: boolean): void {
+        for (const effect of effectList(scopes[0])) {
+            if (!isObject(effect) || effect.kind !== 'patron_support') continue;
+            const faction = String(effect.faction);
+            const delta = effect.delta;
+            if (delta === 0) {
+                ruleC.push(`${label}:${faction}`);
+                continue;
+            }
+            if (typeof delta !== 'number' || delta <= 0) continue;
+            const markers = scopes.flatMap((scope) => atrocityOrCondemnationMarkers(scope, faction));
+            if (ring3) markers.push('Ring-3 family');
+            if (markers.length > 0) {
+                const unique = [...new Set(markers)].sort(strictCompare);
+                ruleA.push(`${label}:${faction}+${delta} (${unique.join(', ')})`);
+                continue;
+            }
+            const entry = allowlist[label];
+            if (!entry || entry.faction !== faction || !isNonEmptyString(entry.reason)) {
+                ruleB.push(`${label}:${faction}+${delta}`);
+            }
+        }
+    }
+    for (const row of sortedRows) {
+        const ring3 = isRing3SensitiveFamily(row.family);
+        check([row], `${row.id}#card`, ring3);
+        if (!Array.isArray(row.response_options)) continue;
+        for (let optionIndex = 0; optionIndex < row.response_options.length; optionIndex++) {
+            const option = row.response_options[optionIndex];
+            if (!isObject(option)) continue;
+            const optionId = isNonEmptyString((option as { id?: unknown }).id)
+                ? (option as { id: string }).id
+                : String(optionIndex);
+            check([option, row], `${row.id}#${optionId}`, ring3);
+        }
+    }
+    const failures: string[] = [];
+    if (ruleA.length > 0) {
+        failures.push(
+            `rule (a): positive patron_support on a row where the same faction has humanitarian_impact, a war_crimes_delta, `
+            + `a negative international_standing shift, or a Ring-3 family (the allowlist cannot override this): ${ruleA.sort(strictCompare).join(', ')}`,
+        );
+    }
+    if (ruleB.length > 0) {
+        failures.push(
+            `rule (b): positive patron_support not on the allowlist (src/sim/events/patron_support_allowlist.json, `
+            + `with the faction and a reason): ${ruleB.sort(strictCompare).join(', ')}`,
+        );
+    }
+    if (ruleC.length > 0) {
+        failures.push(`rule (c): zero-delta patron_support (remove the entry instead): ${ruleC.sort(strictCompare).join(', ')}`);
+    }
+    if (failures.length > 0) {
+        throw new Error(`Patron support rule violation(s) in required event catalog (§6 E4): ${failures.join('; ')}`);
+    }
+}
+
+/**
+ * §6 E4 round 3 (Q1, 2026-11-17): one carrier per patron change. A scope (the card, or one
+ * response option) that carries `patron_support` for faction X carries no `patron_confidence`
+ * dimension shift for X. The support writer already moves X's patron_confidence (its base is
+ * support_level, recomputed every turn), so a twin shift charged the same patron change
+ * twice. Same pattern as {@link validateNoRepeatedEffect}.
+ */
+export function validateOnePatronCarrier(rows: EventDefinition[]): void {
+    const violations: string[] = [];
+    const sortedRows = [...rows].sort((a, b) => strictCompare(a.id, b.id));
+    function check(scope: unknown, label: string): void {
+        if (!isObject(scope)) return;
+        const supportFactions = new Set<string>();
+        for (const effect of effectList(scope)) {
+            if (isObject(effect) && effect.kind === 'patron_support') supportFactions.add(String(effect.faction));
+        }
+        if (supportFactions.size === 0 || !Array.isArray(scope.dimension_shifts)) return;
+        for (const shift of scope.dimension_shifts) {
+            if (isObject(shift) && shift.dimension === 'patron_confidence' && supportFactions.has(String(shift.faction))) {
+                violations.push(`${label}:${String(shift.faction)}`);
+            }
+        }
+    }
+    for (const row of sortedRows) {
+        check(row, `${row.id}#card`);
+        if (!Array.isArray(row.response_options)) continue;
+        for (let optionIndex = 0; optionIndex < row.response_options.length; optionIndex++) {
+            const option = row.response_options[optionIndex];
+            if (!isObject(option)) continue;
+            const optionId = isNonEmptyString((option as { id?: unknown }).id)
+                ? (option as { id: string }).id
+                : String(optionIndex);
+            check(option, `${row.id}#${optionId}`);
+        }
+    }
+    if (violations.length > 0) {
+        violations.sort(strictCompare);
+        throw new Error(
+            'One carrier per patron change (§6 E4): a scope with patron_support for a faction carries no '
+            + `patron_confidence dimension shift for that faction: ${violations.join(', ')}`,
+        );
+    }
+}
+
+/** Material carriers that may not share a scope and faction with a `patron_supply_cut`. */
+const PATRON_SUPPLY_CUT_MATERIAL_KINDS = new Set(['patron_supply_cut', 'equipment_quality_modifier', 'recruitment_modifier']);
+
+/**
+ * Patron-defiance panel (2026-11-17; Systems Manual §7.10.3): `patron_supply_cut` is a defiance
+ * answer's one live material carrier. Every use must:
+ * - sit on a response option (never a card), and never on the event's historical default, so a
+ *   hands-off run never carries one;
+ * - name RS or HRHB (RBiH has no coercive patron);
+ * - have 0 < multiplier < 1 and an integer duration_turns >= 1;
+ * - carry `tag` equal to `<event_id>#<option_id>` (the receipt's id);
+ * - share its option with a negative patron move for the same faction (a `patron_confidence`
+ *   shift below 0 or a `patron_support` cost), so the cut always follows a defiance;
+ * - be the option's only material carrier for that faction (no second `patron_supply_cut`,
+ *   `equipment_quality_modifier` or `recruitment_modifier`).
+ */
+export function validatePatronSupplyCut(rows: EventDefinition[]): void {
+    const violations: string[] = [];
+    const sortedRows = [...rows].sort((a, b) => strictCompare(a.id, b.id));
+    for (const row of sortedRows) {
+        for (const effect of effectList(row)) {
+            if (isObject(effect) && effect.kind === 'patron_supply_cut') {
+                violations.push(`${row.id}#card: patron_supply_cut belongs on a response option, not the card`);
+            }
+        }
+        if (!Array.isArray(row.response_options)) continue;
+        for (let optionIndex = 0; optionIndex < row.response_options.length; optionIndex++) {
+            const option = row.response_options[optionIndex];
+            if (!isObject(option)) continue;
+            const optionId = isNonEmptyString((option as { id?: unknown }).id)
+                ? (option as { id: string }).id
+                : String(optionIndex);
+            const label = `${row.id}#${optionId}`;
+            const effects = effectList(option).filter(isObject);
+            const cuts = effects.filter((effect) => effect.kind === 'patron_supply_cut');
+            if (cuts.length === 0) continue;
+            const isHistoricalDefault = row.historical_default_response_id === optionId
+                || (option as { historical_marker?: unknown }).historical_marker === 'historical_default';
+            if (isHistoricalDefault) violations.push(`${label}: patron_supply_cut on the historical default`);
+            for (const cut of cuts) {
+                const faction = String(cut.faction);
+                if (faction !== 'RS' && faction !== 'HRHB') violations.push(`${label}: faction must be RS or HRHB, got ${faction}`);
+                const multiplier = cut.multiplier;
+                if (typeof multiplier !== 'number' || !Number.isFinite(multiplier) || multiplier <= 0 || multiplier >= 1) {
+                    violations.push(`${label}: multiplier must be > 0 and < 1`);
+                }
+                const duration = cut.duration_turns;
+                if (typeof duration !== 'number' || !Number.isInteger(duration) || duration < 1) {
+                    violations.push(`${label}: duration_turns must be an integer >= 1`);
+                }
+                if (cut.tag !== label) violations.push(`${label}: tag must be "${label}"`);
+                const shifts = Array.isArray(option.dimension_shifts) ? option.dimension_shifts.filter(isObject) : [];
+                const negativePatronMove =
+                    shifts.some((shift) => shift.dimension === 'patron_confidence' && String(shift.faction) === faction
+                        && typeof shift.delta === 'number' && shift.delta < 0)
+                    || effects.some((effect) => effect.kind === 'patron_support' && String(effect.faction) === faction
+                        && typeof effect.delta === 'number' && effect.delta < 0);
+                if (!negativePatronMove) violations.push(`${label}: no negative patron move for ${faction} on the same option`);
+                const carriers = effects.filter((effect) => PATRON_SUPPLY_CUT_MATERIAL_KINDS.has(String(effect.kind))
+                    && String(effect.faction) === faction);
+                if (carriers.length > 1) violations.push(`${label}: more than one material carrier for ${faction}`);
+            }
+        }
+    }
+    if (violations.length > 0) {
+        violations.sort(strictCompare);
+        throw new Error(`patron_supply_cut rule violation(s) (patron-defiance panel): ${[...new Set(violations)].join('; ')}`);
+    }
+}
+
+/** §6 E3a2: plans a routed card may answer (the legacy scheduler's plans; Dayton has its own flow). */
+const ROUTED_PEACE_PLAN_IDS: ReadonlySet<string> = new Set<string>(
+    PEACE_PLANS.filter((plan) => plan.close_week != null).map((plan) => plan.id),
+);
+
+function isPlanResponse(value: unknown): value is 'accepted' | 'rejected' {
+    return value === 'accepted' || value === 'rejected';
+}
+
+/**
+ * §6 E3a2 (ruled 2026-11-17): the routed peace-plan cards. A card is routed when any of its
+ * response options declares `plan_answer`. Load-time rules (the write-once rule is a runtime
+ * check in plan_answer.ts, because RBiH has two Owen-Stoltenberg writers with exclusive gates):
+ * - every option of a routed card declares `plan_answer` (a value or null), and the card names
+ *   its `responding_faction`; its non-null answers name one plan, a routed plan;
+ * - `plan_answer` is `{ plan_id, response, accepted_if? }`; `accepted_if` is the one conditional
+ *   form `{ type: 'peace_plan_response', plan_id: <same plan>, faction: <another side>, response }`;
+ * - a routed card carries no `international_standing` shift, card or option (the record is the
+ *   one carrier of a plan answer's standing; ruling item 5 and the E3 ruling);
+ * - one patron carrier per routed answer (ruling item 6): no card-level patron effect, and an
+ *   option that can be recorded `rejected` (conditional rows included) carries no
+ *   `patron_support` and no `patron_confidence` shift of its own;
+ * - a routed card is not an answer-ahead opening event (those log before they apply).
+ */
+export function validatePlanAnswers(rows: EventDefinition[], openingEventIds: readonly string[] = []): void {
+    const violations: string[] = [];
+    const sortedRows = [...rows].sort((a, b) => strictCompare(a.id, b.id));
+    const patronIn = (scope: unknown): boolean => {
+        if (!isObject(scope)) return false;
+        if (effectList(scope).some((effect) => isObject(effect) && effect.kind === 'patron_support')) return true;
+        return Array.isArray(scope.dimension_shifts)
+            && scope.dimension_shifts.some((shift) => isObject(shift) && shift.dimension === 'patron_confidence');
+    };
+    const standingIn = (scope: unknown): boolean => isObject(scope)
+        && Array.isArray(scope.dimension_shifts)
+        && scope.dimension_shifts.some((shift) => isObject(shift) && shift.dimension === 'international_standing');
+    for (const row of sortedRows) {
+        const options = Array.isArray(row.response_options) ? row.response_options : [];
+        const declaring = options.filter((option) => isObject(option) && hasOwn(option, 'plan_answer'));
+        if (declaring.length === 0) continue;
+        if (declaring.length !== options.length) {
+            violations.push(`${row.id}: every option of a routed card declares plan_answer (a value or null)`);
+        }
+        if (!isNonEmptyString(row.responding_faction) || !VALID_EVENT_FACTION_SET.has(row.responding_faction)) {
+            violations.push(`${row.id}: a routed card names its responding_faction`);
+        }
+        if (openingEventIds.includes(row.id)) {
+            violations.push(`${row.id}: a routed card cannot be an answer-ahead opening event`);
+        }
+        if (standingIn(row)) violations.push(`${row.id}#card: international_standing shift on a routed card`);
+        if (patronIn(row)) violations.push(`${row.id}#card: card-level patron effect on a routed card`);
+        const planIds = new Set<string>();
+        for (const option of declaring) {
+            const label = `${row.id}#${String((option as { id?: unknown }).id)}`;
+            const answer = (option as { plan_answer?: unknown }).plan_answer;
+            if (standingIn(option)) violations.push(`${label}: international_standing shift on a routed option`);
+            if (answer === null) continue;
+            if (!isObject(answer)) {
+                violations.push(`${label}: plan_answer must be an object or null`);
+                continue;
+            }
+            const extraKeys = Object.keys(answer).filter((key) => key !== 'plan_id' && key !== 'response' && key !== 'accepted_if');
+            if (extraKeys.length > 0) violations.push(`${label}: unknown plan_answer keys ${extraKeys.sort(strictCompare).join(', ')}`);
+            if (!isNonEmptyString(answer.plan_id) || !ROUTED_PEACE_PLAN_IDS.has(answer.plan_id)) {
+                violations.push(`${label}: plan_answer.plan_id must be a routed plan (${[...ROUTED_PEACE_PLAN_IDS].sort(strictCompare).join(', ')})`);
+            } else {
+                planIds.add(answer.plan_id);
+            }
+            if (!isPlanResponse(answer.response)) violations.push(`${label}: plan_answer.response must be 'accepted' or 'rejected'`);
+            let canBeRejected = answer.response === 'rejected';
+            if (hasOwn(answer, 'accepted_if')) {
+                const condition = answer.accepted_if;
+                if (
+                    !isObject(condition)
+                    || condition.type !== 'peace_plan_response'
+                    || condition.plan_id !== answer.plan_id
+                    || !isNonEmptyString(condition.faction)
+                    || !VALID_EVENT_FACTION_SET.has(condition.faction)
+                    || condition.faction === row.responding_faction
+                    || !isPlanResponse(condition.response)
+                ) {
+                    violations.push(`${label}: accepted_if must be { type: 'peace_plan_response', plan_id: <same plan>, faction: <another side>, response }`);
+                }
+                canBeRejected = true;
+            }
+            if (canBeRejected && patronIn(option)) {
+                violations.push(`${label}: an option that can be recorded rejected carries no patron effect (the plan's -5 is the one carrier)`);
+            }
+        }
+        if (planIds.size > 1) violations.push(`${row.id}: a routed card answers one plan (${[...planIds].sort(strictCompare).join(', ')})`);
+    }
+    if (violations.length > 0) {
+        violations.sort(strictCompare);
+        throw new Error(`Routed peace-plan card rule violation(s) (§6 E3a2): ${violations.join('; ')}`);
+    }
+}
+
 /**
  * Load a single required event JSON file. Required catalog files fail closed:
  * missing, malformed, or non-array JSON is a loader error.
@@ -1479,6 +1839,10 @@ export function loadEventDefinitionsFromDir(scenarioStartWeek: number, eventsDir
     validateDimensionShiftVocabulary(allEvents);
     validateEffectKindVocabulary(allEvents);
     validateNoRepeatedEffect(allEvents);
+    validatePatronSupportRules(allEvents);
+    validateOnePatronCarrier(allEvents);
+    validatePatronSupplyCut(allEvents);
+    validatePlanAnswers(allEvents, OPENING_FOUNDATIONAL_EVENT_IDS);
     // ─── Phase B Sub-slice B1 catalog-level passes. ────────────────────────
     validateCrossFactionOptionIds(allEvents);
     validateAllianceEffectParties(allEvents);

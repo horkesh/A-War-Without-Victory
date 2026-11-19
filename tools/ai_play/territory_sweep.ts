@@ -269,7 +269,8 @@ async function answerPeacePlan(state: GameState, strategy: Strategy, out: string
     const pending = state.military.negotiation?.pending_peace_plan;
     if (!pending) return;
     const f = strategy.faction;
-    if (f === 'RBiH' && (pending.plan_id === 'vance_owen' || pending.plan_id === 'owen_stoltenberg')) return;
+    // §6 E3a2: the pointer is only the close-week fallback (the player's routed card did not
+    // answer), so it is answered here for every faction and plan.
     const cfg = strategy.peace_plans ?? 'historical';
     const mode = typeof cfg === 'string' ? cfg : (cfg[pending.plan_id] ?? 'historical');
     const plan = getPeacePlanById(pending.plan_id);

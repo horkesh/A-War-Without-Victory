@@ -91,7 +91,15 @@ export type EventCondition =
      * Used to gate `us_halts_federation_advance_1995` on RS area-share ≤ 0.51
      * (the Holbrooke 51:49 halt line). Faction-agnostic predicate.
      */
-    | { type: 'faction_area_ratio'; faction: FactionId; comparator: 'at_most' | 'at_least'; value: number };
+    | { type: 'faction_area_ratio'; faction: FactionId; comparator: 'at_most' | 'at_least'; value: number }
+    /**
+     * §6 E4 round 3 (Q3). True when the plan record holds a RESOLVED entry for `plan_id`
+     * whose answer for `faction` is `response`. Reads
+     * `state.military.negotiation.peace_plan_history` (the single source, §6 E3a1 D3), never
+     * a card or a pending plan. Used to gate `belgrade_embargo_rs_1994` on the RS rejection
+     * of the Contact Group plan. Deterministic (existence check).
+     */
+    | { type: 'peace_plan_response'; plan_id: string; faction: FactionId; response: 'accepted' | 'rejected' };
 
 /** Trigger: when to consider firing (turn range + optional prerequisites). */
 export interface EventTrigger {
@@ -140,9 +148,11 @@ export interface EventEffectHumanitarianImpact {
     war_crimes_delta?: number;
 }
 
-/** Effect: patron pressure delta for faction. */
-export interface EventEffectPatronPressure {
-    kind: 'patron_pressure';
+/** Effect: patron support delta for faction (§6 E4: positive = the patron's backing rises).
+ *  Writes `patron_relationships[faction].support_level`. Pressure toward peace is the
+ *  per-turn patron override, not this effect. */
+export interface EventEffectPatronSupport {
+    kind: 'patron_support';
     faction: FactionId;
     delta: number;
 }
@@ -229,6 +239,34 @@ export interface EventEffectEquipmentQualityModifier {
     /** Multiplicative on combat power. 1.05 = "+5%". Must be > 0. */
     multiplier: number;
     duration_turns: number;
+}
+
+/** Effect: a patron throttles a client's materiel because the client defied it
+ *  (patron-defiance panel, 2026-11-17; Systems Manual §7.10.3). Belgrade (RS) or
+ *  Zagreb (HRHB) holds back ammunition, fuel, spares and seconded officers, which is
+ *  combat effectiveness at the front, for `duration_turns`.
+ *
+ *  It is the one live material carrier of a defiance answer. Applying it writes one
+ *  `equipment_quality_modifiers` entry (the existing combat-power reader, attack and
+ *  defence) marked `source: 'patron_supply_cut'`, and one `patron_defiance_supply_cuts`
+ *  receipt for the patron panel, consequence ledger and chronicle. It carries a
+ *  `multiplier`, never a `delta`, so no bot scorer reads it (bot_response.ts,
+ *  political_event_decision.ts) and no hands-off answer can change.
+ *
+ *  Loader rules (event_loader.ts `validatePatronSupplyCut`): faction RS or HRHB;
+ *  0 < multiplier < 1; integer duration >= 1; a non-empty `tag`; response options only,
+ *  never the event's historical default; the same option carries a negative patron move
+ *  (a `patron_confidence` shift or a `patron_support` cost) for that faction; at most one
+ *  material carrier (this, `equipment_quality_modifier` or `recruitment_modifier`) per
+ *  option and faction. */
+export interface EventEffectPatronSupplyCut {
+    kind: 'patron_supply_cut';
+    faction: FactionId;
+    /** Multiplicative on combat power while active. 0.95 = "-5%". 0 < multiplier < 1. */
+    multiplier: number;
+    duration_turns: number;
+    /** Stable id of the defiance answer (`<event_id>#<option_id>`), written on the receipt. */
+    tag: string;
 }
 
 /** Effect: pushes operation/doctrine/scope restrictions onto the existing
@@ -322,7 +360,7 @@ export type EventEffect =
     | EventEffectMoraleChange
     | EventEffectCohesionChange
     | EventEffectHumanitarianImpact
-    | EventEffectPatronPressure
+    | EventEffectPatronSupport
     | EventEffectAllianceChange
     | EventEffectEquipmentGrant
     | EventEffectAggressionModifier
@@ -337,7 +375,9 @@ export type EventEffect =
     | EventEffectCostLedgerAnnotation
     | EventEffectEnclaveFormationDisplacement
     // Fall-1995 mechanic E-A5
-    | EventEffectOffensiveOpsSuppression;
+    | EventEffectOffensiveOpsSuppression
+    // Patron-defiance panel (2026-11-17): the live material cost of defying a patron.
+    | EventEffectPatronSupplyCut;
 
 export type EventFutureConsequenceTiming = 'immediate' | 'next_turn' | 'future' | 'endgame';
 export type EventFutureConsequenceCertainty = 'guaranteed' | 'conditional' | 'risk';
@@ -425,6 +465,34 @@ export interface EventResponseOption {
      * `future_consequences[*].closes_events` entry on the same option.
      */
     closes_events_runtime?: string[];
+    /**
+     * §6 E3a2: the peace-plan answer this option records for the card's responding faction.
+     * A card is "routed" when its options declare this field; every option of a routed card
+     * declares it, and `null` is an explicit no-write (owen_stoltenberg_plan_1993#accept).
+     * evaluate-peace-plans reads it from the catalog for each routed row of
+     * `event_decision_log`; the option applier never writes the plan record itself.
+     */
+    plan_answer?: PlanAnswer | null;
+}
+
+/**
+ * §6 E3a2 ruling item 2: the one conditional form. The answer is `accepted` when `faction`'s
+ * answer to the same plan, as resolved in the same resolution (recorded or fallback), equals
+ * `response`; otherwise it is the declared `response` of the plan answer. Used only by
+ * hrhb_vance_owen_acceptance_1993#condition_on_arbih_reciprocity.
+ */
+export interface PlanAnswerAcceptedIf {
+    type: 'peace_plan_response';
+    plan_id: string;
+    faction: FactionId;
+    response: 'accepted' | 'rejected';
+}
+
+/** §6 E3a2 ruling item 2: the option-level carrier of a side's peace-plan answer. */
+export interface PlanAnswer {
+    plan_id: string;
+    response: 'accepted' | 'rejected';
+    accepted_if?: PlanAnswerAcceptedIf;
 }
 
 /** Event category for UI display and filtering. */
@@ -1016,6 +1084,14 @@ export function evaluateCondition(condition: EventCondition, state: GameState): 
                 if (typeof v === 'number' && Number.isFinite(v)) total += v;
             }
             return total >= condition.threshold;
+        }
+        case 'peace_plan_response': {
+            // §6 E4 round 3 (Q3): the plan record, resolved entries only.
+            return (state.military?.negotiation?.peace_plan_history ?? []).some((entry) => (
+                entry.plan_id === condition.plan_id
+                && entry.resolved
+                && entry.responses?.[condition.faction] === condition.response
+            ));
         }
         case 'faction_area_ratio': {
             // Fall-1995 E-A5: area-weighted territory share from the latest turn summary.

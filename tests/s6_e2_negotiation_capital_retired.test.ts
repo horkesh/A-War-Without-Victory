@@ -173,7 +173,9 @@ describe('§6 E2: save migration v41', () => {
         const loaded = deserializeState(v39SaveWithPendingDecision(true));
         expect(loaded.schema_version).toBe(CURRENT_SCHEMA_VERSION);
         const decision = loaded.military.pending_event_decisions![0];
-        expect(decision.response_options[0].effects).toEqual([{ kind: 'patron_pressure', faction: 'RBiH', delta: -5 }]);
+        // §6 E4: the chain continues to v42, which drops vance_owen_plan_1993#accept's old
+        // patron_pressure effect (the plan resolution carries that cost), so nothing is left here.
+        expect(decision.response_options[0].effects).toEqual([]);
         expect('effect' in decision.response_options[1]).toBe(false);
         expect(decision.response_options[1].effects).toEqual([{ kind: 'morale_change', faction: 'RBiH', delta: 3 }]);
         expect(JSON.stringify(loaded)).not.toContain('negotiation_capital');
