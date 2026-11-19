@@ -35,14 +35,16 @@ interface MakeStateOptions {
     event_flags?: Record<string, string | number | boolean>;
     event_fire_counts?: Record<string, number>;
     war_crimes_events?: number;
+    /** recordWarCrime's in-play counter; the authored count reads it (§6 E3b). */
+    war_crimes_events_emergent?: number;
     player_faction?: FactionId;
 }
 
 function makeState(options: MakeStateOptions = {}): GameState {
     const faction = options.player_faction ?? ('RBiH' as FactionId);
-    const capital: Record<string, { war_crimes_events: number }> = {};
+    const capital: Record<string, { war_crimes_events: number; war_crimes_events_emergent?: number }> = {};
     if (options.war_crimes_events !== undefined) {
-        capital[faction] = { war_crimes_events: options.war_crimes_events };
+        capital[faction] = { war_crimes_events: options.war_crimes_events, war_crimes_events_emergent: options.war_crimes_events_emergent };
     }
     const military = {
         event_flags: options.event_flags ?? {},
@@ -153,7 +155,7 @@ describe('WAVE-3 builder — W2: mediator_trust_sustained gating', () => {
     });
 });
 
-// ─── W3: rear_pocket_sustained (real war_crimes_events counter) ────────────
+// ─── W3: rear_pocket_sustained (the shared authored count, §6 E3b) ─────────
 
 describe('WAVE-3 builder — W3: rear_pocket_sustained gating', () => {
     it('does not fire without the observer flag', () => {
@@ -163,10 +165,11 @@ describe('WAVE-3 builder — W3: rear_pocket_sustained gating', () => {
         const s = makeState({ event_flags: { rear_pocket_discipline_held_through_turn: true } });
         expect(findGhost(buildGhostEntries(s, 79), 'rear_pocket_sustained')).toBeUndefined();
     });
-    it('does not fire when war_crimes_events > 0 on the player faction capital', () => {
+    it('does not fire when the player faction authorized a war crime in play (§6 E3b authored count)', () => {
         const s = makeState({
             event_flags: { rear_pocket_discipline_held_through_turn: true },
             war_crimes_events: 1,
+            war_crimes_events_emergent: 1,
             player_faction: 'RBiH' as FactionId,
         });
         expect(findGhost(buildGhostEntries(s, 100), 'rear_pocket_sustained')).toBeUndefined();

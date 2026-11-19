@@ -1,44 +1,42 @@
 /**
  * Peace plan evaluation engine.
  *
- * Checks whether a historical peace plan should fire on the current turn,
- * computes bot responses, and resolves accept/reject consequences.
+ * §6 E3a2 (ruled 2026-11-17): each side answers a plan on its own routed card. The card's
+ * option declares `plan_answer`; the applier only logs the choice in `event_decision_log`
+ * (plan_answer.ts reads it back). evaluate-peace-plans is the only resolver: from a plan's
+ * trigger week to its close week it writes one complete, resolved row in
+ * `peace_plan_history` at the first step where all three answers are recorded. At the close
+ * week a side with no recorded answer is answered by today's fallback: a bot by the plan
+ * owner (historical_responses / the plan scorer), Observer by the historical owner, and a
+ * human player by the `pending_peace_plan` pointer and its modal (the only pointer there is).
+ * Costs land at resolution: the standing through the record, the plan's −5 support per
+ * refusal, and the relationship event.
  *
- * Deterministic: sorted iteration via strictCompare, no Math.random().
+ * Deterministic: canonical faction order, the log in persisted order, no Math.random().
  */
 
 import type { GameState, FactionId } from '../../state/game_state.js';
 import type { PeacePlanDefinition, PeacePlanResponse, NegotiationState } from '../../state/negotiation_types.js';
 import { createEmptyCapital, createDefaultPatronRelationship } from '../../state/negotiation_types.js';
+import type { EventDefinition, PlanAnswer } from '../events/event_types.js';
 import { PEACE_PLANS, getPeacePlanById } from './peace_plan_data.js';
 import { PEACE_PLAN_REJECTION_SUPPORT_COST, applyPatronSupportDelta } from './patron_pressure.js';
-import { getPoliticalPersonality, computePoliticalAssessment } from '../political/political_personality.js';
-import { computePoliticalPeacePlanResponse } from '../political/political_peace_plan.js';
 import { freezeEndgameSnapshot } from '../endgame/endgame_snapshot.js';
-import { resolveEventDecisionCore } from '../events/resolve_decision_core.js';
-import { applyDimensionShift } from '../events/strategic_dimensions.js';
 import { applyPeaceSettlement, isSettlementPlan } from './peace_settlement.js';
 import { warDeadTotals } from './war_dead.js';
 import { getFactionTerritoryAreaPct } from '../osid_areas.js';
-import { isWarOutsideHistoricalBand } from '../political/historical_territory_band.js';
-import { isPoliticsOffHistoryFor } from '../political/political_departure_markers.js';
+import {
+    collectRoutedPeacePlanCards,
+    finalizePlanAnswers,
+    hasPendingRoutedDecision,
+    planOwnerResponse,
+    planWarWeek,
+    readRecordedPlanAnswers,
+    type PlanResponse,
+} from './plan_answer.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
 const DAYTON_PLAN_ID = 'dayton';
-const VANCE_OWEN_EVENT_ID = 'vance_owen_plan_1993';
-const OWEN_STOLTENBERG_PLAN_ID = 'owen_stoltenberg';
-const OWEN_STOLTENBERG_PRESIDENCY_EVENT_ID = 'owen_stoltenberg_plan_1993';
-const OWEN_STOLTENBERG_ASSEMBLY_EVENT_ID = 'os_rbih_tactical_acceptance_1993';
-
-// ═══════════════════════════════════════════════════════════════════════════
-// War week helper
-// ═══════════════════════════════════════════════════════════════════════════
-
-/** Compute the current war week (turns since war start). */
-function getWarWeek(state: GameState): number {
-    const warStart = state.meta.war_start_turn ?? 0;
-    return state.meta.turn - warStart;
-}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Initialization
@@ -95,337 +93,144 @@ function ensureNegotiationState(state: GameState): NegotiationState {
 export { getFactionTerritoryAreaPct };
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Bot response logic
-// ═══════════════════════════════════════════════════════════════════════════
-
-/**
- * Determine whether a bot faction accepts or rejects a peace plan.
- *
- * Phase 3: routes through the political personality engine for Vance-Owen,
- * Owen-Stoltenberg, and Contact Group. Cutileiro uses legacy fallback in
- * computePoliticalPeacePlanResponse.
- *
- * Historian-verified design:
- * - RS territory floor (gap > 18pp) → hard reject; patron override bypassed.
- * - RBiH defiance from weakness via survivalScore in scorePoliticalOption.
- * - HRHB patron_sensitivity = 0.80 (confirmed correct for all plans).
- * - Patron hard override at >= 80 override_authority (raised from legacy 50).
- */
-function computeBotResponse(
-    state: GameState,
-    plan: PeacePlanDefinition,
-    faction: FactionId
-): 'accepted' | 'rejected' {
-    const personality = getPoliticalPersonality(faction);
-    const assessment = computePoliticalAssessment(state, faction, personality);
-    const currentTerritoryPct = getFactionTerritoryAreaPct(state, faction);
-
-    const neg = state.military.negotiation;
-    const patronOverrideAuthority = neg?.patron_relationships[faction]?.override_authority ?? 0;
-
-    const warWeek = getWarWeek(state);
-
-    return computePoliticalPeacePlanResponse(
-        plan,
-        faction,
-        currentTerritoryPct,
-        patronOverrideAuthority,
-        assessment,
-        personality,
-        warWeek,
-        plan.historical_responses[faction],
-        isWarOutsideHistoricalBand(state) || isPoliticsOffHistoryFor(state, faction),
-    );
-}
-
-function buildBotResponses(
-    state: GameState,
-    plan: PeacePlanDefinition,
-    playerFaction: FactionId | undefined,
-): Record<string, 'accepted' | 'rejected'> {
-    const historicalResolution = state.meta.decision_mode !== 'emergent';
-    const botResponses: Record<string, 'accepted' | 'rejected'> = {};
-    for (const faction of CANONICAL_FACTIONS) {
-        if (playerFaction != null && faction === playerFaction) continue;
-        const historicalResponse = plan.historical_responses[faction];
-        // Owen-Stoltenberg's RBiH position is owned by the documented
-        // Presidency -> Assembly sequence. When another faction is the player,
-        // the non-player RBiH path therefore keeps its normalized terminal
-        // Assembly rejection even in an otherwise emergent campaign. Letting a
-        // generic political score pre-accept here can end the war before that
-        // faction-owned final disposition is reached.
-        const useFactionOwnedHistoricalDisposition =
-            plan.id === OWEN_STOLTENBERG_PLAN_ID
-            && faction === 'RBiH';
-        if ((historicalResolution || useFactionOwnedHistoricalDisposition) && historicalResponse == null) {
-            throw new Error(`Peace plan ${plan.id} has no historical response for ${faction}`);
-        }
-        botResponses[faction] = historicalResolution || useFactionOwnedHistoricalDisposition
-            ? historicalResponse!
-            : computeBotResponse(state, plan, faction);
-    }
-    return botResponses;
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
 // Main evaluation (called from pipeline)
 // ═══════════════════════════════════════════════════════════════════════════
 
+function isHumanPlayerFaction(state: GameState, faction: FactionId): boolean {
+    return state.meta.player_faction === faction && (state.meta.autonomy_level ?? 0) < 3;
+}
+
 /**
- * Evaluate whether a peace plan should trigger this turn.
+ * The resolver's per-turn step (evaluate-peace-plans).
  *
- * Called once per turn from the war_phases pipeline. If a plan's trigger_week
- * matches the current war week AND the plan hasn't been offered before,
- * creates a pending peace plan with bot responses pre-computed.
+ * For each routed plan without a row, from its trigger week to its close week (ruling item 9:
+ * a window, not the exact week):
+ * - all three answers on the log → one complete, resolved row (the conditional answer is
+ *   evaluated here, on the other side's answer in the same set);
+ * - at the close week, a bot side with no answer → the plan owner's answer; Observer → the
+ *   historical answer; a human player → the `pending_peace_plan` pointer (the modal);
+ * - the fallback never pre-empts the human player's routed card that is still pending: the
+ *   window then stays open past the close week until that card is answered (the card blocks
+ *   the advance, so this is one turn at most on the desktop).
+ * A plan whose window passed before it could open (a later-start scenario) is never opened.
  *
- * The player faction's response remains 'pending' until resolved via
- * resolvePeacePlan().
+ * `eventDefinitions` is the turn's catalog (TurnInput.eventDefinitions); without it no routed
+ * answer can be read and every side is answered by the fallback at the close week.
  */
-export function evaluatePeacePlans(state: GameState): void {
+export function evaluatePeacePlans(state: GameState, eventDefinitions: readonly EventDefinition[] = []): void {
     if (state.meta.phase !== 'war') return;
     if (state.meta.game_over) return;
 
     const neg = ensureNegotiationState(state);
+    const routedCards = collectRoutedPeacePlanCards(eventDefinitions);
 
-    // Don't trigger a new plan if one is already pending
-    if (neg.pending_peace_plan) return;
-
-    const warWeek = getWarWeek(state);
-
-    // Check each plan in chronological order
-    for (const plan of PEACE_PLANS) {
-        if (plan.trigger_week !== warWeek) continue;
-        // Dayton has its own package negotiation, trigger, and resolution flow.
-        // Offering the legacy binary plan at week 185 would bypass that system.
-        if (plan.id === DAYTON_PLAN_ID) continue;
-
-        // Skip if this plan was already offered
-        const alreadyOffered = neg.peace_plan_history.some(h => h.plan_id === plan.id);
-        if (alreadyOffered) continue;
-
-        const playerFaction = state.meta.player_faction;
-
-        // A no-player headless state computes every faction. Player sessions leave
-        // the selected faction pending for the existing desktop resolution path.
-        // Historical campaigns use documented outcomes for every non-player faction;
-        // only explicit emergent mode delegates those responses to the scorer.
-        const botResponses = buildBotResponses(state, plan, playerFaction);
-
-        // Create pending peace plan
-        neg.pending_peace_plan = {
-            plan_id: plan.id,
-            turn_offered: state.meta.turn,
-            bot_responses: botResponses,
-        };
-
-        if (playerFaction == null) {
-            resolvePeacePlan(state, plan.id, botResponses.RBiH ?? 'rejected');
-        }
-
-        // Only one plan per turn
-        break;
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Resolution (called when player responds)
-// ═══════════════════════════════════════════════════════════════════════════
-
-export function synchronizeVanceOwenEventDecision(
-    state: GameState,
-    playerResponse: 'accepted' | 'rejected',
-    playerFaction: FactionId,
-): void {
-    const pending = state.military.pending_event_decisions;
-    if (!pending?.some(decision => (
-        decision.event_id === VANCE_OWEN_EVENT_ID
-        && decision.faction === playerFaction
-    ))) return;
-
-    const existingReceipt = state.military.event_decision_log?.some(
-        decision => decision.event_id === VANCE_OWEN_EVENT_ID && decision.faction === playerFaction,
-    ) === true;
-    if (!existingReceipt) {
-        resolveEventDecisionCore(
-            state,
-            VANCE_OWEN_EVENT_ID,
-            playerResponse === 'accepted' ? 'accept' : 'reject',
-        );
-    }
-
-    state.military.pending_event_decisions = (state.military.pending_event_decisions ?? [])
-        .filter(decision => !(
-            decision.event_id === VANCE_OWEN_EVENT_ID
-            && decision.faction === playerFaction
-        ));
-}
-
-/**
- * Resolve the Vance-Owen event as the canonical owner even when its event card
- * arrives one turn before the negotiation scheduler would create the legacy
- * peace-plan surface.
- */
-export function resolveVanceOwenEventDecision(
-    state: GameState,
-    playerResponse: 'accepted' | 'rejected',
-): { all_accepted: boolean; rejection_factions: FactionId[] } {
-    const playerFaction = state.meta.player_faction ?? 'RBiH';
-    const hasPendingEvent = state.military.pending_event_decisions?.some(decision => (
-        decision.event_id === VANCE_OWEN_EVENT_ID
-        && decision.faction === playerFaction
-    )) === true;
-    if (!hasPendingEvent) {
-        throw new Error(`No pending decision for event_id "${VANCE_OWEN_EVENT_ID}"`);
-    }
-
-    const neg = ensureNegotiationState(state);
-    const existingHistory = (neg.peace_plan_history ?? []).find(entry => entry.plan_id === 'vance_owen');
-    if (existingHistory) {
-        resolveEventDecisionCore(
-            state,
-            VANCE_OWEN_EVENT_ID,
-            playerResponse === 'accepted' ? 'accept' : 'reject',
-        );
-        return {
-            all_accepted: CANONICAL_FACTIONS.every(
-                faction => existingHistory.responses[faction] === 'accepted',
-            ),
-            rejection_factions: CANONICAL_FACTIONS.filter(
-                faction => existingHistory.responses[faction] !== 'accepted',
-            ),
-        };
-    }
-
-    if (!neg.pending_peace_plan) {
-        const plan = getPeacePlanById('vance_owen');
-        if (!plan) throw new Error('Unknown peace plan ID: vance_owen');
-        neg.pending_peace_plan = {
-            plan_id: plan.id,
-            turn_offered: state.meta.turn,
-            bot_responses: buildBotResponses(state, plan, playerFaction),
-        };
-    } else if (neg.pending_peace_plan.plan_id !== 'vance_owen') {
-        throw new Error(
-            `Cannot resolve Vance-Owen while peace plan "${neg.pending_peace_plan.plan_id}" is pending`,
-        );
-    }
-
-    return resolvePeacePlan(state, 'vance_owen', playerResponse);
-}
-
-function hasPendingEventDecision(
-    state: GameState,
-    eventId: string,
-    playerFaction: FactionId,
-): boolean {
-    return state.military.pending_event_decisions?.some(decision => (
-        decision.event_id === eventId
-        && decision.faction === playerFaction
-    )) === true;
-}
-
-function getPeacePlanResolution(
-    history: PeacePlanResponse,
-): { all_accepted: boolean; rejection_factions: FactionId[] } {
-    const rejectionFactions = CANONICAL_FACTIONS.filter(
-        faction => history.responses[faction] !== 'accepted',
-    );
-    return {
-        all_accepted: rejectionFactions.length === 0,
-        rejection_factions: rejectionFactions,
-    };
-}
-
-function ensureOwenStoltenbergPendingPlan(
-    state: GameState,
-    playerFaction: FactionId,
-): void {
-    const neg = ensureNegotiationState(state);
-    if (neg.pending_peace_plan?.plan_id === OWEN_STOLTENBERG_PLAN_ID) return;
+    // The close-week fallback is the only pointer; while it is pending it holds the step
+    // (windows never overlap). It is answered by the modal (resolvePeacePlan), by the player's
+    // routed answer if one reaches the log, or automatically at Observer.
     if (neg.pending_peace_plan) {
+        settlePendingFallback(state, neg, routedCards);
+        return;
+    }
+
+    const warWeek = planWarWeek(state);
+    const humanFaction = CANONICAL_FACTIONS.find((faction) => isHumanPlayerFaction(state, faction)) ?? null;
+    for (const plan of PEACE_PLANS) {
+        // Dayton has its own package negotiation, trigger, and resolution flow.
+        if (plan.id === DAYTON_PLAN_ID || plan.close_week == null) continue;
+        if (warWeek < plan.trigger_week) continue;
+        if (neg.peace_plan_history.some((entry) => entry.plan_id === plan.id)) continue;
+
+        const recorded = readRecordedPlanAnswers(state, routedCards, plan.id);
+        const humanCardPending = humanFaction != null && hasPendingRoutedDecision(state, plan.id, humanFaction);
+        const inWindow = warWeek <= plan.close_week
+            || humanCardPending
+            || (humanFaction != null && recorded.has(humanFaction));
+        if (!inWindow) continue;
+
+        const answers: Partial<Record<FactionId, PlanAnswer>> = {};
+        for (const [faction, entry] of recorded) answers[faction] = entry.answer;
+        const complete = CANONICAL_FACTIONS.every((faction) => answers[faction] != null);
+        if (!complete) {
+            if (warWeek < plan.close_week) continue;
+            if (humanCardPending) continue;
+            for (const faction of CANONICAL_FACTIONS) {
+                if (answers[faction] != null || faction === humanFaction) continue;
+                answers[faction] = { plan_id: plan.id, response: planOwnerResponse(state, plan, faction, state.meta.player_faction === faction) };
+            }
+            if (humanFaction != null && answers[humanFaction] == null) {
+                const final = finalizePlanAnswers(answers);
+                const botResponses: Record<string, PlanResponse> = {};
+                for (const faction of CANONICAL_FACTIONS) {
+                    if (faction !== humanFaction) botResponses[faction] = final[faction]!;
+                }
+                neg.pending_peace_plan = {
+                    plan_id: plan.id,
+                    turn_offered: (state.meta.war_start_turn ?? 0) + plan.trigger_week,
+                    bot_responses: botResponses,
+                };
+                return;
+            }
+        }
+        const final = finalizePlanAnswers(answers);
+        recordResolvedPlan(state, plan, final as Record<FactionId, PlanResponse>);
+        if (state.meta.game_over) return;
+    }
+}
+
+/** The pending fallback: Observer answers it; a routed answer already on the log settles it. */
+function settlePendingFallback(
+    state: GameState,
+    neg: NegotiationState,
+    routedCards: ReadonlyMap<string, EventDefinition>,
+): void {
+    const pending = neg.pending_peace_plan;
+    if (!pending) return;
+    const plan = getPeacePlanById(pending.plan_id);
+    const playerFaction = state.meta.player_faction;
+    if (!plan || playerFaction == null) return;
+    if ((state.meta.autonomy_level ?? 0) >= 3) {
+        resolvePeacePlan(state, plan.id, planOwnerResponse(state, plan, playerFaction, true));
+        return;
+    }
+    const recorded = readRecordedPlanAnswers(state, routedCards, plan.id).get(playerFaction);
+    if (!recorded) return;
+    const answers: Partial<Record<FactionId, PlanAnswer>> = { [playerFaction]: recorded.answer };
+    for (const faction of CANONICAL_FACTIONS) {
+        if (faction === playerFaction) continue;
+        answers[faction] = { plan_id: plan.id, response: pending.bot_responses[faction] ?? 'rejected' };
+    }
+    const final = finalizePlanAnswers(answers);
+    resolvePeacePlan(state, plan.id, final[playerFaction]!);
+}
+
+/**
+ * The harness guard for a deferred fallback (ruling item 9). A pending pointer holds the
+ * plan step, so a harness that keeps deferring it would silently skip every later plan.
+ * Throws when another routed plan's window has opened while a fallback is still pending.
+ */
+export function assertNoPeacePlanWindowSkipped(state: GameState): void {
+    const pending = state.military.negotiation?.pending_peace_plan;
+    if (!pending) return;
+    const warWeek = planWarWeek(state);
+    const history = state.military.negotiation?.peace_plan_history ?? [];
+    for (const plan of PEACE_PLANS) {
+        if (plan.id === pending.plan_id || plan.id === DAYTON_PLAN_ID || plan.close_week == null) continue;
+        if (warWeek < plan.trigger_week) continue;
+        if (history.some((entry) => entry.plan_id === plan.id)) continue;
         throw new Error(
-            `Cannot resolve Owen-Stoltenberg while peace plan "${neg.pending_peace_plan.plan_id}" is pending`,
+            `§6 E3a2: the fallback for "${pending.plan_id}" is still pending at war week ${warWeek}, `
+            + `inside the window of "${plan.id}"; deferring it would skip that plan`,
         );
     }
-
-    const plan = getPeacePlanById(OWEN_STOLTENBERG_PLAN_ID);
-    if (!plan) throw new Error(`Unknown peace plan ID: ${OWEN_STOLTENBERG_PLAN_ID}`);
-    neg.pending_peace_plan = {
-        plan_id: plan.id,
-        turn_offered: (state.meta.war_start_turn ?? 0) + plan.trigger_week,
-        bot_responses: buildBotResponses(state, plan, playerFaction),
-    };
 }
 
-/**
- * The first RBiH Owen-Stoltenberg event is the Presidency stage. Historical
- * conditional acceptance keeps the framework alive for the Assembly vote and
- * must not be recorded as final tripartite peace.
- */
-export function resolveOwenStoltenbergPresidencyDecision(
-    state: GameState,
-    responseId: 'accept' | 'reject',
-): { all_accepted: boolean; rejection_factions: FactionId[] } {
-    const playerFaction = state.meta.player_faction ?? 'RBiH';
-    if (!hasPendingEventDecision(state, OWEN_STOLTENBERG_PRESIDENCY_EVENT_ID, playerFaction)) {
-        throw new Error(`No pending decision for event_id "${OWEN_STOLTENBERG_PRESIDENCY_EVENT_ID}"`);
-    }
-
-    resolveEventDecisionCore(state, OWEN_STOLTENBERG_PRESIDENCY_EVENT_ID, responseId);
-
-    const neg = ensureNegotiationState(state);
-    const existingHistory = (neg.peace_plan_history ?? []).find(
-        entry => entry.plan_id === OWEN_STOLTENBERG_PLAN_ID,
-    );
-    if (existingHistory) return getPeacePlanResolution(existingHistory);
-
-    if (responseId === 'accept') {
-        if (neg.pending_peace_plan?.plan_id === OWEN_STOLTENBERG_PLAN_ID) {
-            neg.pending_peace_plan = undefined;
-        }
-        return { all_accepted: false, rejection_factions: [] };
-    }
-
-    ensureOwenStoltenbergPendingPlan(state, playerFaction);
-    return resolvePeacePlan(state, OWEN_STOLTENBERG_PLAN_ID, 'rejected');
-}
+// ═══════════════════════════════════════════════════════════════════════════
+// Resolution
+// ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * The Assembly event owns the final RBiH Owen-Stoltenberg response. It writes
- * one negotiation-history row only after the Presidency stage has completed.
- */
-export function resolveOwenStoltenbergAssemblyDecision(
-    state: GameState,
-    responseId: 'reject_via_assembly' | 'accept_for_optics',
-): { all_accepted: boolean; rejection_factions: FactionId[] } {
-    const playerFaction = state.meta.player_faction ?? 'RBiH';
-    if (!hasPendingEventDecision(state, OWEN_STOLTENBERG_ASSEMBLY_EVENT_ID, playerFaction)) {
-        throw new Error(`No pending decision for event_id "${OWEN_STOLTENBERG_ASSEMBLY_EVENT_ID}"`);
-    }
-
-    resolveEventDecisionCore(state, OWEN_STOLTENBERG_ASSEMBLY_EVENT_ID, responseId);
-
-    const neg = ensureNegotiationState(state);
-    const existingHistory = (neg.peace_plan_history ?? []).find(
-        entry => entry.plan_id === OWEN_STOLTENBERG_PLAN_ID,
-    );
-    if (existingHistory) {
-        if (neg.pending_peace_plan?.plan_id === OWEN_STOLTENBERG_PLAN_ID) {
-            neg.pending_peace_plan = undefined;
-        }
-        return getPeacePlanResolution(existingHistory);
-    }
-
-    ensureOwenStoltenbergPendingPlan(state, playerFaction);
-    return resolvePeacePlan(
-        state,
-        OWEN_STOLTENBERG_PLAN_ID,
-        responseId === 'accept_for_optics' ? 'accepted' : 'rejected',
-    );
-}
-
-/**
- * Resolve a pending peace plan after the player responds.
+ * Resolve the pending close-week fallback with the player's answer (PeacePlanModal /
+ * `resolve-peace-plan` IPC). The other sides' answers are the pointer's.
  *
  * @param state - The current game state
  * @param planId - The peace plan ID being resolved
@@ -449,35 +254,33 @@ export function resolvePeacePlan(
     }
 
     const playerFaction = state.meta.player_faction ?? 'RBiH';
-
-    if (
-        planId === OWEN_STOLTENBERG_PLAN_ID
-        && hasPendingEventDecision(state, OWEN_STOLTENBERG_PRESIDENCY_EVENT_ID, playerFaction)
-    ) {
-        return resolveOwenStoltenbergPresidencyDecision(
-            state,
-            playerResponse === 'accepted' ? 'accept' : 'reject',
-        );
-    }
-
-    if (planId === 'vance_owen') {
-        synchronizeVanceOwenEventDecision(state, playerResponse, playerFaction);
-    }
-
-    // Build complete response map: bot responses + player response
-    const allResponses: Record<string, 'accepted' | 'rejected' | 'pending'> = {};
+    const responses = {} as Record<FactionId, PlanResponse>;
     for (const faction of CANONICAL_FACTIONS) {
-        if (faction === playerFaction) {
-            allResponses[faction] = playerResponse;
-        } else {
-            allResponses[faction] = neg.pending_peace_plan.bot_responses[faction] ?? 'rejected';
-        }
+        responses[faction] = faction === playerFaction
+            ? playerResponse
+            : neg.pending_peace_plan.bot_responses[faction] ?? 'rejected';
     }
+    return recordResolvedPlan(state, plan, responses, neg.pending_peace_plan.turn_offered);
+}
 
-    // Record in history
+/**
+ * The one row writer: one complete, resolved row, then the consequences. Clears the pointer
+ * for this plan if one is pending. `turn_offered` is the plan's trigger week (war_start +
+ * trigger_week), or the pointer's own stamp on the fallback path.
+ */
+function recordResolvedPlan(
+    state: GameState,
+    plan: PeacePlanDefinition,
+    responses: Record<FactionId, PlanResponse>,
+    turnOffered: number = (state.meta.war_start_turn ?? 0) + plan.trigger_week,
+): { all_accepted: boolean; rejection_factions: FactionId[] } {
+    const neg = ensureNegotiationState(state);
+    const allResponses: Record<string, 'accepted' | 'rejected' | 'pending'> = {};
+    for (const faction of CANONICAL_FACTIONS) allResponses[faction] = responses[faction];
+
     const historyEntry: PeacePlanResponse = {
-        plan_id: planId,
-        turn_offered: neg.pending_peace_plan.turn_offered,
+        plan_id: plan.id,
+        turn_offered: turnOffered,
         responses: allResponses,
         resolved: true,
         // DC A1: stamp the toll at the moment of the answer, so the Dayton delegation
@@ -487,8 +290,9 @@ export function resolvePeacePlan(
     };
     neg.peace_plan_history.push(historyEntry);
 
-    // Clear pending plan
-    neg.pending_peace_plan = undefined;
+    if (neg.pending_peace_plan?.plan_id === plan.id) {
+        neg.pending_peace_plan = undefined;
+    }
 
     // Check if all factions accepted
     const rejectionFactions: FactionId[] = [];
@@ -503,7 +307,7 @@ export function resolvePeacePlan(
     if (allAccepted) {
         // All factions accepted — game ends with peace plan outcome.
         state.meta.game_over = true;
-        state.meta.outcome = `negotiated_peace:${planId}`;
+        state.meta.outcome = `negotiated_peace:${plan.id}`;
         // LANE-2026-05-02-D1-WAR-ENDED-EARLY-PRODUCER:
         // Also set the `war_ended_early` event flag that
         // `src/sim/war_termination.ts:62` reads. The direct
@@ -517,11 +321,11 @@ export function resolvePeacePlan(
         // factions accept the plan.
         if (!state.military.event_flags) state.military.event_flags = {};
         state.military.event_flags['war_ended_early'] = true;
-        state.military.event_flags['early_peace_implemented'] = planId;
+        state.military.event_flags['early_peace_implemented'] = plan.id;
         // Owner, 2026-11-07: the parties agreed to the plan's MAP, not the front line.
         // Record the settlement (plan map + constitutional status) before the endgame
         // snapshot freezes the verdict. Wartime control is not rewritten.
-        if (isSettlementPlan(planId)) applyPeaceSettlement(state, planId);
+        if (isSettlementPlan(plan.id)) applyPeaceSettlement(state, plan.id);
         // LANE-NIGHTSHIFT-N3 (D#2, 2026-05-03): freeze endgame snapshot so
         // verdict / cost ledger / historical comparison are preserved across
         // save/load round-trip even if subsequent engine activity perturbs
@@ -543,7 +347,17 @@ export function resolvePeacePlan(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Apply credibility and override authority changes to factions that rejected.
+ * The patron support cost and the relationship event, per refusal, at resolution.
+ *
+ * - Standing: carried by the record alone. The standing base reads each resolved refusal's
+ *   graded `credibility_change_on_reject` (strategic_dimensions.ts); this writer no longer
+ *   touches `event_modifier` (§6 E3a2 ruling item 5).
+ * - Patron: the plan's −5 support is the one patron carrier of a refusal (§6 E3a2 ruling
+ *   item 6; a routed R option carries no patron effect of its own), plus any patron act
+ *   scripted on the record (CONTACT_GROUP_REJECTION, patron_events.ts).
+ * - `override_change_on_reject` was retired by §6 E3a2 ruling item 7: update-patron-pressure
+ *   rebuilt the override from scratch the same turn, so the bump only lived between turns
+ *   on the player path.
  */
 function applyRejectionConsequences(
     state: GameState,
@@ -556,26 +370,13 @@ function applyRejectionConsequences(
     for (const faction of rejectionFactions) {
         const pr = neg.patron_relationships[faction];
         if (pr) {
-            const overrideChange = plan.override_change_on_reject[faction] ?? 0;
-            pr.override_authority = clamp(pr.override_authority + overrideChange, 0, 100);
             // The one support writer (§6 E4 round 3): a cost below the floor spills into patron_confidence.
             applyPatronSupportDelta(neg, faction, -PEACE_PLAN_REJECTION_SUPPORT_COST);
             pr.relationship_events.push(`rejected_${plan.id}`);
-        }
-
-        // Apply international credibility change → strategic_dimensions international_standing,
-        // through the one accumulator rule (§6 E3a1 D1): no ±100 clamp on event_modifier.
-        const credChange = plan.credibility_change_on_reject[faction] ?? 0;
-        if (credChange !== 0 && neg.strategic_dimensions) {
-            applyDimensionShift(neg.strategic_dimensions, faction, 'international_standing', credChange);
         }
     }
 
     // §6 E3a1 D3: no capital.peace_plans_accepted/rejected pushes here. The entry already
     // recorded in peace_plan_history is the single source; computeNegotiationBreakdown rebuilds
     // those lists from it every turn, and the standing base reads the history directly.
-}
-
-function clamp(value: number, min: number, max: number): number {
-    return Math.max(min, Math.min(max, value));
 }

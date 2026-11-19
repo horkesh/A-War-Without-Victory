@@ -39,7 +39,6 @@ export const KNOWN_EVENT_EFFECT_KINDS = [
     // event_loader.ts `validatePatronSupplyCut`.
     'patron_supply_cut',
     'recruitment_modifier',
-    'supply_delta',
 ] as const;
 
 export const KNOWN_EVENT_CONDITION_TYPES = [
@@ -47,7 +46,6 @@ export const KNOWN_EVENT_CONDITION_TYPES = [
     'alliance_below',
     'alliance_drift',
     'and',
-    'corridor_severed',
     'dimension_above',
     'dimension_below',
     'displaced_in_aggregate',
@@ -71,8 +69,6 @@ export const KNOWN_EVENT_CONDITION_TYPES = [
     // §6 E4 round 3 (Q3): reads negotiation.peace_plan_history (resolved entries).
     'peace_plan_response',
     'rbih_hrhb_war_started',
-    'supply_above',
-    'supply_below',
     'territory_control',
     'territory_loss_window',
     'territory_percentage',

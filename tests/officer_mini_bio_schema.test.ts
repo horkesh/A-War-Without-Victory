@@ -14,12 +14,13 @@ const FIRST_PASS_OPENING_COMMANDERS = [
     'hvo_matuzovic',
     'hvo_petkovic',
     'hvo_tole',
+    // Commander attribution PR 2c: Boric opened the 2nd Krajina Corps (BB1 p.487, BB2 p.536), not Tomanic.
+    'vrs_boric',
     'vrs_grubac',
     'vrs_mladic',
     'vrs_simic',
     'vrs_sipcic',
     'vrs_talic',
-    'vrs_tomanic',
 ] as const;
 
 type OfficerRecord = {

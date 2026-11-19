@@ -70,6 +70,18 @@ describe('war-phase step ordering', () => {
         expect(stepNames[stepNames.length - 1]).toBe('clear-player-ordered-stances');
         assertBefore('generate-bot-corps-orders', 'generate-level1-op-proposals');
 
+        // §6 phase order (ruling 2026-11-17): the one base owner (computeDimensionBaseValues,
+        // through recomputeDimensionBases) runs at three fixed points. (a) at turn start, after
+        // the store exists and before events read it; (b) mid-turn after evaluate-events;
+        // (c) directly after compute-negotiation-capital, before the Dayton menu is priced.
+        assertBefore('ensure-negotiation-state', 'refresh-dimension-bases-turn-start');
+        assertBefore('refresh-dimension-bases-turn-start', 'update-event-readiness');
+        assertBefore('update-event-readiness', 'evaluate-events');
+        assertBefore('evaluate-events', 'compute-dimension-bases');
+        assertBefore('compute-negotiation-capital', 'refresh-dimension-bases');
+        assertBefore('refresh-dimension-bases', 'evaluate-dayton-trigger');
+        expect(stepNames.indexOf('refresh-dimension-bases')).toBe(stepNames.indexOf('compute-negotiation-capital') + 1);
+
         // Event truth must update JNA lifecycle before phantom/operation reconciliation.
         assertBefore('evaluate-events', 'jna-transition');
         assertBefore('jna-transition', 'jna-phantom-withdrawals');
@@ -85,7 +97,7 @@ describe('war-phase step ordering', () => {
 
         // SpatialContext: pre-combat after data load, post-combat after attack resolution
         assertBefore('supply-osid', 'compute-spatial-context-pre-combat');
-        assertBefore('compute-spatial-context-pre-combat', 'compute-supply-reserves');
+        assertBefore('compute-spatial-context-pre-combat', 'enclave-resilience');
         assertBefore('resolve-attack-orders', 'compute-spatial-context-post-combat');
         assertBefore('compute-spatial-context-post-combat', 'attribute-operation-casualties');
 
@@ -307,7 +319,18 @@ describe('war-phase step ordering', () => {
         //        siege defender morale drain and passive bombardment attrition).
         // -1 from retiring evaluate-humanitarian-convoys (2026-11-16, F1i §6 panel:
         //        humanitarian convoys are not modelled in 1.0).
+        // +1 from refresh-dimension-bases-turn-start (2026-11-17, §6 phase-order ruling): the
+        //        base owner at turn start, after ensure-negotiation-state and before
+        //        update-event-readiness, so events see between-turn writes; skipped on the
+        //        first war turn.
+        // +1 from refresh-dimension-bases (2026-11-17, §6 phase-order ruling): the base owner
+        //        directly after compute-negotiation-capital, before evaluate-dayton-trigger, so
+        //        the Dayton menu and the turn boundary see the turn's plan, patron and capital writes.
+        // -2 from retiring compute-supply-reserves and update-smuggling-routes (2026-11-17,
+        //        Fable consult 6: the supply-reserve economy is not modelled in 1.0).
         expect(stepNames.length).toBe(191);
+        expect(stepNames).not.toContain('compute-supply-reserves');
+        expect(stepNames).not.toContain('update-smuggling-routes');
         expect(stepNames).not.toContain('produce-political-directive');
         expect(stepNames).not.toContain('apply-army-directive-interpretation');
         expect(stepNames).not.toContain('update-siege-counters');

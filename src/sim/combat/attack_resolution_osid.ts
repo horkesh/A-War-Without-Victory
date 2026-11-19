@@ -1,7 +1,7 @@
 import { isSupportBrigadeOnActiveOp } from './sector_offensive_axis_helpers.js';
 import {computeAttackForcePower, findTgForAnchor} from './attack_force_power.js';
 import { getAttackIntelConfidence } from './attack_intel_context.js';
-import { collectSectorDefenseBrigades } from './sector_defense_roster.js';
+import { collectAverageDefenseRoster, collectSectorDefenseBrigades } from './sector_defense_roster.js';
 /**
  * ═══════════════════════════════════════════════════════════════
  * OWNERSHIP: Execution-Only
@@ -119,6 +119,7 @@ import {
     getIntelAmbushAttackerCasualtyMult,
     getIntelAmbushDefenderCasualtyMult,
     getIntelExecutionFrictionMultipliers,
+    selectWeightedPrimaryDefender,
 } from './combat_math.js';
 // OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR moved to attack_post_battle_effects.ts
 // Nested default-OFF ambush-DEPTH amplifier (packet 20260605_INTEL_AMBUSH_FRICTION_DESIGN).
@@ -180,12 +181,8 @@ import {
 // ── Morale absorption & homeland determination (extracted to attack_morale_absorption.ts) ──
 import { evaluateAndApplyMoraleAbsorption } from './attack_morale_absorption.js';
 
-// ── Resource aftermath: supply expenditure, facility damage, fatigue (extracted to attack_resource_aftermath.ts) ──
-import {
-    deductCombatSupplyExpenditure,
-    applyFacilityCombatDamage,
-    applyCombatFatigue,
-} from './attack_resource_aftermath.js';
+// ── Resource aftermath: combat fatigue (extracted to attack_resource_aftermath.ts) ──
+import { applyCombatFatigue } from './attack_resource_aftermath.js';
 
 // ── Casualty calculation & distribution (extracted to attack_casualty_distribution.ts) ──
 import {
@@ -710,8 +707,12 @@ export function resolveAttackOrdersOsid(
                 state, sector, targetOsid, controller!, adjacency, defenderFormations,
             );
             if (sectorBrigades.length > 0) {
-                const { primary, totalPower, rankedDefenders } = rankDefendersByPower(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
-                const avgBrigadePower = totalPower / sectorBrigades.length;
+                const { primary, totalPower } = rankDefendersByPower(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
+                // Fable consult 7 bound: seam brigades only add; the cap and floor average the owning roster.
+                const averageRoster = collectAverageDefenseRoster(state, sector, targetOsid, controller!, adjacency, defenderFormations, sectorBrigades);
+                const avgBrigadePower = averageRoster
+                    ? rankDefendersByPower(averageRoster, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus).totalPower / averageRoster.length
+                    : totalPower / sectorBrigades.length;
                 const targetMun = munFromOsid(targetOsid);
 
                 // Single-pass: compute per-brigade power, distance weight, and accumulate
@@ -784,12 +785,14 @@ export function resolveAttackOrdersOsid(
                 // defender or route militia casualties into remote brigades.
                 if (contributingBrigadeCount > 0) {
                     // Power/caps/floors above still use the nominal full roster.
-                    // Only a positive contributor may carry primary-defender
-                    // effects; pick it with the existing nominal power ranking
-                    // (stable tie order) rather than introducing a new score.
-                    const eligiblePrimary = rankedDefenders
-                        .map((entry) => sectorBrigades.find((b) => b.id === entry.id))
-                        .find((b): b is FormationState => b !== undefined && (brigadeWeights.get(b.id) ?? 0) > 0);
+                    // N5 (2026-11-16): the primary defender (who carries the defender-only
+                    // aftermath) is the brigade in the cell with the largest weight, else the
+                    // largest weighted contributor; ties by fewer hops, then id. It used to be
+                    // the nominally strongest contributor, so a strong brigade five hops away
+                    // took the defeat effects while the brigade in contact took none.
+                    const hopsById = new Map<string, number>();
+                    for (const [id, meta] of brigadeMeta) hopsById.set(id, meta.hops);
+                    const eligiblePrimary = selectWeightedPrimaryDefender(sectorBrigades, brigadeWeights, hopsById);
                     defenderFormation = eligiblePrimary ?? primary;
                     isSectorCoverageDefense = true;
                     sectorDefenseBrigades = sectorBrigades;
@@ -1347,17 +1350,8 @@ export function resolveAttackOrdersOsid(
             pushSnapEvent(report, crisisEvent);
         }
 
-        // Part 6b: Supply reserve expenditure (Phase A)
-        deductCombatSupplyExpenditure({
-            state,
-            attackerFaction,
-            attackerCount: attackerFormations.length,
-            powerRatio,
-            defenderFormation,
-        });
-
-        // Part 6c: Facility combat damage (Phase B)
-        applyFacilityCombatDamage({ state, targetOsid });
+        // Parts 6b/6c (supply-reserve expenditure, facility combat damage) retired 2026-11-17
+        // (Fable consult 6): both were no-ops unless supply_reserves_enabled.
 
         // Part 7a: Experience gain (extracted to attack_post_battle_effects.ts)
         for (const a of attackerFormations) applyExperienceGain(a, attackerWon);

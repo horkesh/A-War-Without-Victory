@@ -462,12 +462,15 @@ describe('★ input-surface scan: every data read on the headless path is stampe
         ).toContain('data/source/oob/paramilitary_named_units.js');
     });
 
-    it('EVENT_FILES are stamped even though the scan cannot see them', () => {
-        // Documented blind spot, asserted rather than trusted: the loader joins bare filenames to
-        // a module-relative EVENTS_DIR, so no `data/`-anchored literal exists to discover.
+    it('EVENT_FILES are stamped, and the scan sees them through the authored-war-crimes import', () => {
+        // The loader joins bare filenames to a module-relative EVENTS_DIR, so it leaves no
+        // `data/`-anchored literal to discover (the documented blind spot). Since §6 E3b the
+        // headless path also imports every catalog file statically (`authored_war_crimes.ts`,
+        // the card index of the authored war-crimes count), so each is now a concrete read; it
+        // is stamped either way. Asserted, not trusted.
         for (const name of EVENT_FILES) {
             expect(stamped.has(`data/scenarios/events/${name}`), `${name} must be stamped`).toBe(true);
-            expect(found.concrete).not.toContain(`data/scenarios/events/${name}`);
+            expect(found.concrete).toContain(`data/scenarios/events/${name}`);
         }
     });
 });

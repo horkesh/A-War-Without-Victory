@@ -3,25 +3,23 @@ import type { LoadedGameState } from '../data/types.js';
 type PendingPeacePlan = NonNullable<LoadedGameState['pendingPeacePlan']>;
 type PendingEventDecisions = LoadedGameState['pendingEventDecisions'];
 
-const PEACE_PLAN_EVENT_OWNERS: Record<string, ReadonlySet<string>> = {
-  owen_stoltenberg: new Set([
-    'owen_stoltenberg_plan_1993',
-    'os_rbih_tactical_acceptance_1993',
-  ]),
-};
-
 export function getPeacePlanDismissalKey(plan: PendingPeacePlan): string {
   return `${plan.planId}@${plan.turnOffered}`;
 }
 
+/**
+ * §6 E3a2: a routed card owns its plan's answer. While any pending decision declares a
+ * `plan_answer` for the plan, the fallback modal stays hidden (the engine never opens the
+ * fallback over a pending routed card; this covers a pointer carried by an older save).
+ * Ownership is read from the decision's own options, not from a table of event ids.
+ */
 export function isPeacePlanOwnedByPendingEvent(
   plan: PendingPeacePlan | undefined,
   pendingEventDecisions: PendingEventDecisions,
 ): boolean {
   if (!plan) return false;
-  const ownerIds = PEACE_PLAN_EVENT_OWNERS[plan.planId];
-  if (!ownerIds) return false;
-  return (pendingEventDecisions ?? []).some((decision) => ownerIds.has(decision.event_id));
+  return (pendingEventDecisions ?? []).some((decision) => (decision.response_options ?? [])
+    .some((option) => option.plan_answer?.plan_id === plan.planId));
 }
 
 export function shouldShowPeacePlanModal(

@@ -1,7 +1,0 @@
-## 2026-11-15 — The pushback card names a refused or objected-to corps order, not a political directive
-
-Copy only (EN and BCS); no sim, state, save or calibration change. Found while checking L1's rendered desk: for an `order_refused` event the Decision Room pushback card read "Army CO refused a political directive." But `order_refused` is a corps commander refusing one of the President's own orders; the political directive is the army's weekly reading (`army_directive_pushback`), which L1 took off the card.
-
-`buildPlayerArmyCoPushbackVisibility` now picks the wording from what raised the card. A refused order headlines "A corps commander refused an order." (BCS "Komandant korpusa odbio je naredbu."); `order_pushback`, `order_modified` and `order_exceeded` headline "A corps commander objected to an order." (BCS "Komandant korpusa prigovorio je naredbi."); the fallback rationale used when the event carries no authored reason follows the same wording. The political-directive wording stays where it is true: the army's own reading of a directive (`army_directive_pushback`) and objections read from the decision traces. Counts, severity, evidence lines and which events raise the card are unchanged.
-
-Tests: new cases in `ui_decision_room_pushback_explanations` (refused order headline and fallback rationale on the view and on the Decision Room card, order objections, directive wording kept for directive events and traces, BCS). Rendered before/after in the desktop app is in the PR.

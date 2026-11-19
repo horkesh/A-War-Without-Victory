@@ -57,7 +57,6 @@ function makePlan(overrides: Partial<PeacePlanDefinition> & { id: string }): Pea
         historical_responses: { RBiH: 'rejected', RS: 'rejected', HRHB: 'rejected' },
         proposed_split: { RS: 49, RBiH: 30, HRHB: 21 },
         institutional_model: 'canton',
-        override_change_on_reject: { RS: 5, RBiH: 5, HRHB: 5 },
         credibility_change_on_reject: { RS: -5, RBiH: -5, HRHB: -5 },
         narrative: 'Test plan narrative.',
         ...overrides,

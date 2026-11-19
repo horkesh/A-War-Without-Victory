@@ -80,7 +80,9 @@ const EXPECTED_PACKET_3_DEFAULTS = new Map([
 
 const EXPECTED_PACKET_4_DEFAULTS = new Map([
     ['hrhb_washington_agreement_1994', 'accept'],
-    ['contact_group_plan_1994', 'accept'],
+    // §6 E3a2 (ruling item 4): Sarajevo's Contact Group answer is the Assembly card;
+    // contact_group_plan_1994 is a no-choice presentation card.
+    ['rbih_contact_group_response_1994', 'accept_51_49_plan'],
     ['dayton_talks_begin_1995', 'accept'],
 ]);
 
@@ -313,7 +315,7 @@ describe('event acceptance diagnostic report', () => {
             'hrhb_washington_agreement_1994',
             'rbih_washington_agreement_1994',
             'ic_rbih_restraint_post_washington',
-            'contact_group_plan_1994',
+            // §6 E3a2: contact_group_plan_1994 is a no-choice presentation card (ruling item 4).
             'hrhb_contact_group_response_1994',
             'rbih_contact_group_response_1994',
             'rs_contact_group_response_1994',

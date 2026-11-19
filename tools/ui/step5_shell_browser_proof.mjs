@@ -107,27 +107,13 @@ try {
       await page.keyboard.press('Escape');
       await page.waitForTimeout(600);
 
-      // Desk with the War Footing entry, from the War Room nav.
+      // The President's desk, from the War Room nav. (The War Footing / Economy entry was
+      // retired 2026-11-17 with the supply-reserve economy.)
       await page.getByTestId('warroom-toolbar-president-desk').click();
       await page.getByTestId('president-desk-shell').waitFor({ state: 'visible' });
       await page.waitForTimeout(800);
-      const economyButton = page.getByTestId('desk-action-economy');
-      await economyButton.scrollIntoViewIfNeeded();
-      entry.economyEntry = {
-        visible: await economyButton.isVisible(),
-        label: (await economyButton.textContent())?.trim(),
-        fontPx: await economyButton.evaluate((el) => parseFloat(getComputedStyle(el).fontSize)),
-      };
-      entry.deskShot = await shot('desk_economy_entry');
-      await economyButton.click();
-      await page.getByTestId('economy-panel').waitFor({ state: 'visible' });
-      await page.waitForTimeout(800);
-      entry.economyShot = await shot('economy_over_desk');
-      entry.economyTitle = (await page.locator('#economy-panel-title').textContent())?.trim();
-      await page.keyboard.press('Escape');
-      await page.waitForTimeout(600);
+      entry.deskShot = await shot('desk');
       entry.afterEscape = {
-        economyClosed: !(await page.getByTestId('economy-panel').isVisible().catch(() => false)),
         deskStillOpen: await page.getByTestId('president-desk-shell').isVisible().catch(() => false),
       };
       await page.keyboard.press('Escape');

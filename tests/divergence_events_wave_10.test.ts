@@ -1,9 +1,10 @@
 /**
  * LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-10
  *
- * Per-event predicate + consequence proofs for the 6 Ring 1 / no-§6
+ * Per-event predicate + consequence proofs for the Ring 1 / no-§6
  * divergence events authored in data/scenarios/events/consequences.json
- * during the Wave 10 lane.
+ * during the Wave 10 lane (6 authored; 5 survive the 2026-11-17
+ * supply-reserve retirement).
  *
  * Each test:
  *   1. Constructs a GameState that satisfies the predicate.
@@ -17,8 +18,8 @@
  * in src/sim/events/event_types.ts and writers in src/sim/events/apply_effects.ts.
  *
  * Themes covered (additive Ring 1 / no-§6):
- *   - Wave-8 mirror inversions: csq_supply_corridor_chronic_strain_HRHB,
- *     csq_political_split_temporary_RBiH
+ *   - Wave-8 mirror inversions: csq_political_split_temporary_RBiH
+ *     (csq_supply_corridor_chronic_strain_HRHB retired)
  *   - Recovery / arms-channel chain: csq_post_dayton_train_and_equip_RBiH,
  *     csq_arbih_doctrine_modernization
  *   - Attenuation / counterpart chain: csq_iran_arms_channel_attenuation,
@@ -112,8 +113,8 @@ function baseState(turn: number, overrides: { political?: any; military?: any; d
     } as unknown as GameState;
 }
 
+// csq_supply_corridor_chronic_strain_HRHB retired 2026-11-17 (supply is connection, not stock).
 const WAVE_10_IDS = [
-    'csq_supply_corridor_chronic_strain_HRHB',
     'csq_post_dayton_train_and_equip_RBiH',
     'csq_arbih_doctrine_modernization',
     'csq_iran_arms_channel_attenuation',
@@ -121,54 +122,14 @@ const WAVE_10_IDS = [
     'csq_doctrine_drift',
 ];
 
-describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-10: 6 Ring-1 divergence events', () => {
-    it('all 6 authored events load via event_loader', () => {
+describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-10: 5 surviving Ring-1 divergence events', () => {
+    it('all 5 surviving authored events load via event_loader', () => {
         for (const id of WAVE_10_IDS) {
             expect(ALL_EVENTS.find(e => e.id === id)?.id).toBe(id);
         }
     });
 
-    // ── 1. csq_supply_corridor_chronic_strain_HRHB ──────────────────────────
-    it('csq_supply_corridor_chronic_strain_HRHB: predicate + cohesion drain + recruitment 0.92x', () => {
-        const def = getEvent('csq_supply_corridor_chronic_strain_HRHB');
-        const cond = def.trigger.condition!;
-        const fires = baseState(65, {
-            military: { general_supply_reserve: { RBiH: 50, RS: 70, HRHB: 20 } },
-        });
-        // Re-attach negotiation since military was overridden
-        (fires.military as any).negotiation = {
-            capital: { RBiH: {}, RS: {}, HRHB: {} },
-            patron_relationships: { RBiH: { override_authority: 0 }, RS: { override_authority: 25 }, HRHB: { override_authority: 0 } },
-            strategic_dimensions: { RBiH: fullStrategicDims(), RS: fullStrategicDims(), HRHB: fullStrategicDims() },
-        };
-        fires.military.formations = {
-            'hrhb_b1': { id: 'hrhb_b1', faction: 'HRHB', kind: 'brigade', status: 'active', name: 'h1', created_turn: 0, assignment: null, morale: 40, cohesion: 60 } as any,
-            'hrhb_b2': { id: 'hrhb_b2', faction: 'HRHB', kind: 'brigade', status: 'active', name: 'h2', created_turn: 0, assignment: null, morale: 45, cohesion: 60 } as any,
-        };
-        fires.military.event_flags = {};
-        expect(evaluateCondition(cond, fires)).toBe(true);
-
-        // Lapsed: supply at/above threshold (supply_below uses strict <)
-        const lapsed = baseState(65, {
-            military: { general_supply_reserve: { RBiH: 50, RS: 70, HRHB: 50 } },
-        });
-        (lapsed.military as any).negotiation = {
-            capital: { RBiH: {}, RS: {}, HRHB: {} },
-            patron_relationships: { RBiH: { override_authority: 0 }, RS: { override_authority: 25 }, HRHB: { override_authority: 0 } },
-            strategic_dimensions: { RBiH: fullStrategicDims(), RS: fullStrategicDims(), HRHB: fullStrategicDims() },
-        };
-        lapsed.military.formations = {
-            'hrhb_b1': { id: 'hrhb_b1', faction: 'HRHB', kind: 'brigade', status: 'active', name: 'h1', created_turn: 0, assignment: null, morale: 40 } as any,
-        };
-        lapsed.military.event_flags = {};
-        expect(evaluateCondition(cond, lapsed)).toBe(false);
-
-        applyEventEffects(fires, effectsOf(def));
-        expect(fires.military.formations.hrhb_b1.cohesion).toBe(56); // 60 - 4
-        expect(fires.military.recruitment_modifiers?.some(m => m.faction === 'HRHB' && m.pool_multiplier === 0.92)).toBe(true);
-        const ledger = buildCostLedger(fires);
-        expect(ledger.annotations?.find(a => a.tag === 'supply_corridor_chronic_strain_HRHB')).toBeTruthy();
-    });
+    // ── 1. csq_supply_corridor_chronic_strain_HRHB: retired 2026-11-17 (supply is connection, not stock) ──
 
     // ── 2. csq_post_dayton_train_and_equip_RBiH ─────────────────────────────
     it('csq_post_dayton_train_and_equip_RBiH: predicate + equipment 1.06x + recruitment 1.04x', () => {
@@ -319,7 +280,7 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-10: 6 Ring-1 divergence events'
     });
 
     // ── Faction-symmetric audit: every Wave 10 event predicate is parameterized over faction
-    it('all 6 Wave 10 events are faction-agnostic (no hardcoded OSIDs in conditions)', () => {
+    it('all 5 surviving Wave 10 events are faction-agnostic (no hardcoded OSIDs in conditions)', () => {
         for (const id of WAVE_10_IDS) {
             const def = getEvent(id);
             const cond = def.trigger.condition;
@@ -337,16 +298,15 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-10: 6 Ring-1 divergence events'
     });
 
     // ── No new condition kinds: every Wave 10 predicate uses pre-existing kinds (STOP rule)
-    it('all 6 Wave 10 events use only pre-existing condition kinds (STOP rule)', () => {
+    it('all 5 surviving Wave 10 events use only pre-existing condition kinds (STOP rule)', () => {
         const ALLOWED_CONDITION_KINDS = new Set([
             'territory_control', 'alliance_below', 'alliance_above',
             'faction_controls_municipality', 'operation_completed',
             'and', 'or', 'not',
-            'supply_below', 'supply_above', 'territory_percentage',
+            'territory_percentage',
             'dimension_above', 'dimension_below', 'flag_equals', 'flag_not_set',
             'patron_pressure_above', 'war_crimes_above', 'morale_average_below',
             'week_since_event', 'event_fire_count', 'enclave_supply_status',
-            'corridor_severed',
             'paramilitary_mode_equals', 'enclave_resilience_aggregate', 'flag_at_least',
             'metric_compare_factions', 'alliance_drift', 'territory_loss_window',
             'displaced_in_aggregate',
@@ -370,9 +330,9 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-10: 6 Ring-1 divergence events'
     });
 
     // ── No new effect kinds: every Wave 10 effect uses pre-existing kinds (STOP rule)
-    it('all 6 Wave 10 events use only pre-existing effect kinds (STOP rule)', () => {
+    it('all 5 surviving Wave 10 events use only pre-existing effect kinds (STOP rule)', () => {
         const ALLOWED_EFFECT_KINDS = new Set([
-            'narrative', 'morale_change', 'supply_delta', 'cohesion_change',
+            'narrative', 'morale_change', 'cohesion_change',
             'humanitarian_impact', 'patron_pressure', 'alliance_change',
             // 'negotiation_capital' retired (§6 E2): the loader rejects it.
             'equipment_grant', 'aggression_modifier',

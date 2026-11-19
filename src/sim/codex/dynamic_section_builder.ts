@@ -45,6 +45,7 @@
  */
 import { strictCompare } from '../../state/validateGameState.js';
 import { CANONICAL_FACTIONS } from '../../state/game_state.js';
+import { authoredWarCrimeIncidents, authoredWarCrimeIncidentTerms } from '../events/authored_war_crimes.js';
 import type { GameState, FactionId } from '../../state/game_state.js';
 import {
     buildRealizedConsequenceReceipts,
@@ -137,6 +138,8 @@ type GhostEntryFlagValue = string | number | boolean | undefined;
 
 interface GhostEntryNegotiationCapitalView {
     war_crimes_events?: number;
+    /** Read only through `authoredWarCrimeIncidents` (§6 E3b). */
+    war_crimes_events_emergent?: number;
 }
 
 /** Narrow read shape for a recorded rupture consequence. Mirrors
@@ -368,19 +371,26 @@ function policyOperand(
     };
 }
 
-function warCrimesZeroOperand(
+/**
+ * Clean hands: no war-crime incident the faction AUTHORIZED in play (§6 E3b, 2026-11-17; the
+ * one shared count, `authoredWarCrimeIncidents`). Scripted historical records (Ahmići, the
+ * sieges) are not the side's own conduct and never deny it. One operand per term of the count,
+ * each at zero: the recorded-war-crime counter and every authored card booked to the faction.
+ * Fails closed when the faction has no negotiation capital (nothing observable).
+ */
+function authoredWarCrimesZeroOperands(
     state: GhostEntryStateView,
     faction: FactionId,
-): ClaimPredicateOperand | null {
-    const observed = state.military?.negotiation?.capital?.[faction]?.war_crimes_events;
-    if (typeof observed !== 'number' || observed !== 0) return null;
-    return {
-        owner_path: `state.military.negotiation.capital.${faction}.war_crimes_events`,
-        operator: 'equals',
+): ClaimPredicateOperand[] | null {
+    if (!state.military?.negotiation?.capital?.[faction]) return null;
+    if (authoredWarCrimeIncidents(state, faction) !== 0) return null;
+    return authoredWarCrimeIncidentTerms(state, faction).map((term) => ({
+        owner_path: term.owner_path,
+        operator: 'equals' as const,
         expected_value: 0,
-        observed_value: observed,
-        expression: `negotiation.capital[${faction}].war_crimes_events=0`,
-    };
+        observed_value: term.count,
+        expression: `${term.owner_path.replace(/^state\.military\./, '')}=0`,
+    }));
 }
 
 /** No paramilitary deployment recorded for the faction. A missing count is none: the engine only
@@ -454,21 +464,18 @@ function predAllianceHeld(state: GhostEntryStateView, currentTurn: number): Ghos
 }
 
 // — Ghost 2: cleansing_refused —
-//   paramilitary_policy === 'always_deny' for player faction full run AND
-//   war_crimes_events === 0 at turn ≥ 100. War-crimes count is read from the
-//   negotiation breakdown (`state.political.negotiation.capital[faction]`),
-//   which is the canonical accumulator written by paramilitary_sweep and
-//   per-turn negotiation-capital recalculation.
+//   paramilitary_policy === 'always_deny' for player faction full run AND no
+//   war-crime incident the faction authorized in play at turn ≥ 100 (§6 E3b:
+//   `authoredWarCrimeIncidents`, never the shared delta counter).
 function predCleansingRefused(
     state: GhostEntryStateView,
     currentTurn: number,
     faction: FactionId,
 ): GhostPredicateMatch | null {
-    const operands = requiredOperands(
-        policyOperand(state, 'always_deny'),
-        warCrimesZeroOperand(state, faction),
-    );
-    return operands ? matchGhost(operands, [operands[1]!], currentTurn, 100) : null;
+    const policy = policyOperand(state, 'always_deny');
+    const cleanHands = authoredWarCrimesZeroOperands(state, faction);
+    if (!policy || !cleanHands) return null;
+    return matchGhost([policy, ...cleanHands], cleanHands, currentTurn, 100);
 }
 
 // — Ghost 3: enclave_defended (AUDIT-ONLY) —
@@ -728,21 +735,18 @@ function predMediatorTrustSustained(
 }
 
 // — Ghost 17: rear_pocket_sustained —
-//   Rear-area discipline held: the observer streak flag is set AND the
-//   war_crimes_events counter on the player faction's negotiation capital
-//   remains at zero. Reuses the real war_crimes_events accumulator (the same
-//   counter cleansing_refused reads), so this is grounded on live substrate.
-//   turn >= 80.
+//   Rear-area discipline held: the observer streak flag is set AND the player
+//   faction authorized no war-crime incident in play (§6 E3b: the same shared
+//   authored count cleansing_refused reads). turn >= 80.
 function predRearPocketSustained(
     state: GhostEntryStateView,
     currentTurn: number,
     faction: FactionId,
 ): GhostPredicateMatch | null {
-    const operands = requiredOperands(
-        flagOperand(state, 'rear_pocket_discipline_held_through_turn', true),
-        warCrimesZeroOperand(state, faction),
-    );
-    return operands ? matchGhost(operands, [operands[1]!], currentTurn, 80) : null;
+    const streak = flagOperand(state, 'rear_pocket_discipline_held_through_turn', true);
+    const cleanHands = authoredWarCrimesZeroOperands(state, faction);
+    if (!streak || !cleanHands) return null;
+    return matchGhost([streak, ...cleanHands], cleanHands, currentTurn, 80);
 }
 
 // — Ghost 18: civilian_displacement_contained —

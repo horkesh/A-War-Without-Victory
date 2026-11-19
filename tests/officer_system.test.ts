@@ -17,6 +17,8 @@ import {
     getOfficerCombatMod,
     initializeNamedOfficers,
     processOfficerSuccession,
+    releaseOperationCommanders,
+    selectTacticalCommander,
     validateOfficerData,
 } from '../src/sim/combat/officer_system.js';
 import {
@@ -25,6 +27,7 @@ import {
     getOfficerQualityMult,
     getBrigadeOfficerMod,
 } from '../src/sim/combat/combat_math.js';
+import { validateCorpsCoRoster } from '../src/sim/combat/corps_co_roster.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Test helpers
@@ -857,7 +860,40 @@ describe('succession assignment penalties', () => {
         assert.equal(state.military.named_officers!['pool1']!.penalty_turns_remaining, 8);
     });
 
-    it('incompatible corps gets -2 penalty for 12 turns', () => {
+    it('the vacancy fallback never seats an officer of another corps; an acting commander takes it', () => {
+        // Commander attribution PR 2a: before, the pool officer of vrs_srk took vrs_1kk with a -2 penalty.
+        const data = [
+            makeOfficer({ id: 'pool1', faction: 'RS', home_corps_id: 'vrs_srk', pool_tier: 'tier_a', competence: 4, aggressiveness: 2, defensive_skill: 5, political_reliability: 1 }),
+            makeOfficer({ id: 'pool2', faction: 'RS', home_corps_id: 'vrs_srk', pool_tier: 'tier_a', competence: 3, aggressiveness: 4, defensive_skill: 2, political_reliability: 4 }),
+        ];
+        const state = makeMinimalState();
+        state.military.formations = {
+            vrs_1kk: makeFormation({ id: 'vrs_1kk', faction: 'RS', kind: 'corps_asset' as 'brigade' }),
+        };
+        state.military.named_officer_data = data;
+        state.military.named_officers = {
+            pool1: makeOfficerState({ officer_id: 'pool1', status: 'reserve' }),
+            pool2: makeOfficerState({ officer_id: 'pool2', status: 'reserve' }),
+        };
+
+        const report = processOfficerSuccession(state, new Set());
+
+        assert.equal(state.military.named_officers!['pool1']!.status, 'reserve');
+        assert.equal(state.military.named_officers!['pool1']!.assigned_corps_id, null);
+        assert.equal(report.generic_replacements, 1);
+        const acting = getCorpsCommander('vrs_1kk', state);
+        assert.ok(acting?.data.id.startsWith('generic_'));
+        assert.equal(acting?.state.acting_commander, true);
+        // The acting commander is NEUTRAL: the faction's average corps commander, and he doesn't learn.
+        assert.equal(acting?.data.competence, 3.5);
+        assert.equal(acting?.data.aggressiveness, 3);
+        assert.equal(acting?.data.defensive_skill, 3.5);
+        assert.equal(acting?.data.political_reliability, 2.5);
+        assert.equal(acting?.data.can_improve, false);
+    });
+
+    it('incompatible corps gets -2 penalty for 12 turns (a scheduled holder)', () => {
+        // The dated schedule may still name an officer outside his home corps; the penalty applies there.
         const data = [
             makeOfficer({ id: 'pool1', faction: 'RS', home_corps_id: 'vrs_srk', pool_tier: 'tier_a' }),
         ];
@@ -869,8 +905,12 @@ describe('succession assignment penalties', () => {
         state.military.named_officers = {
             pool1: makeOfficerState({ officer_id: 'pool1', status: 'reserve' }),
         };
+        const roster = validateCorpsCoRoster({
+            schema_version: 1,
+            rosters: { vrs_1kk: { schedule: [{ officer_id: 'pool1', tenure_start: 0, tenure_end: null, historical_fate: 'survived', source: 'test' }] } },
+        });
 
-        processOfficerSuccession(state, new Set());
+        processOfficerSuccession(state, new Set(), roster);
 
         assert.equal(state.military.named_officers!['pool1']!.assigned_corps_id, 'vrs_1kk');
         assert.equal(state.military.named_officers!['pool1']!.effective_competence_penalty, 2);
@@ -921,5 +961,146 @@ describe('apr1992 officer data validation', () => {
         assert.ok(byFaction.get('RS')! >= 20, 'RS should have ≥20 officers');
         assert.ok(byFaction.get('RBiH')! >= 20, 'RBiH should have ≥20 officers');
         assert.ok(byFaction.get('HRHB')! >= 15, 'HRHB should have ≥15 officers');
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Commander attribution PR 2b-i: TG commander release, own-corps TG selector, vacancy rank key
+// (panel rulings Q2-Q4). All inert before the rank retype: no officer is a tactical_commander yet.
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('PR 2b-i: TG commanders and the vacancy rank key', () => {
+    it('releases the TG commander and the operation commander at an operation end, even with no operation commander', () => {
+        const state = makeMinimalState();
+        state.military.named_officer_data = [
+            makeOfficer({ id: 'op1', faction: 'RS', home_corps_id: 'vrs_1kk' }),
+            makeOfficer({ id: 'tc1', faction: 'RS', rank: 'tactical_commander', home_corps_id: 'vrs_1kk' }),
+            makeOfficer({ id: 'tc2', faction: 'RS', rank: 'tactical_commander', home_corps_id: 'vrs_1kk' }),
+        ];
+        state.military.named_officers = {
+            op1: makeOfficerState({ officer_id: 'op1', status: 'active', assigned_operation: 'A' }),
+            tc1: makeOfficerState({ officer_id: 'tc1', status: 'active', assigned_operation: 'A' }),
+            tc2: makeOfficerState({ officer_id: 'tc2', status: 'active', assigned_operation: 'B' }),
+        };
+        releaseOperationCommanders(state, { name: 'A', commander_officer_id: 'op1', tg_commander_officer_id: 'tc1' } as any);
+        // A commanderless operation (PR 2a makes them common) must still release its TG leader.
+        releaseOperationCommanders(state, { name: 'B', tg_commander_officer_id: 'tc2' } as any);
+
+        for (const id of ['op1', 'tc1', 'tc2']) {
+            assert.equal(state.military.named_officers![id]!.status, 'reserve', id);
+            assert.equal(state.military.named_officers![id]!.assigned_operation, undefined, id);
+        }
+    });
+
+    it('a TG is led only by a tactical commander of its own corps, else by nobody', () => {
+        const state = makeMinimalState();
+        state.military.named_officer_data = [
+            makeOfficer({ id: 'tc_other', faction: 'RBiH', rank: 'tactical_commander', home_corps_id: 'arbih_2nd_corps', competence: 5 }),
+            makeOfficer({ id: 'tc_compat', faction: 'RBiH', rank: 'tactical_commander', home_corps_id: 'arbih_3rd_corps', compatible_corps_ids: ['arbih_7th_corps'], competence: 3 }),
+        ];
+        state.military.named_officers = {
+            tc_other: makeOfficerState({ officer_id: 'tc_other', status: 'reserve' }),
+            tc_compat: makeOfficerState({ officer_id: 'tc_compat', status: 'reserve' }),
+        };
+        assert.equal(selectTacticalCommander(state, 'arbih_7th_corps', 'RBiH'), 'tc_compat');
+        state.military.named_officers!['tc_compat']!.status = 'active';
+        assert.equal(selectTacticalCommander(state, 'arbih_7th_corps', 'RBiH'), null);
+    });
+
+    it('a vacancy goes to a corps-rank officer of the corps before one of its tactical commanders', () => {
+        const state = makeMinimalState();
+        state.military.formations = {
+            vrs_1kk: makeFormation({ id: 'vrs_1kk', faction: 'RS', kind: 'corps_asset' as 'brigade' }),
+        };
+        state.military.named_officer_data = [
+            makeOfficer({ id: 'tc_strong', faction: 'RS', rank: 'tactical_commander', home_corps_id: 'vrs_1kk', pool_tier: 'tier_a', competence: 5 }),
+            makeOfficer({ id: 'cos', faction: 'RS', rank: 'corps_commander', home_corps_id: 'vrs_1kk', pool_tier: 'tier_b', competence: 3 }),
+        ];
+        state.military.named_officers = {
+            tc_strong: makeOfficerState({ officer_id: 'tc_strong', status: 'reserve' }),
+            cos: makeOfficerState({ officer_id: 'cos', status: 'reserve' }),
+        };
+        processOfficerSuccession(state, new Set());
+        assert.equal(state.military.named_officers!['cos']!.assigned_corps_id, 'vrs_1kk');
+        assert.equal(state.military.named_officers!['tc_strong']!.status, 'reserve');
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Commander attribution PR 2b round 2 (R2-Q1, 2-1): a pulled-up tactical commander holds a corps
+// as ACTING and gives way to a corps-rank officer of the corps; never to another tactical commander.
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('PR 2b R2-Q1: a pulled-up tactical commander holds the corps as acting', () => {
+    function corpsState() {
+        const state = makeMinimalState({ meta: { turn: 50, phase: 'war', scenario_id: 'test' } } as unknown as Partial<GameState>);
+        state.military.formations = {
+            arbih_3rd: makeFormation({ id: 'arbih_3rd', faction: 'RBiH', kind: 'corps_asset' as 'brigade' }),
+        };
+        return state;
+    }
+
+    it('seats him as acting, keeps him against another tactical commander, and hands over to a corps-rank officer', () => {
+        const state = corpsState();
+        state.military.named_officer_data = [
+            makeOfficer({ id: 'og_lead', faction: 'RBiH', rank: 'tactical_commander', home_corps_id: 'arbih_3rd', competence: 5 }),
+            makeOfficer({ id: 'og_two', faction: 'RBiH', rank: 'tactical_commander', home_corps_id: 'arbih_3rd', competence: 4 }),
+            makeOfficer({ id: 'appointed', faction: 'RBiH', rank: 'corps_commander', home_corps_id: 'arbih_3rd', competence: 3, available_from_turn: 52 }),
+        ];
+        state.military.named_officers = {
+            og_lead: makeOfficerState({ officer_id: 'og_lead', status: 'reserve' }),
+            og_two: makeOfficerState({ officer_id: 'og_two', status: 'reserve' }),
+        };
+
+        processOfficerSuccession(state, new Set());
+        let holder = getCorpsCommander('arbih_3rd', state);
+        assert.equal(holder?.data.id, 'og_lead');
+        assert.equal(holder?.state.acting_commander, true);
+
+        // Another tactical commander is free: no swap.
+        state.meta.turn = 51;
+        processOfficerSuccession(state, new Set());
+        assert.equal(getCorpsCommander('arbih_3rd', state)?.data.id, 'og_lead');
+
+        // The appointed corps-rank officer arrives: he takes the corps; the OG commander returns to reserve.
+        state.meta.turn = 52;
+        processOfficerSuccession(state, new Set());
+        holder = getCorpsCommander('arbih_3rd', state);
+        assert.equal(holder?.data.id, 'appointed');
+        assert.equal(holder?.state.acting_commander, false);
+        assert.equal(state.military.named_officers!['og_lead']!.status, 'reserve');
+        assert.equal(state.military.named_officers!['og_lead']!.assigned_corps_id, null);
+        assert.equal(state.military.named_officers!['og_lead']!.acting_commander, false);
+    });
+
+    // Codex review on #800 (P2): the assignment penalty belongs to the corps seat. Step 4 counts it
+    // down only while the officer holds a corps, so a hand-over before it expired left the reserve
+    // officer with the reduction for good, including on later TG commands in his home corps.
+    it('clears the corps assignment penalty when he hands the seat over before it expires', () => {
+        const state = corpsState();
+        state.military.named_officer_data = [
+            makeOfficer({ id: 'og_lead', faction: 'RBiH', rank: 'tactical_commander', home_corps_id: 'arbih_2nd', compatible_corps_ids: ['arbih_3rd'], competence: 4 }),
+            makeOfficer({ id: 'appointed', faction: 'RBiH', rank: 'corps_commander', home_corps_id: 'arbih_3rd', competence: 3, available_from_turn: 52 }),
+        ];
+        state.military.named_officers = {
+            og_lead: makeOfficerState({ officer_id: 'og_lead', status: 'reserve' }),
+        };
+
+        // A compatible, non-home corps: he is seated as acting with the compatible penalty.
+        processOfficerSuccession(state, new Set());
+        const ogData = state.military.named_officer_data!.find(o => o.id === 'og_lead')!;
+        const og = state.military.named_officers!['og_lead']!;
+        assert.equal(getCorpsCommander('arbih_3rd', state)?.data.id, 'og_lead');
+        assert.ok(og.penalty_turns_remaining > 0);
+        assert.equal(getEffectiveCompetence(og, ogData), 3);
+
+        // The corps-rank officer arrives two turns later, well inside the penalty window.
+        state.meta.turn = 52;
+        processOfficerSuccession(state, new Set());
+        assert.equal(getCorpsCommander('arbih_3rd', state)?.data.id, 'appointed');
+        assert.equal(og.status, 'reserve');
+        assert.equal(og.penalty_turns_remaining, 0);
+        assert.equal(og.effective_competence_penalty, 0);
+        assert.equal(getEffectiveCompetence(og, ogData), 4);
     });
 });

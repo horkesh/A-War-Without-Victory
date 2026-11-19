@@ -44,7 +44,7 @@ const EFFECT_KIND_ORDER: Record<string, number> = {
     // §6 E4: renamed from patron_pressure; same slot, so the application order is unchanged.
     patron_support: 17,
     recruitment_modifier: 18,
-    supply_delta: 19,
+    // 19 was supply_delta (retired, #810). The gap is kept, as for 15.
     // Patron-defiance panel (2026-11-17): appended, so every existing relative order holds.
     patron_supply_cut: 20,
 };
@@ -93,10 +93,15 @@ export function applyEventEffects(
     effects: EventEffect[],
     targetFormationId?: string,
 ): void {
-    if (effects.length === 0) return;
+    // The `supply_delta` kind is retired (2026-11-17; supply is connection, not stock). A pending
+    // decision in an old save may still carry one in its staged response options. It was a silent
+    // no-op without the reserve layer, so it is dropped here, explicitly, so the decision can still be
+    // answered. The retired-field sweep migration strips staged entries; this filter goes with it.
+    const live = effects.filter((effect) => (effect as { kind?: unknown }).kind !== 'supply_delta');
+    if (live.length === 0) return;
 
     // Sort by kind for deterministic application order
-    const sorted = [...effects].sort((a, b) => {
+    const sorted = [...live].sort((a, b) => {
         const oa = EFFECT_KIND_ORDER[a.kind] ?? 99;
         const ob = EFFECT_KIND_ORDER[b.kind] ?? 99;
         return oa - ob;
@@ -115,9 +120,6 @@ function applySingleEffect(state: GameState, effect: EventEffect, targetFormatio
             } else {
                 applyMoraleChange(state, effect.faction, effect.delta, effect.affected_corps);
             }
-            break;
-        case 'supply_delta':
-            applySupplyDelta(state, effect.faction, effect.delta);
             break;
         case 'cohesion_change':
             if (targetFormationId) {
@@ -385,19 +387,6 @@ function applyCohesionChange(state: GameState, faction: FactionId, delta: number
             f.cohesion = clamp(f.cohesion + delta, 0, 100);
         }
     }
-}
-
-/** Add delta to faction's general supply reserve. Floor at 0.
- *  Un-clamped accumulator: non-finite delta is rejected (prior reserve kept) + logged
- *  — `Math.max(0, NaN)` is NaN and would persist (P1-B). */
-function applySupplyDelta(state: GameState, faction: FactionId, delta: number): void {
-    if (!Number.isFinite(delta)) {
-        recordNonFiniteEffectAnomaly(state, 'supply_delta', faction, delta);
-        return;
-    }
-    if (!state.military.general_supply_reserve) return;
-    const current = state.military.general_supply_reserve[faction] ?? 0;
-    state.military.general_supply_reserve[faction] = Math.max(0, current + delta);
 }
 
 /** Adjust war_crimes_events in faction's negotiation capital.

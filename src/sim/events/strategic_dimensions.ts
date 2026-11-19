@@ -1,8 +1,9 @@
 import type { DimensionId } from './event_types.js';
 import { clamp } from '../../utils/math.js';
-import { CANONICAL_FACTIONS } from '../../state/game_state.js';
+import { CANONICAL_FACTIONS, type GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { PeacePlanResponse } from '../../state/negotiation_types.js';
+import { getPeacePlanById } from '../negotiation/peace_plan_data.js';
 import type { ParamilitarySeverityBand } from '../combat/paramilitary_sweep.js';
 
 export const DIMENSION_IDS: DimensionId[] = [
@@ -88,9 +89,31 @@ export function computeNegotiatingCapital(store: DimensionStore, faction: string
 }
 
 /**
- * The one owner of every dimension `base_value` (§6 E3a1 D2). Runs once per faction per
- * turn at the `compute-dimension-bases` pipeline step. No other function writes a
- * `base_value`; `computeNegotiationBreakdown` only rebuilds the raw capital record.
+ * Run the one base owner, `computeDimensionBaseValues`, for every faction in a fixed order.
+ * The only caller of the owner in src/. The war pipeline calls it at three fixed points each
+ * war turn (§6 phase-order ruling, 2026-11-17; Systems Manual §7.10.3):
+ *   - `refresh-dimension-bases-turn-start` (after ensure-negotiation-state): the turn's events
+ *     see every write made since the last turn, between-turn IPC writes included;
+ *   - `compute-dimension-bases` (after evaluate-events): a choice's base input reaches the
+ *     base before operations;
+ *   - `refresh-dimension-bases` (after compute-negotiation-capital): the Dayton menu is priced,
+ *     and the turn boundary saved, on the turn's plan, patron, capital and combat writes.
+ * A pure overwrite of `base_value`; no-op while the dimension store does not exist.
+ */
+export function recomputeDimensionBases(state: GameState): void {
+    const store = state.military?.negotiation?.strategic_dimensions;
+    if (!store) return;
+    for (const faction of ['RBiH', 'RS', 'HRHB'] as const) {
+        computeDimensionBaseValues(store, state, faction);
+    }
+}
+
+/**
+ * The one owner of every dimension `base_value` (§6 E3a1 D2). Called only through
+ * `recomputeDimensionBases`, which runs it for every faction at three fixed points each war
+ * turn (turn start, mid-turn after evaluate-events, after compute-negotiation-capital). No
+ * other function writes a `base_value`; `computeNegotiationBreakdown` only rebuilds the raw
+ * capital record.
  */
 export function computeDimensionBaseValues(store: DimensionStore, state: any, faction: string): void {
     if (!store[faction]) return;
@@ -196,6 +219,7 @@ function parseDeploymentCount(text?: string): number {
  * Plans a faction accepted and rejected, derived from `peace_plan_history` (the single
  * source, §6 E3a1 D3). `computeNegotiationBreakdown` rebuilds `capital.peace_plans_*`
  * from this; the standing base reads it directly so it never depends on when that rebuild ran.
+ * Resolved rows only (§6 E3a2): an answer counts once its plan is decided, never before.
  */
 export function derivePeacePlanResponseLists(
     history: readonly PeacePlanResponse[],
@@ -204,6 +228,7 @@ export function derivePeacePlanResponseLists(
     const accepted: string[] = [];
     const rejected: string[] = [];
     for (const plan of history) {
+        if (!plan.resolved) continue;
         const response = plan.responses[faction];
         if (response === 'accepted') accepted.push(plan.plan_id);
         else if (response === 'rejected') rejected.push(plan.plan_id);
@@ -211,12 +236,33 @@ export function derivePeacePlanResponseLists(
     return { accepted, rejected };
 }
 
+/** §6 E3a2 ruling item 5: the base credit for each accepted plan (flat, every plan and side). */
+export const PEACE_PLAN_ACCEPT_STANDING = 10;
+
+/**
+ * The graded standing term of the plans a faction rejected: Σ the plan's own
+ * `credibility_change_on_reject[faction]` (§6 E3a2 ruling item 5; it replaced the flat −15).
+ * A plan without a value for the faction contributes 0.
+ */
+export function rejectedPlansStandingTerm(rejectedPlanIds: readonly string[], faction: string): number {
+    let term = 0;
+    for (const planId of rejectedPlanIds) {
+        term += getPeacePlanById(planId)?.credibility_change_on_reject?.[faction] ?? 0;
+    }
+    return term;
+}
+
 /**
  * international_standing base =
  *   clamp(50 − war_crimes_events × 10 − paramilitary_finding_penalty − civilian_casualties / 5000
- *         + plans_accepted × 10 − plans_rejected × 15, 0, 100).
+ *         + plans_accepted × 10 + Σ credibility_change_on_reject over the rejected plans, 0, 100).
  * The finding penalty ADDS to the war-crimes term; it never replaces it (§6 E3a1 D2), so a
  * sweep that brings a finding can never raise the base.
+ *
+ * §6 E3a2 ruling item 5: the plan terms are the only carrier of a plan answer's standing
+ * (no card shift, no event_modifier write at resolution) and sit INSIDE the base clamp, so a
+ * side whose base is already at 0 absorbs a refusal. Recorded rule: E3c moves the plan terms
+ * into its single outer layer, alongside the authored-incident term.
  */
 export function computeInternationalStandingBase(state: any, faction: string): number {
     const cap = state?.military?.negotiation?.capital?.[faction];
@@ -228,7 +274,9 @@ export function computeInternationalStandingBase(state: any, faction: string): n
     const civCas = cap?.civilian_casualties_caused ?? 0;
     const plans = derivePeacePlanResponseLists(state?.military?.negotiation?.peace_plan_history ?? [], faction);
     return clamp(
-        50 - (warCrimes * 10) - findingPenalty - (civCas / 5000) + (plans.accepted.length * 10) - (plans.rejected.length * 15),
+        50 - (warCrimes * 10) - findingPenalty - (civCas / 5000)
+            + (plans.accepted.length * PEACE_PLAN_ACCEPT_STANDING)
+            + rejectedPlansStandingTerm(plans.rejected, faction),
         0,
         100
     );

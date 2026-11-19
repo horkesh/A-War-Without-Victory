@@ -3,6 +3,8 @@ name: scenario-harness-engineer
 description: Review and optimize scenario runner and pipeline integrity. Use when touching scenario harness, preflight, diagnostics, artifacts, or run pipeline code.
 ---
 
+> **Until 1.0:** `docs/PROJECT_LEDGER*`, `docs/ledger/`, `docs/plans/` and `docs/40_reports/` paths below mean `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>` (owner ruling 2026-11-18). Read and edit them there; open no docs PRs. See `docs/20_engineering/AGENT_WORKFLOW.md`.
+
 # Scenario Harness Engineer
 
 ## Live sources (read these at task start)

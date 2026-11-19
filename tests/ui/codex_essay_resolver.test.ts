@@ -763,6 +763,27 @@ describe('codexEssayResolver — cost-ledger finding atoms and tokens', () => {
         expect(text).not.toContain('srebrenica_genocide_1995');
     });
 
+    it('§6 E3b: the war-crimes record key also answers to the decisions-in-play line (record line hidden at zero)', () => {
+        const authoredOnly = {
+            ...costLedger,
+            findings: [{
+                id: 'war_crimes_authorized_RBiH',
+                category: 'war_crimes',
+                severity: 'grave',
+                faction: 'RBiH',
+                title: 'War crimes arising from decisions in play: ARBiH forces',
+                text: '2 incidents arose from decisions in play.',
+                sources: [],
+            }],
+        } as NonNullable<CodexRenderContext['costLedger']>;
+        const ctx = context({ gameOver: true, costLedger: authoredOnly });
+        expect(evaluateEssayCondition('FINDING:war_crimes_record_RBiH', ctx)).toBe(true);
+        expect(evaluateEssayCondition('FINDING:war_crimes_record_RS', ctx)).toBe(false);
+        expect(evaluateEssayCondition('FINDING:war_crimes_authorized_RBiH', ctx)).toBe(true);
+        // The record line itself still answers its own key.
+        expect(evaluateEssayCondition('FINDING:war_crimes_record_HRHB', context({ gameOver: true, costLedger }))).toBe(true);
+    });
+
     it('cost-ledger atoms return false when the ledger is absent', () => {
         const ctx = context({ gameOver: true, costLedger: undefined });
         expect(evaluateEssayCondition('FINDING:human_cost_record', ctx)).toBe(false);

@@ -3,6 +3,8 @@ name: operations-expert
 description: Use when creating, modifying, debugging, or reviewing ANY military operation — pre-planned ops, triggered ops, objective changes, brigade assignments, staging OSIDs, timing, or corps command. MUST be consulted before any change to pre_planned_operations.ts, triggered_operations.ts, sector_offensive.ts, operation_preparation.ts, or jna_phantom_brigades.ts. Also use when calibration runs show unexpected territorial changes that could be caused by operation behavior.
 ---
 
+> **Until 1.0:** `docs/PROJECT_LEDGER*`, `docs/ledger/`, `docs/plans/` and `docs/40_reports/` paths below mean `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>` (owner ruling 2026-11-18). Read and edit them there; open no docs PRs. See `docs/20_engineering/AGENT_WORKFLOW.md`.
+
 # Operations Expert
 
 ## Live sources (read these at task start — do not hardcode floor/lane state)

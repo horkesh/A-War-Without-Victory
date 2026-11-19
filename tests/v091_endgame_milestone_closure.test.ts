@@ -224,15 +224,4 @@ describe('v0.9.1 Dynamic Essay + Endgame Comparison milestone closure', () => {
         expect(v091Sections.some((section) => section.condition?.includes('ANNOTATION:'))).toBe(true);
         expect(v091Sections.some((section) => section.condition?.includes('MILESTONE:'))).toBe(true);
     });
-
-    it('records v0.9.1 as closed in the plan and master roadmap', () => {
-        const plan = readText('docs', 'plans', '2026-04-06-v091-dynamic-essay-endgame-comparison-plan.md');
-        const roadmap = readText('docs', 'plans', 'MASTER_ROADMAP.md');
-
-        expect(plan).toContain('**Status:** CLOSED-FOR-AGENT-SCOPE');
-        expect(plan).toContain('canonical historical text remains immutable substrate');
-        expect(plan).toContain('All five execution phases are agent-closed');
-        expect(roadmap).toContain('| 12 | Dynamic Codex | R4 |');
-        expect(roadmap).toContain('Prior roadmap history remains in Git before this consolidation');
-    });
 });

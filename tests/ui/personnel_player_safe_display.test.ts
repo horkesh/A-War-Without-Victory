@@ -368,11 +368,8 @@ describe('PersonnelContent player-facing display', () => {
     expect(container.textContent).not.toContain('BANJA LUKA');
   });
 
-  it('renders sparse supply reserves and mobilization fields as unreported instead of invented zeroes', () => {
+  it('renders sparse mobilization fields as unreported instead of invented zeroes', () => {
     const state = makeState();
-    state.factionReserves = {
-      RS: { heavyMunitions: 42 } as any,
-    };
     state.mobilizationSummary = {
       RS: {
         faction: 'RS',
@@ -391,12 +388,11 @@ describe('PersonnelContent player-facing display', () => {
     const { container } = render(React.createElement(PersonnelContent));
     const copy = container.textContent ?? '';
 
-    expect(copy).toContain('No staff reportSupply Reserve');
+    expect(copy).not.toContain('Supply Reserve');
     expect(copy).toContain('No staff reportCommitted');
     expect(copy).toContain('No staff reportStrategic Reserve');
     expect(copy).toContain('No staff reportExhaustion');
     expect(copy).toContain('Banja Luka');
-    expect(copy).not.toContain('0Supply Reserve');
     expect(copy).not.toContain('NaN');
     expect(copy).not.toContain('undefined');
   });
@@ -429,11 +425,8 @@ describe('PersonnelContent player-facing display', () => {
     expect(copy).not.toContain('OFFICER ROSTER (Unreported)');
   });
 
-  it('keeps explicit zero supply and mobilization values as reported zeroes', () => {
+  it('keeps explicit zero mobilization values as reported zeroes', () => {
     const state = makeState();
-    state.factionReserves = {
-      RS: { generalSupply: 0, heavyMunitions: 42 },
-    };
     state.mobilizationSummary = {
       RS: {
         faction: 'RS',
@@ -452,11 +445,9 @@ describe('PersonnelContent player-facing display', () => {
     const { container } = render(React.createElement(PersonnelContent));
     const copy = container.textContent ?? '';
 
-    expect(copy).toContain('0Supply Reserve');
     expect(copy).toContain('0Committed');
     expect(copy).toContain('0Strategic Reserve');
     expect(copy).toContain('0.0%Exhaustion');
-    expect(copy).not.toContain('No staff reportSupply Reserve');
   });
 
   it('renders HQ-assigned brigades and routes them to Army HQ drilldown', () => {

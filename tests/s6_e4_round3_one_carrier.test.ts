@@ -130,6 +130,26 @@ function makeState(opts: { turn?: number; player_faction?: FactionId; flags?: Re
     } as unknown as GameState;
 }
 
+/** §6 E3a2: the three contact-group response cards as routed rows (historical default first). */
+function CG_RESPONSE_CARDS(): EventDefinition[] {
+    const card = (id: string, faction: FactionId, defaultId: string, defaultAnswer: 'accepted' | 'rejected'): EventDefinition => ({
+        id,
+        trigger: { turn_min: 118, turn_max: 120, phase: 'war' },
+        effect: { kind: 'narrative', text: id },
+        once: true,
+        responding_faction: faction,
+        historical_default_response_id: defaultId,
+        response_options: [
+            { id: defaultId, label: defaultId, effects: [], plan_answer: { plan_id: 'contact_group', response: defaultAnswer } },
+        ],
+    } as EventDefinition);
+    return [
+        card('rbih_contact_group_response_1994', 'RBiH', 'accept_51_49_plan', 'accepted'),
+        card('rs_contact_group_response_1994', 'RS', 'reject_51_49_plan', 'rejected'),
+        card('hrhb_contact_group_response_1994', 'HRHB', 'accept_51_49_plan', 'accepted'),
+    ];
+}
+
 function cgRecord(rs: 'accepted' | 'rejected', resolved = true): PeacePlanResponse {
     return {
         plan_id: 'contact_group',
@@ -165,7 +185,8 @@ describe('§6 E4 round 3, Q1: one carrier per patron change (loader rule)', () =
         for (const [eventId, optionId, faction, value] of [
             ['concentration_camps_revealed_1992', 'deny', 'RS', -10],
             ['concentration_camps_revealed_1992', 'obstruct', 'RS', -5],
-            ['rs_assembly_rejects_voplan_1993', 'accept_rejection', 'RS', -10],
+            // §6 E3a2 stripped the interim −10 (a refusal's patron cost is the plan's −5).
+            ['rs_assembly_rejects_voplan_1993', 'accept_rejection', 'RS', 0],
             ['rs_contact_group_response_1994', 'accept_51_49_plan', 'RS', 20],
             ['belgrade_embargo_rs_1994', 'defiant', 'RS', -10],
             ['un_hostage_crisis_1995', 'maintain_hostages', 'RS', -10],
@@ -327,10 +348,10 @@ describe('§6 E4 round 3: the spill (costs only) through the one support writer'
     });
 
     it('the peace-plan rejection cost spills through the same writer (−5 at support 2)', () => {
-        const state = makeState({ turn: 118 });
+        const state = makeState({ turn: 120 });
         const neg = state.military.negotiation!;
         neg.patron_relationships.RS!.support_level = 2;
-        evaluatePeacePlans(state); // headless: offered and resolved at week 118 (RS historically rejects)
+        evaluatePeacePlans(state); // headless, no answering card: the close-week fallback resolves (RS historically rejects)
         expect(neg.peace_plan_history.find((h) => h.plan_id === 'contact_group')?.responses.RS).toBe('rejected');
         expect(neg.patron_relationships.RS!.support_level).toBe(0);
         expect(neg.strategic_dimensions!.RS!.patron_confidence!.event_modifier).toBe(-3);
@@ -355,7 +376,19 @@ describe('§6 E4 round 3, Q3: Belgrade\'s break has one carrier', () => {
         const state = makeState({ turn: 118 });
         const neg = state.military.negotiation!;
         const supportBefore = neg.patron_relationships.RS!.support_level;
-        evaluatePeacePlans(state);
+        // §6 E3a2: the three response cards answer at 118 (bot path) and the resolver reads the log.
+        const cards = CG_RESPONSE_CARDS();
+        for (const card of cards) {
+            (state.military.event_decision_log ??= []).push({
+                event_id: card.id,
+                response_id: card.historical_default_response_id!,
+                decision_source: 'bot_ai_default',
+                faction: card.responding_faction!,
+                turn: 118,
+            });
+        }
+        evaluatePeacePlans(state, cards);
+        expect(neg.peace_plan_history.map((row) => [row.plan_id, row.resolved_turn])).toEqual([['contact_group', 118]]);
         updatePatronPressure(state);
         evaluatePatronEvents(state);
         expect(neg.patron_relationships.RS!.relationship_events).toEqual(['rejected_contact_group', 'contact_group_rejection']);
@@ -390,8 +423,9 @@ describe('§6 E4 round 3, Q3: Belgrade\'s break has one carrier', () => {
         expect(evaluateCondition(condition, noPlatform)).toBe(false);
     });
 
-    it('a pending CG plan cannot persist past its turn: it blocks the advance (modal gate); the break waits for the answer', () => {
-        const state = makeState({ turn: 118, player_faction: 'RS' });
+    it('a pending CG fallback cannot persist past its turn: it blocks the advance (modal gate); the break waits for the answer', () => {
+        // §6 E3a2: the pointer exists only as the close-week fallback (RS's card never answered).
+        const state = makeState({ turn: 120, player_faction: 'RS' });
         const neg = state.military.negotiation!;
         evaluatePeacePlans(state);
         expect(neg.pending_peace_plan?.plan_id).toBe('contact_group');
@@ -408,7 +442,7 @@ describe('§6 E4 round 3, Q3: Belgrade\'s break has one carrier', () => {
         resolvePeacePlan(accept, 'contact_group', 'accepted');
         expect(accept.military.negotiation!.peace_plan_history.at(-1)?.responses.RS).toBe('accepted');
         expect(listBlockingPlayerDecisions(accept as never, 'RS').some((item) => item.familyId === 'peace_plan')).toBe(false);
-        for (let week = 119; week <= 140; week++) {
+        for (let week = 121; week <= 140; week++) {
             accept.meta.turn = week;
             evaluatePatronEvents(accept);
         }
@@ -417,20 +451,21 @@ describe('§6 E4 round 3, Q3: Belgrade\'s break has one carrier', () => {
         // The player rejects: the break fires at the next week.
         const reject = structuredClone(state);
         resolvePeacePlan(reject, 'contact_group', 'rejected');
-        reject.meta.turn = 119;
+        reject.meta.turn = 121;
         evaluatePatronEvents(reject);
         expect(reject.military.negotiation!.patron_relationships.RS!.relationship_events).toContain('contact_group_rejection');
     });
 
-    it('the reject cards carry neither support nor confidence; contact_group_plan_1994#reject keeps −10', () => {
+    it('the reject cards carry neither support nor confidence; the RBiH accept carries the +10 (§6 E3a2: the −10 interim went)', () => {
         const rs = optionOf('rs_contact_group_response_1994', 'reject_51_49_plan');
         expect(supportSum(rs.effects, 'RS')).toBe(0);
         expect(confidenceShifts(rs, 'RS')).toEqual([]);
         const rbih = optionOf('rbih_contact_group_response_1994', 'reject_51_49_plan');
         expect(supportSum(rbih.effects, 'RBiH')).toBe(0);
         expect(confidenceShifts(rbih, 'RBiH')).toEqual([]);
-        expect(supportSum(optionOf('contact_group_plan_1994', 'reject').effects, 'RBiH')).toBe(-10);
-        expect(supportSum(optionOf('contact_group_plan_1994', 'accept').effects, 'RBiH')).toBe(10);
+        // contact_group_plan_1994 is a no-choice presentation card; its +10 moved, same size.
+        expect(byId().get('contact_group_plan_1994')!.response_options ?? []).toEqual([]);
+        expect(supportSum(optionOf('rbih_contact_group_response_1994', 'accept_51_49_plan').effects, 'RBiH')).toBe(10);
     });
 });
 
@@ -473,12 +508,25 @@ describe('§6 E4 round 3: save migration v42 lists', () => {
     });
 
     it('the lists match the catalog: DROP options carry no support, SET options carry the set value, shift-drop options carry no twin', () => {
+        // §6 E3a2 (v43) moved these on after v42: the four interim carriers are stripped, the
+        // contact-group +10 moved from contact_group_plan_1994#accept (now no options) to
+        // rbih_contact_group_response_1994#accept_51_49_plan (a v42 DROP key). v42 keeps its lists.
+        const MOVED_BY_E3A2 = new Set([
+            'contact_group_plan_1994#accept',
+            'contact_group_plan_1994#reject',
+            'rbih_contact_group_response_1994#accept_51_49_plan',
+            'rs_assembly_rejects_voplan_1993#accept_rejection',
+            'rs_contact_group_response_1994#negotiate_amendments',
+            'rs_owen_stoltenberg_response_1993#reject_plan',
+        ]);
         for (const key of S6_E4_PATRON_SUPPORT_DROP) {
+            if (MOVED_BY_E3A2.has(key)) continue;
             const [eventId, optionId] = key.split('#') as [string, string];
             const option = optionOf(eventId, optionId);
             expect((option.effects ?? []).some((e) => e.kind === 'patron_support'), key).toBe(false);
         }
         for (const [key, value] of Object.entries(S6_E4_PATRON_SUPPORT_SET)) {
+            if (MOVED_BY_E3A2.has(key)) continue;
             const [eventId, optionId] = key.split('#') as [string, string];
             const option = optionOf(eventId, optionId);
             const total = (option.effects ?? []).filter((e) => e.kind === 'patron_support').reduce((s, e) => s + (e as { delta: number }).delta, 0);
@@ -523,12 +571,15 @@ describe('§6 E4 round 3: save migration v42 lists', () => {
         const [accept, reject, amend] = cg;
         expect(accept!.effects).toEqual([{ kind: 'patron_support', faction: 'RS', delta: 20 }]);
         expect(confidenceShifts(accept!, 'RS')).toEqual([]);
-        expect(accept!.dimension_shifts).toContainEqual({ faction: 'RS', dimension: 'international_standing', delta: 20 });
+        // §6 E3a2 (v43, after v42): the routed card's own standing shift is stripped and plan_answer added.
+        expect((accept!.dimension_shifts ?? []).some((s) => s.dimension === 'international_standing')).toBe(false);
+        expect(accept!.plan_answer).toEqual({ plan_id: 'contact_group', response: 'accepted' });
         expect(reject!.effects).toEqual([{ kind: 'morale_change', faction: 'RS', delta: 3 }]);
         expect(confidenceShifts(reject!, 'RS')).toEqual([]);
         expect(reject!.dimension_shifts).toEqual([{ faction: 'RS', dimension: 'internal_cohesion', delta: 5 }]);
         expect(reject!.future_consequences![0]!.material_effect_refs).toEqual(['morale_change.RS']);
-        expect(amend!.effects).toEqual([{ kind: 'patron_support', faction: 'RS', delta: -5 }]);
+        // §6 E3a2 (v43): the interim −5 that v42 sets is stripped (the plan's −5 is the one carrier).
+        expect(amend!.effects).toEqual([]);
         expect(confidenceShifts(amend!, 'RS')).toEqual([]);
         const posture = byEvent.get('strategic_posture_review_rs')![0]!;
         expect(posture.effects).toEqual([]);

@@ -1,6 +1,0 @@
-## 2026-11-16 — Pass 53: the final chapter titles; the B5-10 emergent figure corrected
-
-Docs only; no `src/` or `data/` change, no hash change.
-
-- Owner ruling, 2026-11-16 (chapters_design/TITLES_FINAL.md): the final chapter titles replace the earlier set in the work list's Chapters block: I The Lines Are Drawn / Linije su povučene; II Who Is the Enemy? / Ko je neprijatelj? (subtitle "War Within the War / Rat unutar rata" when the ARBiH-HVO war actually happens; the owner corrected the BCS from "Rat u ratu"); III War of Attrition / Rat iscrpljivanja; IV Who Breaks First? / Ko će prvi popustiti?. Guards: III names what each army can still do, never the enemy's dead; IV is never linked to Srebrenica or Žepa. Implementation is post-freeze presentation under the §6 copy panel. (The earlier titles also appear in the consult 5 ledger fragment of pass 41, which is merged and not edited.)
-- Correction to B5-10 (#748), also superseding the figure in the pass 51 fragment: the emergent check is 709 / 709 / 708 / 682, guard intact, Farz 4 of 4, cascade 31, measured by the batch-b-lane on #748's head ee8cd125a, which includes #727; the 710 / 707 / 707 / 670 figure came from a base before #727 and is withdrawn.

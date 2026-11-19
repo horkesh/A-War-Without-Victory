@@ -1424,7 +1424,7 @@
               "rbih_state_identity"
             ],
             "material_effect_refs": [],
-            "explanation": "The civic platform aligns Sarajevo's posture with the NATO-led Sarajevo Heavy Weapons Exclusion Zone regime imposed by the North Atlantic Council ultimatum of 9 February 1994 following the Markale market shelling of 5 February 1994 (more than 60 civilians killed; ICTY Galić IT-98-29-T attributing the shelling to SRK/VRS positions). The civic line carries Sarajevo's documented cooperation with UNPROFOR HWEZ inspections and public framing of NATO enforcement as overdue Western action: the Presidency accepts the symmetric application of withdrawal demands to ARBiH heavy weapons inside the 20km perimeter (NATO NAC decision 9 February 1994; UNSCR 836 of 4 June 1993; UN A/54/549 §§ on Sarajevo HWEZ regime; BB Vol. II Sarajevo siege chronology)."
+            "explanation": "The civic platform aligns Sarajevo's posture with the NATO-led Sarajevo Heavy Weapons Exclusion Zone regime imposed by the North Atlantic Council ultimatum of 9 February 1994 following the Markale market shelling of 5 February 1994 (68 killed, nearly all of them civilians; ICTY Mladić IT-09-92-T; ICTY Galić IT-98-29-T attributing the shelling to SRK/VRS positions). The civic line carries Sarajevo's documented cooperation with UNPROFOR HWEZ inspections and public framing of NATO enforcement as overdue Western action: the Presidency accepts the symmetric application of withdrawal demands to ARBiH heavy weapons inside the 20km perimeter (NATO NAC decision 9 February 1994; UNSCR 836 of 4 June 1993; UN A/54/549 §§ on Sarajevo HWEZ regime; BB Vol. II Sarajevo siege chronology)."
           },
           {
             "id": "civic_to_bihac_5th_corps",
@@ -1699,7 +1699,7 @@
               "rbih_state_identity"
             ],
             "material_effect_refs": [],
-            "explanation": "The Bosniak-national line still reaches the February 1994 NATO ultimatum HWEZ compliance decision. The North Atlantic Council ultimatum of 9 February 1994 following the Markale market shelling of 5 February 1994 (more than 60 civilians killed; ICTY Galić IT-98-29-T) applies symmetrically to ARBiH heavy weapons inside the 20km exclusion zone. On this branch the Assembly hardline current is louder against the moral-equivalence framing of symmetric application, but the Presidency's documented historical posture of HWEZ cooperation still arrives at the table (NATO NAC decision 9 February 1994; UNSCR 836 of 4 June 1993; UN A/54/549 §§ on Sarajevo HWEZ regime; BB Vol. II Sarajevo siege chronology)."
+            "explanation": "The Bosniak-national line still reaches the February 1994 NATO ultimatum HWEZ compliance decision. The North Atlantic Council ultimatum of 9 February 1994 following the Markale market shelling of 5 February 1994 (68 killed, nearly all of them civilians; ICTY Mladić IT-09-92-T) applies symmetrically to ARBiH heavy weapons inside the 20km exclusion zone. On this branch the Assembly hardline current is louder against the moral-equivalence framing of symmetric application, but the Presidency's documented historical posture of HWEZ cooperation still arrives at the table (NATO NAC decision 9 February 1994; UNSCR 836 of 4 June 1993; UN A/54/549 §§ on Sarajevo HWEZ regime; BB Vol. II Sarajevo siege chronology)."
           },
           {
             "id": "bosniak_national_to_bihac_5th_corps",
@@ -1967,7 +1967,7 @@
               "rbih_state_identity"
             ],
             "material_effect_refs": [],
-            "explanation": "The pragmatic line carries the same instrumental posture (civic rhetoric outward, Bosniak institutions inward) into the February 1994 NATO ultimatum HWEZ compliance decision. The North Atlantic Council ultimatum of 9 February 1994 following the Markale market shelling of 5 February 1994 (more than 60 civilians killed; ICTY Galić IT-98-29-T) is read by Sarajevo as the long-overdue Western coercion the pragmatic posture has been positioning for; the Presidency's documented HWEZ cooperation lines up with the international-standing return on the diplomatic exterior (NATO NAC decision 9 February 1994; UNSCR 836 of 4 June 1993; UN A/54/549 §§ on Sarajevo HWEZ regime; BB Vol. II Sarajevo siege chronology)."
+            "explanation": "The pragmatic line carries the same instrumental posture (civic rhetoric outward, Bosniak institutions inward) into the February 1994 NATO ultimatum HWEZ compliance decision. The North Atlantic Council ultimatum of 9 February 1994 following the Markale market shelling of 5 February 1994 (68 killed, nearly all of them civilians; ICTY Mladić IT-09-92-T) is read by Sarajevo as the long-overdue Western coercion the pragmatic posture has been positioning for; the Presidency's documented HWEZ cooperation lines up with the international-standing return on the diplomatic exterior (NATO NAC decision 9 February 1994; UNSCR 836 of 4 June 1993; UN A/54/549 §§ on Sarajevo HWEZ regime; BB Vol. II Sarajevo siege chronology)."
           },
           {
             "id": "pragmatic_to_bihac_5th_corps",
@@ -2362,7 +2362,7 @@
           },
           "united_front": {
             "label": "Zajednički front s ARBiH",
-            "description": "Mi smo Hrvati i Bosanci. Naša borba je protiv Velike Srbije, uz naše saveznike. Zagreb će biti bijesan. Tuđman može presjeći podršku. Ali udruženi front protiv VRS-a bit će snažan."
+            "description": "Mi smo Hrvati i Bosanci. Naša borba je protiv Velike Srbije, uz naše saveznike. Zagreb će biti bijesan. Tuđman može presjeći podršku. Ali udruženi front protiv VRS-a bit će snažan. Sklapa se dogovor o prihvatu raseljenih na 56 sedmica. Napetost u savezu zbog raseljavanja i zagrebački pritisak popuštaju dok traje; regrutacija se usporava, povjerenje Zagreba pada."
           },
           "strategic_ambiguity": {
             "label": "Javno sarađuj, tiho se pripremaj",
@@ -2690,7 +2690,7 @@
         "branch_tag": "hrhb_united_front",
         "historical_marker": "counterfactual",
         "label": "United front with ARBiH",
-        "description": "We are Croats and Bosnians. Our fight is against Greater Serbia, alongside our allies. Zagreb will be furious. Tudjman may cut support. But the combined front against the VRS will be formidable.",
+        "description": "We are Croats and Bosnians. Our fight is against Greater Serbia, alongside our allies. Zagreb will be furious. Tudjman may cut support. But the combined front against the VRS will be formidable. It opens a refugee compact for 56 weeks. Displacement strain and Zagreb's pull on the alliance ease while it stands; recruitment slows, Zagreb's confidence falls.",
         "effects": [
           {
             "kind": "alliance_change",
@@ -2936,7 +2936,7 @@
           {
             "faction": "HRHB",
             "dimension": "patron_confidence",
-            "delta": -25
+            "delta": -35
           },
           {
             "faction": "HRHB",
@@ -3258,16 +3258,9 @@
     },
     "once": true,
     "effect": {
-      "kind": "supply_delta",
-      "faction": "RBiH",
-      "delta": -10
+      "kind": "narrative",
+      "text": "The UN arms embargo leaves the ARBiH critically short of weapons and ammunition."
     },
-    "effects": [
-      {
-        "kind": "narrative",
-        "text": "The UN arms embargo leaves the ARBiH critically short of weapons and ammunition."
-      }
-    ],
     "pressure": {
       "base_rate": 3,
       "threshold": 3,
@@ -3318,11 +3311,6 @@
       "target_municipality": "visoko"
     },
     "effects": [
-      {
-        "kind": "supply_delta",
-        "faction": "RBiH",
-        "delta": 5
-      },
       {
         "kind": "morale_change",
         "faction": "RBiH",
@@ -3476,7 +3464,7 @@
         "branch_tag": "hrhb_alliance_sustained",
         "historical_marker": "counterfactual",
         "label": "Preserve formal HVO-ARBiH alliance",
-        "description": "The Presidency disciplines local HVO commanders asserting HZ HB jurisdiction in Prozor, Novi Travnik, and Vitez. The joint anti-VRS framework is reinforced as primary; the Graz framework is treated as an external diplomatic exchange that does not bind HVO operational posture. Zagreb reads the intervention as non-alignment and pulls officer secondments, fuel, and ammunition support from HVO units; the international monitors record the cooperation as visible.",
+        "description": "The Presidency disciplines local HVO commanders asserting HZ HB jurisdiction in Prozor, Novi Travnik, and Vitez. The joint anti-VRS framework is reinforced as primary; the Graz framework is treated as an external diplomatic exchange that does not bind HVO operational posture. Zagreb reads the intervention as non-alignment and pulls officer secondments, fuel, and ammunition support from HVO units; the international monitors record the cooperation as visible. Adds a refugee compact for 56 weeks to any you hold. Displacement strain and Zagreb's pull on the alliance ease while it stands; recruitment slows.",
         "effects": [
           {
             "kind": "alliance_change",
@@ -3523,7 +3511,7 @@
           {
             "faction": "HRHB",
             "dimension": "patron_confidence",
-            "delta": -15
+            "delta": -25
           },
           {
             "faction": "HRHB",
@@ -3598,11 +3586,6 @@
       "target_municipality": "novo_sarajevo"
     },
     "effects": [
-      {
-        "kind": "supply_delta",
-        "faction": "RBiH",
-        "delta": 10
-      },
       {
         "kind": "morale_change",
         "faction": "RBiH",
@@ -3700,16 +3683,11 @@
     },
     "once": true,
     "effect": {
-      "kind": "supply_delta",
-      "faction": "RS",
-      "delta": 20
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": -5
     },
     "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": -5
-      },
       {
         "kind": "narrative",
         "text": "The JNA formally withdraws from Bosnia. Equipment, bases, and ammunition stores are left to the VRS."
@@ -3793,11 +3771,6 @@
       "target_municipality": "tuzla"
     },
     "effects": [
-      {
-        "kind": "supply_delta",
-        "faction": "RBiH",
-        "delta": 15
-      },
       {
         "kind": "morale_change",
         "faction": "RBiH",
@@ -4022,11 +3995,6 @@
       "target_municipality": "zenica"
     },
     "effects": [
-      {
-        "kind": "supply_delta",
-        "faction": "RBiH",
-        "delta": 8
-      },
       {
         "kind": "morale_change",
         "faction": "RBiH",
@@ -4296,11 +4264,6 @@
       "text": "The VRS secures the Posavina Corridor near Brčko, linking Krajina with Serbia. A vital supply artery is established."
     },
     "effects": [
-      {
-        "kind": "supply_delta",
-        "faction": "RS",
-        "delta": 5
-      },
       {
         "kind": "morale_change",
         "faction": "RS",
@@ -5021,7 +4984,6 @@
     "bot_response_logic": "strategic_weighted",
     "requires_player_response": false,
     "priority": 50,
-    "auto_resolve_turns": 2,
     "effect": {
       "kind": "narrative",
       "text": "Belgrade privately signals to Pale that international pressure is mounting and the pace of events must slow."

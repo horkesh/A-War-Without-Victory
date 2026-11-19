@@ -250,12 +250,12 @@ describe('patron_supply_cut: hands-off answers cannot change', () => {
     });
 });
 
-describe('patron_supply_cut: save migration v43', () => {
+describe('patron_supply_cut: save migration v44 (runs after §6 E3a2 v43)', () => {
     const FIXTURE = resolve(__dirname, 'fixtures', 'save_migration', 'v41_patron_pressure_pending.json');
 
-    function v42Save(): string {
+    function v43Save(): string {
         const raw = JSON.parse(readFileSync(FIXTURE, 'utf8'));
-        raw.schema_version = 42;
+        raw.schema_version = 43;
         raw.military.pending_event_decisions = [
             {
                 event_id: 'zagreb_orders_hrhb_ceasefire', event_title: 'Zagreb Orders HVO Ceasefire With ARBiH', turn_fired: 95,
@@ -303,8 +303,8 @@ describe('patron_supply_cut: save migration v43', () => {
     }
 
     it('gives pending defiance answers their cut, rewrites the old carriers, drops pre-panel receipts', () => {
-        const migrated = deserializeState(v42Save());
-        expect(migrated.schema_version).toBe(43);
+        const migrated = deserializeState(v43Save());
+        expect(migrated.schema_version).toBe(44);
         const byId = (id: string) => migrated.military.pending_event_decisions!.find((d) => d.event_id === id)!;
         const ceasefire = byId('zagreb_orders_hrhb_ceasefire');
         expect(ceasefire.response_options[0]!.effects).toEqual([]);
@@ -318,7 +318,7 @@ describe('patron_supply_cut: save migration v43', () => {
     });
 
     it('keeps tagged receipts and is idempotent', () => {
-        const raw = JSON.parse(v42Save());
+        const raw = JSON.parse(v43Save());
         raw.military.patron_defiance_supply_cuts.push({
             faction: 'HRHB', turn: 46, cut_fraction: 0.05, support_after: 0.7,
             tag: 'zagreb_restrains_boban_vopp#resist_patron', expires_turn: 59, combined_multiplier: 0.95,
@@ -327,7 +327,7 @@ describe('patron_supply_cut: save migration v43', () => {
         expect(migrated.military.patron_defiance_supply_cuts).toHaveLength(1);
         const once = serializeState(migrated);
         const again = JSON.parse(once) as GameState;
-        again.schema_version = 42;
+        again.schema_version = 43;
         expect(applyMigrations(again)).toBe(1);
         expect(serializeState(again)).toBe(once);
     });
@@ -337,7 +337,7 @@ describe('patron_supply_cut: save migration v43', () => {
         const clean = deserializeState(startup);
         const before = serializeState(clean);
         const again = JSON.parse(before) as GameState;
-        again.schema_version = 42;
+        again.schema_version = 43;
         applyMigrations(again);
         expect(serializeState(again)).toBe(before);
     });

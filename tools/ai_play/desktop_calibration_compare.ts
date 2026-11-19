@@ -35,7 +35,7 @@ import { loadEventDefinitionsFromDir } from '../../src/sim/events/event_loader.j
 import { selectBotEventResponse } from '../../src/sim/events/evaluate_events.js';
 import { strictCompare } from '../../src/state/validateGameState.js';
 import { isHistoricalOperationAuthorizationReview } from '../../src/sim/combat/historical_operation_authorization.js';
-import { resolvePeacePlan } from '../../src/sim/negotiation/peace_plans.js';
+import { assertNoPeacePlanWindowSkipped, resolvePeacePlan } from '../../src/sim/negotiation/peace_plans.js';
 import { getPeacePlanById } from '../../src/sim/negotiation/peace_plan_data.js';
 import { createRequire } from 'node:module';
 import { raiseArmyClash, sweepLapsedArmyClashes } from '../../src/sim/combat/army_clashes.js';
@@ -85,6 +85,9 @@ interface CliOptions {
     finalSaveDir?: string;
     /** Corps ids whose operation queue and live operations are recorded every turn (diagnostic only). */
     traceCorps?: string[];
+    /** Settlement ids whose controller is recorded every turn in both branches (diagnostic only;
+     *  `--watch-cells <id>[,<id>...]`), so a played probe shows when a cell fell, not just whether. */
+    watchCells?: string[];
     /**
      * ATTRIBUTION DIAGNOSTIC ONLY — never a calibration result (Pyrrhic panel 2026-11-05,
      * docs/40_reports/audits/20261105_live_jan1993/paramilitary_panel/DECISION.md). Gives the
@@ -112,7 +115,8 @@ interface CliOptions {
      * Played-test options for the President (package "1994-95 attack and defence"), opt-in:
      * `--request-axis <corps>[+<corps>...]:<mun>[,<mun>...]`, `--request-prefer-exhausted on` and
      * `--request-every <weeks>` (1-52; 1 = a sustained weekly push) and `--request-only on` (spend
-     * Authority on Request-ops only). With any of them,
+     * Authority on Request-ops only) and `--request-from <turn>` (no Request-op before that game
+     * turn, e.g. 91 ≈ 1 Jan 1994). With any of them,
      * the output adds `president_requests` (each order joined to its after-action report) and the
      * requested corps' exhaustion per turn. Without them the output is unchanged.
      */
@@ -331,6 +335,9 @@ function parseArgs(argv: string[]): CliOptions {
         ...(values.get('--trace-corps')
             ? { traceCorps: (values.get('--trace-corps') ?? '').split(',').filter(Boolean).sort(strictCompare) }
             : {}),
+        ...(values.get('--watch-cells')
+            ? { watchCells: (values.get('--watch-cells') ?? '').split(',').filter(Boolean).sort(strictCompare) }
+            : {}),
         autonomyLevel: (() => {
             const raw = parseEnum(values.get('--autonomy-level') ?? '1', ['0', '1', '2', '3', 'production'] as const, '--autonomy-level');
             return raw === 'production' ? 'production' : (Number(raw) as 0 | 1 | 2 | 3);
@@ -355,9 +362,15 @@ function parseArgs(argv: string[]): CliOptions {
             const exhaustedRaw = parseEnum(values.get('--request-prefer-exhausted') ?? 'off', ['off', 'on'] as const, '--request-prefer-exhausted');
             const everyRaw = values.get('--request-every');
             const onlyRaw = parseEnum(values.get('--request-only') ?? 'off', ['off', 'on'] as const, '--request-only');
-            if (!axisRaw && exhaustedRaw === 'off' && everyRaw == null && onlyRaw === 'off') return {};
+            const fromRaw = values.get('--request-from');
+            if (!axisRaw && exhaustedRaw === 'off' && everyRaw == null && onlyRaw === 'off' && fromRaw == null) return {};
             if (!presidentArg) {
-                throw new Error('--request-axis / --request-prefer-exhausted / --request-every / --request-only need --president engaged or meddler');
+                throw new Error('--request-axis / --request-prefer-exhausted / --request-every / --request-only / --request-from need --president engaged or meddler');
+            }
+            let requestFrom: number | undefined;
+            if (fromRaw != null) {
+                requestFrom = Number(fromRaw);
+                if (!Number.isInteger(requestFrom) || requestFrom < 0) throw new Error(`--request-from expects a game turn (integer >= 0), got ${fromRaw}`);
             }
             let requestAxis: PresidentPolicyOptions['requestAxis'];
             if (axisRaw) {
@@ -377,6 +390,7 @@ function parseArgs(argv: string[]): CliOptions {
                 ...(exhaustedRaw === 'on' ? { preferExhausted: true } : {}),
                 ...(requestEvery != null ? { requestEvery } : {}),
                 ...(onlyRaw === 'on' ? { requestOnly: true } : {}),
+                ...(requestFrom != null ? { requestFrom } : {}),
             } };
         })(),
     };
@@ -624,9 +638,11 @@ function applyParamilitaryPolicy(
 
 /**
  * The player's answer to a pending peace plan (the PeacePlanModal / `resolve-peace-plan` IPC).
- * With no player the scheduler resolves every faction on the offer turn; with a player the plan
- * stays pending until answered, and a pending plan blocks every later plan. Under the
- * historical_default policy the player gives its documented historical response.
+ * §6 E3a2: each side answers on its routed card (applyEventPolicy answers the player's); the
+ * pointer exists only as the close-week fallback, when the player's side has no recorded
+ * answer. Under the historical_default policy the player gives its documented historical
+ * response. A deferred fallback holds the plan step, so the defer asserts that no later
+ * plan's window has opened meanwhile (it would be skipped silently).
  */
 function applyPeacePlanPolicy(
     state: GameState,
@@ -636,14 +652,12 @@ function applyPeacePlanPolicy(
 ): void {
     const pending = state.military.negotiation?.pending_peace_plan;
     if (!pending) return;
-    // RBiH answers Vance-Owen and Owen-Stoltenberg through its own event decisions (the
-    // Presidency -> Assembly sequence), which applyEventPolicy already resolves.
-    if (faction === 'RBiH' && (pending.plan_id === 'vance_owen' || pending.plan_id === 'owen_stoltenberg')) return;
     const plan = getPeacePlanById(pending.plan_id);
     const response = policy === 'historical_default' || policy === 'bot_equivalent'
         ? plan?.historical_responses[faction]
         : undefined;
     if (!response) {
+        assertNoPeacePlanWindowSkipped(state);
         transcript.push({ turn: state.meta.turn, family: 'peace_plan', id: pending.plan_id, decision: 'defer' });
         return;
     }
@@ -1118,6 +1132,11 @@ async function runComparison(baseDir: string, options: CliOptions) {
                 headless: corpsTrace(headlessState, options.traceCorps),
                 player: corpsTrace(playerState, options.traceCorps),
             };
+        }
+        if (options.watchCells) {
+            const watch = (state: GameState) => Object.fromEntries(options.watchCells!.map((id) =>
+                [id, state.political?.political_controllers?.[id] ?? null]));
+            row.watched_cells = { headless: watch(headlessState), player: watch(playerState) };
         }
         turns.push(row);
     }

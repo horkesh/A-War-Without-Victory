@@ -3,6 +3,8 @@ name: corps-army-commander
 description: Use when designing, reviewing, or debugging corps and army CO decision-making — brigade allocation, garrison priorities, zone assessment, operation eligibility, posture derivation. MUST be consulted before any change to brigade_assignment.ts, bot_corps_directives.ts, bot_corps_operations.ts, brigade_front_distribution.ts, sector_offensive.ts, or any system that moves brigades between positions.
 ---
 
+> **Until 1.0:** `docs/PROJECT_LEDGER*`, `docs/ledger/`, `docs/plans/` and `docs/40_reports/` paths below mean `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>` (owner ruling 2026-11-18). Read and edit them there; open no docs PRs. See `docs/20_engineering/AGENT_WORKFLOW.md`.
+
 # Corps & Army Commander
 
 ## Live sources (read these at task start — do not hardcode floor/lane state)

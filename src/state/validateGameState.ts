@@ -174,6 +174,11 @@ interface VersionRequiredField {
      * same-version states (which skip the seeding migration). Default false.
      */
     optionalWhenAbsent?: boolean;
+    /**
+     * Schema version that RETIRED the field (its migration deletes it). States at or above
+     * this version are not required to carry it. Omit for live fields.
+     */
+    retiredAtVersion?: number;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -3919,7 +3924,7 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 3, path: 'meta.war_start_turn', check: (v) => v === null || Number.isInteger(v) },
     { version: 3, path: 'meta.peace_scheduled_referendum_turn', check: (v) => v === null || Number.isInteger(v) },
     { version: 3, path: 'meta.peace_scheduled_war_start_turn', check: (v) => v === null || Number.isInteger(v) },
-    { version: 3, path: 'meta.peace_war_start_control_path', check: (v) => v === null || typeof v === 'string' },
+    { version: 3, path: 'meta.peace_war_start_control_path', check: (v) => v === null || typeof v === 'string', retiredAtVersion: 40 },
     { version: 3, path: 'meta.referendum_eligible_turn', check: (v) => v === null || Number.isInteger(v) },
     { version: 3, path: 'meta.referendum_deadline_turn', check: (v) => v === null || Number.isInteger(v) },
     { version: 3, path: 'meta.game_over', check: (v) => typeof v === 'boolean' },
@@ -4032,6 +4037,7 @@ export function validateGameStateShape(
     if (options.requireVersion !== undefined) {
         for (const field of VERSION_REQUIRED_FIELDS) {
             if (stateVersion < field.version || field.version > options.requireVersion) continue;
+            if (field.retiredAtVersion !== undefined && stateVersion >= field.retiredAtVersion) continue;
             const value = getPathValue(s, field.path);
             if (value === undefined) {
                 // optionalWhenAbsent additive read-models canonicalize to their
@@ -4100,8 +4106,12 @@ export function validateGameStateShape(
             if ('peace_scheduled_war_start_turn' in m && m.peace_scheduled_war_start_turn !== undefined && m.peace_scheduled_war_start_turn !== null && (typeof m.peace_scheduled_war_start_turn !== 'number' || !Number.isInteger(m.peace_scheduled_war_start_turn) || m.peace_scheduled_war_start_turn < 0)) {
                 errors.push('meta.peace_scheduled_war_start_turn must be null or a non-negative integer when present');
             }
-            if ('peace_war_start_control_path' in m && m.peace_war_start_control_path !== undefined && m.peace_war_start_control_path !== null && typeof m.peace_war_start_control_path !== 'string') {
-                errors.push('meta.peace_war_start_control_path must be string or null when present');
+            if ('peace_war_start_control_path' in m && m.peace_war_start_control_path !== undefined) {
+                if (stateVersion >= 40) {
+                    errors.push('meta.peace_war_start_control_path was retired at schema v40 and must be absent');
+                } else if (m.peace_war_start_control_path !== null && typeof m.peace_war_start_control_path !== 'string') {
+                    errors.push('meta.peace_war_start_control_path must be string or null when present');
+                }
             }
             if ('referendum_eligible_turn' in m && m.referendum_eligible_turn !== undefined && m.referendum_eligible_turn !== null && (typeof m.referendum_eligible_turn !== 'number' || !Number.isInteger(m.referendum_eligible_turn) || m.referendum_eligible_turn < 0)) {
                 errors.push('meta.referendum_eligible_turn must be null or a non-negative integer when present');
@@ -4696,6 +4706,20 @@ export function validateGameStateShape(
                     // RF-5B: optional cause marker; only 'policy_expulsion' is defined.
                     if (rec.cause !== undefined && rec.cause !== 'policy_expulsion') {
                         errors.push(`displacement.hostile_takeover_timers.${munId}.cause must be 'policy_expulsion' when present`);
+                    }
+                    // RB9: optional dormant marker (a fired timer kept only as a record of who was expelled).
+                    if (
+                        rec.dormant_since_turn !== undefined &&
+                        (typeof rec.dormant_since_turn !== 'number' || !Number.isInteger(rec.dormant_since_turn) || rec.dormant_since_turn < 0)
+                    ) {
+                        errors.push(`displacement.hostile_takeover_timers.${munId}.dormant_since_turn must be a non-negative integer when present`);
+                    }
+                    // RB9 return rule: optional routed-survivor count and safe-hold start turn.
+                    for (const field of ['cumulative_routed', 'return_hold_since_turn', 'cumulative_pool_cut'] as const) {
+                        const v = rec[field];
+                        if (v !== undefined && (typeof v !== 'number' || !Number.isInteger(v) || v < 0)) {
+                            errors.push(`displacement.hostile_takeover_timers.${munId}.${field} must be a non-negative integer when present`);
+                        }
                     }
                 }
             } else {

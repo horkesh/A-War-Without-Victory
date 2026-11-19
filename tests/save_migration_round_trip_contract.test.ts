@@ -27,21 +27,14 @@ describe('save migration round-trip fixture contract', () => {
         .filter((name) => /^v\d{2}_.+\.json$/.test(name))
         .sort();
 
-    // §6 E2 took v41 while v40 is claimed by another lane (batch-b) and is not registered on this
-    // branch, so there is no v40 save to fixture yet. Remove 40 from this set when v40 lands
-    // together with its v40 fixture.
-    const UNREGISTERED_RESERVED_VERSIONS = new Set<number>([40]);
-
-    it('has one fixture for every registered schema version before the current startup artifact', () => {
+    it('has one fixture for every schema version before the current startup artifact', () => {
         expect(fixtureFiles.map((name) => name.slice(0, 3))).toEqual(
-            Array.from({ length: CURRENT_SCHEMA_VERSION - 1 }, (_, index) => index + 1)
-                .filter((version) => !UNREGISTERED_RESERVED_VERSIONS.has(version))
-                .map((version) => `v${String(version).padStart(2, '0')}`),
+            Array.from({ length: CURRENT_SCHEMA_VERSION - 1 }, (_, index) => `v${String(index + 1).padStart(2, '0')}`),
         );
     });
 
-    it('v39 fixture: the v41 migration strips the retired negotiation_capital effects from a pending decision', () => {
-        const migrated = deserializeState(readFileSync(resolve(fixtureDir, 'v39_negotiation_capital_pending.json'), 'utf8'));
+    it('v40 fixture: the v41 migration strips the retired negotiation_capital effects from a pending decision', () => {
+        const migrated = deserializeState(readFileSync(resolve(fixtureDir, 'v40_negotiation_capital_pending.json'), 'utf8'));
         const options = migrated.military.pending_event_decisions![0]!.response_options;
         expect(options.map((option) => option.effects)).toEqual([
             [{ kind: 'supply_delta', faction: 'RBiH', delta: 10 }],
@@ -76,8 +69,8 @@ describe('save migration round-trip fixture contract', () => {
         expect(serializeState(migrated)).not.toContain('"patron_pressure"');
     });
 
-    it('v42 fixture: the v43 migration gives pending defiance answers their patron_supply_cut and drops pre-panel receipts', () => {
-        const migrated = deserializeState(readFileSync(resolve(fixtureDir, 'v42_patron_defiance_pending.json'), 'utf8'));
+    it('v43 fixture: the v44 migration gives pending defiance answers their patron_supply_cut and drops pre-panel receipts', () => {
+        const migrated = deserializeState(readFileSync(resolve(fixtureDir, 'v43_patron_defiance_pending.json'), 'utf8'));
         const byEvent = new Map(migrated.military.pending_event_decisions!.map((d) => [d.event_id, d.response_options]));
         expect(byEvent.get('zagreb_orders_hrhb_ceasefire')!.map((o) => o.effects)).toEqual([
             [],

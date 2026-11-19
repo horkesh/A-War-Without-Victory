@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { test } from 'vitest';
 import { eventDefinitionDisplayEffects } from '../../src/ui/map/data/DataLoader.js';
+import { isDisplayEventEffectKind } from '../../src/ui/map/utils/eventEffectDisplay.js';
 
 // §6 E1 (2026-11-16): the card must show what the engine applies (`effect` + `effects`).
 
@@ -17,9 +18,16 @@ test('a mechanical effect is listed first, then each effects entry', () => {
 test('a narrative effect beside effects stays hidden (card text unchanged)', () => {
     const shown = eventDefinitionDisplayEffects({
         effect: { kind: 'narrative', text: 'line' },
-        effects: [{ kind: 'supply_delta', faction: 'RS', delta: -3 }],
+        effects: [{ kind: 'cohesion_change', faction: 'RS', delta: -3 }],
     });
-    assert.deepStrictEqual(shown.map((e) => e.kind), ['supply_delta']);
+    assert.deepStrictEqual(shown.map((e) => e.kind), ['cohesion_change']);
+});
+
+// Retired 2026-11-17 (supply is connection, not stock): an old save's staged decision may still carry a
+// supply_delta. The engine ignores it, so the player-facing effect list must never show it.
+test('a retired supply_delta carried by an old save is never a displayable effect', () => {
+    assert.strictEqual(isDisplayEventEffectKind('supply_delta'), false);
+    assert.strictEqual(isDisplayEventEffectKind('morale_change'), true);
 });
 
 test('an effect-only row shows its effect, whatever its kind', () => {

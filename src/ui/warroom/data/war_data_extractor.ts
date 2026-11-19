@@ -590,7 +590,8 @@ export function extractDisplacement(state: GameState, pf: FactionId): Displaceme
         .map((timerId) => timers[timerId])
         // RF-5B: a policy-expulsion timer is not hostile-takeover pressure (no control change;
         // wave B timers sit 16 turns ahead of their wave). Its harm reaches the ledger when it fires.
-        .filter((timer) => timer?.from_faction === pf && timer?.cause !== 'policy_expulsion');
+        // RB9: a dormant timer only records people already expelled; it is not current pressure.
+        .filter((timer) => timer?.from_faction === pf && timer?.cause !== 'policy_expulsion' && timer?.dormant_since_turn === undefined);
     const hostileTakeoverMunicipalities = Array.from(new Set(
         playerTakeoverTimers
             .map((timer) => timer?.mun_id)

@@ -18,13 +18,8 @@ import type {
 } from '../../state/game_state.js';
 import type { NamedOfficer, NamedOfficerState } from '../../state/officer_types.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supply_state_derivation.js';
-import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
-import {
-    RESERVE_ADEQUATE_THRESHOLD,
-    RESERVE_STRAINED_THRESHOLD,
-} from '../../state/supply_reserve_constants.js';
 import { findBrigadeOperation, findBrigadeOperationAnywhere } from './corps_operation_helpers.js';
 import { getEnclaveDefenseBonus } from './enclave_resilience.js';
 // ADR-0006 Phase 3A: named TG commander anchor mod (flag-gated; flag-off branch never taken).
@@ -262,6 +257,37 @@ export function clampSectorStanceToCorpsStance(stance: SectorStance, corpsStance
     const allowed = CORPS_STANCE_ALLOWED_SECTOR_STANCES[corpsStance ?? 'balanced']
         ?? CORPS_STANCE_ALLOWED_SECTOR_STANCES.balanced!;
     return narrowSectorStance(stance, allowed);
+}
+
+/**
+ * N5 (2026-11-16): the primary defender of a sector-coverage battle — the brigade that carries the
+ * defender-only aftermath (cohesion, morale, officer loss, fatigue, last-stand and surrender gates,
+ * flip penalties, the AAR name). It used to be the nominally strongest positive contributor, so a
+ * strong brigade five hops away (weight 0.6^5) took every hit while the brigade actually in contact
+ * took none. Now: a brigade in the cell (hop 0) if any, the one with the largest weight among them;
+ * otherwise the largest weighted contributor. Ties go to fewer hops, then id (strictCompare).
+ * Only positive weights qualify. Returns undefined when no brigade contributes.
+ */
+export function selectWeightedPrimaryDefender<T extends { id: string }>(
+    brigades: readonly T[],
+    weightById: ReadonlyMap<string, number>,
+    hopsById: ReadonlyMap<string, number>,
+): T | undefined {
+    const contributors = brigades.filter((b) => (weightById.get(b.id) ?? 0) > 0);
+    const inCell = contributors.filter((b) => hopsById.get(b.id) === 0);
+    const pool = inCell.length > 0 ? inCell : contributors;
+    let best: T | undefined;
+    for (const b of pool) {
+        if (!best) { best = b; continue; }
+        const wb = weightById.get(b.id) ?? 0;
+        const wBest = weightById.get(best.id) ?? 0;
+        if (wb !== wBest) { if (wb > wBest) best = b; continue; }
+        const hb = hopsById.get(b.id) ?? Number.POSITIVE_INFINITY;
+        const hBest = hopsById.get(best.id) ?? Number.POSITIVE_INFINITY;
+        if (hb !== hBest) { if (hb < hBest) best = b; continue; }
+        if (strictCompare(b.id, best.id) < 0) best = b;
+    }
+    return best;
 }
 
 /**
@@ -885,18 +911,9 @@ export function getThreeTierOfficerMod(
 // Pure functions
 // ═══════════════════════════════════════════════════════════════════════════
 
-/**
- * Heavy munitions scale factor for bombardment and suppression.
- * Adequate (≥50) → 1.0, Strained (20–49) → 0.75, Critical (<20) → 0.5.
- * Returns 1.0 when supply_reserves_enabled is false.
- */
-function getHeavyMunitionsMult(factionId: string, state: GameState): number {
-    if (!state.meta?.supply_reserves_enabled || !state.military.heavy_munitions_reserve) return 1.0;
-    const reserve = (state.military.heavy_munitions_reserve as Record<string, number>)[factionId] ?? 100;
-    if (reserve >= RESERVE_ADEQUATE_THRESHOLD) return 1.0;
-    if (reserve >= RESERVE_STRAINED_THRESHOLD) return 0.75;
-    return 0.5;
-}
+// getHeavyMunitionsMult retired 2026-11-17 (Fable consult 6): it scaled bombardment,
+// suppression and defensive fire by the retired heavy-munitions reserve and returned 1.0
+// whenever the reserve model was off. The multiplications by 1.0 are removed below.
 
 /** Power queries must not initialize persistent equipment while forecasting.
  * Reuse the existing default composition policy on a detached formation shell.
@@ -930,8 +947,7 @@ export function getArtillerySuppression(attackers: FormationState[], attackerFac
         const suppression = suppressions[i];
         if (suppression !== undefined) totalSuppression += suppression * 0.3;
     }
-    const munitionsMult = getHeavyMunitionsMult(attackerFactionId, state);
-    return Math.min(0.7, totalSuppression) * munitionsMult;
+    return Math.min(0.7, totalSuppression);
 }
 
 /**
@@ -955,8 +971,7 @@ export function getBombardmentCasualtyMult(attackers: FormationState[], attacker
         totalFirepower += artEff + tankEff * 0.5;
     }
     const bombardmentFraction = Math.min(1.0, totalFirepower / BOMBARDMENT_DIVISOR);
-    const munitionsMult = getHeavyMunitionsMult(attackerFactionId, state);
-    return 1.0 + (MAX_BOMBARDMENT_CAS_MULT - 1.0) * bombardmentFraction * munitionsMult;
+    return 1.0 + (MAX_BOMBARDMENT_CAS_MULT - 1.0) * bombardmentFraction;
 }
 
 /**
@@ -983,9 +998,8 @@ export function getDefensiveFireMult(
         const tankEff = (comp.tanks ?? 0) * (comp.tank_condition?.operational ?? 0.5);
         totalFirepower += artEff * 1.0 + tankEff * 0.4;
     }
-    const munitionsMult = getHeavyMunitionsMult(defenderFactionId, state);
     const fraction = Math.min(1.0, totalFirepower / DEFENSIVE_FIRE_DIVISOR);
-    return 1.0 + (MAX_DEFENSIVE_FIRE_MULT - 1.0) * fraction * munitionsMult;
+    return 1.0 + (MAX_DEFENSIVE_FIRE_MULT - 1.0) * fraction;
 }
 
 /**
@@ -1154,8 +1168,8 @@ export function basePower(formation: FormationState): number {
 
 /**
  * Supply mult from OSID report when available; else last_supplied_turn fallback.
- * When supply_reserves_enabled, combines OSID reachability with faction reserve level
- * per SUPPLY_AMMO_SYSTEM_PLAN.md §3.4 interaction table.
+ * Supply is reachability only: the faction-reserve combination was retired 2026-11-17
+ * with the supply-reserve economy (Fable consult 6).
  *
  * LANE-2026-05-02-IN-TRANSIT-COMBAT-POWER-CONTEXT: optional `contextLocationOverride`
  * shifts the supply-state-by-osid lookup (branch (a)) to the override OSID instead
@@ -1182,14 +1196,7 @@ export function getSupplyMult(
     if (supplyStateByOsid?.factions && locationOsid) {
         const rawState = getSupplyStateForOsid(supplyStateByOsid, state.meta.turn, factionId, locationOsid);
         if (rawState) {
-            let effectiveState: SupplyStateLevel = rawState;
-
-            // Phase A: When reserves enabled, combine reachability with reserves
-            if (state.meta.supply_reserves_enabled && state.military.general_supply_reserve) {
-                const reserveLevel = (state.military.general_supply_reserve as Record<string, number>)[factionId] ?? 100;
-                effectiveState = getEffectiveSupplyState(rawState, reserveLevel);
-            }
-
+            const effectiveState: SupplyStateLevel = rawState;
             if (effectiveState === 'adequate') return applyPriority(1.0);
             if (effectiveState === 'strained') return applyPriority(0.75);
             return applyPriority(mode === 'attack' ? 0.45 : 0.5);

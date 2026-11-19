@@ -236,29 +236,211 @@ export function seedDisplacementTimerOnFlip(
     for (const displaced of allFactions) {
         if (displaced === toFaction) continue;
         const timerKey = `${osid}|${displaced}`;
-        // A stale RF-5B policy timer (the OSID changed hands) yields to the new holder's timer.
-        if (timerMap[timerKey] && timerMap[timerKey].cause !== 'policy_expulsion') continue;
+        // A stale RF-5B policy timer (the OSID changed hands) or a dormant one (RB9) yields to
+        // the new holder's timer, which inherits the people already expelled.
+        if (!isReplaceableTimer(timerMap[timerKey])) continue;
         timerMap[timerKey] = {
             mun_id: munId,
             from_faction: displaced,
             to_faction: toFaction,
             started_turn: currentTurn,
-            ...carriedPolicyDisplacement(timerMap[timerKey]),
+            ...carriedDisplacement(timerMap[timerKey]),
         };
     }
 }
 
 /**
- * RF-5B: when a capture replaces a policy timer whose wave already fired, the new timer
- * inherits the people that wave expelled, so its own waves draw on the community that
- * remains, never on the 1991 census again (the same people cannot be expelled twice).
+ * RF-5B, extended to every timer by RB9: when a capture replaces a timer whose wave already
+ * fired (a policy timer, or a dormant one), the new timer inherits the people already expelled,
+ * so its own waves draw on the community that remains, never on the 1991 census again (the
+ * same people cannot be expelled twice).
  */
-function carriedPolicyDisplacement(
+function carriedDisplacement(
     existing: HostileTakeoverTimerState | undefined
-): { cumulative_displaced?: number } {
-    if (existing?.cause !== 'policy_expulsion' || existing.matured_turn === undefined) return {};
+): { cumulative_displaced?: number; cumulative_routed?: number; cumulative_pool_cut?: number } {
+    if (!existing) return {};
+    if (existing.cause !== 'policy_expulsion' && existing.dormant_since_turn === undefined) return {};
+    // The count is carried whether or not this timer fired: a re-seeded timer that inherited a count
+    // and was replaced again inside its delay still holds those people (red-team C1).
     const prior = existing.cumulative_displaced ?? 0;
-    return prior > 0 ? { cumulative_displaced: prior } : {};
+    if (prior <= 0) return {};
+    const carried: { cumulative_displaced: number; cumulative_routed?: number; cumulative_pool_cut?: number } = { cumulative_displaced: prior };
+    const routed = Math.min(prior, Math.max(0, existing.cumulative_routed ?? 0));
+    if (routed > 0) carried.cumulative_routed = routed;
+    const poolCut = Math.max(0, existing.cumulative_pool_cut ?? 0);
+    if (poolCut > 0) carried.cumulative_pool_cut = poolCut;
+    return carried;
+}
+
+/**
+ * RB9 return rule (historian seat, orchestrator ruling 2026-11-16): weeks a dormant record's OSID
+ * must be held by the expelled group's own side, or a side not at war with it, before the routed
+ * survivors come back. The historian seat picks and justifies the figure.
+ */
+export const RETURN_HOLD_WEEKS = 12;
+
+/**
+ * Whether two sides have fought each other at any point so far. RS has been at war with both from the
+ * start; RBiH and HRHB only from the open bilateral war (`rbih_hrhb_state.war_started_turn`). A later
+ * ceasefire or alliance (Washington) does not undo it.
+ */
+function haveEverBeenAtWar(state: GameState, a: FactionId, b: FactionId): boolean {
+    if (!a || !b || a === b) return false;
+    if (!isRbihHrhbPair(a, b)) return true;
+    const started = state.political?.rbih_hrhb_state?.war_started_turn;
+    return typeof started === 'number' && started <= state.meta.turn;
+}
+
+/**
+ * A safe holder for a group's return (historian seat, round 2; it also closes red-team R1): the
+ * group's own side, or a side that has never yet been at war with that group. The expeller is never
+ * a safe holder. So people go home when their own side retakes the place, or under an ally that has
+ * not fought them (Stolac Bosniaks under the HVO in 1992), but not across a front after a later peace
+ * (cross-front returns before Dayton were negligible).
+ */
+function isSafeHolderForGroup(
+    state: GameState,
+    group: FactionId,
+    expeller: FactionId,
+    controller: FactionId | null | undefined,
+): boolean {
+    if (!controller) return false;
+    if (controller === group) return true;
+    if (controller === expeller) return false;
+    return !haveEverBeenAtWar(state, group, controller);
+}
+
+/**
+ * RB9 return rule. A dormant record whose OSID has been held safely for RETURN_HOLD_WEEKS brings its
+ * routed survivors home: the same number leave that group's refugee population (the origin camp
+ * first, then `displaced_in` in the order the cohort was routed), so each person is still counted once.
+ * The killed and the fled abroad never return and stay on the record; people no longer found in
+ * any refugee population are not invented. `refugees_created` is untouched: the expulsion happened.
+ * Faction-blind, no named places. A record with nothing left on it is deleted.
+ */
+function applyBoundedReturn(
+    state: GameState,
+    timerMap: Record<string, HostileTakeoverTimerState>,
+    timerKey: string,
+    timer: HostileTakeoverTimerState,
+    osid: string,
+    controller: FactionId | null | undefined,
+    currentTurn: number,
+): void {
+    if (!isSafeHolderForGroup(state, timer.from_faction, timer.to_faction, controller)) {
+        delete timer.return_hold_since_turn;
+        return;
+    }
+    if (timer.return_hold_since_turn === undefined) {
+        timer.return_hold_since_turn = currentTurn;
+        return;
+    }
+    if (currentTurn - timer.return_hold_since_turn < RETURN_HOLD_WEEKS) return;
+
+    const group = timer.from_faction;
+    let wanted = Math.min(Math.max(0, timer.cumulative_routed ?? 0), Math.max(0, timer.cumulative_displaced ?? 0));
+    let returned = 0;
+    const camps = (state.displacement.displacement_camp_state ?? {}) as Record<MunicipalityId, DisplacementCampState>;
+    const camp = camps[timer.mun_id];
+    if (wanted > 0 && camp) {
+        const take = Math.min(wanted, Math.max(0, camp.by_faction[group] ?? 0), Math.max(0, camp.population));
+        if (take > 0) {
+            camp.by_faction[group] = (camp.by_faction[group] ?? 0) - take;
+            camp.population -= take;
+            wanted -= take;
+            returned += take;
+        }
+    }
+    const dispStates = state.displacement.displacement_state ?? {};
+    // Draw returnees from where this cohort was routed: the same routing order the expulsion used
+    // (engine seat E1; alphabetical order emptied whichever hosts sort first), then any other host.
+    const routed = getBilateralRoutingOrder(timer.mun_id, group, timer.to_faction);
+    const routedSet = new Set(routed);
+    const rest = Object.keys(dispStates).filter((m) => !routedSet.has(m)).sort(strictCompare);
+    for (const munId of [...routed, ...rest]) {
+        if (wanted <= 0) break;
+        if (munId === timer.mun_id) continue;
+        const d = dispStates[munId];
+        const byFaction = d?.displaced_in_by_faction;
+        if (!d || !byFaction) continue;
+        const take = Math.min(wanted, Math.max(0, Math.floor(byFaction[group] ?? 0)), Math.max(0, d.displaced_in));
+        if (take <= 0) continue;
+        byFaction[group] = (byFaction[group] ?? 0) - take;
+        d.displaced_in -= take;
+        d.last_updated_turn = currentTurn;
+        wanted -= take;
+        returned += take;
+    }
+    if (returned > 0) {
+        const origin = dispStates[timer.mun_id];
+        if (origin) {
+            origin.displaced_out = Math.max(0, origin.displaced_out - returned);
+            origin.last_updated_turn = currentTurn;
+        }
+        // Red-team R2: the return is an event, so the per-OSID tally and the turn record see it too.
+        // No expulsion fields are set, so refugees_created and casualties are untouched.
+        appendDisplacementEvent(state, {
+            turn: currentTurn,
+            origin_mun: timer.mun_id,
+            origin_osid: osid,
+            dest_mun: timer.mun_id,
+            ethnicity: group,
+            displaced: 0,
+            killed: 0,
+            fled_abroad: 0,
+            settled: 0,
+            returned,
+        });
+        // Engine seat E3: the returnees' share of the militia the expulsion cut from the home pool goes
+        // back to it (their share of everyone the record expelled, so the dead and the fled stay cut).
+        const poolCut = Math.max(0, timer.cumulative_pool_cut ?? 0);
+        const expelled = Math.max(1, timer.cumulative_displaced ?? 0);
+        const restore = Math.min(poolCut, Math.floor((poolCut * returned) / expelled));
+        if (restore > 0) {
+            const homePool = state.military.militia_pools?.[militiaPoolKey(timer.mun_id, group)];
+            if (homePool) {
+                homePool.available += restore;
+                homePool.updated_turn = currentTurn;
+                timer.cumulative_pool_cut = poolCut - restore;
+            }
+        }
+    }
+    // The routed survivors have come home, or are no longer in any refugee population; either way
+    // nobody routed remains to return. What is left on the record is the killed and the fled abroad.
+    timer.cumulative_displaced = Math.max(0, (timer.cumulative_displaced ?? 0) - returned);
+    timer.cumulative_routed = 0;
+    delete timer.return_hold_since_turn;
+    if (timer.cumulative_displaced <= 0) delete timerMap[timerKey];
+}
+
+/** A timer a new capture may replace: a policy timer (RF-5B) or a dormant one (RB9). */
+function isReplaceableTimer(existing: HostileTakeoverTimerState | undefined): boolean {
+    return !existing || existing.cause === 'policy_expulsion' || existing.dormant_since_turn !== undefined;
+}
+
+/**
+ * RB9: retire a timer instead of forgetting it. A timer that holds a count of people already
+ * expelled (its own fired wave, or a count it inherited and has not yet fired on) keeps it as a
+ * dormant record that never fires; a timer with no count displaced nobody and is deleted, as before.
+ */
+function retireTimer(
+    state: GameState,
+    timerMap: Record<string, HostileTakeoverTimerState>,
+    timerKey: string,
+    currentTurn: number,
+    controller: FactionId | null | undefined,
+): void {
+    const timer = timerMap[timerKey];
+    if (timer && (timer.cumulative_displaced ?? 0) > 0) {
+        timer.dormant_since_turn = currentTurn;
+        // Codex P2: the return clock starts on the turn the safe holder takes over, not on the
+        // next weekly pass (a recapture at t60 returns people at t72, after 12 weeks, not t73).
+        if (isSafeHolderForGroup(state, timer.from_faction, timer.to_faction, controller)) {
+            timer.return_hold_since_turn = currentTurn;
+        }
+        return;
+    }
+    delete timerMap[timerKey];
 }
 
 export interface TakeoverBattleRecord {
@@ -781,13 +963,17 @@ export function processDisplacementTakeover(
                 const scope = getPolicyExpulsionEntry(holder, munId);
                 if (!scope) continue;
                 const timerKey = `${osid}|${other}`;
-                if (timerMap[timerKey]) continue;
+                // RB9: a dormant timer (people already expelled here) yields, and the policy
+                // wave draws only on those who remain.
+                const existingTimer = timerMap[timerKey];
+                if (existingTimer && existingTimer.dormant_since_turn === undefined) continue;
                 timerMap[timerKey] = {
                     mun_id: munId,
                     from_faction: other,
                     to_faction: holder,
                     started_turn: scope.wave === 'B' ? currentTurn + POLICY_WAVE_B_DELAY_TURNS : currentTurn,
-                    cause: 'policy_expulsion'
+                    cause: 'policy_expulsion',
+                    ...carriedDisplacement(existingTimer),
                 };
                 report.timers_started += 1;
             }
@@ -813,14 +999,15 @@ export function processDisplacementTakeover(
             if (fromFaction === toFaction) continue;
             if (!areFactionsAtWar(state, fromFaction, toFaction)) continue;
             const timerKey = `${osidKey}|${fromFaction}`;
-            // A stale RF-5B policy timer (the OSID changed hands) yields to the captor's timer.
-            if (timerMap[timerKey] && timerMap[timerKey].cause !== 'policy_expulsion') continue;
+            // A stale RF-5B policy timer (the OSID changed hands) or a dormant one (RB9) yields
+            // to the captor's timer, which inherits the people already expelled.
+            if (!isReplaceableTimer(timerMap[timerKey])) continue;
             timerMap[timerKey] = {
                 mun_id: munId,
                 from_faction: fromFaction,
                 to_faction: toFaction,
                 started_turn: currentTurn,
-                ...carriedPolicyDisplacement(timerMap[timerKey])
+                ...carriedDisplacement(timerMap[timerKey])
             };
             report.timers_started += 1;
         }
@@ -855,21 +1042,30 @@ export function processDisplacementTakeover(
         const pipeIdx = timerKey.indexOf('|');
         const osid = pipeIdx >= 0 ? timerKey.substring(0, pipeIdx) : timerKey;
 
-        // Recapture check: if displaced faction regained control, delete timer
         const currentController = state.political.political_controllers?.[osid];
-        if (currentController === timer.from_faction) {
-            delete timerMap[timerKey];
+
+        // RB9: a dormant timer only remembers who was already expelled; it never fires. Under a safe
+        // holder for RETURN_HOLD_WEEKS its routed survivors come home (bounded return rule).
+        if (timer.dormant_since_turn !== undefined) {
+            applyBoundedReturn(state, timerMap, timerKey, timer, osid, currentController, currentTurn);
             continue;
         }
-        // Alliance check: if factions no longer at war, delete timer
+
+        // Recapture check: if displaced faction regained control, retire the timer (RB9: a fired
+        // timer stays as a dormant record of who was expelled; an unfired one is deleted).
+        if (currentController === timer.from_faction) {
+            retireTimer(state, timerMap, timerKey, currentTurn, currentController);
+            continue;
+        }
+        // Alliance check: if factions no longer at war, retire the timer
         if (currentController && !areFactionsAtWar(state, timer.from_faction, currentController)) {
-            delete timerMap[timerKey];
+            retireTimer(state, timerMap, timerKey, currentTurn, currentController);
             continue;
         }
         // RF-5B: a policy wave belongs to the faction whose policy it is. If that faction no
         // longer holds the OSID (e.g. RS took it), the wave never fires and books nothing.
         if (timer.cause === 'policy_expulsion' && currentController !== timer.to_faction) {
-            delete timerMap[timerKey];
+            retireTimer(state, timerMap, timerKey, currentTurn, currentController);
             continue;
         }
 
@@ -933,6 +1129,8 @@ export function processDisplacementTakeover(
                 const fledAbroad = Math.floor(survivors * getFleeAbroadFraction(munId, timer.from_faction, timer.to_faction));
                 const routedToCamp = Math.max(0, survivors - fledAbroad);
                 const lost = killed + fledAbroad;
+                // RB9 return rule: only the routed survivors can come back (not the killed or the fled abroad).
+                timer.cumulative_routed = (timer.cumulative_routed ?? 0) + routedToCamp;
 
                 const beforePop = remainingPop;
                 dispState.displaced_out += routedToCamp;
@@ -946,6 +1144,7 @@ export function processDisplacementTakeover(
                     const reduction = Math.floor(sourcePool.available * ratio);
                     if (reduction > 0) {
                         sourcePool.available = Math.max(0, sourcePool.available - reduction);
+                        timer.cumulative_pool_cut = (timer.cumulative_pool_cut ?? 0) + reduction; // RB9 return rule (E3)
                         sourcePool.updated_turn = currentTurn;
                     }
                 }
@@ -1059,7 +1258,7 @@ export function processDisplacementTakeover(
             const remainingMinority = Math.max(0, initialMinority - cumulativeDisplaced);
 
             if (remainingMinority < SUSTAINED_MIN_REMAINING) {
-                delete timerMap[timerKey];
+                retireTimer(state, timerMap, timerKey, currentTurn, currentController);
                 continue;
             }
 
@@ -1075,6 +1274,8 @@ export function processDisplacementTakeover(
             const fledAbroad = Math.floor(survivors * getFleeAbroadFraction(munId, timer.from_faction, timer.to_faction));
             const directRouted = Math.max(0, survivors - fledAbroad);
             const lost = killed + fledAbroad;
+            // RB9 return rule: only the routed survivors can come back.
+            timer.cumulative_routed = (timer.cumulative_routed ?? 0) + directRouted;
 
             const beforePop = remainingPop;
             dispState.displaced_out += directRouted;
@@ -1089,6 +1290,7 @@ export function processDisplacementTakeover(
                 const reduction = Math.floor(sourcePool.available * ratio);
                 if (reduction > 0) {
                     sourcePool.available = Math.max(0, sourcePool.available - reduction);
+                    timer.cumulative_pool_cut = (timer.cumulative_pool_cut ?? 0) + reduction; // RB9 return rule (E3)
                     sourcePool.updated_turn = currentTurn;
                 }
             }

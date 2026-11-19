@@ -39,10 +39,11 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-// v40 is claimed by another lane (batch-b) and is not yet on this branch; §6 E2 took 41,
-// §6 E4 took 42 (patron_pressure -> patron_support in pending decisions), and the
-// patron-defiance panel took 43 (patron_supply_cut in pending decisions; legacy receipts dropped).
-export const CURRENT_SCHEMA_VERSION = 43 as const;
+// v40 retired the September 1991 peace start (#773), §6 E2 took 41, §6 E4 took 42 (#797:
+// patron_pressure -> patron_support in pending decisions), §6 E3a2 took 43 (#815: plan_answer on
+// pending peace-plan decisions; their standing and refusal patron effects stripped) and the
+// patron-defiance panel took 44 (#812: patron_supply_cut in pending decisions; legacy receipts dropped).
+export const CURRENT_SCHEMA_VERSION = 44 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;
@@ -1009,7 +1010,15 @@ export interface CorpsDirective {
     priority_sector_id?: string;
     /** Explicit brigade-to-sector reassignment orders from density equalization.
      *  Brigade AI reads these and issues column march orders to move brigades to their assigned sector. */
-    sector_reassignment_orders?: Array<{ brigade_id: string; to_sector_id: string }>;
+    sector_reassignment_orders?: Array<{
+        brigade_id: string;
+        to_sector_id: string;
+        /**
+         * Set on an empty-sector relief reassignment (computeEmptySectorReliefReassignments). Its
+         * march releases a dug-in donor, like an operation-authorized order (package P2 step 1).
+         */
+        empty_sector_relief?: true;
+    }>;
 }
 
 /**
@@ -1553,6 +1562,19 @@ export interface InternationalVisibilityPressure {
     last_major_shift: number | null; // turn index
 }
 
+/** Retired smuggling-route record (moved from the deleted smuggling_routes.ts, 2026-11-17).
+ * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
+ * @persistence compatibility-only */
+export interface SmugglingRouteState {
+    id: string;
+    /** Capacity [0-100]. */
+    capacity: number;
+    /** Whether the route was disrupted that turn. */
+    disrupted: boolean;
+    /** Cumulative turns the route had been active. */
+    active_turns: number;
+}
+
 /** Retired F1i 2026-11-16: humanitarian convoys are not modelled in 1.0; kept optional so old saves load; nothing writes it. */
 export interface PendingConvoyDecision {
     id: string;
@@ -1816,7 +1838,7 @@ export interface FormationSpawnDirective {
 export interface DisplacementState {
     mun_id: MunicipalityId;
     original_population: number; // immutable baseline from census or existing data
-    displaced_out: number; // cumulative, irreversible (people who left this municipality)
+    displaced_out: number; // cumulative people who left this municipality; reduced only when routed survivors return (RB9 return rule)
     displaced_in: number; // cumulative (people who arrived from other municipalities)
     /** When set, displaced_in is split by recruiting faction (Bosniak→RBiH, Serb→RS, Croat→HRHB) so pool population can add to the correct faction's pool at this mun. */
     displaced_in_by_faction?: Partial<Record<FactionId, number>>;
@@ -1871,6 +1893,12 @@ export interface DisplacementEvent {
     /** People who left BiH in this wave. */
     fled_abroad: number;
     settled: number;
+    /**
+     * RB9 return rule: routed survivors of an earlier expulsion who came home to `origin_osid` this
+     * turn (no expulsion; `displaced`, `killed` and `fled_abroad` are 0, and `refugees_created` is not
+     * touched). Absent on every other event.
+     */
+    returned?: number;
 }
 
 /**
@@ -1886,10 +1914,35 @@ export interface HostileTakeoverTimerState {
     matured_turn?: number;
     /**
      * Cumulative persons displaced from this OSID (initial + all sustained rounds). Set before
-     * maturation only when a capture replaces a fired RF-5B policy timer: it then carries the
-     * people that wave already expelled, and the new initial wave draws on those who remain.
+     * maturation only when a capture replaces a timer whose wave already fired (an RF-5B policy
+     * timer, or a dormant timer, RB9): it then carries the people already expelled, and the new
+     * initial wave draws on those who remain, never on the 1991 census again.
      */
     cumulative_displaced?: number;
+    /**
+     * RB9: set when a timer whose wave already fired would have been deleted (the expelled side
+     * retook the OSID, the sides made peace, a policy holder lost it, or the community ran out).
+     * A dormant timer never fires; it only remembers `cumulative_displaced`, so a later capture of
+     * the same OSID inherits it instead of counting the same people from the census a second time.
+     */
+    dormant_since_turn?: number;
+    /**
+     * RB9 return rule: the survivors of this timer's waves who were routed inside BiH (camp or
+     * another municipality), as opposed to the killed and the fled abroad. Only these people can
+     * come back. Carried with `cumulative_displaced` on inheritance.
+     */
+    cumulative_routed?: number;
+    /**
+     * RB9 return rule: militia the expulsion removed from the group's home pool at this municipality
+     * (the source-pool cut). When survivors return, their share of it goes back to the home pool, so
+     * manpower is not lost twice (engine seat E3). Carried on inheritance.
+     */
+    cumulative_pool_cut?: number;
+    /**
+     * RB9 return rule: the turn since which a dormant record's OSID has been held by the expelled
+     * group's own side or a side not at war with it. Cleared when a hostile side holds it again.
+     */
+    return_hold_since_turn?: number;
     /**
      * RF-5B: why the timer exists when no control change seeded it. 'policy_expulsion' =
      * seeded once by a faction's recorded minority policy ("expel") at the RBiH-HRHB war
@@ -1993,6 +2046,12 @@ export interface RbihHrhbState {
     bilateral_diverted_corps?: Partial<Record<FactionId, FormationId>>;
     /** Per-faction release progress after ceasefire/Washington, in turns. */
     bilateral_corps_release_progress?: Partial<Record<FactionId, number>>;
+    /**
+     * A2b refugee compact (src/sim/early_war/refugee_compact.ts): the compact's refugee-pressure
+     * damping is suspended while turn < this value, after a bilateral flip during an active compact.
+     * Optional and written only while a compact is active, so saves without one never carry it.
+     */
+    refugee_compact_suspended_until?: number;
 }
 
 export interface NegotiationStatus {
@@ -2222,8 +2281,6 @@ export interface StateMeta {
     peace_scheduled_referendum_turn?: number | null;
     /** Phase 0: Optional scheduled war-start turn override used with scheduled referendum starts. */
     peace_scheduled_war_start_turn?: number | null;
-    /** Phase 0: Optional absolute path to a mun1990 control file to apply exactly when war starts. */
-    peace_war_start_control_path?: string | null;
     /** Phase 0: First turn when referendum became eligible (both RS and HRHB declared). */
     referendum_eligible_turn?: number | null;
     /** Phase 0: Deadline turn for referendum; if reached without referendum → non-war terminal. */
@@ -2278,11 +2335,13 @@ export interface StateMeta {
      * factual initial-control corrections.
      */
     avoided_osids_by_faction?: Record<string, string[]>;
-    /** Phase A: When true, supply reserves system is active (general supply + heavy munitions). */
+    /** Former supply-reserve economy switch.
+     * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
+     * @persistence compatibility-only */
     supply_reserves_enabled?: boolean;
     /**
      * When true, gates offensive-operation launch eligibility on the RBiH arms
-     * embargo phase (`EMBARGO_PHASE_CAPS`), independent of `supply_reserves_enabled`
+     * embargo phase (`EMBARGO_PHASE_CAPS`), independent of the retired supply-reserve economy
      * — does not touch the general-supply-reserve pipeline, siege counters, or
      * enclave resilience. A faction whose current embargo cap is below
      * `EMBARGO_OFFENSIVE_GATE_CAP_THRESHOLD` cannot launch new offensive corps
@@ -3018,13 +3077,17 @@ war_jna?: JNATransitionState;
  * Retired 2026-11-17 (§6 panel, Fable consult 6): siege counters / bombardment attrition / siege morale drain are not modelled in 1.0; kept optional so old saves load; nothing writes it.
  * @persistence compatibility-only */
 siege_turn_counters?: Record<string, number>;
-/** General supply reserves per faction [0..100]. Consumed by maintenance; replenished by facilities/patron. */
+/** General supply reserves per faction [0..100].
+ * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
+ * @persistence compatibility-only */
 general_supply_reserve?: Record<FactionId, number>;
 /** Scenario-authored must-hold OSIDs per corps. Set once at scenario load; read by commander briefing. Key: corps_id. */
 must_hold_osids_by_corps?: Record<string, string[]>;
 /** Per-corps comms quality override loaded from scenario. Key: corps_id. */
 comms_override_by_corps?: Record<string, { before_turn: number; mode: 'radio' | 'full' }>;
-/** Heavy munitions reserves per faction [0..100]. Consumed by combat; replenished by ammo facilities/patron. */
+/** Heavy munitions reserves per faction [0..100].
+ * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
+ * @persistence compatibility-only */
 heavy_munitions_reserve?: Record<FactionId, number>;
 /** Canonical front-edge snapshot for GUI rendering and deterministic diagnostics. */
 front_edges?: FrontEdgeState[];
@@ -3122,20 +3185,26 @@ war_timeline?: import('./war_timeline.js').WarTimeline;
 named_officer_data?: import('./officer_types.js').NamedOfficer[];
 /** Named officer mutable state keyed by officer ID. */
 named_officers?: Record<string, import('./officer_types.js').NamedOfficerState>;
-/** Player-entered humanitarian airdrop split by enclave id. */
+/** Humanitarian airdrop split by enclave id.
+ * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
+ * @persistence compatibility-only */
 airdrop_allocation?: Record<string, number>;
 /** Retired F1i 2026-11-16: humanitarian convoys are not modelled in 1.0; kept optional so old saves load; nothing writes it. */
 pending_convoy_decisions?: PendingConvoyDecision[];
 /** Retired F1i 2026-11-16: humanitarian convoys are not modelled in 1.0; kept optional so old saves load; nothing writes it. */
 convoy_decision_history?: ConvoyDecisionRecord[];
-/** Player-entered smuggling split by enclave id. */
+/** Smuggling split by enclave id.
+ * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
+ * @persistence compatibility-only */
 smuggling_allocation?: Record<string, { type: 'ammo' | 'food'; amount: number }>;
 /** One-turn municipality-targeted local support orders for asymmetric Phase E player agency. */
 municipality_support_orders?: Partial<Record<FactionId, MunicipalitySupportOrder>>;
 /** One-time Sarajevo tunnel unlock. */
 sarajevo_tunnel_operational?: boolean;
-/** Smuggling route capacity and disruption state per route id. */
-smuggling_routes?: import('../sim/economy/smuggling_routes.js').SmugglingRouteState[];
+/** Smuggling route capacity and disruption state per route id.
+ * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
+ * @persistence compatibility-only */
+smuggling_routes?: SmugglingRouteState[];
 /** Sector ids with OPSEC active. */
 opsec_sectors?: string[];
 /** Tracks which operation names have been used (name → turn used). Sequential consumption, no repeats. */

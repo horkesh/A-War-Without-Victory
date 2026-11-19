@@ -70,6 +70,20 @@ function rowsForFaction(value, faction) {
     .map(cloneJson);
 }
 
+/**
+ * Peace-plan history rows carry no `faction` field: each is one resolved plan with every faction's
+ * recorded answer in `responses` (peace_plans.ts writes the whole map at the moment the player
+ * answers, so none of it is hidden information; the pending plan's precomputed bot answers are
+ * redacted separately). A row belongs to the player's history when the player's faction answered it.
+ * Filtering by `rowsForFaction` read a `faction` field that is never there, so this projection was always empty.
+ */
+function peacePlanHistoryRowsForFaction(value, faction) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((row) => isRecord(row) && isRecord(row.responses) && typeof row.responses[faction] === 'string')
+    .map(cloneJson);
+}
+
 function resolvePlayerFaction(state, fallbackFaction) {
   const direct = state?.meta?.player_faction;
   if (PLAYER_FACTIONS.has(direct)) return direct;
@@ -90,7 +104,6 @@ function projectMeta(meta, playerFaction) {
     'war_start_turn',
     'peace_scheduled_referendum_turn',
     'peace_scheduled_war_start_turn',
-    'peace_war_start_control_path',
     'referendum_deadline_turn',
     'referendum_eligible_turn',
     'referendum_held',
@@ -375,7 +388,7 @@ function projectNegotiation(negotiation, playerFaction) {
   for (const key of ['capital', 'patron_relationships', 'strategic_dimensions']) {
     projected[key] = scopeRecordToKey(negotiation[key], playerFaction);
   }
-  projected.peace_plan_history = rowsForFaction(negotiation.peace_plan_history, playerFaction);
+  projected.peace_plan_history = peacePlanHistoryRowsForFaction(negotiation.peace_plan_history, playerFaction);
   projected.pending_counter_offers = (Array.isArray(negotiation.pending_counter_offers)
     ? negotiation.pending_counter_offers
     : [])
@@ -471,17 +484,7 @@ function projectArmyHqOperations(value, playerFaction, ownCorpsIds) {
   );
 }
 
-function projectSmugglingRoutes(value, playerFaction) {
-  if (Array.isArray(value)) {
-    return value.filter((row) => isRecord(row) && row.faction === playerFaction).map(cloneJson);
-  }
-  if (!isRecord(value)) return undefined;
-  return sortedRecordFromEntries(
-    Object.entries(value)
-      .filter(([, row]) => isRecord(row) && row.faction === playerFaction)
-      .map(([id, row]) => [id, cloneJson(row)]),
-  );
-}
+// projectSmugglingRoutes retired 2026-11-17 with the supply-reserve economy (Fable consult 6).
 
 function projectMilitary(state, playerFaction, opportunityOwnership) {
   const military = isRecord(state?.military) ? state.military : {};
@@ -551,15 +554,14 @@ function projectMilitary(state, playerFaction, opportunityOwnership) {
     negotiation: projectNegotiation(military.negotiation, playerFaction),
     war_timeline: projectWarTimeline(military.war_timeline, playerFaction),
     army_hq_operations: projectArmyHqOperations(military.army_hq_operations, playerFaction, ownCorpsIds),
-    smuggling_routes: projectSmugglingRoutes(military.smuggling_routes, playerFaction),
+    // smuggling_routes, airdrop_allocation and smuggling_allocation are retired compatibility-only
+    // fields (supply-reserve economy, 2026-11-17); they are no longer projected to the player.
     ...copyKeys(military, [
       'front_edges',
       'war_front_edges_osid',
       'production_facilities',
       'sarajevo_tunnel_operational',
       'command_authority',
-      'airdrop_allocation',
-      'smuggling_allocation',
     ]),
     ...copyKeys(eventState, [
       'event_decision_log',
@@ -617,8 +619,7 @@ function projectMilitary(state, playerFaction, opportunityOwnership) {
     'front_posture',
     'front_posture_regions',
     'strategic_reserves',
-    'general_supply_reserve',
-    'heavy_munitions_reserve',
+    // general_supply_reserve / heavy_munitions_reserve retired 2026-11-17 (not projected).
     'army_stance',
     'logistics_priority',
     'equipment_quality_modifiers',
@@ -733,6 +734,18 @@ function projectPolitical(political, playerFaction) {
     'collapse_eligibility',
   ]) {
     projected[key] = playerFaction ? scopeRecordToKey(political[key], playerFaction) : {};
+  }
+  // The HRHB refugee compact line (Army HQ Records) reads when the Washington Agreement was signed
+  // and when the displacement damping is suspended. These three fields leave under their own key,
+  // never as a partial `rbih_hrhb_state` (the war-room diplomacy extractor treats that object as
+  // complete), and nothing else of the bilateral state leaves.
+  if (isRecord(political.rbih_hrhb_state)) {
+    const compactView = copyKeys(political.rbih_hrhb_state, [
+      'washington_signed',
+      'washington_turn',
+      'refugee_compact_suspended_until',
+    ]);
+    if (Object.keys(compactView).length > 0) projected.refugee_compact_view = compactView;
   }
   if (isRecord(political.last_contained_osids_by_faction)) {
     projected.last_contained_osids_by_faction = {};

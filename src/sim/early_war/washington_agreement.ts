@@ -265,19 +265,35 @@ export const WASHINGTON_AGREEMENT_WEEK = 102;
  * coherent only as the formalising of an existing alliance (BB2 pp.450-451; BB1 p.54), so it
  * carries the Federation benefits but none of the war-ending effects (no ceasefire to start, no
  * cut to an alliance already above the lock). Never fires left alone: the war starts ~t49-57.
+ * A2b (2026-11-17): there is no consent once HRHB has answered the 1993 federation overture with
+ * a refusal (`reject_federation_path` / `maintain_separate_state`); the bots answer
+ * `extend_federation_overture`, so this changes nothing left alone.
  */
 export function evaluateWashingtonByConsent(state: GameState): boolean {
     const rhs = state.political.rbih_hrhb_state;
     if (!rhs || rhs.washington_signed) return false;
     if (rhs.war_started_turn != null) return false;
     if (!((state.political.war_alliance_rbih_hrhb ?? 0) > ALLIED_THRESHOLD)) return false;
+    const overture = lastResponse(state, FEDERATION_OVERTURE_EVENT);
+    if (overture !== null && FEDERATION_REFUSALS.includes(overture)) return false;
     return state.meta.turn >= WASHINGTON_AGREEMENT_WEEK;
 }
+
+const FEDERATION_OVERTURE_EVENT = 'hrhb_federation_overture_1993';
+const FEDERATION_REFUSALS: readonly string[] = ['maintain_separate_state', 'reject_federation_path'];
 
 // ── Path A': the cards' agreement on a quiet front (B5, 2026-11-16) ──
 
 /** Weeks the front must be quiet (stalemate or a held ceasefire); matches W2. */
 export const WASH_QUIET_FRONT_TURNS = WASH_CEASEFIRE_DURATION;
+
+/**
+ * First week Path A' can fire: the week after the Washington week. A Path A signing in the Washington
+ * week itself (t102, 18 Mar 1994: the 23 Feb ceasefire plus the four-week W2 hold) is the historical
+ * outcome, so Path A' waits until it has been missed (orchestrator ruling, 2026-11-19). Only Path A'
+ * reads this; WASHINGTON_AGREEMENT_WEEK stays the boundary for Path C and the peace plan.
+ */
+export const WASH_QUIET_FRONT_OPENS_WEEK = WASHINGTON_AGREEMENT_WEEK + 1;
 
 /** Responses that sign each Washington card (both options of each card sign). */
 const WASHINGTON_SIGNING_RESPONSES: Readonly<Record<string, readonly string[]>> = {
@@ -311,19 +327,19 @@ export interface WashingtonQuietFrontResult {
  * at t102 while Path A still waits for an engine ceasefire whose start is keyed to how long the war
  * ran, so for weeks the cards say "signed" and the engine withholds the Federation. Path A' fires
  * once when ALL hold: not yet signed; a bilateral war was fought (`war_started_turn` set); the
- * Washington week has arrived; the front is quiet (stalemate_turns, or a held ceasefire, at least
+ * Washington week has passed (WASH_QUIET_FRONT_OPENS_WEEK); the front is quiet (stalemate_turns, or a held ceasefire, at least
  * WASH_QUIET_FRONT_TURNS); HRHB acknowledged Zagreb's ceasefire order (the patron price); both
  * Washington cards were signed (accept or reluctant); and the alliance is above ALLIED_THRESHOLD.
  * Effects are Path A's, ceasefire included. Game designer + historian 2026-11-16 (the real
  * ceasefire → framework → signing gap was 1-3.5 weeks: 23 Feb, 1 Mar, 18 Mar 1994; BB2 pp.450-451).
- * Never fires left alone: the historical run signs through Path A before t102, which the baseline
- * runner asserts (tools/scenario_runner/run_baseline_regression.ts).
+ * Never fires left alone: the historical run signs through Path A by t102, before Path A' opens,
+ * which the baseline runner asserts (tools/scenario_runner/run_baseline_regression.ts).
  */
 export function evaluateWashingtonQuietFront(state: GameState): WashingtonQuietFrontResult {
     const rhs = state.political.rbih_hrhb_state;
     const turn = state.meta.turn;
     const warFought = rhs?.war_started_turn != null;
-    const calendarReached = turn >= WASHINGTON_AGREEMENT_WEEK;
+    const calendarReached = turn >= WASH_QUIET_FRONT_OPENS_WEEK;
     const ceasefireSince = rhs?.ceasefire_since_turn ?? null;
     const ceasefireHeld = rhs?.ceasefire_active === true && ceasefireSince !== null
         ? turn - ceasefireSince

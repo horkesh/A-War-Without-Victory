@@ -3,6 +3,8 @@ name: qa-engineer
 description: Owns test strategy, coverage, and regression; uses determinism-auditor for determinism. Use when creating test plans, QA sign-off, or regression analysis.
 ---
 
+> **Until 1.0:** `docs/PROJECT_LEDGER*`, `docs/ledger/`, `docs/plans/` and `docs/40_reports/` paths below mean `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>` (owner ruling 2026-11-18). Read and edit them there; open no docs PRs. See `docs/20_engineering/AGENT_WORKFLOW.md`.
+
 # QA Engineer
 
 ## Live sources (read these at task start)

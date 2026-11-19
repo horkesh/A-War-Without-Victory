@@ -1,43 +1,15 @@
 /**
- * SupplyIntelligence — supply breakdown, enclave resilience bars,
- * and mobilization summary for Army HQ Nerve Center.
+ * SupplyIntelligence — enclave resilience bars and mobilization summary for
+ * Army HQ Nerve Center. Enclave data comes directly from enclaveResilience on
+ * LoadedGameState.
  *
- * Supply breakdown is estimated from formation count + known constants
- * (the exact breakdown is computed transiently in the pipeline, not stored).
- * Enclave data comes directly from enclaveResilience on LoadedGameState.
+ * The reserve breakdown (general supply, maintenance drain, patron aid, depletion
+ * runway) was retired 2026-11-17 with the supply-reserve economy (Fable consult 6).
  */
-import type { LoadedGameState, FormationView } from '../../data/types';
-import { turnToDateString } from '../../utils/formatters';
+import type { LoadedGameState } from '../../data/types';
 import { getPlayerSafeEnclaveName } from '../../utils/playerSafeText';
-import { isFieldedTacticalFormation } from '../../../shared/playerVisibility';
-
-import {
-    MAINTENANCE_DRAIN_PER_FORMATION,
-    HEAVY_MAINTENANCE_PER_WEAPON,
-    PATRON_AID_SCALE,
-} from '../../../../state/supply_reserve_constants.js';
-
-// Historical patron commitment profiles (simplified midpoints)
-const PATRON_COMMITMENT: Record<string, number> = {
-    RBiH: 0.45,  // 0.3 → 0.6 over war
-    RS: 0.65,    // 0.8 → 0.55 over war
-    HRHB: 0.08,  // 0 → 0.15
-};
 
 // ── Types ────────────────────────────────────────────────────────────────
-
-export interface SupplyBreakdown {
-    currentGeneral: number | null;
-    currentHeavy: number | null;
-    currentGeneralReported: boolean;
-    currentHeavyReported: boolean;
-    estimatedMaintenanceDrain: number;
-    estimatedHeavyDrain: number | null;
-    estimatedHeavyDrainReported: boolean;
-    estimatedPatronAid: number;
-    estimatedNetPerTurn: number;
-    estimatedRunwayTurns: number | null;  // null = sustainable
-}
 
 export interface EnclaveStatus {
     id: string;
@@ -56,52 +28,6 @@ export interface MobilizationInfo {
 }
 
 // ── Pure computation ─────────────────────────────────────────────────────
-
-export function computeSupplyBreakdown(
-    state: LoadedGameState,
-    faction: string,
-): SupplyBreakdown {
-    const reserves = state.factionReserves?.[faction];
-    const currentGeneralReported = Number.isFinite(reserves?.generalSupply);
-    const currentHeavyReported = Number.isFinite(reserves?.heavyMunitions);
-    const currentGeneral = currentGeneralReported && reserves ? reserves.generalSupply : null;
-    const currentHeavy = currentHeavyReported && reserves ? reserves.heavyMunitions : null;
-
-    const formations = state.formations?.filter(f =>
-        f.faction === faction && isFieldedTacticalFormation(f),
-    ) ?? [];
-
-    const formationCount = formations.length;
-    const heavyCompositionReported = formations.every((f) => f.composition != null);
-    const totalHeavyWeapons = formations.reduce((sum, f) => {
-        const c = f.composition;
-        if (!c) return sum;
-        return sum + (c.tanks ?? 0) + (c.artillery ?? 0) + (c.aa_systems ?? 0);
-    }, 0);
-
-    const estimatedMaintenanceDrain = formationCount * MAINTENANCE_DRAIN_PER_FORMATION;
-    const estimatedHeavyDrain = heavyCompositionReported
-        ? totalHeavyWeapons * HEAVY_MAINTENANCE_PER_WEAPON
-        : null;
-    const estimatedPatronAid = (PATRON_COMMITMENT[faction] ?? 0.1) * PATRON_AID_SCALE * 0.01;
-    const estimatedNetPerTurn = estimatedPatronAid - estimatedMaintenanceDrain;
-    const estimatedRunwayTurns = currentGeneral != null && estimatedNetPerTurn < 0
-        ? Math.round(currentGeneral / Math.abs(estimatedNetPerTurn))
-        : null;
-
-    return {
-        currentGeneral: currentGeneral == null ? null : Math.round(currentGeneral * 10) / 10,
-        currentHeavy: currentHeavy == null ? null : Math.round(currentHeavy * 10) / 10,
-        currentGeneralReported,
-        currentHeavyReported,
-        estimatedMaintenanceDrain: Math.round(estimatedMaintenanceDrain * 100) / 100,
-        estimatedHeavyDrain: estimatedHeavyDrain == null ? null : Math.round(estimatedHeavyDrain * 100) / 100,
-        estimatedHeavyDrainReported: heavyCompositionReported,
-        estimatedPatronAid: Math.round(estimatedPatronAid * 100) / 100,
-        estimatedNetPerTurn: Math.round(estimatedNetPerTurn * 100) / 100,
-        estimatedRunwayTurns,
-    };
-}
 
 export function getEnclaveStatuses(
     state: LoadedGameState,
@@ -159,46 +85,15 @@ const SUPPLY_STATE_LABEL = {
 } as const;
 
 interface SupplyIntelligenceProps {
-    breakdown: SupplyBreakdown;
     enclaves: EnclaveStatus[];
     mobilization: MobilizationInfo | null;
-    currentTurn: number;
 }
 
-export function SupplyIntelligence({ breakdown, enclaves, mobilization, currentTurn }: SupplyIntelligenceProps) {
-    const currentGeneralLabel = breakdown.currentGeneralReported && breakdown.currentGeneral != null
-        ? String(breakdown.currentGeneral)
-        : 'Unreported';
-    const heavyDrainLabel = breakdown.estimatedHeavyDrainReported && breakdown.estimatedHeavyDrain != null
-        ? (breakdown.estimatedHeavyDrain === 0 ? '0' : `-${breakdown.estimatedHeavyDrain}`)
-        : 'Unreported';
-
+export function SupplyIntelligence({ enclaves, mobilization }: SupplyIntelligenceProps) {
     return (
         <div className="bg-panel-card border border-panel-border rounded p-4 mb-4">
             <div className="text-[13px] uppercase tracking-[0.25em] font-bold text-text-secondary mb-3 pb-2 border-b border-panel-border">
                 SUPPLY &amp; SUSTAINABILITY
-            </div>
-
-            {/* Supply breakdown */}
-            <div className="mb-3">
-                <div className="flex items-baseline gap-3 mb-1">
-                    <span className="text-[13px] text-text-primary font-bold">
-                        GENERAL SUPPLY: {currentGeneralLabel}
-                    </span>
-                    <span className={`text-[13px] font-bold ${breakdown.estimatedNetPerTurn < 0 ? 'text-red-400' : 'text-emerald-400'}`}>
-                        {breakdown.estimatedNetPerTurn >= 0 ? '▲' : '▼'} {breakdown.estimatedNetPerTurn}/turn
-                    </span>
-                    {breakdown.estimatedRunwayTurns != null && (
-                        <span className="text-[13px] text-red-400/80">
-                            Depletion ~{breakdown.estimatedRunwayTurns} turns ({turnToDateString(currentTurn + breakdown.estimatedRunwayTurns)})
-                        </span>
-                    )}
-                </div>
-                <div className="text-[13px] text-text-secondary/70 flex flex-wrap gap-x-3 ml-1">
-                    <span>maint −{breakdown.estimatedMaintenanceDrain}</span>
-                    <span>patron +{breakdown.estimatedPatronAid}</span>
-                    <span>heavy equip {heavyDrainLabel}</span>
-                </div>
             </div>
 
             {/* Enclave bars */}

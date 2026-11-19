@@ -411,7 +411,11 @@ describe('deriveInboxItems — peace plan', () => {
                 event_title: 'Owen-Stoltenberg Presidency Review',
                 turn_fired: 70,
                 faction: 'RBiH',
-                response_options: [{ id: 'accept', label: 'Conditionally accept', effects: [] }],
+                // §6 E3a2: ownership is read from the options' plan_answer, not an id table.
+                response_options: [
+                    { id: 'accept', label: 'Conditionally accept', effects: [], plan_answer: null },
+                    { id: 'reject', label: 'Reject', effects: [], plan_answer: { plan_id: 'owen_stoltenberg', response: 'rejected' } },
+                ],
             }],
         });
 

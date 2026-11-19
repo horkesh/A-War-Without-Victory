@@ -99,8 +99,10 @@ function playerDecision(
     return { event_id, response_id, decision_source: 'player', faction, turn };
 }
 
-function makeBreakdown(warCrimes: number) {
+/** `authored`: recordWarCrime's in-play counter, which the clean-hands ghosts read (§6 E3b). */
+function makeBreakdown(warCrimes: number, authored = 0) {
     return {
+        war_crimes_events_emergent: authored,
         territory_controlled_pct: 0,
         territory_controlled_km2: 0,
         civilians_under_protection: 0,
@@ -203,7 +205,7 @@ describe('LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE — T3: ghost-entry conditionality
         expect(got?.path).toBe('data/codex/ghost_entries/alliance_held.md');
     });
 
-    it('cleansing_refused requires policy=always_deny, war_crimes=0, turn>=100', () => {
+    it('cleansing_refused requires policy=always_deny, no authored war crime, turn>=100', () => {
         const policyWrong = makeState({
             paramilitary_policy: 'ask',
             negotiation_capital: { RBiH: makeBreakdown(0) },
@@ -212,9 +214,16 @@ describe('LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE — T3: ghost-entry conditionality
 
         const crimesPositive = makeState({
             paramilitary_policy: 'always_deny',
-            negotiation_capital: { RBiH: makeBreakdown(2) },
+            negotiation_capital: { RBiH: makeBreakdown(2, 2) },
         });
         expect(buildGhostEntries(crimesPositive, 120).find((g) => g.ghost_id === 'cleansing_refused')).toBeUndefined();
+
+        // §6 E3b: a scripted historical record (shared counter only) is not the side's own conduct.
+        const scriptedOnly = makeState({
+            paramilitary_policy: 'always_deny',
+            negotiation_capital: { RBiH: makeBreakdown(2) },
+        });
+        expect(buildGhostEntries(scriptedOnly, 120).find((g) => g.ghost_id === 'cleansing_refused')).toBeDefined();
 
         const tooEarly = makeState({
             paramilitary_policy: 'always_deny',

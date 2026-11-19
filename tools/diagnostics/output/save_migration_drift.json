@@ -1,7 +1,7 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 43,
-  "registered_migration_count": 42,
+  "latest_schema_version": 44,
+  "registered_migration_count": 44,
   "strict_required_field_count": 79,
   "anonymous_default_count": 0,
   "fields": [],
@@ -163,6 +163,10 @@
       "description": "Freeze cut B3 + B2: the political-directive chain is retired. Empties the stale "
     },
     {
+      "version": 40,
+      "description": "The September 1991 peace start is retired (campaign structure decision 2026-03-23; "
+    },
+    {
       "version": 41,
       "description": "Section 6 E2: the negotiation_capital event effect kind is retired (every catalog "
     },
@@ -172,6 +176,10 @@
     },
     {
       "version": 43,
+      "description": "Section 6 E3a2: the peace-plan chain. Each routed card option now declares plan_answer "
+    },
+    {
+      "version": 44,
       "description": "Patron-defiance panel (2026-11-17): defying a patron carries one live material cost, the "
     }
   ],

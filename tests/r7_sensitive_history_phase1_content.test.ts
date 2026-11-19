@@ -98,7 +98,7 @@ describe('R7 Phase 1.1 sensitive-history content', () => {
             shift.faction === 'RBiH' && typeof shift.delta === 'number' && shift.delta > 0
         ))).toBe(false);
         expect(event.effects.some((effect: any) => (
-            ['supply_delta', 'equipment_grant', 'territorial_legitimacy'].includes(effect.kind)
+            ['equipment_grant', 'territorial_legitimacy'].includes(effect.kind)
         ))).toBe(false);
     });
 

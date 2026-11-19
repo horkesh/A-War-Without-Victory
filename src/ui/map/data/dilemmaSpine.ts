@@ -95,7 +95,7 @@ export interface DilemmaSpineView {
  *   2. Srebrenica demilitarization event srebrenica_demilitarization_1993 (war_1993)  essay_srebrenica_enclave_forms_1992 [GATED]
  *   3. Vance-Owen                  event vance_owen_plan_1993 (war_1993)       essay_vance_owen_plan_1993        [SAFE]
  *   4. Owen-Stoltenberg            event owen_stoltenberg_plan_1993 (war_1993) essay_owen_stoltenberg_plan_1993  [SAFE]
- *   5. Contact Group              event contact_group_plan_1994 (war_1994)    essay_contact_group_plan_1994     [SAFE]
+ *   5. Contact Group              event rbih_contact_group_response_1994 (war_1994; presented by contact_group_plan_1994)  essay_contact_group_plan_1994  [SAFE]
  *   6. HVO alliance-vs-republic    event hrhb_political_goal (war_1992)        essay_hrhb_political_goal         [GATED]
  *   7. Karadžić–Mladić split       event karadzic_mladic_split_1995 (war_1995) (no essay)                       [SAFE]
  *
@@ -150,10 +150,12 @@ export const DILEMMA_SPINE: readonly DilemmaSpineDefinition[] = [
         sensitive: false,
     },
     {
+        // §6 E3a2 (ruling item 4): contact_group_plan_1994 is now the no-choice presentation of
+        // the plan; Sarajevo's answer is the Assembly card, which carries the decision and the tag.
         dilemmaId: 'contact_group_plan',
         title: 'The Contact Group Plan',
-        keystoneEventIds: ['contact_group_plan_1994'],
-        decisionEventId: 'contact_group_plan_1994',
+        keystoneEventIds: ['contact_group_plan_1994', 'rbih_contact_group_response_1994'],
+        decisionEventId: 'rbih_contact_group_response_1994',
         essayId: 'essay_contact_group_plan_1994',
         sensitive: false,
     },

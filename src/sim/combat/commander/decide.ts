@@ -332,6 +332,10 @@ export function computeEmptySectorReliefReassignments(
             .map((order) => order.brigade_id),
     );
     const placements = buildReliefDonorPlacements(corpsSectors);
+    // Dug-in donors are legal but rank after donors that are not dug in, least dug-in first
+    // (package P2 step 1, 2026-11-16).
+    const digInRank = (brigade: { id: FormationId; posture?: string; dig_in_progress?: number }): number =>
+        (brigade.posture === 'dig_in' || pendingDigIn.has(brigade.id)) ? 1 + (brigade.dig_in_progress ?? 0) : 0;
     const reservedDonors = new Set<FormationId>();
     const results: EmptySectorReliefReassignment[] = [];
 
@@ -354,7 +358,9 @@ export function computeEmptySectorReliefReassignments(
                 if (!isSectorRosterEligibleFormation(brigade) || !brigade.location_osid) return false;
                 if (reservedDonors.has(brigade.id) || operationParticipants.has(brigade.id)) return false;
                 if ((brigade.disrupted_turns ?? 0) > 0 || brigade.disrupted === true) return false;
-                if (brigade.posture === 'dig_in' || pendingDigIn.has(brigade.id)) return false;
+                // A dug-in brigade is a legal donor (package P2 step 1, 2026-11-16): moving forfeits its
+                // dig-in, released by the march's `defend` posture order. It ranks after donors that are not
+                // dug in (see the sort below).
                 if (brigade.elite_loan_state?.on_loan) return false;
                 if (state.military.brigade_movement_orders?.[brigade.id]) return false;
                 const movementState = state.military.brigade_movement_state?.[brigade.id];
@@ -384,11 +390,15 @@ export function computeEmptySectorReliefReassignments(
         if (hasOwnPool) {
             // SE7E (see the function comment): the reserve sector march owns an eligible own
             // reserve; otherwise only the sector's own rear is committed.
-            if (eligible.some((candidate) => ownReserve.has(candidate.brigade.id))) continue;
+            // A dug-in own reserve does not defer: the reserve march would not release it, so it
+            // ranks as an ordinary donor behind the sector's own rear (package P2 step 1).
+            if (eligible.some((candidate) => ownReserve.has(candidate.brigade.id) && digInRank(candidate.brigade) === 0)) continue;
             candidates = eligible.filter((candidate) => ownRear.has(candidate.brigade.id));
         }
+        // Within a tier: donors not dug in first, then the least dug-in, then the nearest.
         candidates.sort((left, right) =>
             left.placement.tier - right.placement.tier
+            || digInRank(left.brigade) - digInRank(right.brigade)
             || left.distance - right.distance
             || strictCompare(left.brigade.id, right.brigade.id),
         );
