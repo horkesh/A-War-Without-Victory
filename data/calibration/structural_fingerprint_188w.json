@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "fingerprint": "2949525cb1afe0fc",
+  "fingerprint": "540686f07e69f574",
   "fields": {
     "schema_version": 2,
     "scenario_id": "apr1992_definitive_188w",
@@ -571,6 +571,12 @@
         "to": "RS"
       },
       {
+        "settlement_id": "op:sipovo:volari_2",
+        "municipality_id": "sipovo",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
         "settlement_id": "op:skender_vakuf:donji_koricani",
         "municipality_id": "skender_vakuf",
         "from": "HRHB",
@@ -603,12 +609,6 @@
       {
         "settlement_id": "op:teslic:donji_ruzevic",
         "municipality_id": "teslic",
-        "from": "RBiH",
-        "to": "RS"
-      },
-      {
-        "settlement_id": "op:travnik:gornje_krcevine",
-        "municipality_id": "travnik",
         "from": "RBiH",
         "to": "RS"
       },
