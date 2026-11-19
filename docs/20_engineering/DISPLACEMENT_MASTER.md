@@ -143,6 +143,27 @@ The primary displacement trigger since 2026-03-01: capture displacement flows th
 8. Camp holds for `CAMP_REROUTE_DELAY_TURNS = 4` turns
 9. Camp routes to destination municipalities via per-ethnicity routing tables
 
+**Dormant records and the bounded return rule (RB9, 2026-11-16, §6 panel, three rounds):**
+- **No timer forgets who it expelled.** A timer that holds a count (`cumulative_displaced` > 0, fired or inherited) becomes a dormant record (`dormant_since_turn`) instead of being deleted. This happens when:
+  - the expelled side retakes the OSID;
+  - the sides make peace;
+  - a policy holder loses the OSID;
+  - the sustained drain runs out.
+
+  A dormant record never fires. The next capture, flip seed or policy seed of the same OSID and group replaces it and inherits `cumulative_displaced`, `cumulative_routed` and `cumulative_pool_cut`. So the same people are never expelled twice from the 1991 census (#623 extended to every timer). A timer with no count is still deleted.
+- **Return rule.** Suppose a dormant record's OSID is held for `RETURN_HOLD_WEEKS` = 12 unbroken weeks by the group's own side, or by a side that has never yet been at war with the group. RS has been at war with both from the start; RBiH and HRHB from `rbih_hrhb_state.war_started_turn`. The expeller is never a safe holder. Then the routed survivors (`cumulative_routed`) come home:
+  - the same number leave that group's refugee population: the origin camp first, then `displaced_in` in the cohort's bilateral routing order;
+  - origin `displaced_out` falls by the same number;
+  - the returnees' share of the expulsion's home-pool cut goes back to the home militia pool;
+  - the return is logged as a displacement event (`returned`, with no expulsion fields), and the per-OSID departed tally falls to match.
+
+  The killed and the fled abroad never return and stay on the record. People no longer found in any refugee population are not invented. `refugees_created` is untouched: the expulsion happened. A shorter hold returns nobody. The rule is faction-blind and names no places.
+- **Measured** (188w, against main at the same commit): about 80k return by w188 (Serbs ~58k, Bosniaks ~20k, Croats ~5k), of which the historian finds about 60k follow the wartime pattern. About 20k undo phantom t5 expulsions (register RB9-R1).
+- **Limits:**
+  - Returns change manpower, because refugees feed host militia pools every turn. Control moves; the lost cells are on the calibration list.
+  - The restore is not netted against the pool-size floor (register RB9-R24).
+  - Cross-front returns before Dayton are excluded by design.
+
 **Hostile share:** Two-tier computation (as of n319):
 
 1. **Per-OSID census data** (preferred): Uses `population_bosniaks`, `population_serbs`, `population_croats`, `population_others` from operational settlements GeoJSON. Faction alignment: RBiH = bosniak + other, RS = serb, HRHB = croat. Cap: 0.95.

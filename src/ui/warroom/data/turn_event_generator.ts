@@ -211,6 +211,8 @@ function detectDisplacement(
             // RF-5B: a policy-expulsion timer is not a takeover (no control change, and wave B
             // timers carry a future start turn); its displacement reaches the ledger when it fires.
             if (timer.cause === 'policy_expulsion') continue;
+            // RB9: a dormant timer is only a record of people already expelled; it is not a takeover.
+            if (timer.dormant_since_turn !== undefined) continue;
             // Timer started this turn = new displacement event
             if (timer.started_turn === state.meta.turn) {
                 events.push({

@@ -52,6 +52,7 @@
       "transition": { "cohesion_cost": 4, "disrupted_turns": 2 },
       "reason": "The 7th Corps (Travnik) takes over the 3rd Corps' OG Bosanska Krajina and OG Zapad, 26 Feb 1994 (per the ICTY indictment, IT-01-47 Case Information Sheet p.4; BB1 p.380; BB2 pp.468, 493, 510). Transition sized like two weeks of the reorganize stance: cohesion -4 (two weeks of its +2 recovery) and one week of disruption."
     },
+    { "id": "jna_herzegovina_command_retire", "type": "corps_retire", "trigger_turn": 7, "corps_id": "jna_herzegovina_command", "successor_corps_id": "vrs_herzegovina", "reason": "JNA withdrawal from BiH: the JNA 13th (Bileća) Corps became the VRS Herzegovina Corps on 19 May 1992, under Col. Radovan Grubač (BB1 pp.156, 488; the date is tier B, historian gap search, commander attribution PR 2c). Turn 7 is the first turn starting on or after 19 May (turn 0 = 6 Apr 1992), the convention of the dated corps-commander schedule; the phantom axes of Operation Herzegovina have withdrawn by turn 6, so the remaining JNA formations pass to the VRS Herzegovina Corps (orchestrator ruling, 2026-11-18)." },
     { "id": "arbih_7th_corps_commander_alagic", "type": "commander_handover", "trigger_turn": 99, "corps_id": "arbih_7th_corps", "officer_id": "arbih_alagic", "reason": "Brig. Gen. Mehmed Alagić appointed to command the new 7th Corps, Travnik, 26 Feb 1994 (per the ICTY indictment, IT-01-47 Case Information Sheet p.4; BB2 pp.468, 493)" }
   ]
 }
