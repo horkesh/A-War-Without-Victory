@@ -37,6 +37,17 @@ import { serializeState } from '../src/state/serialize.js';
 import { COMMANDER_CREATION_PREFIX, resetReasonCodeTopicCacheForTests } from '../src/sim/combat/reason_code_debug.js';
 import { buildBotOrdersPerfSnapshot, resetBotOrdersPerfProfile } from '../src/sim/combat/_perf_profile_bot_orders.js';
 
+// F1 (P3 battle-cut trace, 2026-11-19): lets a test force the Army HQ reservation exit; null keeps the real predicate.
+const armyHqReservationOverride = vi.hoisted(() => ({ value: null as boolean | null }));
+vi.mock('../src/sim/combat/triggered_operations.js', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('../src/sim/combat/triggered_operations.js')>();
+    return {
+        ...actual,
+        corpsHasDueArmyHqReservation: (...args: Parameters<typeof actual.corpsHasDueArmyHqReservation>) =>
+            armyHqReservationOverride.value ?? actual.corpsHasDueArmyHqReservation(...args),
+    };
+});
+
 const FACTION: FactionId = 'RS';
 const CORPS_ID = 'vrs_test_corps' as FormationId;
 const defaultPersonality: OfficerPersonality = {
@@ -54,6 +65,7 @@ function setTopics(value: string | undefined): void {
 
 afterEach(() => {
     setTopics(undefined);
+    armyHqReservationOverride.value = null;
     vi.restoreAllMocks();
 });
 
@@ -377,6 +389,8 @@ const SCENARIOS: Array<{
     expectSite?: string;
     expectFields?: Record<string, unknown>;
     expectReturned: number;
+    /** F1: the plan exit falls through to the local probe fallback (fallback-reached fields become present). */
+    f1FallsThrough?: boolean;
 }> = [
     {
         name: 'general plan creation (site A)',
@@ -413,6 +427,7 @@ const SCENARIOS: Array<{
     },
     {
         name: 'below the effective participant minimum is an OUTER terminal',
+        f1FallsThrough: true,
         build: () => ({
             briefing: makeIntelBriefing([0.25], { turn: 20, consecutiveProbes: 2 }),
             plan: makePlanDecision(),
@@ -421,7 +436,7 @@ const SCENARIOS: Array<{
         expectExit: 'below_min_participants',
         expectPresent: ['primary_pool_size', 'participating_count', 'effective_min_for_op'],
         expectAbsent: ['objective_ids', 'launch_probe', 'overlap_checked', 'probe_on_cooldown'],
-        expectReturned: 0,
+        expectReturned: 1, // F1: the local probe fallback now emits a probe
     },
     {
         name: 'fallback escalation into an occupying operation against a bounded position (site B)',
@@ -443,6 +458,7 @@ const SCENARIOS: Array<{
     },
     {
         name: 'a plan target that is not a reachable enemy OSID leaves no objective (OUTER terminal)',
+        f1FallsThrough: true,
         build: () => {
             const plan = makePlanDecision();
             (plan.plan as unknown as { target_osids: string[] }).target_osids = ['op:test:not_an_enemy_osid'];
@@ -451,7 +467,7 @@ const SCENARIOS: Array<{
         expectExit: 'no_objectives',
         expectPresent: ['primary_pool_size', 'participating_count', 'effective_min_for_op', 'reachable_enemy_osid_count', 'objective_ids'],
         expectAbsent: ['launch_probe', 'overlap_checked', 'probe_on_cooldown'],
-        expectReturned: 0,
+        expectReturned: 1, // F1: the local probe fallback now emits a probe
     },
     {
         name: 'plan-probe substitution suppressed by an overlapping live operation (recovery phase holds no slot)',
@@ -464,6 +480,7 @@ const SCENARIOS: Array<{
     },
     {
         name: 'general operation suppressed by an overlapping live operation (recovery phase holds no slot)',
+        f1FallsThrough: true,
         build: () => ({ briefing: makeIntelBriefingWith([0.25], { turn: 20, consecutiveProbes: 2 }, [OVERLAPPING_RECOVERY_OPERATION]), plan: makePlanDecision(), allocation: makeAllocation() }),
         expectExit: 'general_overlap_suppressed',
         expectPresent: ['active_slot_users', 'launch_probe', 'overlap_checked', 'overlap_found'],
@@ -500,6 +517,7 @@ const SCENARIOS: Array<{
     },
     {
         name: 'below the minimum AFTER the objective-eligibility filter (enough participants before it) is an OUTER terminal',
+        f1FallsThrough: true,
         build: () => {
             const inputs: EmitInputs = { briefing: makeIntelBriefing([0.25], { turn: 20, consecutiveProbes: 2 }), plan: makePlanDecision(), allocation: makeAllocation() };
             // one enclave-tagged brigade located outside the objective's enclave: real isBrigadeEligibleForOperationObjectives() drops it
@@ -513,10 +531,11 @@ const SCENARIOS: Array<{
         expectPresent: ['primary_pool_size', 'participating_count', 'effective_min_for_op', 'reachable_enemy_osid_count', 'objective_ids', 'eligible_count'],
         expectAbsent: ['launch_probe_evaluated', 'launch_probe', 'overlap_checked', 'probe_on_cooldown', 'can_consider_local_opportunity', 'fallback_considered'],
         expectFields: { participating_count: 2, effective_min_for_op: 2, eligible_count: 1, objective_ids: ['op:test:objective'] },
-        expectReturned: 0,
+        expectReturned: 1, // F1: the local probe fallback now emits a probe
     },
     {
         name: 'inner friendly-approach helper returns [] (no friendly OSID set for the faction) and the REAL outer terminal below_min_participants follows',
+        f1FallsThrough: true,
         build: () => {
             const inputs: EmitInputs = { briefing: makeIntelBriefing([0.25], { turn: 20, consecutiveProbes: 2 }), plan: makePlanDecision(), allocation: makeAllocation() };
             // friendlyOsidsByFaction has no entry for the faction: friendlyApproachOsids' helper returns [] (emit.ts, not bilateral-specific),
@@ -1244,6 +1263,64 @@ describe('local_occupation_candidate observer (real commander builder)', () => {
     });
 });
 
+// F1 (orchestrator ruling 2026-11-19): a corps whose active plan cannot be built this turn still
+// probes locally. The five plan exits fall through to the existing probe/local-occupation fallback
+// with every fallback gate unchanged; the first-reached plan exit stays the recorded exit.
+const F1_PLAN_EXIT_CASES: Array<{ exit: string; build: () => EmitInputs; overlapSuppressed?: boolean; setup?: () => void }> = [
+    {
+        exit: 'reserved_for_army_hq',
+        build: () => ({ briefing: makeIntelBriefing([0.25], { turn: 20, consecutiveProbes: 2 }), plan: makePlanDecision(), allocation: makeAllocation() }),
+        setup: () => { armyHqReservationOverride.value = true; },
+    },
+    { exit: 'below_min_participants', build: SCENARIOS.find((s) => s.name.startsWith('below the effective participant minimum'))!.build },
+    { exit: 'no_objectives', build: SCENARIOS.find((s) => s.expectExit === 'no_objectives')!.build },
+    { exit: 'below_min_after_eligibility', build: SCENARIOS.find((s) => s.expectExit === 'below_min_after_eligibility')!.build },
+    { exit: 'general_overlap_suppressed', build: SCENARIOS.find((s) => s.expectExit === 'general_overlap_suppressed')!.build, overlapSuppressed: true },
+];
+
+describe('F1: a plan that cannot be built falls through to the local probe fallback', () => {
+    for (const c of F1_PLAN_EXIT_CASES) {
+        it(`${c.exit}: the fallback is reached with its gates unchanged`, () => {
+            c.setup?.();
+            setTopics('commander_creation');
+            const on = runEmit(c.build());
+            const row = parseRow(on.lines[0]!);
+            expect(row.exit).toBe(c.exit);
+            expect(row.can_consider_local_opportunity).toBe(true);
+            expect(row.fallback_considered).toBe(true);
+            expect(row.built.map((entry: any) => entry.site)).toContain('fallback_probe');
+            if (c.overlapSuppressed) {
+                // the same overlap gate that suppressed the plan op also suppresses the fallback probe
+                expect(on.output.operations).toEqual([]);
+            } else {
+                expect(on.output.operations).toHaveLength(1);
+                expect(on.output.operations[0]!.type).toBe('probe');
+            }
+            // on/off parity holds on the new path
+            setTopics(undefined);
+            c.setup?.();
+            const off = runEmit(c.build());
+            expect(off.output).toEqual(on.output);
+        });
+    }
+
+    it('active_slot_full stays an outer terminal: no fallback when every slot is in use', () => {
+        setTopics('commander_creation');
+        const on = runEmit(SCENARIOS.find((s) => s.expectExit === 'active_slot_full')!.build());
+        const row = parseRow(on.lines[0]!);
+        expect(row.exit).toBe('active_slot_full');
+        expect(row.fallback_considered).toBeUndefined();
+        expect(on.output.operations).toEqual([]);
+    });
+});
+
+// Fields the local probe fallback reaches; since F1 they are legitimately present after a plan exit.
+const F1_FALLBACK_REACHED_KEYS = new Set([
+    'probe_on_cooldown', 'can_consider_local_opportunity', 'local_occupation_candidate_present', 'fallback_considered',
+    'probe_brigade_selected', 'probe_objective_ids', 'probe_reachable', 'target_is_bounded_position',
+    'reduction_participant_count', 'single_brigade_sufficient', 'escalate_to_operation', 'overlap_checked', 'overlap_found',
+]);
+
 describe('commander_creation emitter observation', () => {
     for (const scenario of SCENARIOS) {
         it(`${scenario.name}: records the REAL exit with reached fields only, without changing operations or state`, () => {
@@ -1269,7 +1346,11 @@ describe('commander_creation emitter observation', () => {
             expect(row.turn).toBe(inputs.briefing.turn);
             expect(row.exit).toBe(scenario.expectExit);
             for (const key of scenario.expectPresent) expect(row, `present: ${key}`).toHaveProperty(key);
-            for (const key of scenario.expectAbsent) expect(row, `absent (never inferred): ${key}`).not.toHaveProperty(key);
+            const absentKeys = scenario.f1FallsThrough
+                ? scenario.expectAbsent.filter((key) => !F1_FALLBACK_REACHED_KEYS.has(key))
+                : scenario.expectAbsent;
+            for (const key of absentKeys) expect(row, `absent (never inferred): ${key}`).not.toHaveProperty(key);
+            if (scenario.f1FallsThrough) expect(row.fallback_considered).toBe(true);
             expect(row.returned).toHaveLength(scenario.expectReturned);
             expect(row.returned.map((entry: any) => entry.name)).toEqual(on.output.operations.map((op) => op.name));
             expect(row.returned.map((entry: any) => entry.started_turn)).toEqual(on.output.operations.map((op) => op.started_turn));

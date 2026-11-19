@@ -1422,16 +1422,14 @@ describe('commander emission overlap guards', () => {
         });
     });
 
-    it('P-A: does not create an operation whose only second brigade cannot reach assembly in time', () => {
-        // b1 is at the objective's approach (staged). b2 is 8 friendly hops away — WITHIN the
-        // existing MAX_REACHABILITY_HOPS=8 reachability check, so the pre-P-A creator admitted
-        // it — but 8 terrain-weighted edges at the RS column rate of 2 need 4 transit turns,
-        // while this plan-driven op provides only planning_duration 1 + grace 2 = 3. P-A drops
-        // b2; one brigade is below the two-brigade anchor minimum, so no operation is created.
-        // The minimum is NOT lowered and no participant is manufactured.
-        const farIds = Array.from({ length: 8 }, (_, i) => `op:test:far${i}`);
+    // b1 staged at the objective's approach; b2 `farHops` friendly cells behind it on a single
+    // chain. Default terrain costs ~0.92 per edge, so 8 edges at the RS column rate of 2 need 4
+    // transit turns. With `riverCrossings`, every chain cell carries a river-crossing penalty
+    // (+0.5 per edge, ~1.42), so the same 8 edges cost ~11.3 = 6 transit turns.
+    function makeFarSecondBrigadeBriefing(farHops: number, riverCrossings = false): CommanderBriefing {
+        const farIds = Array.from({ length: farHops }, (_, i) => `op:test:far${i}`);
         const adjacency = new Map<string, readonly string[]>([
-            ['op:test:approach', ['op:test:objective', 'op:test:far7']],
+            ['op:test:approach', ['op:test:objective', farIds[farIds.length - 1]!]],
             ['op:test:objective', ['op:test:approach']],
         ]);
         for (let i = 0; i < farIds.length; i += 1) {
@@ -1456,7 +1454,23 @@ describe('commander emission overlap guards', () => {
                     ['HRHB' as FactionId, new Set()],
                 ]),
             } as SpatialContext,
-            reverse_map: new Map() as any,
+            reverse_map: (riverCrossings
+                ? new Map(farIds.map((id) => [id, [`S:${id}`]]))
+                : new Map()) as any,
+            ...(riverCrossings
+                ? {
+                    terrain_data: {
+                        by_sid: Object.fromEntries(farIds.map((id) => [`S:${id}`, {
+                            road_access_index: 0.5,
+                            river_crossing_penalty: 1,
+                            elevation_mean_m: 200,
+                            elevation_stddev_m: 10,
+                            slope_index: 0.1,
+                            terrain_friction_index: 0.1,
+                        }])),
+                    } as any,
+                }
+                : {}),
         };
         const state = briefing.state_ref!;
         state.military.formations = Object.fromEntries(
@@ -1466,11 +1480,29 @@ describe('commander emission overlap guards', () => {
             a: 'op:test:approach',
             b: 'op:test:objective',
         } as any];
+        // Controllers are keyed by OSID directly, so the reverse map only feeds terrain lookups.
         state.political.political_controllers = {
             ['op:test:approach']: FACTION,
             ['op:test:objective']: 'RBiH',
             ...Object.fromEntries(farIds.map((id) => [id, FACTION])),
         } as any;
+        return briefing;
+    }
+
+    it('P-A: does not create a plan-driven operation whose only second brigade cannot reach assembly in time', () => {
+        // b1 is at the objective's approach (staged). b2 is 8 friendly hops away — WITHIN the
+        // existing MAX_REACHABILITY_HOPS=8 reachability check, so the pre-P-A creator admitted
+        // it — but 8 terrain-weighted edges at the RS column rate of 2 need 4 transit turns,
+        // while this plan-driven op provides only planning_duration 1 + grace 2 = 3. P-A drops
+        // b2; one brigade is below the two-brigade anchor minimum, so no plan-driven operation is
+        // created. The minimum is NOT lowered and no participant is manufactured.
+        //
+        // F1 (2026-11-19): the corps then reaches the local fallback, as a corps with no plan
+        // does. The objective is a bounded position, so the fallback builds its own reduction
+        // operation with planning_duration computePlanningDuration(1) = 3, and runs its own P-A
+        // check against that budget: 3 + grace 2 = 5 >= 4 transit turns, so b2 is admitted
+        // there. With plan = null the same reduction is built without F1.
+        const briefing = makeFarSecondBrigadeBriefing(8);
 
         const output = emitCommanderOutput(
             briefing,
@@ -1482,7 +1514,61 @@ describe('commander emission overlap guards', () => {
             makeThreats(),
         );
 
-        expect(output.operations).toHaveLength(0);
+        // No plan-driven operation (planning_duration 1): the only operation is the fallback
+        // reduction, at its own planning_duration 3, with the two-brigade minimum not lowered.
+        expect(output.operations).toHaveLength(1);
+        const [reduction] = output.operations;
+        expect(reduction).toMatchObject({
+            type: 'sector_attack',
+            objectives: ['op:test:objective'],
+            participating_brigades: ['b1', 'b2'],
+            planning_duration: 3,
+            minimum_viable_participants: 2,
+            minimum_assembled_participants: 2,
+        });
+
+        // The same operation a corps with no plan builds (the fallback path, unchanged by F1).
+        const noPlanOutput = emitCommanderOutput(
+            briefing,
+            [],
+            makeForces(),
+            makeAllocation(),
+            { ...makePlanDecision(), plan: null, action: 'none' as const },
+            makeDecisions(),
+            makeThreats(),
+        );
+        expect(noPlanOutput.operations).toHaveLength(1);
+        const { name: _planName, ...withPlan } = reduction!;
+        const { name: _noPlanName, ...withoutPlan } = noPlanOutput.operations[0]!;
+        expect(withPlan).toEqual(withoutPlan);
+    });
+
+    it('P-A: the fallback reduction does not admit a second brigade that cannot reach its own assembly budget', () => {
+        // Negative case for the fallback path: b2 is 8 cells back (inside MAX_REACHABILITY_HOPS)
+        // across river-crossing terrain, 6 transit turns, past the reduction's own budget of
+        // planning_duration 3 + grace 2 = 5. P-A drops b2 there too.
+        // With one participant the bounded position is not escalated to a reduction: with or
+        // without a plan, the corps sends only b1's single-brigade probe, and b2 is in no operation.
+        // (Without the reduction path's P-A check, b2 would be admitted and a b1+b2 reduction built.)
+        for (const planDecision of [
+            makePlanDecision(),
+            { ...makePlanDecision(), plan: null, action: 'none' as const },
+        ]) {
+            const output = emitCommanderOutput(
+                makeFarSecondBrigadeBriefing(8, true),
+                [],
+                makeForces(),
+                makeAllocation(),
+                planDecision,
+                makeDecisions(),
+                makeThreats(),
+            );
+            expect(output.operations).toHaveLength(1);
+            expect(output.operations[0]).toMatchObject({
+                type: 'probe',
+                participating_brigades: ['b1'],
+            });
+        }
     });
 
     it('concentrates a third available brigade against a bounded position without raising the two-brigade formation minimum', () => {
