@@ -5,8 +5,9 @@
  * unanimously on 2026-11-18 after three rounds, EN and BCS in lockstep; it is pinned word for word. The rule: the staff follows
  * the standing order; Always allow sends sweeps and each counts against the side; any other order, or none, sends none at
  * Assisted, Delegated or Observer; the staff sends nothing before the order is answered; at Observer an order the player has not
- * given is answered automatically with the historical policy, and an order the player gave stays in force; corps operations at
- * Assisted still wait for the President. The copy never calls a sweep "authorized" or the flag "ethnic cleansing"
+ * given is answered automatically with the historical policy, and an order the player gave stays in force (F1-B, 2026-11-19: the
+ * card that comes up after it is answered with that order, at the same effects); corps operations at Assisted still wait for the
+ * President. The copy never calls a sweep "authorized" or the flag "ethnic cleansing"
  * (SENSITIVE_HISTORY_DESIGN_GATE.md §2a(0)), never names Operation Circle (ruling §6), and the RS policy card keeps its
  * pre-#740 "entirely" (reverted by the same panel).
  */
@@ -56,7 +57,7 @@ const SIGNED: Record<'en' | 'bcs', Record<string, string>> = {
         'autonomy.level.delegated.desc':
             'The default. Your staff runs the army, including operations and recruitment, without asking. Corps and OG commanders report their stance changes to you, and each change stands unless you answer. Event decisions still come to you. Rear-area paramilitary sweeps follow your standing order: under Always allow your staff sends them without asking you, and each one counts against your side; under any other order, or none, it sends none.',
         'autonomy.level.observer.desc':
-            'As Delegated, except that stance changes are not reported to you and event decisions resolve to their historical response. A decision with no historical response still waits for you. If you have not given the paramilitary standing order, it is answered the same way when its decision comes up, with the historical policy. An order you gave stays in force. Your side\'s forces act under the order in force, and each sweep they carry out counts against your side.',
+            'As Delegated, except that stance changes are not reported to you and event decisions resolve to their historical response. A decision with no historical response still waits for you. If you have not given the paramilitary standing order, it is answered the same way when its decision comes up, with the historical policy. An order you gave stays in force. When its decision comes up, that decision is answered with your order, and the effects are the same as if you had answered it yourself. Your side\'s forces act under the order in force, and each sweep they carry out counts against your side.',
         'eventDecision.paramilitaryPolicyRule':
             'Your staff follows this order at every command level. If you allow deployment, rear-area sweeps are sent without asking you, and each one counts against your side. If you refuse it, none are sent. If you choose to review each deployment, each request comes to you at Full Control; at Assisted, Delegated or Observer no request comes to you, so none are sent. Your staff sends nothing before this order is answered. Your answer holds at every level, Observer included. At Observer, if you have not given a standing order, this order is answered automatically with the historical policy, and your side\'s forces act under it. At Assisted, corps operations still wait for your approval; this order does not cover them.',
         'paramilitaryReview.policyHint':
@@ -84,7 +85,7 @@ const SIGNED: Record<'en' | 'bcs', Record<string, string>> = {
         'autonomy.level.delegated.desc':
             'Zadani nivo. Štab vodi vojsku, uključujući operacije i regrutaciju, bez pitanja. Komandanti korpusa i OG vam prijavljuju promjene stava, a svaka promjena ostaje ako ne odgovorite. Odluke o događajima i dalje dolaze vama. Paravojne akcije u pozadini slijede vašu stalnu naredbu: uz Uvijek dozvoli štab ih šalje bez pitanja, a svaka takva akcija pada na teret vaše strane; uz bilo koju drugu naredbu, ili bez naredbe, ne šalje nijednu.',
         'autonomy.level.observer.desc':
-            'Kao Delegirano, osim što vam se promjene stava ne prijavljuju, a odluke o događajima rješavaju se historijskim odgovorom. Odluka bez historijskog odgovora i dalje čeka vas. Ako niste izdali stalnu naredbu o paravojnim akcijama, na nju se odgovara na isti način kad dođe odluka o njoj, historijskom politikom. Naredba koju ste izdali ostaje na snazi. Snage vaše strane djeluju po naredbi koja vrijedi, a svaka akcija koju provedu pada na teret vaše strane.',
+            'Kao Delegirano, osim što vam se promjene stava ne prijavljuju, a odluke o događajima rješavaju se historijskim odgovorom. Odluka bez historijskog odgovora i dalje čeka vas. Ako niste izdali stalnu naredbu o paravojnim akcijama, na nju se odgovara na isti način kad dođe odluka o njoj, historijskom politikom. Naredba koju ste izdali ostaje na snazi. Kad dođe odluka o njoj, na tu odluku se odgovara vašom naredbom, a učinci su isti kao da ste sami odgovorili. Snage vaše strane djeluju po naredbi koja vrijedi, a svaka akcija koju provedu pada na teret vaše strane.',
         'eventDecision.paramilitaryPolicyRule':
             'Štab slijedi ovu naredbu na svakom nivou komandovanja. Ako dozvolite raspoređivanje, paravojne akcije u pozadini šalju se bez pitanja, a svaka takva akcija pada na teret vaše strane. Ako ga odbijete, ne šalje se nijedna. Ako odaberete da pregledate svako raspoređivanje, na nivou Pune kontrole svaki zahtjev dolazi vama; na nivoima Asistirano, Delegirano i Posmatrač zahtjev vam ne stiže, pa se ne šalje nijedna. Prije odgovora na ovu naredbu štab ne šalje ništa. Vaš odgovor vrijedi na svakom nivou, i na nivou Posmatrač. Na nivou Posmatrač, ako niste izdali stalnu naredbu, na ovu naredbu se automatski odgovara historijskom politikom, a snage vaše strane djeluju po njoj. Na nivou Asistirano operacije korpusa i dalje čekaju vašu saglasnost; ova naredba ih ne obuhvata.',
         'paramilitaryReview.policyHint':
@@ -167,6 +168,19 @@ describe('staff-sweep disclosure copy', () => {
         expect(en['autonomy.level.observer.desc']).toMatch(/An order you gave stays in force\./);
         expect(en['autonomy.level.observer.desc']).toMatch(/each sweep they carry out counts against your side/);
         expect(bcs['autonomy.level.observer.desc']).toMatch(/Naredba koju ste izdali ostaje na snazi\./);
+    });
+
+    it('Observer, F1-B: a card that comes up after an order you gave is answered with that order, at the same effects (signed 2026-11-19)', () => {
+        const observer = en['autonomy.level.observer.desc']!;
+        const observerBcs = bcs['autonomy.level.observer.desc']!;
+        expect(observer).toMatch(/When its decision comes up, that decision is answered with your order, and the effects are the same as if you had answered it yourself\./);
+        expect(observerBcs).toMatch(/na tu odluku se odgovara vašom naredbom, a učinci su isti kao da ste sami odgovorili\./);
+        // The new sentence follows "An order you gave stays in force." directly, in both languages.
+        expect(observer).toContain('An order you gave stays in force. When its decision comes up, that decision is answered with your order');
+        expect(observerBcs).toContain('Naredba koju ste izdali ostaje na snazi. Kad dođe odluka o njoj, na tu odluku se odgovara vašom naredbom');
+        // "Consequences" names the Decision Consequences screen, which lists only answers given in person: never in this string.
+        expect(observer).not.toMatch(/consequences/i);
+        expect(observerBcs).not.toMatch(/posljedic/i);
     });
 
     it('the game-rule block states the signed rule, in both languages', () => {

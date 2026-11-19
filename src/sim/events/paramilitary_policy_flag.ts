@@ -41,7 +41,10 @@ export const PARAMILITARY_POLICY_CARD_ID_BY_FACTION: Readonly<Partial<Record<Fac
  *
  * Ruling A1 (an order the human gives in person wins): the card-to-order mirror reads this so an
  * automatic answer to this faction's card (Observer's, at fire time or from the pending drain)
- * never replaces such an order. Headless runs file no paramilitary decisions, so this is false there.
+ * never replaces such an order, and F1-B (2026-11-19) reads it first, before that answer writes
+ * anything, so the automatic answer is the option that writes the order
+ * (`selectInPersonParamilitaryOrderResponse`, ai_default_response.ts). Headless runs file no
+ * paramilitary decisions, so this is false there.
  */
 export function hasInPersonParamilitaryStandingOrder(state: GameState, faction: FactionId): boolean {
     const order = state.paramilitary_policy;

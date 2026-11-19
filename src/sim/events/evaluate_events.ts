@@ -12,7 +12,12 @@ import type { EventDefinition, DimensionShift, EventResponseOption, FiredEvent, 
 import { triggerMatches } from './event_types.js';
 import { isEventReady } from './pressure_system.js';
 import { pickBotResponseV1 } from './bot_response.js';
-import { applyAIDefaultResponse, hasAuthoredAIDefaultResponse, selectAIDefaultResponse } from './ai_default_response.js';
+import {
+    applyAIDefaultResponse,
+    hasAuthoredAIDefaultResponse,
+    selectAIDefaultResponse,
+    selectInPersonParamilitaryOrderResponse,
+} from './ai_default_response.js';
 import { emitEventNotifications } from './emit_notifications.js';
 import { applyDimensionShift, type DimensionStore } from './strategic_dimensions.js';
 import { getPoliticalPersonality, computePoliticalAssessment } from '../political/political_personality.js';
@@ -188,8 +193,10 @@ export function applyDefinitionFlags(
     const policy = policyFlag ? flags[policyFlag] : undefined;
     if (policy === 'always_allow' || policy === 'always_deny' || policy === 'ask') {
         // A1: an order the human gives in person wins. An automatic answer never replaces an
-        // Always allow or Always deny the human set in the review modal; the card's flag and its
-        // other effects still apply, so the automatic answer stays on the record.
+        // Always allow or Always deny the human set in the review modal. Since F1-B (2026-11-19)
+        // both automatic entry points answer the player's own card with the option that writes
+        // that order (`selectInPersonParamilitaryOrderResponse`), so the value here already equals
+        // the order; this return stays as the second guard.
         if (answeredBy === 'automatic' && playerFaction && hasInPersonParamilitaryStandingOrder(state, playerFaction)) {
             return;
         }
@@ -721,7 +728,9 @@ export function evaluateEvents(
                 stillPending.push(pending);
                 continue;
             }
-            const auto = applyAIDefaultResponse(state, def);
+            // F1-B: the player's own policy card takes the option of an order given in person,
+            // chosen here before any part of the answer is applied (read before write).
+            const auto = applyAIDefaultResponse(state, def, selectInPersonParamilitaryOrderResponse(state, def));
             recordEventDecision(
                 state,
                 def.id,
@@ -955,12 +964,16 @@ export function evaluateEvents(
                 // No player faction (headless/spectator) OR Observer (level 3) for non-required events: bot auto-responds.
                 // Every selection route applies the chosen response the same way (effects, then
                 // flags, then dimension shifts), so the choice and its application are separate.
-                const { chosen, decisionSource } = selectBotEventResponse(
-                    state,
-                    def,
-                    respondingFaction,
-                    observerAutoResolves,
-                );
+                // F1-B (§6 D1 stage 2, 2026-11-19): at Observer the player's own policy card is
+                // answered with the order the player already gave that side in person, if any, at
+                // that order's price; it is read here, before any part of the answer is applied.
+                // Still logged `bot_ai_default` (an automatic answer). Bots and headless never reach it.
+                const inPersonOrder = observerAutoResolves
+                    ? selectInPersonParamilitaryOrderResponse(state, def)
+                    : null;
+                const { chosen, decisionSource } = inPersonOrder
+                    ? { chosen: inPersonOrder, decisionSource: 'bot_ai_default' as const }
+                    : selectBotEventResponse(state, def, respondingFaction, observerAutoResolves);
                 applyEventEffects(state, chosen.effects ?? []);
                 applyDefinitionFlags(state, chosen.sets_flags, 'automatic');
                 applyDefinitionDimensionShifts(state, chosen.dimension_shifts);

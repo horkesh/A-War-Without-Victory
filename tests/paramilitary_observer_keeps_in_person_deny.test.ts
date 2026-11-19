@@ -3,9 +3,11 @@
  *
  * Pinning test for a suspected defect (historian code read, 2026-11-18): an RS human sets Always deny
  * in the paramilitary review modal before the RS policy card has fired, then switches to Observer.
- * When the card fires, Observer answers it automatically with the historical default (Always allow).
- * That automatic answer must not replace the order the human gave in person: the standing order
- * stays Always deny and the paramilitary gate still sends no sweep.
+ * When the card fires, Observer answers it automatically. That automatic answer must not replace the
+ * order the human gave in person: the standing order stays Always deny and the paramilitary gate
+ * still sends no sweep. Since F1-B (2026-11-19) the automatic answer is the card's Always deny
+ * itself, not the historical Always allow (tests/paramilitary_observer_in_person_order_f1b.test.ts);
+ * E1's guard in the mirror stays as a second guard.
  *
  * Both automatic-answer paths are driven through the real `evaluateEvents`: the fire-time branch
  * (the card fires while Observer is on) and the Observer drain (the card fired at Full Control,
@@ -155,8 +157,8 @@ describe('§6 D1 stage 2 A1: Observer\'s automatic card answer keeps the human\'
         state.meta.autonomy_level = 3;
 
         evaluateEvents(state, noRng, 2, [RS_CARD] as EventDefinition[]);
-        // The card did fire and Observer did answer it with the historical default.
-        expect(cardDecision(state)).toMatchObject({ response_id: 'always_allow', decision_source: 'bot_ai_default', faction: 'RS' });
+        // The card did fire and Observer answered it automatically with the in-person order (F1-B).
+        expect(cardDecision(state)).toMatchObject({ response_id: 'always_deny', decision_source: 'bot_ai_default', faction: 'RS' });
 
         expect(state.paramilitary_policy).toBe('always_deny');
         expect(resolveNonManualParamilitaryPolicy(state, 'RS', CATALOG)).toBe('always_deny');
@@ -174,7 +176,7 @@ describe('§6 D1 stage 2 A1: Observer\'s automatic card answer keeps the human\'
         state.meta.autonomy_level = 3;
         evaluateEvents(state, noRng, 3, [RS_CARD] as EventDefinition[]);
         expect(state.military.pending_event_decisions ?? []).toEqual([]);
-        expect(cardDecision(state)).toMatchObject({ response_id: 'always_allow', decision_source: 'bot_ai_default', faction: 'RS' });
+        expect(cardDecision(state)).toMatchObject({ response_id: 'always_deny', decision_source: 'bot_ai_default', faction: 'RS' });
 
         expect(state.paramilitary_policy).toBe('always_deny');
         expect(resolveNonManualParamilitaryPolicy(state, 'RS', CATALOG)).toBe('always_deny');
@@ -219,7 +221,9 @@ describe('§6 D1 stage 2 A1: Observer\'s automatic card answer keeps the human\'
         const t2 = await advanceTurn(answered, process.cwd());
         expect(t2.error).toBeUndefined();
         expect(t2.state.meta.turn).toBe(2);
-        expect(cardDecision(t2.state)).toMatchObject({ response_id: 'always_allow', decision_source: 'bot_ai_default', faction: 'RS' });
+        expect(cardDecision(t2.state)).toMatchObject({ response_id: 'always_deny', decision_source: 'bot_ai_default', faction: 'RS' });
+        expect(t2.state.military.event_flags?.rs_paramilitary_refused).toBe(true);
+        expect(t2.state.military.event_flags).not.toHaveProperty('rs_paramilitary_authorized');
         expect(t2.state.paramilitary_policy).toBe('always_deny');
         expect(resolveNonManualParamilitaryPolicy(t2.state, 'RS', CATALOG)).toBe('always_deny');
         const rsSweeps = (t2.state.political.control_events ?? [])
