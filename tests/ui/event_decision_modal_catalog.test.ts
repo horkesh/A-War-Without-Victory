@@ -155,6 +155,25 @@ function eventTitle(event: EventDefinition): string {
     .join(' ') || event.id;
 }
 
+/** What the English modal shows: the card's `localizations.en` correction when it has one (Codex #763). */
+function englishDisplay(event: EventDefinition, field: 'title' | 'narrative' | 'staff_assessment', persisted: string): string {
+  const override = event.localizations?.en?.[field];
+  return typeof override === 'string' && override.trim().length > 0 ? override : persisted;
+}
+
+function englishEvidence(event: EventDefinition): string[] {
+  const override = event.localizations?.en?.trigger_evidence;
+  return Array.isArray(override) && override.length > 0 ? override : (event.trigger_evidence ?? []);
+}
+
+function englishOption(event: EventDefinition, option: EventResponseOption): { label: string; description?: string } {
+  const override = event.localizations?.en?.response_options?.[option.id];
+  return {
+    label: override?.label?.trim() || option.label,
+    description: override?.description?.trim() || option.description,
+  };
+}
+
 describe('production modal-ready event catalog rendering', () => {
   it('renders every accepted ready row as a complete player-facing decision modal', () => {
     const report = buildEventAcceptanceReport();
@@ -216,9 +235,9 @@ describe('production modal-ready event catalog rendering', () => {
         eventCatalog: new Map([[event.id, event]]),
       }));
 
-      expect(screen.getByRole('dialog', { name: restoreBosnianProperNames(eventTitle(event)) }), row.id).toBeTruthy();
+      expect(screen.getByRole('dialog', { name: restoreBosnianProperNames(englishDisplay(event, 'title', eventTitle(event))) }), row.id).toBeTruthy();
       expect(screen.getByText('Situation'), row.id).toBeTruthy();
-      expect(screen.getByText(displayEventProse(event.narrative ?? event.situation!)), row.id).toBeTruthy();
+      expect(screen.getByText(displayEventProse(englishDisplay(event, 'narrative', event.narrative ?? event.situation!))), row.id).toBeTruthy();
       // Council fix 4 (C1): the dossier shows the first source line free of developer text, or none.
       const sourceLine = resolveEventSourceLine(event, 'en');
       if (sourceLine) {
@@ -227,8 +246,8 @@ describe('production modal-ready event catalog rendering', () => {
       } else {
         expect(screen.queryByText('Source note'), row.id).toBeNull();
       }
-      expect(screen.getByText(playerSafeDossierText(displayEventProse(event.staff_assessment!))), row.id).toBeTruthy();
-      for (const evidence of event.trigger_evidence ?? []) {
+      expect(screen.getByText(playerSafeDossierText(displayEventProse(englishDisplay(event, 'staff_assessment', event.staff_assessment!)))), row.id).toBeTruthy();
+      for (const evidence of englishEvidence(event)) {
         expect(screen.getByText(playerSafeDossierText(displayEventProse(evidence))), row.id).toBeTruthy();
       }
       if (usesStaffRecommendation) {
@@ -251,9 +270,10 @@ describe('production modal-ready event catalog rendering', () => {
       expect(screen.queryByText('No immediate mechanical effects.'), row.id).toBeNull();
 
       for (const option of event.response_options ?? []) {
-        expect(screen.getByRole('button', { name: new RegExp(option.label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) }), `${row.id}:${option.id}`).toBeTruthy();
-        if (option.description) expect(screen.getByText(displayEventProse(option.description)), `${row.id}:${option.id}`).toBeTruthy();
-        for (const preview of expectedPreviewRows(option)) {
+        const shown = englishOption(event, option);
+        expect(screen.getByRole('button', { name: new RegExp(shown.label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) }), `${row.id}:${option.id}`).toBeTruthy();
+        if (shown.description) expect(screen.getByText(displayEventProse(shown.description)), `${row.id}:${option.id}`).toBeTruthy();
+        for (const preview of expectedPreviewRows({ ...option, label: shown.label, description: shown.description })) {
           expect(screen.getAllByText(preview).length, `${row.id}:${option.id}`).toBeGreaterThan(0);
         }
       }

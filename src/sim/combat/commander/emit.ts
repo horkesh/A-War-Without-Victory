@@ -2100,6 +2100,7 @@ interface CommanderCreationProbeWalkEntry {
     outcome:
         | 'selected'
         | 'unreachable'
+        | 'ineligible'
         | 'skipped_contact_cell'
         | 'skipped_duplicate_sector_location'
         | CommanderCreationProbeTargetSelectionStatus;
@@ -2162,6 +2163,7 @@ interface CommanderCreationObservation {
     fallback_considered?: boolean;
     probe_brigade_selected?: boolean;
     probe_objective_ids?: string[];
+    probe_objective_eligible?: boolean;
     probe_reachable?: boolean;
     target_is_bounded_position?: boolean;
     reduction_participant_count?: number;
@@ -2395,6 +2397,9 @@ function buildOperationsImpl(
     // participants, no objective, too few eligible, overlap), the corps still probes locally: those
     // exits leave this block and reach the probe/local-occupation fallback below with all of its
     // gates unchanged. active_slot_full stays a terminal return (no slot, no new operation of any kind).
+    // A plan stopped by the Army HQ reservation keeps that reservation in the fallback: it may
+    // probe, but it never escalates to a full operation (Codex #828 r4630167606).
+    let armyHqReservedPlanFellThrough = false;
     planBlock: if (
         planDecision.plan &&
         ACTIVE_PLAN_STATUSES.has(planDecision.plan.status) &&
@@ -2438,6 +2443,7 @@ function buildOperationsImpl(
             && corpsHasDueArmyHqReservation(briefing.state_ref, briefing.corps_id, briefing.turn)
         ) {
             markCommanderCreationExit(obs, 'reserved_for_army_hq');
+            armyHqReservedPlanFellThrough = true;
             break planBlock;
         }
         // Brigades the due queue head holds for its authored operation never join a commander
@@ -3333,6 +3339,7 @@ function buildOperationsImpl(
         let contactByFaction: ContactOsidsByFaction | undefined;
         let selectedProbe: { brigade: BrigadeEvaluation; sectorId: string | undefined; objectives: string[] } | null = null;
         let rankZeroObjectives: string[] | null = null;
+        let rankZeroEligible: boolean | null = null;
         let rankZeroReachable: boolean | null = null;
         let rankZeroDetail: CommanderCreationProbeTargetSelectionDetail | null = null;
         for (let sortedRank = 0; sortedRank < probeSurvivors.length; sortedRank++) {
@@ -3387,10 +3394,17 @@ function buildOperationsImpl(
                 });
             }
             const walkedObjectives = deriveProbeObjectives(walked, walkedSectorId);
-            const walkedReachable = walkedObjectives.length > 0 && isProbeReachable(walked, walkedObjectives);
+            // Enclave restriction (Codex #828 r4630167627, #833): the brigade must be eligible for its
+            // objective, by the same predicate the plan, local-occupation and reduction paths ask.
+            const walkedEligible = walkedObjectives.length > 0 && isBrigadeEligibleForOperationObjectives(
+                briefing.brigades.find((brigade) => brigade.id === walked.brigade_id),
+                walkedObjectives,
+            );
+            const walkedReachable = walkedEligible && isProbeReachable(walked, walkedObjectives);
             if (sortedRank === 0) {
                 rankZeroObjectives = walkedObjectives;
-                rankZeroReachable = walkedObjectives.length > 0 ? walkedReachable : null;
+                rankZeroEligible = walkedObjectives.length > 0 ? walkedEligible : null;
+                rankZeroReachable = walkedEligible ? walkedReachable : null;
                 if (targetSelectionDetail) rankZeroDetail = { ...targetSelectionDetail };
             }
             walkReceipt?.push({
@@ -3400,7 +3414,9 @@ function buildOperationsImpl(
                 derived_sector_id: walkedSectorId ?? null,
                 outcome: walkedReachable
                     ? 'selected'
-                    : walkedObjectives.length > 0
+                    : !walkedEligible && walkedObjectives.length > 0
+                        ? 'ineligible'
+                        : walkedObjectives.length > 0
                         ? 'unreachable'
                         : targetSelectionDetail?.status ?? 'not_reached',
             });
@@ -3427,7 +3443,11 @@ function buildOperationsImpl(
         if (probeSurvivors.length > 0) {
             // Skip probe if no enemy-adjacent OSIDs found — empty objectives cause immediate ZEA.
             if (obs) obs.probe_objective_ids = [...probeObjectives].sort(strictCompare);
-            if (obs && probeObjectives.length > 0) obs.probe_reachable = selectedProbe != null || rankZeroReachable === true;
+            if (obs && probeObjectives.length > 0) {
+                const objectiveEligible = selectedProbe != null || rankZeroEligible === true;
+                obs.probe_objective_eligible = objectiveEligible;
+                if (objectiveEligible) obs.probe_reachable = selectedProbe != null || rankZeroReachable === true;
+            }
         }
         if (probeBrigade) {
             if (probeObjectives.length > 0) {
@@ -3555,7 +3575,8 @@ function buildOperationsImpl(
                         })();
                     const singleBrigadeOccupationIsSufficient = localOccupationCandidate != null
                         && reductionParticipants.length === 1;
-                    const escalateToOperation = targetIsBoundedPosition
+                    const escalateToOperation = !armyHqReservedPlanFellThrough
+                        && targetIsBoundedPosition
                         && (
                             reductionParticipants.length >= ISOLATED_POSITION_OPERATION_MIN_BRIGADES
                             || singleBrigadeOccupationIsSufficient

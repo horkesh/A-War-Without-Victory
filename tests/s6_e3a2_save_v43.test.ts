@@ -7,11 +7,14 @@
  * - A v42 save past a plan week already holds a resolved row: a late card for that plan then
  *   writes nothing and costs nothing.
  * - A v42 pending_peace_plan is kept (the fallback pointer); the plan record is not rewritten.
+ * - Codex #827: a v42 save can hold the pointer beside the player's own routed card. Answering
+ *   the card settles the pointer from the logged answer at once, so the desktop advance gate
+ *   asks for no second (fallback modal) decision and the record equals the logged answer.
  */
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { CURRENT_SCHEMA_VERSION, type GameState } from '../src/state/game_state.js';
+import { CURRENT_SCHEMA_VERSION, type FactionId, type GameState } from '../src/state/game_state.js';
 import { applyMigrations } from '../src/state/save_migration.js';
 import {
     S6_E3A2_ADD_SUPPORT,
@@ -23,8 +26,10 @@ import { deserializeState, serializeState } from '../src/state/serialize.js';
 import { loadEventDefinitions } from '../src/sim/events/event_loader.js';
 import type { EventDefinition, EventResponseOption } from '../src/sim/events/event_types.js';
 import { collectRoutedPeacePlanCards } from '../src/sim/negotiation/plan_answer.js';
-import { evaluatePeacePlans } from '../src/sim/negotiation/peace_plans.js';
+import { evaluatePeacePlans, resolvePeacePlan } from '../src/sim/negotiation/peace_plans.js';
 import { resolveEventDecision } from '../src/sim/events/resolve_decision.js';
+import { resolveDesktopEventDecision } from '../src/desktop/desktop_sim.js';
+import { listBlockingPlayerDecisions } from '../src/state/player_decision_manifest.js';
 import { computeDimensionBaseValues, initializeStrategicDimensions } from '../src/sim/events/strategic_dimensions.js';
 
 const FIXTURE = resolve(__dirname, 'fixtures', 'save_migration', 'v42_plan_chain_pending.json');
@@ -192,5 +197,94 @@ describe('§6 E3a2 v43: a late card for a plan the v42 save already resolved', (
         computeDimensionBaseValues(neg.strategic_dimensions!, state, 'RS');
         // The base counts the resolved v42 row once: RS rejected Vance-Owen (graded −20).
         expect(neg.strategic_dimensions!.RS!.international_standing!.base_value).toBe(30);
+    });
+});
+
+/**
+ * A v42 save as the old rule could leave it (Codex #827, PR #827 thread r4626957984): the old
+ * engine opened the fallback pointer at the plan's trigger week, so the player's own routed card
+ * could be pending beside it (Owen-Stoltenberg and Contact Group fire on that same week). The
+ * card's v42 options carry no plan_answer; v43 adds it and keeps the pointer.
+ */
+function v42PointerBesideCard(opts: {
+    player: FactionId;
+    turn: number;
+    pointer: { plan_id: string; turn_offered: number; bot_responses: Partial<Record<FactionId, 'accepted' | 'rejected'>> };
+    card: { event_id: string; options: Array<{ id: string; effects: unknown[] }> };
+}): GameState {
+    const raw = JSON.parse(readFileSync(FIXTURE, 'utf8'));
+    raw.meta.player_faction = opts.player;
+    raw.meta.phase = 'war';
+    raw.meta.turn = opts.turn;
+    raw.meta.war_start_turn = 0;
+    raw.military.negotiation.peace_plan_history = [];
+    raw.military.negotiation.pending_peace_plan = opts.pointer;
+    raw.military.event_decision_log = [];
+    raw.military.pending_event_decisions = [{
+        event_id: opts.card.event_id,
+        event_title: opts.card.event_id,
+        turn_fired: opts.turn,
+        faction: opts.player,
+        requires_player_response: true,
+        response_options: opts.card.options.map((option) => ({ ...option, label: option.id })),
+    }];
+    return deserializeState(JSON.stringify(raw));
+}
+
+describe('§6 E3a2 v43: a v42 pointer beside the player\'s pending routed card (Codex #827)', () => {
+    it('answering the card settles the pointer from the logged answer: no second decision at the advance gate', () => {
+        const state = v42PointerBesideCard({
+            player: 'RBiH',
+            turn: 40,
+            pointer: { plan_id: 'vance_owen', turn_offered: 40, bot_responses: { RS: 'rejected', HRHB: 'accepted' } },
+            card: {
+                event_id: 'vance_owen_plan_1993',
+                options: [
+                    { id: 'accept', effects: [] },
+                    { id: 'reject', effects: [{ kind: 'morale_change', faction: 'RBiH', delta: 3 }] },
+                ],
+            },
+        });
+        // Both survive the load: the pointer, and the card now declaring its plan answer.
+        expect(state.military.negotiation!.pending_peace_plan?.plan_id).toBe('vance_owen');
+        expect(optionsOf(state, 'vance_owen_plan_1993').map((option) => option.plan_answer)).toEqual([
+            { plan_id: 'vance_owen', response: 'accepted' },
+            { plan_id: 'vance_owen', response: 'rejected' },
+        ]);
+
+        // The player rejects Vance-Owen on the card (desktop respond-to-event-decision, between turns).
+        const answered = resolveDesktopEventDecision(state, 'vance_owen_plan_1993', 'reject', process.cwd());
+        const neg = answered.military.negotiation!;
+        expect(answered.military.event_decision_log!.map((row) => [row.event_id, row.response_id, row.faction])).toEqual([
+            ['vance_owen_plan_1993', 'reject', 'RBiH'],
+        ]);
+        // The pointer is settled from that answer: the record equals the log.
+        expect(neg.pending_peace_plan).toBeUndefined();
+        expect(neg.peace_plan_history.map((row) => [row.plan_id, row.turn_offered, row.responses, row.resolved])).toEqual([
+            ['vance_owen', 40, { RBiH: 'rejected', RS: 'rejected', HRHB: 'accepted' }, true],
+        ]);
+
+        // Advance: the desktop gate asks for nothing more, and no modal answer can contradict the card.
+        expect(listBlockingPlayerDecisions(answered as never, 'RBiH')).toEqual([]);
+        expect(() => resolvePeacePlan(answered, 'vance_owen', 'accepted')).toThrow(/No pending peace plan/);
+        // The turn's own step finds the plan on the record: no second row, no new pointer.
+        evaluatePeacePlans(answered, catalog());
+        expect(neg.peace_plan_history).toHaveLength(1);
+        expect(neg.pending_peace_plan).toBeUndefined();
+    });
+
+    it('an answer that records nothing (the Owen-Stoltenberg Presidency accept) leaves the pointer to its modal', () => {
+        const state = v42PointerBesideCard({
+            player: 'RBiH',
+            turn: 70,
+            pointer: { plan_id: 'owen_stoltenberg', turn_offered: 70, bot_responses: { RS: 'accepted', HRHB: 'accepted' } },
+            card: { event_id: 'owen_stoltenberg_plan_1993', options: [{ id: 'accept', effects: [] }, { id: 'reject', effects: [] }] },
+        });
+        const answered = resolveDesktopEventDecision(state, 'owen_stoltenberg_plan_1993', 'accept', process.cwd());
+        expect(answered.military.negotiation!.pending_peace_plan?.plan_id).toBe('owen_stoltenberg');
+        expect(answered.military.negotiation!.peace_plan_history).toEqual([]);
+        expect(listBlockingPlayerDecisions(answered as never, 'RBiH').map((item) => [item.familyId, item.id])).toEqual([
+            ['peace_plan', 'owen_stoltenberg'],
+        ]);
     });
 });
