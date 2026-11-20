@@ -46,6 +46,7 @@ import type {
 import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../../state/formation_constants.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { spatialFriendlyDistance, spatialSameComponent } from '../../spatial_context.js';
+import { MAX_EXHAUSTION_FOR_OPERATION } from '../bot_constants.js';
 import { buildContactOsidsByFaction, standsOnContactCell, type ContactOsidsByFaction } from '../contact_cells.js';
 import { buildCommanderOperation, buildProbeOperation, derivePrimarySectorForBrigades, getMaxOperationSlots, getOperationSlotUsageForOperations } from '../corps_operation_helpers.js';
 import { isBrigadeEligibleForOperationObjectives } from '../enclave_resilience.js';
@@ -2103,6 +2104,7 @@ interface CommanderCreationProbeWalkEntry {
         | 'ineligible'
         | 'skipped_contact_cell'
         | 'skipped_duplicate_sector_location'
+        | 'stopped_corps_exhausted'
         | CommanderCreationProbeTargetSelectionStatus;
 }
 
@@ -3345,6 +3347,19 @@ function buildOperationsImpl(
         for (let sortedRank = 0; sortedRank < probeSurvivors.length; sortedRank++) {
             const walked = probeSurvivors[sortedRank]!;
             const walkedLocation = formationById[walked.brigade_id]?.location_osid ?? null;
+            // Panel revision (ops + corps seats, 2026-11-20): the walk past rank 0 runs only while the
+            // corps passes the planner's own readiness check. An exhausted corps behaves exactly as
+            // before the walk: one look at its top brigade, then it stands down.
+            if (sortedRank > 0 && briefing.corps_exhaustion > MAX_EXHAUSTION_FOR_OPERATION) {
+                walkReceipt?.push({
+                    sorted_rank: sortedRank,
+                    brigade_id: walked.brigade_id,
+                    location_osid: walkedLocation,
+                    derived_sector_id: null,
+                    outcome: 'stopped_corps_exhausted',
+                });
+                break;
+            }
             if (sortedRank > 0) {
                 contactByFaction ??= buildContactOsidsByFaction(
                     briefing.state_ref?.military.formations,
