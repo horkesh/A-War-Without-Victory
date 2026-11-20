@@ -270,4 +270,75 @@ describe('bilateral formation diversion', () => {
             .map(([id]) => id);
         expect(tagged).toEqual([]);
     });
+
+    // F3b (2026-11-20): the early exits. The war can stop without a ceasefire or Washington: the
+    // alliance drifts back above HOSTILE_THRESHOLD (appeasement, events), and the ceasefire
+    // preconditions (bilateral_ceasefire.ts C1-C6) do not depend on the war still running, so
+    // nothing guarantees a later branch clears the pick. These exits must release the current
+    // pick, not return with it still tagged.
+    const taggedCorps = (state: GameState) => Object.entries(state.military.corps_command ?? {})
+        .filter(([, cmd]) => cmd.status_reason === 'rbih_hrhb_bilateral_front_diversion')
+        .map(([id]) => id);
+
+    test('the war stops without a ceasefire or Washington (not_applicable): the current pick is released', () => {
+        const state = rotatingState();
+        expect(reassignCorpsForBilateralWar(state, 'RBiH').diverted_corps_id).toBe('arbih_vitez');
+        state.meta.turn += 1;
+        state.political.war_alliance_rbih_hrhb = 0.1; // above HOSTILE_THRESHOLD, still <= ALLIED_THRESHOLD
+        const report = reassignCorpsForBilateralWar(state, 'RBiH');
+        expect(report.reason).toBe('not_applicable');
+        expect(report.released_corps_id).toBe('arbih_vitez');
+        expect(taggedCorps(state)).toEqual([]);
+        expect(state.political.rbih_hrhb_state?.bilateral_diverted_corps?.RBiH).toBeUndefined();
+        const released = state.military.corps_command!.arbih_vitez!;
+        expect(released.status_reason).toBe('bilateral_diversion_lapsed');
+        expect(released.stance).toBe('balanced');
+        expect(released.directive?.offensive_targets).toEqual([]);
+    });
+
+    test('the faction falls below the corps minimum (insufficient_corps): the current pick is released', () => {
+        const state = rotatingState();
+        reassignCorpsForBilateralWar(state, 'RBiH');
+        state.meta.turn += 1;
+        for (const id of ['arbih_1st', 'arbih_2nd']) {
+            delete state.military.formations[id];
+            delete state.military.formations[`${id}_brigade`];
+        }
+        const report = reassignCorpsForBilateralWar(state, 'RBiH');
+        expect(report.reason).toBe('insufficient_corps');
+        expect(report.released_corps_id).toBe('arbih_vitez');
+        expect(taggedCorps(state)).toEqual([]);
+    });
+
+    test('the bilateral front disappears (no_bilateral_front): the current pick is released', () => {
+        const state = rotatingState();
+        reassignCorpsForBilateralWar(state, 'RBiH');
+        state.meta.turn += 1;
+        state.military.corps_front_sectors = {};
+        const report = reassignCorpsForBilateralWar(state, 'RBiH');
+        expect(report.reason).toBe('no_bilateral_front');
+        expect(report.released_corps_id).toBe('arbih_vitez');
+        expect(taggedCorps(state)).toEqual([]);
+    });
+
+    test('no HRHB-held enemy cells left on the front (no_bilateral_front after scoring): the current pick is released', () => {
+        const state = rotatingState();
+        reassignCorpsForBilateralWar(state, 'RBiH');
+        state.meta.turn += 1;
+        for (const osid of ['op:vitez:e', 'op:busovaca:e', 'op:zepce:e']) state.political.political_controllers![osid] = 'RBiH';
+        const report = reassignCorpsForBilateralWar(state, 'RBiH');
+        expect(report.reason).toBe('no_bilateral_front');
+        expect(report.released_corps_id).toBe('arbih_vitez');
+        expect(taggedCorps(state)).toEqual([]);
+    });
+
+    test('the early exits with no current pick write nothing', () => {
+        const state = rotatingState();
+        state.political.war_alliance_rbih_hrhb = 0.1;
+        const before = JSON.stringify(state.military.corps_command);
+        const report = reassignCorpsForBilateralWar(state, 'RBiH');
+        expect(report.reason).toBe('not_applicable');
+        expect(report.released_corps_id).toBeNull();
+        expect(JSON.stringify(state.military.corps_command)).toBe(before);
+    });
 });
