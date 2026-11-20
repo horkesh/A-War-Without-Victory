@@ -18,6 +18,11 @@
  * real adapter, ledger and distance-from-history reader. RBiH runs on a synthetic state: its identity card's answer is
  * written directly (a legacy save, a faction switch or the harness reach this state; engine Q3).
  *
+ * Since the merge onto main (2026-11-20): §6 T3 holds every request from a manual player until the side's card applies, so an
+ * order given in person before the card is a save an older build wrote; and §6 M's cap (D1's readers read through it) makes
+ * that build's pre-card Always allow no order in force. So the RBiH mismatch is now clamped (Observer takes the historical
+ * Refuse; pinned below), and RS's in-person Always deny, within any cap, is the remaining mismatched case.
+ *
  * Registered, not changed here: the Observer drain sends no notifications and applies no runtime causality (engine Q3 point
  * 3). Neither policy card's options carry runtime causality, so B does not depend on it; the drain cases pin that no
  * notification at all is sent, in particular no false one.
@@ -64,10 +69,19 @@ const FIRE_TURN: Record<Side, number> = { RS: 2, RBiH: 3 };
 const RS_GOALS_ID = 'rs_strategic_goals';
 const RS_GOALS = CATALOG.find((def) => def.id === RS_GOALS_ID)!;
 
-/** The two mismatched cases: the order the player gives in person differs from the card's historical default. */
+/**
+ * The mismatched case: the order the player gives in person differs from the card's historical default. Since §6 M merged
+ * (2026-11-20) the RBiH mismatch (an in-person Always allow before the card applies) is above M's cap, so D1's readers clamp it
+ * to `ask` and it is no in-person order: Observer answers with the historical Refuse (pinned below, "RBiH ... clamped").
+ * Only RS's in-person Always deny, within any cap, remains a mismatched F1-B case.
+ */
 const CASES: { side: Side; order: Order; historical: Order }[] = [
     { side: 'RS', order: 'always_deny', historical: 'always_allow' },
-    { side: 'RBiH', order: 'always_allow', historical: 'always_deny' },
+];
+/** Both sides' historical defaults, for the controls. */
+const CONTROLS: { side: Side; historical: Order }[] = [
+    { side: 'RS', historical: 'always_allow' },
+    { side: 'RBiH', historical: 'always_deny' },
 ];
 
 function option(side: Side, id: string): EventResponseOption {
@@ -342,36 +356,26 @@ describe('§6 D1 stage 2 F1-B: Observer answers the card with the order the play
             expect(detect(state, 'RS')).toEqual([0, 0]);
         });
 
-        it(`RBiH modal Always allow kept at Observer (${entry}, synthetic state): the card is answered Always allow, with the authorization's price and no refusal`, () => {
+        it(`RBiH modal Always allow from an older build, then Observer (${entry}, synthetic state): above M's cap, it is clamped, so the card takes the historical Refuse at its price and no sweep follows`, () => {
+            // Before §6 M merged, F1-B answered this card Always allow at the authorization's price. M's cap (no order above the
+            // card's applied answer, nor above `ask` before it applies; D1's readers read through it since the merge) makes the
+            // pre-card modal Always allow no order in force, so there is no in-person order and no refusal credit while sweeping.
             const state = inPersonOrderBeforeTheCard('RBiH', 'always_allow');
             const before = dimensionsBefore(state);
             answerAtObserver(state, 'RBiH', entry);
 
-            expectRecordOf(state, 'RBiH', 'always_allow', entry, before);
+            expectRecordOf(state, 'RBiH', 'always_deny', entry, before);
             const flags = state.military.event_flags ?? {};
-            expect(flags.rbih_paramilitary_policy).toBe('always_allow');
-            expect(flags.rbih_paramilitary_authorized).toBe(true);
-            expect(flags).not.toHaveProperty('rbih_paramilitary_refused');
-            // The authorization's price: -25 standing, -15 leverage, recruitment x0.95 for 52 turns; no refusal's +5 or -3.
-            expect(dimension(state, 'RBiH', 'international_standing') - before('RBiH', 'international_standing')).toBe(-25);
-            expect(dimension(state, 'RBiH', 'negotiating_leverage') - before('RBiH', 'negotiating_leverage')).toBe(-15);
-            expect(dimension(state, 'RBiH', 'internal_cohesion') - before('RBiH', 'internal_cohesion')).toBe(0);
-            expect(state.military.recruitment_modifiers).toEqual([
-                { faction: 'RBiH', pool_multiplier: 0.95, expires_turn: (state.meta.turn ?? 0) + 52 },
-            ]);
-            if (entry === 'fire time') {
-                expect(cardNotifications(state, 'RBiH').map(([target, response]) => [target, response])).toEqual([
-                    ['HRHB', 'always_allow'],
-                    ['RS', 'always_allow'],
-                ]);
-            } else {
-                expect(cardNotifications(state, 'RBiH')).toEqual([]);
-            }
-            expect(state.paramilitary_policy).toBe('always_allow');
-            expect(resolveNonManualParamilitaryPolicy(state, 'RBiH', CATALOG)).toBe('always_allow');
+            expect(flags.rbih_paramilitary_policy).toBe('always_deny');
+            expect(flags.rbih_paramilitary_refused).toBe(true);
+            expect(flags).not.toHaveProperty('rbih_paramilitary_authorized');
+            // The order in force is the card's applied Refuse, and the staff send nothing under it.
+            expect(state.paramilitary_policy).toBe('always_deny');
+            expect(resolveNonManualParamilitaryPolicy(state, 'RBiH', CATALOG)).toBe('always_deny');
+            expect(detect(state, 'RBiH')).toEqual([0, 0]);
         });
 
-        for (const { side, historical } of CASES) {
+        for (const { side, historical } of CONTROLS) {
             it(`control (${side}, ${entry}): with no in-person order, Observer answers with the historical default`, () => {
                 const state = noInPersonOrder(side);
                 const before = dimensionsBefore(state);
@@ -393,18 +397,19 @@ describe('§6 D1 stage 2 F1-B: Observer answers the card with the order the play
         });
 
         it(`the selector fails loudly (${entry}): a card with no option, or two options, writing the in-person order throws`, () => {
+            // RS's in-person Always deny (within M's cap; RBiH's pre-card Always allow is clamped since the merge onto M).
             const none: EventDefinition = {
-                ...CARD.RBiH,
-                response_options: CARD.RBiH.response_options!.filter((candidate) => candidate.id !== 'always_allow'),
+                ...CARD.RS,
+                response_options: CARD.RS.response_options!.filter((candidate) => candidate.id !== 'always_deny'),
             };
-            const allow = option('RBiH', 'always_allow');
+            const deny = option('RS', 'always_deny');
             const twice: EventDefinition = {
-                ...CARD.RBiH,
-                response_options: [...CARD.RBiH.response_options!, { ...allow, id: 'always_allow_copy' }],
+                ...CARD.RS,
+                response_options: [...CARD.RS.response_options!, { ...deny, id: 'always_deny_copy' }],
             };
             for (const def of [none, twice]) {
-                const state = inPersonOrderBeforeTheCard('RBiH', 'always_allow');
-                expect(() => answerAtObserver(state, 'RBiH', entry, [def])).toThrow(/rbih_paramilitary_policy/);
+                const state = inPersonOrderBeforeTheCard('RS', 'always_deny');
+                expect(() => answerAtObserver(state, 'RS', entry, [def])).toThrow(/rs_paramilitary_policy/);
             }
         });
     }
@@ -469,30 +474,23 @@ function receipts(state: GameState): { cause: string | undefined; key: string | 
 
 describe('§6 D1 stage 2 F1-B: the readers never count B\'s answer as history', () => {
     for (const entry of ENTRY_POINTS) {
-        for (const dissolved of [false, true]) {
-            it(`RBiH modal Always allow, then Observer (${entry}): a staff sweep's receipt is neutral${dissolved ? ' (dissolved)' : ''}, never the historical policy`, () => {
-                const state = inPersonOrderBeforeTheCard('RBiH', 'always_allow');
-                answerAtObserver(state, 'RBiH', entry);
-                expect(cardEntries(state, 'RBiH')).toEqual([
-                    expect.objectContaining({ response_id: 'always_allow', decision_source: 'bot_ai_default' }),
-                ]);
-                // The staff sends the second pocket's sweep under the order in force.
-                const { edges, reverseMap } = graph();
-                const report = detectParamilitaryTargets(state, edges, reverseMap, CATALOG);
-                expect(report.spawned.filter((spawn) => spawn.faction === 'RBiH').map((spawn) => spawn.target_osid)).toEqual([POCKETS[1]]);
-                if (dissolved) state.political.political_controllers![POCKETS[1]!] = 'RBiH';
-                advanceParamilitaries(state, edges, reverseMap);
-                marchToOutcome(state);
-
-                const shown = receipts(state);
-                expect(shown).toHaveLength(1);
-                expect(shown[0]!.cause).toBe('neutral');
-                expect(shown[0]!.key).toBe(dissolved
-                    ? 'decisionConsequences.detail.paramilitary.unrequestedDissolvedNeutral'
-                    : 'decisionConsequences.detail.paramilitary.unrequestedNeutral');
-                expect(shown[0]!.key).not.toMatch(/AutomaticOrder$/);
-            });
-        }
+        it(`RBiH modal Always allow from an older build, then Observer (${entry}): no staff sweep follows, so no receipt can credit the historical policy`, () => {
+            // Before §6 M merged, B answered the card Always allow here and the staff swept, and the receipt was pinned neutral
+            // (captured and dissolved). M's cap clamps that pre-card order, the card takes its historical Refuse, and nothing
+            // is sent without a request, so there is no receipt at all. The neutral receipt for a modal Always allow kept at
+            // Observer stays pinned on RS, whose card's own answer allows it (tests/paramilitary_receipt_cause_paths.test.ts, C1).
+            const state = inPersonOrderBeforeTheCard('RBiH', 'always_allow');
+            answerAtObserver(state, 'RBiH', entry);
+            expect(cardEntries(state, 'RBiH')).toEqual([
+                expect.objectContaining({ response_id: 'always_deny', decision_source: 'bot_ai_default' }),
+            ]);
+            const { edges, reverseMap } = graph();
+            const report = detectParamilitaryTargets(state, edges, reverseMap, CATALOG);
+            expect(report.spawned.filter((spawn) => spawn.faction === 'RBiH')).toEqual([]);
+            advanceParamilitaries(state, edges, reverseMap);
+            marchToOutcome(state);
+            expect(receipts(state)).toEqual([]);
+        });
 
         for (const { side, order } of CASES) {
             it(`${side} ${order} (${entry}): distance from history ignores B's automatic entry; the departure is counted once, through the filed modal entry`, () => {

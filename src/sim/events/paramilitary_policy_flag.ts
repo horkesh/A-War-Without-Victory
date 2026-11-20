@@ -7,7 +7,11 @@
  */
 
 import type { FactionId, GameState } from '../../state/game_state.js';
-import { PARAMILITARY_POLICY_CARD_BY_FACTION } from './paramilitary_policy_card.js';
+import {
+    PARAMILITARY_POLICY_CARD_BY_FACTION,
+    hasParamilitaryPolicyCardApplied,
+    readParamilitaryStandingOrder,
+} from './paramilitary_policy_card.js';
 
 /** The three standing orders a policy card or the review modal can write. */
 export type ParamilitaryPolicy = 'always_allow' | 'always_deny' | 'ask';
@@ -49,9 +53,15 @@ export const PARAMILITARY_POLICY_CARD_ID_BY_FACTION: Readonly<Partial<Record<Fac
  * anything, so the automatic answer is the option that writes the order
  * (`selectInPersonParamilitaryOrderResponse`, ai_default_response.ts). Headless runs file no
  * paramilitary decisions, so this is false there.
+ *
+ * Since the merge onto §6 T and M (2026-11-20): the order is read through M's cap
+ * (`readParamilitaryStandingOrder`), so an order above the side's applied card answer, or above
+ * `ask` before the card applies (an older build's modal Always allow), is not an order in force;
+ * and another side's card answer counts as a human decision only once that card has applied
+ * (`hasParamilitaryPolicyCardApplied`, T's shared accessor): a filed, unapplied answer is none.
  */
 export function hasInPersonParamilitaryStandingOrder(state: GameState, faction: FactionId): boolean {
-    const order = state.paramilitary_policy;
+    const order = readParamilitaryStandingOrder(state, faction);
     if (order !== 'always_allow' && order !== 'always_deny') return false;
     const history = Array.isArray(state.paramilitary_decision_history) ? state.paramilitary_decision_history : [];
     let newestOwn = Number.NEGATIVE_INFINITY;
@@ -62,11 +72,14 @@ export function hasInPersonParamilitaryStandingOrder(state: GameState, faction: 
         else newestOther = Math.max(newestOther, Number(record.turn));
     }
     if (newestOwn === Number.NEGATIVE_INFINITY) return false;
-    const ownCardId = PARAMILITARY_POLICY_CARD_ID_BY_FACTION[faction];
-    const cardIds: readonly (string | undefined)[] = Object.values(PARAMILITARY_POLICY_CARD_ID_BY_FACTION);
+    const appliedOtherCardIds = new Set(
+        Object.entries(PARAMILITARY_POLICY_CARD_ID_BY_FACTION)
+            .filter(([cardFaction]) => cardFaction !== faction && hasParamilitaryPolicyCardApplied(state, cardFaction))
+            .map(([, cardId]) => cardId),
+    );
     for (const entry of state.military?.event_decision_log ?? []) {
-        if (entry?.decision_source !== 'player' || entry.event_id === ownCardId) continue;
-        if (cardIds.includes(entry.event_id)) newestOther = Math.max(newestOther, Number(entry.turn));
+        if (entry?.decision_source !== 'player') continue;
+        if (appliedOtherCardIds.has(entry.event_id)) newestOther = Math.max(newestOther, Number(entry.turn));
     }
     return newestOwn >= newestOther;
 }

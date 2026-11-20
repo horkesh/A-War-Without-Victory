@@ -5,6 +5,7 @@ import {
     paramilitaryPolicyFlagKey,
     PARAMILITARY_POLICY_CARD_ID_BY_FACTION,
 } from './paramilitary_policy_flag.js';
+import { readParamilitaryStandingOrder } from './paramilitary_policy_card.js';
 import type { GameState } from '../../state/game_state.js';
 import type { EventDefinition, EventResponseOption } from './event_types.js';
 
@@ -44,6 +45,10 @@ export function selectAIDefaultResponse(def: EventDefinition): EventResponseOpti
  *
  * Callers are the two automatic entry points only (Observer at fire time, and the Observer drain), and they call it before
  * any part of the answer is applied: the in-person check reads the state as it was before the answer.
+ *
+ * Since the merge onto §6 M (2026-11-20) the order is the one in force, read through M's cap (`readParamilitaryStandingOrder`):
+ * the card has not applied yet, so an order above `ask` (an older build's modal Always allow) is no in-person order and the
+ * historical default stands; an in-person Always deny is within any cap and is kept.
  */
 export function selectInPersonParamilitaryOrderResponse(
     state: GameState,
@@ -53,7 +58,7 @@ export function selectInPersonParamilitaryOrderResponse(
     if (!playerFaction || def.id !== PARAMILITARY_POLICY_CARD_ID_BY_FACTION[playerFaction]) return null;
     if (!hasInPersonParamilitaryStandingOrder(state, playerFaction)) return null;
     const flagKey = paramilitaryPolicyFlagKey(playerFaction);
-    const order = state.paramilitary_policy;
+    const order = readParamilitaryStandingOrder(state, playerFaction);
     const matches = (def.response_options ?? []).filter((option) => option.sets_flags?.[flagKey] === order);
     if (matches.length !== 1) {
         throw new Error(

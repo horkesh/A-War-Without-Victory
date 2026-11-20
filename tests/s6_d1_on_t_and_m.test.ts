@@ -127,7 +127,7 @@ function detect(state: GameState, side: Side): [number, number] {
 describe('D1 after T and M: no sweep at autonomy 1-3 before the player\'s own policy card applies', () => {
     for (const side of ['RBiH', 'RS'] as const) {
         for (const autonomy of [1, 2, 3]) {
-            it(`${side} at autonomy ${autonomy}: an Always allow on record (filed${side === 'RBiH' ? ' at t0' : ''}, and an older build's modal order) sends nothing until the card applies at t${APPLY_TURN[side]}`, () => {
+            it(`${side} at autonomy ${autonomy}: an Always allow on record (${side === 'RBiH' ? 'filed at t0' : 'the card enabled, not fired'}, and an older build's modal order) sends nothing until the card applies at t${APPLY_TURN[side]}`, () => {
                 const state = humanState(side, autonomy, 1);
                 if (side === 'RBiH') fileAnswer(state, side, 'always_allow');
                 else state.military.enabled_event_ids.push(CARD.RS); // the goals answer applied; the card fires at t2

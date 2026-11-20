@@ -40,6 +40,11 @@ import {
     PARAMILITARY_POLICY_CARD_ID_BY_FACTION,
     type ParamilitaryPolicy,
 } from '../events/paramilitary_policy_flag.js';
+import {
+    appliedParamilitaryPolicyCardAnswer,
+    hasParamilitaryPolicyCardApplied,
+    readParamilitaryStandingOrder,
+} from '../events/paramilitary_policy_card.js';
 
 export type NonManualParamilitaryDecision = 'always_allow' | 'always_deny';
 
@@ -93,24 +98,34 @@ export function historicalParamilitaryPolicy(card: EventDefinition, faction: Fac
  * mirror in `applyDefinitionFlags`, including Observer's automatic answer) and by the review
  * modal. An order never carries across a faction switch, so the field counts for `faction` only
  * when this faction's own saved record carries it and no other side's human decision is newer:
- * - this faction's policy card is answered and its flag holds the same value (the card answer
- *   writes both at once), or
+ * - this faction's policy card has applied that same order (the applied answer writes the flag
+ *   and the order at once), or
  * - the player filed a paramilitary decision for this faction (`paramilitary_decision_history`:
  *   the review modal resolves this faction's requests and sets the order in the same step).
  * A bot-sourced card answer counts only while no other side has a human decision on record: at
  * Observer that is the automatic answer, but after a faction switch it is a bot's answer from
  * before the human took this side, which is never the human's order.
+ *
+ * Since the merge onto §6 T and M (2026-11-20, their records' "D1's inherited duties"):
+ * - the order is read through M's cap (`readParamilitaryStandingOrder`): never above the answer
+ *   this side's card has APPLIED, nor above `ask` before it applies, so an older build's modal
+ *   order above the card's answer reads clamped here too;
+ * - a card answer counts only once that card has APPLIED it (T's shared accessor,
+ *   `hasParamilitaryPolicyCardApplied` / `appliedParamilitaryPolicyCardAnswer`): an answer filed
+ *   ahead (RBiH at t0, applied at t4) is no answer before then, for this side and as another
+ *   side's human decision alike.
+ * So no sweep is sent in a human's name at Assisted to Observer before that human's card applies.
  */
 export function humanStandingParamilitaryOrder(state: GameState, faction: FactionId): ParamilitaryPolicy {
-    const order = state.paramilitary_policy;
+    const order = readParamilitaryStandingOrder(state, faction);
     if (order !== 'always_allow' && order !== 'always_deny') return 'ask';
     const log = state.military?.event_decision_log ?? [];
     const history = Array.isArray(state.paramilitary_decision_history) ? state.paramilitary_decision_history : [];
     const ownCardId = PARAMILITARY_POLICY_CARD_ID_BY_FACTION[faction] ?? null;
     const otherCardIds = new Set(
         Object.entries(PARAMILITARY_POLICY_CARD_ID_BY_FACTION)
-            .filter(([cardFaction]) => cardFaction !== faction)
-            .map(([, id]) => id as string),
+            .filter(([cardFaction]) => cardFaction !== faction && hasParamilitaryPolicyCardApplied(state, cardFaction))
+            .map(([, id]) => id),
     );
 
     let newestOtherHuman = Number.NEGATIVE_INFINITY;
@@ -124,8 +139,7 @@ export function humanStandingParamilitaryOrder(state: GameState, faction: Factio
     }
 
     let newestOwn = Number.NEGATIVE_INFINITY;
-    const ownFlag = state.military?.event_flags?.[paramilitaryPolicyFlagKey(faction)];
-    if (ownCardId && ownFlag === order) {
+    if (ownCardId && appliedParamilitaryPolicyCardAnswer(state, faction) === order) {
         for (const entry of log) {
             if (entry?.event_id !== ownCardId) continue;
             if (entry.decision_source === 'player' || newestOtherHuman === Number.NEGATIVE_INFINITY) {

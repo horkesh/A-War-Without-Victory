@@ -229,7 +229,8 @@ describe('§6 D1 stage 2: the standing policy binds every non-manual paramilitar
         state.meta.autonomy_level = 2;
         expect(attackerOutcome(state, 'RBiH')).toEqual([0, 0]);
 
-        // The other direction: a card Refuse, then Always allow in the modal, binds too.
+        // The other direction: a card Refuse, then Always allow in the modal (an older build's write; §6 M's IPC now refuses
+        // it). M's cap clamps it to the card's applied Refuse, so the staff send none (before M this sent the sweep).
         const reverse = pocketState('RBiH', metaFor('RBiH', 0));
         applyOrder(reverse, 'RBiH', 0, 'always_deny');
         reverse.pending_paramilitary_requests = [{ target_osid: 'op:other:q', faction: 'RBiH', strength: 150, mode: 'rear_pocket' }];
@@ -239,7 +240,18 @@ describe('§6 D1 stage 2: the standing policy binds every non-manual paramilitar
         resolvePlayerParamilitaryDecisions(reverse);
         reverse.meta.turn = 5;
         reverse.meta.autonomy_level = 2;
-        expect(attackerOutcome(reverse, 'RBiH')).toEqual([1, 0]);
+        expect(attackerOutcome(reverse, 'RBiH')).toEqual([0, 0]);
+        // Tightening is never capped: a card Always allow, then Always deny in the modal, binds (the first case above),
+        // and re-raising to the card's own Always allow binds again.
+        const reraise = pocketState('RBiH', metaFor('RBiH', 0));
+        applyOrder(reraise, 'RBiH', 0, 'always_allow');
+        reraise.paramilitary_policy = 'always_deny';
+        reraise.paramilitary_decision_history = [{ id: 'paramilitary:4:op:other:q', turn: 4, target_osid: 'op:other:q', faction: 'RBiH', strength: 150, decision: 'deny' }];
+        reraise.meta.autonomy_level = 2;
+        expect(attackerOutcome(reraise, 'RBiH')).toEqual([0, 0]);
+        reraise.paramilitary_policy = 'always_allow';
+        reraise.paramilitary_decision_history.push({ id: 'paramilitary:5:op:other:r', turn: 5, target_osid: 'op:other:r', faction: 'RBiH', strength: 150, decision: 'allow' });
+        expect(attackerOutcome(reraise, 'RBiH')).toEqual([1, 0]);
     });
 
     it('an order never carries across a faction switch', () => {
