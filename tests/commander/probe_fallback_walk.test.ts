@@ -63,6 +63,7 @@ interface WalkHarnessOptions {
     unreachableInSharedBoundary?: Array<keyof typeof LANES>;
     /** Adds a 5000-man brigade with this id next to an undefended isolated enemy cell. */
     occupationBrigade?: string;
+    corpsExhaustion?: number;
     topics?: string;
 }
 
@@ -270,7 +271,7 @@ function runWalkHarness(options: WalkHarnessOptions) {
         intel_data: null,
         doctrine_stance: 'balanced',
         corps_stance: 'offensive',
-        corps_exhaustion: 0,
+        corps_exhaustion: options.corpsExhaustion ?? 0,
         faction_war_exhaustion: 0,
         avg_fatigue_pct: 0,
         brigades_above_fatigue_threshold: 0,
@@ -417,6 +418,21 @@ describe('F1b probe fallback walk', () => {
         expect(detail?.walk).toBeUndefined();
         const unlogged = runWalkHarness({ ...scenario, topics: undefined });
         expect(JSON.stringify(unlogged.output.operations)).toBe(JSON.stringify(operations));
+    });
+
+    it('walks past rank 0 only while the corps passes the plan readiness check (exhaustion <= 30)', () => {
+        const scenario = { brigades: [{ id: 'b_alpha', lane: 'a' as const }, { id: 'b_bravo', lane: 'b' as const }], defenders: { a: 4_000 } };
+        expect(probeSummary(runWalkHarness({ ...scenario, corpsExhaustion: 30 })))
+            .toEqual([{ brigades: ['b_bravo'], objectives: [LANES.b.target] }]);
+        const exhausted = runWalkHarness({ ...scenario, corpsExhaustion: 31, topics: 'commander_creation' });
+        expect(exhausted.probes).toEqual([]);
+        expect(exhausted.receipt?.probe_gate_receipt?.target_selection_detail?.walk?.map((entry: { outcome: string }) => entry.outcome))
+            .toEqual(['all_filtered', 'stopped_corps_exhausted']);
+    });
+
+    it('keeps rank 0 exactly as on main for an exhausted corps', () => {
+        const result = runWalkHarness({ brigades: [{ id: 'b_alpha', lane: 'a' }, { id: 'b_bravo', lane: 'b' }], corpsExhaustion: 90 });
+        expect(probeSummary(result)).toEqual([{ brigades: ['b_alpha'], objectives: [LANES.a.target] }]);
     });
 
     it('emits nothing when no survivor has a viable target, as on main', () => {
