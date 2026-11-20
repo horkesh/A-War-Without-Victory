@@ -1,12 +1,13 @@
 /**
  * The paramilitary policy card's data vocabulary, in one place (§6 D1 stage 2, engine C2).
  *
- * Leaf module: it imports only types, so `evaluate_events.ts` (the card-to-order mirror), the
- * sweep's pending gate and the policy resolver can all read it without an import cycle. The
- * mirror's in-person check lives here for the same reason.
+ * Leaf module: it imports only types and the card registry (`paramilitary_policy_card.ts`, itself a
+ * types-only leaf), so `evaluate_events.ts` (the card-to-order mirror) and the policy resolver can
+ * all read it without an import cycle. The mirror's in-person check lives here for the same reason.
  */
 
 import type { FactionId, GameState } from '../../state/game_state.js';
+import { PARAMILITARY_POLICY_CARD_BY_FACTION } from './paramilitary_policy_card.js';
 
 /** The three standing orders a policy card or the review modal can write. */
 export type ParamilitaryPolicy = 'always_allow' | 'always_deny' | 'ask';
@@ -26,11 +27,14 @@ export function paramilitaryPolicyFlagKey(faction: FactionId): string {
  * that sets a `<faction>_paramilitary_policy` flag is listed here, and nothing else is. The
  * resolver uses it to tell "no card in the data" (allow, as before) from "a card the start-week
  * filter removed" (never read as no card: event_loader.ts start-week filter, engine C4).
+ * Derived from the one card registry, `PARAMILITARY_POLICY_CARD_BY_FACTION` (§6 T3 and M-a), so the
+ * request gate, the cap and this resolver can never name different cards.
  */
-export const PARAMILITARY_POLICY_CARD_ID_BY_FACTION: Readonly<Partial<Record<FactionId, string>>> = {
-    RS: 'rs_paramilitary_policy_1992',
-    RBiH: 'rbih_paramilitary_policy_1992',
-};
+export const PARAMILITARY_POLICY_CARD_ID_BY_FACTION: Readonly<Partial<Record<FactionId, string>>> = Object.freeze(
+    Object.fromEntries(
+        Object.entries(PARAMILITARY_POLICY_CARD_BY_FACTION).flatMap(([faction, card]) => (card ? [[faction, card.eventId]] : [])),
+    ),
+);
 
 /**
  * Whether the human's standing order `state.paramilitary_policy` is an Always allow or Always deny

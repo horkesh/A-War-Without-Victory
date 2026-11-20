@@ -96,10 +96,18 @@ function pocketState(attacker: Faction, meta: Partial<GameState['meta']> = {}): 
     } as GameState;
 }
 
+/** The card FIRED at t3: with its receipt and flag, its answer has applied (§6 T3's `hasParamilitaryPolicyCardApplied`). */
+function markCardFired(state: GameState, cardId: string): void {
+    state.military.fired_event_ids = [...(state.military.fired_event_ids ?? []), cardId];
+    state.military.event_fire_counts = { ...(state.military.event_fire_counts ?? {}), [cardId]: 1 };
+    state.military.event_last_fired_turn = { ...(state.military.event_last_fired_turn ?? {}), [cardId]: 3 };
+}
+
 /**
  * Write `order` the way the game does for this faction. A bot's order is its card flag. A human's
  * order is `state.paramilitary_policy`, carried by the card answer (flag + decision log) or, for a
- * side with no card (HRHB), by a filed review-modal decision.
+ * side with no card (HRHB), by a filed review-modal decision. A card answer is an APPLIED one: the card
+ * fired (since §6 T merged, a receipt without a firing is only a filed answer, which binds nothing).
  */
 function applyOrder(state: GameState, faction: Faction, controller: Controller, order: Order): void {
     if (order === 'unanswered') {
@@ -111,6 +119,7 @@ function applyOrder(state: GameState, faction: Faction, controller: Controller, 
     if (controller === 'bot') {
         state.military.event_flags = { [key]: order };
         if (cardId) {
+            markCardFired(state, cardId);
             state.military.event_decision_log = [
                 { event_id: cardId, response_id: order, decision_source: 'bot_ai_default', faction, turn: 3 },
             ];
@@ -119,6 +128,7 @@ function applyOrder(state: GameState, faction: Faction, controller: Controller, 
     }
     state.paramilitary_policy = order;
     if (cardId) {
+        markCardFired(state, cardId);
         state.military.event_flags = { [key]: order };
         state.military.event_decision_log = [
             { event_id: cardId, response_id: order, decision_source: 'player', faction, turn: 3 },
@@ -155,6 +165,8 @@ function expected(faction: Faction, controller: Controller, order: Order): [numb
         // Manual path, byte-unchanged: Always allow deploys, Always deny sends none, ask raises a request.
         if (order === 'always_allow') return [1, 0];
         if (order === 'always_deny') return [0, 0];
+        // §6 T3 (merged): unanswered, a side with a card raises no request until the card applies an answer.
+        if (order === 'unanswered' && PARAMILITARY_POLICY_CARD_ID_BY_FACTION[faction]) return [0, 0];
         return [0, 1];
     }
     // Assisted, Delegated, Observer: the human's standing order binds; nothing but Always allow sends a sweep.
@@ -232,7 +244,10 @@ describe('§6 D1 stage 2: the standing policy binds every non-manual paramilitar
 
     it('an order never carries across a faction switch', () => {
         // RS human answered Always allow, then the campaign switched to RBiH; the RBiH bot had refused.
+        // Both cards fired and applied (a receipt alone is a filed answer since §6 T, and binds nothing).
         const toRbih = pocketState('RBiH', metaFor('RBiH', 2));
+        markCardFired(toRbih, 'rs_paramilitary_policy_1992');
+        markCardFired(toRbih, 'rbih_paramilitary_policy_1992');
         toRbih.paramilitary_policy = 'always_allow';
         toRbih.military.event_flags = { rs_paramilitary_policy: 'always_allow', rbih_paramilitary_policy: 'always_deny' };
         toRbih.military.event_decision_log = [
@@ -244,6 +259,8 @@ describe('§6 D1 stage 2: the standing policy binds every non-manual paramilitar
         // RBiH human answered Always allow, then switched to RS, whose bot had answered Always allow too:
         // the value coincides, but the human never answered for RS, so RS staff send none.
         const toRs = pocketState('RS', metaFor('RS', 2));
+        markCardFired(toRs, 'rbih_paramilitary_policy_1992');
+        markCardFired(toRs, 'rs_paramilitary_policy_1992');
         toRs.paramilitary_policy = 'always_allow';
         toRs.military.event_flags = { rs_paramilitary_policy: 'always_allow', rbih_paramilitary_policy: 'always_allow' };
         toRs.military.event_decision_log = [
@@ -314,8 +331,9 @@ describe('§6 D1 stage 2: the standing policy binds every non-manual paramilitar
             const mirror = withoutComments(readFileSync('src/sim/events/evaluate_events.ts', 'utf8'));
             expect(mirror).toMatch(/paramilitaryPolicyFlagKey\(/);
             expect(mirror).not.toMatch(/'rbih_paramilitary_policy'|'rs_paramilitary_policy'/);
+            // Since the merge onto §6 T the sweep's request gate reads T's card registry, from which D1's id map derives.
             const sweep = withoutComments(readFileSync('src/sim/combat/paramilitary_sweep.ts', 'utf8'));
-            expect(sweep).toMatch(/PARAMILITARY_POLICY_CARD_ID_BY_FACTION/);
+            expect(sweep).toMatch(/PARAMILITARY_POLICY_CARD_BY_FACTION/);
             expect(sweep).not.toMatch(/'rbih_paramilitary_policy_1992'|'rs_paramilitary_policy_1992'/);
         });
 

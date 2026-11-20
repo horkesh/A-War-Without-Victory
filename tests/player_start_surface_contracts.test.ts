@@ -14,12 +14,12 @@ import { displayEventProse, resolveEventSourceLine } from '../src/ui/map/data/ev
 import { restoreBosnianProperNames } from '../src/ui/shared/bosnianPlaceNames';
 import war1992Events from '../data/scenarios/events/war_1992.json';
 
-// Every card is on the desk at campaign birth. atBirth: the event is also FIRED (and the answer
-// applied) at birth. hrhb_political_goal (window t3-7) is answered at birth but only filed; it
-// fires and the answer applies in its window, the turn a bot answers it (answer_ahead_of_firing.ts).
+// Every card is on the desk at campaign birth and none is FIRED then (§6 design T1, 2026-11-19):
+// each answer is filed at birth, and the card fires and the answer applies in its window, the turn
+// a bot answers it (answer_ahead_of_firing.ts). Before T1 the RBiH and RS cards were fired at birth.
 const FOUNDATIONAL_FLOWS = [
-  { faction: 'RBiH', eventId: 'rbih_state_identity', atBirth: true },
-  { faction: 'RS', eventId: 'rs_strategic_goals', atBirth: true },
+  { faction: 'RBiH', eventId: 'rbih_state_identity', atBirth: false },
+  { faction: 'RS', eventId: 'rs_strategic_goals', atBirth: false },
   { faction: 'HRHB', eventId: 'hrhb_political_goal', atBirth: false },
 ] as const;
 
@@ -86,6 +86,13 @@ function displayedEffectRow(effect: EventEffect): string | null {
   if (effect.kind === 'morale_change') return `${armyLabel(effect.faction)} morale ${signedDelta(effect.delta)}`;
   if (effect.kind === 'alliance_change') return `RBiH–HRHB alliance ${signedDelta(Math.round(effect.delta * 100))}`;
   if (effect.kind === 'aggression_modifier') return `${armyLabel(effect.faction)} offensive drive ${signedDelta(Math.round(effect.delta * 100))}% for ${effect.duration_turns} weeks (noted in the record; it does not change army planning)`;
+  // Patron-defiance panel: the united-front answer shows Zagreb's cut before the choice.
+  if (effect.kind === 'patron_supply_cut') {
+    const patron = effect.faction === 'RS'
+      ? 'Belgrade holds back part of its fuel and ammunition'
+      : 'Zagreb holds back some of its ammunition, fuel and seconded officers';
+    return `${patron}: ${armyLabel(effect.faction)} combat effectiveness -${Math.round((1 - effect.multiplier) * 100)}% for ${effect.duration_turns} weeks`;
+  }
   throw new Error(`Unhandled display-safe foundational effect: ${effect.kind}`);
 }
 
@@ -198,17 +205,10 @@ describe('player start surface contracts', () => {
           response_id: option.id,
           decision_source: 'player',
         });
-        if (!flow.atBirth) {
-          // Filed only: nothing applies until the event fires in its window.
-          expect(nextState.military.negotiation!.strategic_dimensions).toEqual(beforeDimensions);
-          continue;
-        }
-        for (const shift of option.dimension_shifts ?? []) {
-          const targetFaction = shift.faction ?? flow.faction;
-          const before = beforeDimensions[targetFaction]![shift.dimension]!.effective_value;
-          const after = nextState.military.negotiation!.strategic_dimensions![targetFaction]![shift.dimension]!.effective_value;
-          expect(after - before, `${flow.eventId}:${option.id}:${targetFaction}:${shift.dimension}`).toBe(shift.delta);
-        }
+        // Filed only: nothing applies until the event fires in its window (the shifts land then,
+        // pinned through the turn pipeline in s6_opening_timing_bot_turn.test.ts).
+        expect(nextState.military.negotiation!.strategic_dimensions).toEqual(beforeDimensions);
+        expect(nextState.military.fired_event_ids.includes(flow.eventId)).toBe(false);
       }
     }
   });

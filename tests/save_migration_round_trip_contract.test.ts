@@ -43,6 +43,50 @@ describe('save migration round-trip fixture contract', () => {
         expect(serializeState(migrated)).not.toContain('negotiation_capital');
     });
 
+    it('v41 fixture: the v42 migration renames patron_pressure, applies the E4 SET and DROP lists, and strips the camp shifts', () => {
+        const migrated = deserializeState(readFileSync(resolve(fixtureDir, 'v41_patron_pressure_pending.json'), 'utf8'));
+        const byEvent = new Map(migrated.military.pending_event_decisions!.map((d) => [d.event_id, d.response_options]));
+        expect(byEvent.get('concentration_camps_revealed_1992')!.map((o) => o.effects)).toEqual([
+            [{ kind: 'patron_support', faction: 'RS', delta: -10 }],
+            [{ kind: 'patron_support', faction: 'RS', delta: -5 }],
+            [],
+        ]);
+        const hrhb = byEvent.get('hrhb_camp_exposure_response_1993')!;
+        expect(hrhb.map((o) => o.effects)).toEqual([
+            [{ kind: 'patron_support', faction: 'HRHB', delta: -10 }],
+            [{ kind: 'patron_support', faction: 'HRHB', delta: -5 }],
+            [],
+        ]);
+        expect(hrhb.flatMap((o) => o.dimension_shifts ?? []).filter((s) => s.dimension === 'patron_confidence')).toEqual([]);
+        expect(byEvent.get('un_hostage_crisis_1995')!.map((o) => o.effects)).toEqual([
+            [{ kind: 'patron_support', faction: 'RS', delta: -10 }, { kind: 'morale_change', faction: 'RS', delta: 2 }],
+            [],
+        ]);
+        expect(byEvent.get('rs_autonomy_path_decision_1993')!.map((o) => o.effects)).toEqual([
+            [{ kind: 'patron_support', faction: 'RS', delta: -5 }],
+            [{ kind: 'patron_support', faction: 'RS', delta: 15 }],
+        ]);
+        expect(serializeState(migrated)).not.toContain('"patron_pressure"');
+    });
+
+    it('v43 fixture: the v44 migration gives pending defiance answers their patron_supply_cut and drops pre-panel receipts', () => {
+        const migrated = deserializeState(readFileSync(resolve(fixtureDir, 'v43_patron_defiance_pending.json'), 'utf8'));
+        const byEvent = new Map(migrated.military.pending_event_decisions!.map((d) => [d.event_id, d.response_options]));
+        expect(byEvent.get('zagreb_orders_hrhb_ceasefire')!.map((o) => o.effects)).toEqual([
+            [],
+            [{ kind: 'patron_supply_cut', faction: 'HRHB', multiplier: 0.85, duration_turns: 52, tag: 'zagreb_orders_hrhb_ceasefire#resist_patron' }],
+        ]);
+        expect(byEvent.get('hrhb_political_goal')![1]!.effects).toEqual([
+            { kind: 'alliance_change', delta: 0.15 },
+            { kind: 'patron_supply_cut', faction: 'HRHB', multiplier: 0.85, duration_turns: 52, tag: 'hrhb_political_goal#united_front' },
+        ]);
+        expect(byEvent.get('belgrade_embargo_rs_1994')![1]!.effects).toEqual([
+            { kind: 'patron_support', faction: 'RS', delta: -10 },
+            { kind: 'patron_supply_cut', faction: 'RS', multiplier: 0.93, duration_turns: 26, tag: 'belgrade_embargo_rs_1994#defiant' },
+        ]);
+        expect(migrated.military.patron_defiance_supply_cuts).toBeUndefined();
+    });
+
     it.each(fixtureFiles)('%s migrates and save/loads byte-stably', (fileName) => {
         const payload = readFileSync(resolve(fixtureDir, fileName), 'utf8');
 

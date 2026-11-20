@@ -368,6 +368,11 @@ function applyBoundedReturn(
         byFaction[group] = (byFaction[group] ?? 0) - take;
         d.displaced_in -= take;
         d.last_updated_turn = currentTurn;
+        // Codex P2 (#747): routing credited the host OSID's arrivals tally; reverse that credit so
+        // the per-OSID panel does not show returnees at the host and at home. Same resolver as routing.
+        const hostOsid = resolveRepresentativeDestOsid(state, munId, group);
+        const hostFlow = hostOsid ? state.displacement.displacement_flows_by_osid?.[hostOsid] : undefined;
+        if (hostFlow) hostFlow.in = Math.max(0, hostFlow.in - take);
         wanted -= take;
         returned += take;
     }

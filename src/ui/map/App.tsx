@@ -251,8 +251,8 @@ export function formatAcknowledgementEventEffect(
       return t('eventModal.effect.cohesionChange', { faction: factionPrefix, delta });
     case 'humanitarian_impact':
       return formatWarCrimesRecordLine(effect.faction, effect.war_crimes_delta);
-    case 'patron_pressure':
-      return t('eventModal.effect.patronPressure', { faction: statePrefix, delta });
+    case 'patron_support':
+      return t('eventModal.effect.patronSupport', { faction: statePrefix, delta });
     case 'alliance_change':
       return t('eventModal.effect.allianceChange', { delta: formatSignedEventShare(effect.delta) });
     case 'equipment_grant':

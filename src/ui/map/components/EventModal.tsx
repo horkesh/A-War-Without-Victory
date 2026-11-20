@@ -68,7 +68,7 @@ const EFFECT_ICONS: Record<string, IconName> = {
     morale_change: 'morale',
     cohesion_change: 'cohesion',
     humanitarian_impact: 'dead',
-    patron_pressure: 'recon',
+    patron_support: 'recon',
     alliance_change: 'balanced',
     // §6 E2: a card's own strategic-dimension shifts (appended by App.tsx).
     dimension_shift: 'star',

@@ -123,15 +123,17 @@ function firedIds(context: TurnContext): string[] {
 
 describe('§6 phase order test 1: turn-boundary consistency (headless)', () => {
     it('after a negotiation-step support write, every pc base equals support and every standing base equals its formula', async () => {
-        // Week 118 hands-off: evaluate-peace-plans resolves the Contact Group plan in the
+        // Week 120 hands-off: evaluate-peace-plans resolves the Contact Group plan in the
         // negotiation steps, RS rejects (historical), which costs RS support and standing.
-        const state = makeWarState(117);
+        // §6 E3a2: the plan resolves when every side's routed card has answered; this harness
+        // passes no catalog, so no card answers and the plan resolves at its close week (120).
+        const state = makeWarState(119);
         settleBases(state);
         const rsSupportBefore = support(state, 'RS');
 
         const { nextState } = await runTurn(state, { seed: 's6-phase-order-t1', settlementEdges: [] });
 
-        expect(nextState.meta.turn).toBe(118);
+        expect(nextState.meta.turn).toBe(120);
         expect(nextState.military.negotiation!.peace_plan_history.map((p) => p.plan_id)).toContain('contact_group');
         // Precondition: a negotiation step wrote RS support this turn.
         expect(support(nextState, 'RS')).toBeLessThan(rsSupportBefore);
@@ -152,7 +154,9 @@ describe('§6 phase order test 2: the desktop gap (plan answered between turns)'
         const state = makeWarState(118, 'RBiH');
         const neg = state.military.negotiation!;
         neg.patron_relationships.RS!.support_level = 58;
-        neg.patron_relationships.RS!.override_authority = 0;
+        // §6 E3a2 ruling item 7 retired the rejection's override bump (override_change_on_reject),
+        // so the override the delivery card needs (≥ 20) is set here, as in the control below.
+        neg.patron_relationships.RS!.override_authority = 30;
         settleBases(state); // end of t118: RS pc base 58, consistent
         neg.pending_peace_plan = {
             plan_id: 'contact_group',
@@ -182,6 +186,7 @@ describe('§6 phase order test 2: the desktop gap (plan answered between turns)'
         resolvePeacePlan(state, 'contact_group', 'accepted');
         const neg = state.military.negotiation!;
         expect(neg.patron_relationships.RS!.support_level).toBe(53);
+        // Unchanged by the rejection (§6 E3a2 ruling item 7).
         expect(neg.patron_relationships.RS!.override_authority).toBe(30);
         // The base is stale between turns (display-only known limit).
         expect(store(state).RS!.patron_confidence.base_value).toBe(58);

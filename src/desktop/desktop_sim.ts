@@ -42,6 +42,7 @@ import {
     resolvePlayerEventDecisionWithOpeningPolicy,
 } from '../sim/events/opening_policy_transition.js';
 import { initializeNegotiationState } from '../sim/negotiation/initialize_negotiation_state.js';
+import { settlePendingPeacePlanFromRecord } from '../sim/negotiation/peace_plans.js';
 import { deferUnauthorizedHistoricalOperationsForPlayer } from '../sim/combat/historical_operation_authorization.js';
 import {
     applyDefinitionDimensionShifts,
@@ -85,7 +86,10 @@ import {
     retaskEliteLoan,
 } from '../sim/combat/army_reserve_system.js';
 import { ELITE_DEPLOY_COST } from '../ui/map/utils/commandAuthority.js';
-import { resolvePlayerParamilitaryDecisions } from '../sim/combat/paramilitary_sweep.js';
+import {
+    isPlayerParamilitaryRequestGateHolding,
+    resolvePlayerParamilitaryDecisions,
+} from '../sim/combat/paramilitary_sweep.js';
 
 // Electron main consumes simulation code through this built bundle. Direct
 // source-relative imports from electron-main.cjs do not exist in packaged output.
@@ -310,10 +314,12 @@ function queueOpeningFoundationalDecision(
 
     const turn = state.meta?.turn ?? 0;
     state.military.pending_event_decisions ??= [];
-    // Bot-equivalent timing: an event whose authored window opens after the first turn is NOT
-    // fired at birth. Its card is still queued here, so the player answers it at the start; the
-    // answer is filed and applied when evaluate-events fires the event in its window
-    // (preFiresOpeningDecisionAtBirth, answer_ahead_of_firing.ts).
+    // Bot-equivalent timing (§6 design T1): no opening card is fired at birth. Its card is still
+    // queued here, so the player answers it at the start; the answer is filed and applied when
+    // evaluate-events fires the event in its window, on the bot's turn (RS t1, RBiH t3, HRHB t4;
+    // preFiresOpeningDecisionAtBirth, answer_ahead_of_firing.ts). The fire-at-birth path below is
+    // what builds before T took for the RBiH and RS cards; it is no longer reached. Saves those builds
+    // wrote keep their fired card and its old timing.
     if (!preFiresOpeningDecisionAtBirth(def, turn)) {
         state.military.pending_event_decisions.push(buildOpeningPendingDecision(def, playerFaction, turn));
         return;
@@ -895,12 +901,12 @@ export function resolveDesktopEventDecision(
     responseId: string,
     baseDir: string,
 ): GameState {
-    return resolvePlayerEventDecisionWithOpeningPolicy(
-        state,
-        loadDesktopEventDefinitions(baseDir),
-        eventId,
-        responseId,
-    );
+    const eventDefinitions = loadDesktopEventDefinitions(baseDir);
+    const resolved = resolvePlayerEventDecisionWithOpeningPolicy(state, eventDefinitions, eventId, responseId);
+    // §6 E3a2, Codex #827: an older save's fallback pointer is settled by this routed answer now,
+    // not by a second (modal) decision the advance gate would otherwise demand.
+    settlePendingPeacePlanFromRecord(resolved, eventDefinitions);
+    return resolved;
 }
 
 /**
@@ -938,11 +944,14 @@ function replaceGameStateContents(target: GameState, source: GameState): void {
 /** Re-export for main process (serialize/deserialize state for IPC). */
 export {
     deserializeState,
+    isPlayerParamilitaryRequestGateHolding,
     resolveEventDecision,
     resolvePlayerParamilitaryDecisions,
     serializeRuntimeState,
     serializeState,
 };
+// §6 design M (M-a1): the paramilitary review IPC's decision logic (validation, the T3 gate, the standing-order cap).
+export { resolveParamilitaryReviewRequests } from './paramilitary_review_ipc.js';
 export {
     PLAYER_DECISION_FAMILIES,
     summarizePlayerDecisions,

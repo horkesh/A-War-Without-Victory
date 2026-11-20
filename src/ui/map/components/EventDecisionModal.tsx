@@ -19,6 +19,7 @@ import type {
 } from '../../../sim/events/event_types';
 import type { GameState } from '../../../state/game_state';
 import { getCausalAncestors } from '../../../sim/events/causality_query';
+import { isAnswerAheadOfFiringDecision } from '../../../sim/events/answer_ahead_of_firing';
 import { getPlayerSafePoliticalFactionName, getPlayerSafeOfficerName, getPlayerSafeDecisionTitle } from '../utils/playerSafeText';
 import { useGameStore } from '../store/gameStore';
 import { Z } from '../../shared/zIndex';
@@ -61,8 +62,13 @@ type EventDecisionDossier = PendingEventDecision & {
     situation?: string;
 };
 
+/**
+ * The card's display localization for the active locale, English included: `localizations.en` is the
+ * corrected English display copy for strings the engine persists (event_types.ts), so an English player
+ * reads the panel-corrected wording too (Codex #763). The chain is the same for every locale: this
+ * override, then the catalog's current text, then the persisted copy (`localizedField`, `catalogText`).
+ */
 function eventLocalization(def: EventDefinition | undefined, locale: Locale) {
-    if (locale === 'en') return undefined;
     return def?.localizations?.[locale];
 }
 
@@ -320,7 +326,7 @@ function describeEffect(effect: EventEffect): string {
         case 'morale_change': return t('eventDecision.effect.moraleChange', { faction: army, delta: signedDelta(effect.delta) });
         case 'cohesion_change': return t('eventDecision.effect.cohesionChange', { faction: army, delta: signedDelta(effect.delta) });
         case 'humanitarian_impact': return formatWarCrimesRecordLine(factionId, effect.war_crimes_delta);
-        case 'patron_pressure': return t('eventDecision.effect.patronPressure', { faction, delta: signedDelta(effect.delta) });
+        case 'patron_support': return t('eventDecision.effect.patronSupport', { faction, delta: signedDelta(effect.delta) });
         case 'alliance_change': return t('eventDecision.effect.allianceChange', {
             rbih: eventDecisionStateShortLabel('RBiH'),
             hrhb: eventDecisionStateShortLabel('HRHB'),
@@ -346,6 +352,12 @@ function describeEffect(effect: EventEffect): string {
         case 'guerrilla_threat': return t('eventDecision.effect.guerrillaThreat', { faction, turns: effect.duration_turns });
         case 'recruitment_modifier': return t('eventDecision.effect.recruitmentModifier', { faction: army, percent: Math.round(effect.pool_multiplier * 100), turns: effect.duration_turns });
         case 'equipment_quality_modifier': return t('eventDecision.effect.equipmentQualityModifier', { faction: army, percent: Math.round(effect.multiplier * 100), turns: effect.duration_turns });
+        // Patron-defiance panel: the price of defying the patron, shown before the choice and
+        // generated from the effect's own numbers.
+        case 'patron_supply_cut': return t(
+            effect.faction === 'RS' ? 'eventDecision.effect.patronSupplyCut.RS' : 'eventDecision.effect.patronSupplyCut.HRHB',
+            { faction: army, percent: Math.round((1 - effect.multiplier) * 100), turns: effect.duration_turns },
+        );
         case 'doctrine_constraint': return t('eventDecision.effect.doctrineConstraint', { faction: army, turns: effect.duration_turns });
         case 'offensive_ops_suppression': return t('eventDecision.effect.offensiveOpsSuppression', { faction: army, turns: effect.duration_turns });
         case 'alliance_lock': return t('eventDecision.effect.allianceLock', {
@@ -620,6 +632,10 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
     // the assessment block speaks in a named officer's voice; otherwise it falls
     // back to the generic "Staff assessment". (See deriveAssessmentLabel.)
     const assessmentLabel = deriveAssessmentLabel(localizedDecision.category, advisor);
+    // §6 design T (ui-ux F2/F4): an answer-ahead card whose event has not fired only FILES the answer;
+    // it applies when the card comes due. Keyed on "not fired", so an old save's card fired at birth
+    // (applied at once) shows no note. Pending §4 copy panel for the wording.
+    const filedAhead = state ? isAnswerAheadOfFiringDecision(state, decision.event_id) : false;
     const decisionDate = turnToDateString(localizedDecision.turn_fired);
     const safeSourceNote = sourceNote ? playerSafeDossierText(sourceNote, diagMode) : null;
     // Art: the event's own documentary still when it authors one, otherwise the
@@ -765,6 +781,20 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                             <div className={SURFACE_LABEL}>
                                 {t('eventDecision.presidentialResponse')}
                             </div>
+                            {filedAhead && (
+                                <div
+                                    className="flex flex-col gap-1.5 rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-4"
+                                    role="note"
+                                    data-testid="event-decision-filed-ahead"
+                                >
+                                    <div className={SURFACE_LABEL_MUTED}>
+                                        {t('eventDecision.filedAhead.label')}
+                                    </div>
+                                    <p className="m-0 text-[17px] leading-relaxed text-[#ddd1b3]">
+                                        {t('eventDecision.filedAhead.body')}
+                                    </p>
+                                </div>
+                            )}
                             {localizedDecision.response_options.map(option => (
                                 <ResponseButton
                                     key={option.id}
@@ -787,9 +817,12 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                                     <div className={SURFACE_LABEL}>
                                         {t('eventDecision.turnPaused.title')}
                                     </div>
-                                    <p className="m-0 text-[15px] leading-relaxed text-[#c2b69c]">
-                                        {t('eventDecision.turnPaused.body')}
-                                    </p>
+                                    {/* "Takes effect this week" is false for a card that will only be filed (F4). */}
+                                    {!filedAhead && (
+                                        <p className="m-0 text-[15px] leading-relaxed text-[#c2b69c]">
+                                            {t('eventDecision.turnPaused.body')}
+                                        </p>
+                                    )}
                                 </div>
                                 <button
                                     type="button"

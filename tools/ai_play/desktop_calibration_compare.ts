@@ -20,7 +20,7 @@ import { dirname, relative, resolve } from 'node:path';
 import {
     advanceTurn,
     loadStateFromPath,
-    resolveEventDecision,
+    resolveDesktopEventDecisionInPlace,
     resolvePlayerParamilitaryDecisions,
     serializeState,
     startNewCampaign,
@@ -35,7 +35,7 @@ import { loadEventDefinitionsFromDir } from '../../src/sim/events/event_loader.j
 import { selectBotEventResponse } from '../../src/sim/events/evaluate_events.js';
 import { strictCompare } from '../../src/state/validateGameState.js';
 import { isHistoricalOperationAuthorizationReview } from '../../src/sim/combat/historical_operation_authorization.js';
-import { resolvePeacePlan } from '../../src/sim/negotiation/peace_plans.js';
+import { assertNoPeacePlanWindowSkipped, resolvePeacePlan } from '../../src/sim/negotiation/peace_plans.js';
 import { getPeacePlanById } from '../../src/sim/negotiation/peace_plan_data.js';
 import { createRequire } from 'node:module';
 import { raiseArmyClash, sweepLapsedArmyClashes } from '../../src/sim/combat/army_clashes.js';
@@ -133,6 +133,8 @@ interface DecisionTranscriptRow {
     value?: string;
     /** 'paused_turn': answered inside the pause before combat (turn = the turn being run). */
     stage?: 'paused_turn';
+    /** Event answers only: the harness's scripted answer, never a player's own choice (§6 design T4). */
+    answer_author?: 'harness_script';
 }
 
 interface ElectronStateSummary {
@@ -443,6 +445,24 @@ function botEquivalentResponseId(state: GameState, decision: PendingEventDecisio
     return selectBotEventResponse(state, narrowed, decision.faction, false).chosen.id;
 }
 
+function pendingDecisionsFor(state: GameState, faction: FactionId): PendingEventDecision[] {
+    return [...(state.military.pending_event_decisions ?? [])]
+        .filter((decision) => decision.faction === faction)
+        .sort((a, b) => strictCompare(a.event_id, b.event_id));
+}
+
+/**
+ * Answer the player's event decisions the way the desktop does (§6 design T4).
+ *
+ * - Through the product resolver (`resolveDesktopEventDecisionInPlace`, which takes the RBiH opening lane),
+ *   never the plain sim resolver, so the harness measures the game a player plays.
+ * - Until nothing it can answer is pending (engine D6): an answer can put a further card on the desk (the
+ *   identity answer queues the RBiH policy card), and the product blocks Advance on such a card. Only cards
+ *   queued by this call's own answers are chased, so earlier deferred cards are not re-asked in the pause.
+ * - Every answer is the harness's SCRIPTED answer. The engine records it as a `player` row, as it would a
+ *   human's; the transcript marks it `answer_author: 'harness_script'` so no reader takes it for a choice a
+ *   player made (red-team T4 condition). Parity claims list that log source as the allowed difference.
+ */
 function applyEventPolicy(
     state: GameState,
     faction: FactionId,
@@ -452,43 +472,54 @@ function applyEventPolicy(
 ): void {
     // In the pause before combat the decisions are answered in the order the turn fired them
     // (the order a bot answers in-turn); between turns, by event id as before.
-    const pending = pausedDecisions
+    const pendingAtStart = new Set((state.military.pending_event_decisions ?? []).map((decision) => decision.event_id));
+    const handled = new Set<string>();
+    let batch = pausedDecisions
         ? pausedDecisions.filter((decision) => decision.faction === faction)
-        : [...(state.military.pending_event_decisions ?? [])]
-            .filter((decision) => decision.faction === faction)
-            .sort((a, b) => strictCompare(a.event_id, b.event_id));
+        : pendingDecisionsFor(state, faction);
 
-    for (const decision of pending) {
-        const overrideId = eventResponseOverrides.get(decision.event_id);
-        const responseId = overrideId != null && decision.response_options.some((o) => o.id === overrideId)
-            ? overrideId
-            : policy === 'historical_default'
-            ? decision.historical_default_response_id ?? decision.response_options[0]?.id
-            : policy === 'staff_recommended'
-                ? decision.staff_recommended_response_id ?? decision.historical_default_response_id
-                : policy === 'bot_equivalent'
-                    ? botEquivalentResponseId(state, decision)
-                    : undefined;
-        const stage = pausedDecisions ? { stage: 'paused_turn' as const } : {};
-        if (!responseId) {
+    while (batch.length > 0) {
+        let answeredAny = false;
+        for (const decision of batch) {
+            if (handled.has(decision.event_id)) continue;
+            handled.add(decision.event_id);
+            const overrideId = eventResponseOverrides.get(decision.event_id);
+            const responseId = overrideId != null && decision.response_options.some((o) => o.id === overrideId)
+                ? overrideId
+                : policy === 'historical_default'
+                ? decision.historical_default_response_id ?? decision.response_options[0]?.id
+                : policy === 'staff_recommended'
+                    ? decision.staff_recommended_response_id ?? decision.historical_default_response_id
+                    : policy === 'bot_equivalent'
+                        ? botEquivalentResponseId(state, decision)
+                        : undefined;
+            const stage = pausedDecisions ? { stage: 'paused_turn' as const } : {};
+            if (!responseId) {
+                transcript.push({
+                    turn: state.meta.turn,
+                    family: 'event',
+                    id: decision.event_id,
+                    decision: 'defer',
+                    ...stage,
+                });
+                continue;
+            }
+            resolveDesktopEventDecisionInPlace(state, decision.event_id, responseId, REPO_ROOT);
+            answeredAny = true;
             transcript.push({
                 turn: state.meta.turn,
                 family: 'event',
                 id: decision.event_id,
-                decision: 'defer',
+                decision: policy,
+                value: responseId,
                 ...stage,
+                answer_author: 'harness_script',
             });
-            continue;
         }
-        resolveEventDecision(state, decision.event_id, responseId);
-        transcript.push({
-            turn: state.meta.turn,
-            family: 'event',
-            id: decision.event_id,
-            decision: policy,
-            value: responseId,
-            ...stage,
-        });
+        if (!answeredAny) break;
+        // D6: re-read; answer what this call's answers put on the desk.
+        batch = pendingDecisionsFor(state, faction)
+            .filter((decision) => !handled.has(decision.event_id) && !pendingAtStart.has(decision.event_id));
     }
 }
 
@@ -638,9 +669,11 @@ function applyParamilitaryPolicy(
 
 /**
  * The player's answer to a pending peace plan (the PeacePlanModal / `resolve-peace-plan` IPC).
- * With no player the scheduler resolves every faction on the offer turn; with a player the plan
- * stays pending until answered, and a pending plan blocks every later plan. Under the
- * historical_default policy the player gives its documented historical response.
+ * §6 E3a2: each side answers on its routed card (applyEventPolicy answers the player's); the
+ * pointer exists only as the close-week fallback, when the player's side has no recorded
+ * answer. Under the historical_default policy the player gives its documented historical
+ * response. A deferred fallback holds the plan step, so the defer asserts that no later
+ * plan's window has opened meanwhile (it would be skipped silently).
  */
 function applyPeacePlanPolicy(
     state: GameState,
@@ -650,14 +683,12 @@ function applyPeacePlanPolicy(
 ): void {
     const pending = state.military.negotiation?.pending_peace_plan;
     if (!pending) return;
-    // RBiH answers Vance-Owen and Owen-Stoltenberg through its own event decisions (the
-    // Presidency -> Assembly sequence), which applyEventPolicy already resolves.
-    if (faction === 'RBiH' && (pending.plan_id === 'vance_owen' || pending.plan_id === 'owen_stoltenberg')) return;
     const plan = getPeacePlanById(pending.plan_id);
     const response = policy === 'historical_default' || policy === 'bot_equivalent'
         ? plan?.historical_responses[faction]
         : undefined;
     if (!response) {
+        assertNoPeacePlanWindowSkipped(state);
         transcript.push({ turn: state.meta.turn, family: 'peace_plan', id: pending.plan_id, decision: 'defer' });
         return;
     }

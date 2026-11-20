@@ -108,15 +108,20 @@ describe('the unrequested-sweep receipt cause is derived from the saved basis', 
         ]))).toBe('standing_order');
     });
 
-    it('a real stage-2 campaign: Always allow at Delegated, then the first Advance, gives standing-order receipts', async () => {
+    it('a real stage-2 campaign: Always allow at Delegated gives standing-order receipts, all from t4, when the filed answer applies', async () => {
+        // §6 T: the answer given at t0 is filed and the card applies it at t4; before that nothing is sent in its name.
         const opening = (await startNewCampaign(process.cwd(), 'RBiH', 'apr_1992', 'historical')).state;
         const pending = resolveDesktopEventDecision(opening, 'rbih_state_identity', 'civic', process.cwd());
         pending.meta.autonomy_level = 2;
-        const resolved = resolveDesktopEventDecision(pending, 'rbih_paramilitary_policy_1992', 'always_allow', process.cwd());
-        const advanced = await advanceTurn(resolved, process.cwd());
-        expect(advanced.error).toBeUndefined();
-        const rows = parseGameState(JSON.parse(JSON.stringify(advanced.state))).paramilitaryUnrequested ?? [];
-        expect(rows.map((row) => row.target_osid).sort()).toEqual(['op:brcko:bukvik_gornji_2', 'op:srebrenica:obadi']);
+        let state = resolveDesktopEventDecision(pending, 'rbih_paramilitary_policy_1992', 'always_allow', process.cwd());
+        for (let turn = 1; turn <= 4; turn += 1) {
+            const advanced = await advanceTurn(state, process.cwd());
+            expect(advanced.error).toBeUndefined();
+            state = advanced.state;
+        }
+        const rows = parseGameState(JSON.parse(JSON.stringify(state))).paramilitaryUnrequested ?? [];
+        expect(rows.length).toBeGreaterThan(0);
+        expect(rows.every((row) => row.turn === 4)).toBe(true);
         expect(rows.every((row) => row.cause === 'standing_order' && row.captured)).toBe(true);
-    }, 120_000);
+    }, 300_000);
 });

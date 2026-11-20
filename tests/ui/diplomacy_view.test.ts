@@ -182,34 +182,70 @@ describe('buildDiplomacyView', () => {
             military: {
                 ...(makeDiplomacyState().military as Record<string, unknown>),
                 patron_defiance_supply_cuts: [
-                    { faction: 'RS', turn: 30, cut_fraction: 0.2, support_after: 0.6 },
-                    { faction: 'RS', turn: 44, cut_fraction: 0.35, support_after: 0.45 },
-                    { faction: 'HRHB', turn: 40, cut_fraction: 0.5, support_after: 0.3 },
+                    {
+                        faction: 'RS', turn: 18, cut_fraction: 0.03, support_after: 0.8,
+                        tag: 'milosevic_isolation_warning_aug92#resist_patron', expires_turn: 31, combined_multiplier: 0.97,
+                    },
+                    {
+                        faction: 'RS', turn: 54, cut_fraction: 0.05, support_after: 0.6,
+                        tag: 'milosevic_vopp_pressure#resist_patron', expires_turn: 67, combined_multiplier: 0.95,
+                    },
+                    {
+                        faction: 'HRHB', turn: 46, cut_fraction: 0.05, support_after: 0.7,
+                        tag: 'zagreb_restrains_boban_vopp#resist_patron', expires_turn: 59, combined_multiplier: 0.95,
+                    },
+                    // Pre-panel per-turn entry (no tag): never shown.
+                    { faction: 'RS', turn: 60, cut_fraction: 0.1, support_after: 0.5 },
                 ],
             },
         }), 'RS');
         expect(withCuts.patronDefianceCuts).toEqual({
             count: 2,
-            latestCutFraction: 0.35,
-            latestTurn: 44,
-            latestSupportAfter: 0.45,
+            latestCutFraction: 0.05,
+            latestTurn: 54,
+            latestExpiresTurn: 67,
+            latestSupportAfter: 0.6,
+            activeCombinedCutFraction: 0,
+            activeFloorBinding: false,
             entries: [
-                { turn: 44, cutFraction: 0.35, supportAfter: 0.45 },
-                { turn: 30, cutFraction: 0.2, supportAfter: 0.6 },
+                { turn: 54, tag: 'milosevic_vopp_pressure#resist_patron', cutFraction: 0.05, expiresTurn: 67, floorBinding: false },
+                { turn: 18, tag: 'milosevic_isolation_warning_aug92#resist_patron', cutFraction: 0.03, expiresTurn: 31, floorBinding: false },
             ],
         });
 
-        // No player-faction entries → summary absent (historical/calibration mode never writes these).
         expect(withCuts.negotiationTimeline).toContainEqual(expect.objectContaining({
-            id: 'patron-defiance:RS:44:0.35:0.45',
-            label: 'Serbia material support cut',
-            detail: 'VRS channel lost 35% of material support; support after cut 45%.',
-            turn: 44,
+            id: 'patron-defiance:RS:54:milosevic_vopp_pressure#resist_patron',
+            label: 'Serbia holds back part of its supply',
+            detail: 'VRS combat effectiveness -5% for 13 weeks.',
+            turn: 54,
             confidence: 'known',
         }));
 
         const noCuts = buildDiplomacyView(makeDiplomacyState(), 'RS');
         expect(noCuts.patronDefianceCuts).toBeUndefined();
+    });
+
+    it('reads the patron cut in force through the combat reader, floor included', () => {
+        // Turn 44: two active RS patron cuts (0.90 x 0.90 = 0.81) floor at 0.85; a non-patron
+        // modifier never counts toward the patron cut.
+        const view = buildDiplomacyView(makeDiplomacyState({
+            military: {
+                ...(makeDiplomacyState().military as Record<string, unknown>),
+                equipment_quality_modifiers: [
+                    { faction: 'RS', multiplier: 0.9, expires_turn: 50, source: 'patron_supply_cut' },
+                    { faction: 'RS', multiplier: 0.9, expires_turn: 60, source: 'patron_supply_cut' },
+                    { faction: 'RS', multiplier: 1.04, expires_turn: 60 },
+                ],
+                patron_defiance_supply_cuts: [{
+                    faction: 'RS', turn: 40, cut_fraction: 0.1, support_after: 0.6,
+                    tag: 'rs_belgrade_pressure_response_1993#defy_belgrade_directive', expires_turn: 50,
+                    combined_multiplier: 0.85, floor_binding: true,
+                }],
+            },
+        }), 'RS');
+        expect(view.patronDefianceCuts?.activeCombinedCutFraction).toBeCloseTo(0.15, 10);
+        expect(view.patronDefianceCuts?.activeFloorBinding).toBe(true);
+        expect(view.patronDefianceCuts?.entries?.[0]?.floorBinding).toBe(true);
     });
 
     it('returns a stable empty view when diplomacy state has not been populated', () => {

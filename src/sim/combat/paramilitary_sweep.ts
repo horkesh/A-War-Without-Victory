@@ -60,7 +60,11 @@ import type { EdgeRecord } from '../../map/settlements.js';
 import { getMainCasualtySplit } from './casualty_realism_v2_gate.js';
 import { selectManualPlayerFaction } from '../bot/staff_control.js';
 import { resolveNonManualParamilitaryPolicy } from './paramilitary_policy.js';
-import { PARAMILITARY_POLICY_CARD_ID_BY_FACTION } from '../events/paramilitary_policy_flag.js';
+import {
+    PARAMILITARY_POLICY_CARD_BY_FACTION,
+    hasParamilitaryPolicyCardApplied,
+    readParamilitaryStandingOrder,
+} from '../events/paramilitary_policy_card.js';
 import type { EventDefinition } from '../events/event_types.js';
 /** Casualty multiplier when paramilitary retreats from defended OSID (heavy losses). */
 const DEFENDED_RETREAT_CASUALTY_MULT = 3;
@@ -82,14 +86,44 @@ function emptyReport(): ParamilitarySweepReport {
     return { spawned: [], captured: [], dissolved: [], pending_player_requests: 0 };
 }
 
-function isPlayerParamilitaryPolicyDecisionPending(
-    state: GameState,
-    playerFaction: FactionId | null,
-): boolean {
-    if (!playerFaction) return false;
-    const eventId = PARAMILITARY_POLICY_CARD_ID_BY_FACTION[playerFaction];
-    if (!eventId || !(state.military.enabled_event_ids ?? []).includes(eventId)) return false;
-    return !(state.military.event_decision_log ?? []).some((entry) => entry.event_id === eventId);
+/**
+ * THE MANUAL REQUEST GATE (§6 design T3, signed 2026-11-19, round 2 R2-1).
+ *
+ * A player with a registered paramilitary-policy card (RBiH, RS) gets no paramilitary request, and no stale
+ * request is approved or kept, until that card has APPLIED an answer: fired, receipted, and its policy flag a
+ * valid order (`hasParamilitaryPolicyCardApplied`, the one accessor M-a's cap and D1 also read). A FILED
+ * answer is not an applied one: under T2 the RBiH card is answered at t0 and applies at t4, and releasing on
+ * the t0 receipt would let the player approve t1-t3 sweeps and then collect the refusal's credit at t4.
+ *
+ * There is no turn test and no "window passed" or "closed" exit: a card that never applies (its enabling card
+ * left unanswered, a lapse, a closure) holds the player through the sweep fade week, so no act is ever bought
+ * at zero card price. The gate runs before the fade check in both detect steps; once nothing more is made
+ * after the fade, holding and not holding are the same. Held requests are deleted, never replayed: after the
+ * card applies, requests are built afresh from the current map by the normal detection.
+ *
+ * Binds only a manual (autonomy 0) player in `detectParamilitaryTargets` (staff control and headless have no
+ * gate player). HRHB has no card and is never held (the registered §6 gap).
+ */
+function paramilitaryRequestGateHolds(state: GameState, playerFaction: FactionId | null): boolean {
+    if (!playerFaction || !PARAMILITARY_POLICY_CARD_BY_FACTION[playerFaction]) return false;
+    return !hasParamilitaryPolicyCardApplied(state, playerFaction);
+}
+
+/**
+ * The player the request gate binds: a manual (autonomy 0) player only; null for staff control and headless.
+ * It is the player of `detectParamilitaryTargets`' manual path (`selectManualPlayerFaction`, §6 D1 stage 2).
+ */
+function selectRequestGatePlayer(state: GameState): FactionId | null {
+    return selectManualPlayerFaction(state);
+}
+
+/**
+ * Whether the manual player's paramilitary requests are held this turn. The request IPC reads it too
+ * (engine D5): a save loaded while the gate holds may still carry requests an older build made, and none of
+ * them may be approved before the next detect deletes them.
+ */
+export function isPlayerParamilitaryRequestGateHolding(state: GameState): boolean {
+    return paramilitaryRequestGateHolds(state, selectRequestGatePlayer(state));
 }
 
 function removePrematurePlayerParamilitaryRequests(state: GameState, playerFaction: FactionId): void {
@@ -422,13 +456,13 @@ export function detectParamilitaryTargets(
 ): ParamilitarySweepReport {
     const report = emptyReport();
     const turn = state.meta?.turn ?? 0;
-    // Only a manual (autonomy 0) player keeps the request/policy path below. At autonomy >= 1
-    // the player's staff and every bot go through the one policy gate in the faction loop
-    // (§6 D1 stage 2, which replaced the 2026-11-05 "staff run consolidation like bots" rule).
-    // Headless has no player: every faction is a bot.
-    const playerFaction = selectManualPlayerFaction(state);
-    const playerPolicyDecisionPending = isPlayerParamilitaryPolicyDecisionPending(state, playerFaction);
-    if (playerPolicyDecisionPending && playerFaction) {
+    // Only a manual (autonomy 0) player keeps the request/policy path below, behind the §6 T3
+    // request gate. At autonomy >= 1 the player's staff and every bot go through the one policy
+    // gate in the faction loop (§6 D1 stage 2, which replaced the 2026-11-05 "staff run
+    // consolidation like bots" rule). Headless has no player: every faction is a bot.
+    const playerFaction = selectRequestGatePlayer(state);
+    const requestGateHolds = paramilitaryRequestGateHolds(state, playerFaction);
+    if (requestGateHolds && playerFaction) {
         removePrematurePlayerParamilitaryRequests(state, playerFaction);
     } else {
         resolveStandingPolicyPendingParamilitaryRequests(state, playerFaction);
@@ -455,7 +489,7 @@ export function detectParamilitaryTargets(
     }
 
     for (const faction of factions) {
-        if (faction === playerFaction && playerPolicyDecisionPending) continue;
+        if (faction === playerFaction && requestGateHolds) continue;
         // §6 D1 stage 2: the one gate in front of every non-manual spawn. A bot follows its
         // decided card flag, else the card's historical default; a human's staff follow the
         // human's current standing order (unanswered or `ask` sends none). Deny skips every
@@ -528,9 +562,10 @@ export function detectParamilitaryTargets(
             const deploymentsInMunicipality = municipalityDeploymentCounts.get(candidate.municipalityId) ?? 0;
             if (deploymentsInMunicipality >= PARAMILITARY_MAX_DEPLOYMENTS_PER_MUNICIPALITY_TURN) continue;
 
-            // Player faction: create request instead of auto-spawning
+            // Player faction: create request instead of auto-spawning. The standing order is read through
+            // the §6 M-a cap (never above the policy card's applied answer; `ask` before it applies).
             if (faction === playerFaction) {
-                const policy = state.paramilitary_policy ?? 'ask';
+                const policy = readParamilitaryStandingOrder(state, faction);
                 if (policy === 'always_deny') continue;
                 if (policy === 'always_allow') {
                     spawnParamilitary(state, faction, candidate.osid, turn, spawnIndex, report);
@@ -572,7 +607,8 @@ function resolveStandingPolicyPendingParamilitaryRequests(
     state: GameState,
     playerFaction: FactionId | null,
 ): void {
-    const policy = state.paramilitary_policy ?? 'ask';
+    // §6 M-a: a standing order above the card's applied answer (an old save's modal order) never auto-approves.
+    const policy = readParamilitaryStandingOrder(state, playerFaction);
     if (policy === 'ask' || !playerFaction || !Array.isArray(state.pending_paramilitary_requests)) return;
     let changed = false;
     for (const request of state.pending_paramilitary_requests) {

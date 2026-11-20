@@ -65,10 +65,12 @@ import { PARAMILITARY_POLICY_CARD_ID_BY_FACTION } from '../../../sim/events/para
 import { countHeldOgsByCorps } from '../utils/heldOg.js';
 import { computeFullVerdict } from '../../../sim/negotiation/scoring.js';
 import { DIMENSION_WEIGHTS } from '../../../sim/events/strategic_dimensions.js';
+import { ANSWER_AHEAD_EVENT_IDS } from '../../../sim/events/answer_ahead_of_firing.js';
+import { paramilitaryStandingOrderCap, readParamilitaryStandingOrder } from '../../../sim/events/paramilitary_policy_card.js';
 import type { GameVerdict } from '../../../state/negotiation_types.js';
 import { buildCostLedger } from '../../../sim/endgame/cost_ledger.js';
 import { compareToHistorical, endingBasisForState } from '../../../sim/endgame/endgame_comparison.js';
-import type { DimensionShift, EventCategory, EventEffect } from '../../../sim/events/event_types.js';
+import type { DimensionShift, EventCategory, EventEffect, PlanAnswer } from '../../../sim/events/event_types.js';
 import historicalBaseline from '../../../../data/reference/historical_baseline.json';
 import { computeCorpsCommandStrainBreakdown, getCommandStrainLabel, projectStrainDecay, deriveRecoveryForecast, deriveRecoveryForecastToken, deriveCorpsSituationAssessment, deriveReadinessTrend } from './command_strain.js';
 import type { GameState } from '../../../state/game_state.js';
@@ -224,7 +226,7 @@ function pendingPoliticalObjectiveEventDecision(
                 (dimension === 'internal_cohesion'
                     && effect.kind === 'alliance_change'
                     && (faction === 'RBiH' || faction === 'HRHB'))
-                || (dimension === 'patron_confidence' && effect.kind === 'patron_pressure' && effect.faction === faction)
+                || (dimension === 'patron_confidence' && effect.kind === 'patron_support' && effect.faction === faction)
             ))
         ))) ?? null;
 }
@@ -3002,9 +3004,10 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         paramilitaryUnrequested,
         officerDecisionHistory,
         pendingParamilitaryRequests,
-        paramilitaryPolicy: state.paramilitary_policy === 'always_allow' || state.paramilitary_policy === 'always_deny' || state.paramilitary_policy === 'ask'
-            ? state.paramilitary_policy
-            : undefined,
+        // §6 M-a: the order in force (never above the policy card's applied answer) and the cap, both through
+        // the one accessor the engine and the review IPC read; the projection carries the player's own card flag.
+        paramilitaryPolicy: readParamilitaryStandingOrder(state, playerFaction),
+        paramilitaryPolicyCap: paramilitaryStandingOrderCap(state, playerFaction),
         armyReserveQueue,
         operationOpportunityRecords,
         operationOpportunitySummary,
@@ -3856,6 +3859,13 @@ function deriveFiredEvents(state: any, playerFaction: string | null): LoadedGame
         const response = decision
             ? staticInfo?.responseLabels.get(decision.responseId) ?? getPlayerSafeDisplayLabel(decision.responseId, 'response recorded')
             : null;
+        // §6 design T: a player answer filed ahead of its card firing applied on the card's fire turn. Only a log
+        // row with decision_source 'player' qualifies (historian condition, §4 copy row 3): an automatic or staff
+        // answer never reads as "Your answer".
+        const filedAnswerAppliedTurn = decision && decision.source === 'player' && ANSWER_AHEAD_EVENT_IDS.includes(id)
+            && typeof recordedTurn === 'number' && recordedTurn > decision.turn
+            ? recordedTurn
+            : undefined;
         entries.push({
             id,
             turn,
@@ -3867,6 +3877,8 @@ function deriveFiredEvents(state: any, playerFaction: string | null): LoadedGame
             category: decision ? 'political' : 'military',
             effects: decision && response ? [{ kind: 'decision', description: t('firedEvent.wrapper.responseRecorded', { response }) }] : [],
             isDecision: Boolean(decision),
+            ...(response ? { responseLabel: response } : {}),
+            ...(filedAnswerAppliedTurn !== undefined ? { filedAnswerAppliedTurn } : {}),
         });
     }
 
@@ -3894,6 +3906,7 @@ interface RawPendingEventOption {
     historical_marker?: unknown;
     effects?: unknown;
     dimension_shifts?: unknown;
+    plan_answer?: unknown;
 }
 
 interface RawPendingEventDecision {
@@ -3941,9 +3954,19 @@ function sanitizePendingEventDecision(decision: RawPendingEventDecision): Pendin
                 ...(option.historical_marker === 'historical_default' || option.historical_marker === 'counterfactual' ? { historical_marker: option.historical_marker } : {}),
                 effects: Array.isArray(option.effects) ? option.effects as EventEffect[] : [],
                 ...(Array.isArray(option.dimension_shifts) ? { dimension_shifts: option.dimension_shifts as DimensionShift[] } : {}),
+                ...(sanitizePendingPlanAnswer(option.plan_answer)),
             }))
             : [],
     };
+}
+
+/** §6 E3a2: carry a routed option's plan answer (its plan id owns the plan modal while pending). */
+function sanitizePendingPlanAnswer(value: unknown): { plan_answer?: PlanAnswer | null } {
+    if (value === null) return { plan_answer: null };
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+    const raw = value as { plan_id?: unknown; response?: unknown };
+    if (typeof raw.plan_id !== 'string' || (raw.response !== 'accepted' && raw.response !== 'rejected')) return {};
+    return { plan_answer: { plan_id: raw.plan_id, response: raw.response } };
 }
 
 function derivePendingEventDecisions(state: any, playerFaction: string | null): LoadedGameState['pendingEventDecisions'] {

@@ -117,13 +117,23 @@ function modalAlwaysDeny(state: GameState): void {
 }
 
 /**
- * At Full Control, t1: the pocket raises a request (the card is not enabled yet, so it is not
- * pending), the human picks Always deny in the modal, then answers the strategic-goals card in
- * person, which enables the RS policy card for t2.
+ * The request an older build raised for the pocket at t1. Since §6 T merged (T3), no request reaches a
+ * manual player before the side's card has applied, so a new campaign never raises it; a save an older
+ * build wrote still can carry it, and the review IPC still files an Always deny against it.
+ */
+function restoreLegacyRequest(state: GameState): void {
+    state.pending_paramilitary_requests = [{ target_osid: TARGET, faction: 'RS', strength: 150, mode: 'rear_pocket' }];
+}
+
+/**
+ * At Full Control, t1: the human picks Always deny in the modal on the request an older build left
+ * (the T3 gate holds a new one), then answers the strategic-goals card in person, which enables the RS
+ * policy card for t2.
  */
 function inPersonDenyBeforeTheCard(): GameState {
     const state = rsHumanState();
-    expect(rsOutcome(state)).toEqual([0, 1]);
+    expect(rsOutcome(state)).toEqual([0, 0]);
+    restoreLegacyRequest(state);
     modalAlwaysDeny(state);
     expect(state.paramilitary_policy).toBe('always_deny');
     expect(state.paramilitary_decision_history?.map((record) => [record.faction, record.decision])).toEqual([['RS', 'deny']]);
@@ -203,15 +213,16 @@ describe('§6 D1 stage 2 A1: Observer\'s automatic card answer keeps the human\'
         expect(rsOutcome(state)).toEqual([1, 0]);
     });
 
-    it('live desktop path: modal Always deny at t1, goals answered in person, Observer; the card fires at t2 and no RS sweep follows', async () => {
+    it('live desktop path: modal Always deny at t1 (on an older build\'s request), goals answered in person, Observer; the card fires at t2 and no RS sweep follows', async () => {
         const opening = (await startNewCampaign(process.cwd(), 'RS', 'apr_1992', 'historical')).state;
         opening.meta.autonomy_level = 0;
         expect(opening.paramilitary_policy).toBe('ask');
         const t1 = await advanceTurn(opening, process.cwd());
         expect(t1.error).toBeUndefined();
         expect(t1.state.meta.turn).toBe(1);
-        const requests = (t1.state.pending_paramilitary_requests ?? []).filter((request) => request.faction === 'RS');
-        expect(requests.length).toBeGreaterThan(0);
+        // §6 T3: no request reaches the manual RS player before the RS card applies.
+        expect((t1.state.pending_paramilitary_requests ?? []).filter((request) => request.faction === 'RS')).toEqual([]);
+        restoreLegacyRequest(t1.state);
 
         modalAlwaysDeny(t1.state);
         const answered = resolveDesktopEventDecision(t1.state, RS_GOALS_ID, 'all_six', process.cwd());

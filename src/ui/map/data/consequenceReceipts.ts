@@ -46,6 +46,7 @@ import {
 } from '../../../sim/events/realized_consequence_receipts.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { getPlayerSafeDisplayLabel } from '../utils/playerSafeText.js';
+import { turnToDateString } from '../utils/formatters.js';
 import { getActiveLocale, t, type Locale } from '../i18n/index.js';
 import { isCanonicalPlayerFaction, playerFactionMatch } from './playerFactionMatch.js';
 import { hasDeveloperText } from '../../shared/developerText.js';
@@ -73,6 +74,9 @@ export interface ConsequenceReceipt {
     decisionOptionLabel: string;
     /** Turn the player made the decision. */
     decisionTurn: number;
+    /** Turn the decision's effects applied: the decision turn, or for an answer filed ahead of its
+     *  card firing (answer_ahead_of_firing.ts) the turn the card fired. Realized receipts only. */
+    appliedTurn?: number;
     /** The predicted downstream event id. */
     predictedEventId: string;
     /** Player-facing label of the predicted consequence (from the dossier's
@@ -196,16 +200,14 @@ function patronLabelForFaction(factionId: string, locale: Locale): string {
 }
 
 /**
- * Slice 4a — project the engine's realized patron-defiance supply cuts into
- * one-shot ConsequenceReceipts. Each entry of
- * `state.military.patron_defiance_supply_cuts` records a turn on which refusing /
- * distancing from the patron actually STARVED a faction's materiel (emergent-only;
- * the engine never writes these in historical/calibration mode, so this projection
- * collapses to [] there). Unlike the event-causality receipts, these have no
- * promise→receipt edge (the cut is an engine-state mechanic, not an event decision):
- * we emit a one-shot RECEIPT marked `confirmed` with `firedTurn` = the cut turn,
- * so the existing Turn-Aftermath "Consequences Realized This Turn" section surfaces
- * it via `receiptsRealizedOnTurn`. Wording is factual and never framed as a reward.
+ * Project the patron supply cuts (patron-defiance panel, 2026-11-17) into one-shot
+ * ConsequenceReceipts. Each tagged entry of `state.military.patron_defiance_supply_cuts`
+ * records one defiance answer whose `patron_supply_cut` effect applied: the patron held
+ * back materiel, a combat-effectiveness cut until `expires_turn`. Bots never pick these
+ * answers, so hands-off runs carry none. Pre-panel entries (no `tag`) are skipped. The
+ * receipt is `confirmed` with `firedTurn` = the cut turn, so the Turn-Aftermath
+ * "Consequences Realized This Turn" section surfaces it via `receiptsRealizedOnTurn`.
+ * Wording is factual, never framed as a reward, and never promises lost ground.
  */
 function buildPatronDefianceReceipts(
     state: GameState,
@@ -217,10 +219,12 @@ function buildPatronDefianceReceipts(
     const out: ConsequenceReceipt[] = [];
     for (const cut of cuts) {
         if (!playerFactionMatch(cut.faction, playerFaction)) continue;
+        if (typeof cut.tag !== 'string' || cut.tag.length === 0 || typeof cut.expires_turn !== 'number') continue;
         const pct = Math.round(cut.cut_fraction * 100);
-        const supportPct = Math.round(cut.support_after * 100);
+        const combinedPct = Math.round((1 - (cut.combined_multiplier ?? 1)) * 100);
+        const until = turnToDateString(cut.expires_turn);
         const patron = patronLabelForFaction(cut.faction, locale);
-        const id = `patron_defiance::${cut.faction}::${cut.turn}`;
+        const id = `patron_defiance::${cut.faction}::${cut.turn}::${cut.tag}`;
         out.push({
             id,
             sourceRecordId: decisionSourceRecordId(`patron_defiance_${cut.faction}`, 'refused_demand', cut.turn),
@@ -231,8 +235,9 @@ function buildPatronDefianceReceipts(
             decisionTurn: cut.turn,
             predictedEventId: `patron_supply_cut_${cut.faction}`,
             predictedLabel: t('chronicle.generated.patron.materielCut', { patron, pct }, locale),
-            predictedExplanation:
-                t('chronicle.generated.patron.predictedExplanation', { patron, supportPct }, locale),
+            predictedExplanation: cut.floor_binding
+                ? t('chronicle.generated.patron.predictedExplanationFloor', { patron, until, combinedPct }, locale)
+                : t('chronicle.generated.patron.predictedExplanation', { patron, pct, until }, locale),
             status: 'confirmed',
             firedTurn: cut.turn,
             turnsElapsed: 0,
@@ -245,8 +250,8 @@ function buildPatronDefianceReceipts(
                 ],
                 expression:
                     `state.meta.player_faction=${playerFaction} AND ` +
-                    `patron_defiance_supply_cuts(faction=${cut.faction},turn=${cut.turn},` +
-                    `cut_fraction=${cut.cut_fraction},support_after=${cut.support_after})`,
+                    `patron_defiance_supply_cuts(faction=${cut.faction},turn=${cut.turn},tag=${cut.tag},` +
+                    `cut_fraction=${cut.cut_fraction},expires_turn=${cut.expires_turn})`,
                 operands: [
                     {
                         owner_path: 'state.meta.player_faction',
@@ -261,8 +266,8 @@ function buildPatronDefianceReceipts(
                         expected_value: id,
                         observed_value: id,
                         expression:
-                            `patron_defiance_supply_cuts(faction=${cut.faction},turn=${cut.turn},` +
-                            `cut_fraction=${cut.cut_fraction},support_after=${cut.support_after})`,
+                            `patron_defiance_supply_cuts(faction=${cut.faction},turn=${cut.turn},tag=${cut.tag},` +
+                            `cut_fraction=${cut.cut_fraction},expires_turn=${cut.expires_turn})`,
                     },
                 ],
             },
@@ -358,6 +363,7 @@ export function buildConsequenceReceipts(
                     decisionTitle,
                     decisionOptionLabel,
                     decisionTurn: dec.turn,
+                    appliedTurn: realized.applied_turn,
                     predictedEventId: predictedId,
                     predictedLabel,
                     predictedExplanation: resolvePredictedExplanation(fc.explanation, locale),

@@ -3523,78 +3523,19 @@ app.whenReady().then(() => {
   });
 
   ipcMain.handle('resolve-paramilitary-requests', async (_event, payload) => {
-    const decisions = Array.isArray(payload?.decisions) ? payload.decisions : null;
-    const policy = parseParamilitaryPolicy(payload?.policy);
-    if (payload?.policy !== undefined && !policy) {
-      return { ok: false, error: 'invalid_policy' };
-    }
-    if (!currentGameStateJson || !decisions) {
-      return { ok: false, error: 'no_state_or_invalid_payload' };
-    }
-
-    const decisionByTarget = new Map();
-    for (const item of decisions) {
-      if (
-        item
-        && typeof item.target_osid === 'string'
-        && (item.decision === 'allow' || item.decision === 'deny')
-      ) {
-        decisionByTarget.set(item.target_osid, item.decision);
-      }
-    }
-    if (decisionByTarget.size === 0) return { ok: false, error: 'invalid_decisions' };
-
+    // §6 design M (M-a1): the decision logic (payload validation, the T3 request gate, the M-a standing-order
+    // cap) lives in src/desktop/paramilitary_review_ipc.ts, which tests call directly. The state is a
+    // deserialized copy, written back only when the whole packet is accepted; a refusal writes nothing.
     try {
       const sim = getDesktopSim();
-      const state = readCanonicalCurrentState(sim);
-      const pending = Array.isArray(state.pending_paramilitary_requests)
-        ? state.pending_paramilitary_requests
-        : [];
-      const playerFaction = state.meta?.player_faction ?? null;
-      if (policy) state.paramilitary_policy = policy;
-      let matched = 0;
-
-      for (const request of pending) {
-        if (!request || typeof request.target_osid !== 'string') continue;
-        if (playerFaction && request.faction !== playerFaction) continue;
-        if (isFinalParamilitaryDecision(request.decision)) continue;
-        const decision = decisionByTarget.get(request.target_osid) ?? policyDecision(policy);
-        if (!decision) continue;
-        request.decision = decision;
-        matched += 1;
-      }
-
-      if (matched === 0) return { ok: false, error: 'request_not_found' };
-
-      const unresolved = pending.filter((request) =>
-        request
-        && (!playerFaction || request.faction === playerFaction)
-        && !isFinalParamilitaryDecision(request.decision)
-      );
-      if (unresolved.length > 0) return { ok: false, error: 'incomplete_decisions' };
-
-      const report = sim.resolvePlayerParamilitaryDecisions(state);
-      writeCanonicalCurrentState(sim, state);
-      return { ok: true, report };
+      const state = currentGameStateJson ? readCanonicalCurrentState(sim) : null;
+      const result = sim.resolveParamilitaryReviewRequests(state, payload);
+      if (result.ok) writeCanonicalCurrentState(sim, state);
+      return result;
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
     }
   });
-
-  function isFinalParamilitaryDecision(decision) {
-    return decision === 'allow' || decision === 'deny' || decision === 'regular';
-  }
-
-  function parseParamilitaryPolicy(policy) {
-    if (policy === 'ask' || policy === 'always_deny' || policy === 'always_allow') return policy;
-    return null;
-  }
-
-  function policyDecision(policy) {
-    if (policy === 'always_deny') return 'deny';
-    if (policy === 'always_allow') return 'allow';
-    return null;
-  }
 
   ipcMain.handle('resolve-dayton', async (_event, payload) => {
     if (!currentGameStateJson) {

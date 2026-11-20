@@ -92,7 +92,7 @@ function describeEffect(effect: EventEffect): string | null {
     case 'morale_change': return `${army} morale ${signedDelta(effect.delta)}`;
     case 'cohesion_change': return `${army} cohesion ${signedDelta(effect.delta)}`;
     case 'humanitarian_impact': return `${faction} humanitarian impact${effect.war_crimes_delta ? ` (${signedDelta(effect.war_crimes_delta)})` : ''}`;
-    case 'patron_pressure': return `${faction} patron pressure ${signedDelta(effect.delta)}`;
+    case 'patron_support': return `${faction} patron support ${signedDelta(effect.delta)}`;
     case 'alliance_change': return `RBiH–HRHB alliance ${signedDelta(points(effect.delta))}`;
     // §6 E2: no 'negotiation_capital' case; the kind is retired and the loader rejects it.
     case 'equipment_grant': {
@@ -108,6 +108,10 @@ function describeEffect(effect: EventEffect): string | null {
     case 'guerrilla_threat': return `${faction} rear-area threat for ${effect.duration_turns} weeks`;
     case 'recruitment_modifier': return `${army} recruitment ${Math.round(effect.pool_multiplier * 100)}% for ${effect.duration_turns} weeks`;
     case 'equipment_quality_modifier': return `${army} combat effectiveness ${Math.round(effect.multiplier * 100)}% for ${effect.duration_turns} weeks`;
+    // Patron-defiance panel: the price of defying the patron, generated from the effect's numbers.
+    case 'patron_supply_cut': return effect.faction === 'RS'
+      ? `Belgrade holds back part of its fuel and ammunition: ${army} combat effectiveness -${Math.round((1 - effect.multiplier) * 100)}% for ${effect.duration_turns} weeks`
+      : `Zagreb holds back some of its ammunition, fuel and seconded officers: ${army} combat effectiveness -${Math.round((1 - effect.multiplier) * 100)}% for ${effect.duration_turns} weeks`;
     case 'doctrine_constraint': return `${army} doctrine constraint for ${effect.duration_turns} weeks`;
     case 'offensive_ops_suppression': return `${army} offensive operations suppressed for ${effect.duration_turns} weeks`;
     case 'alliance_lock': return `RBiH–HRHB alliance kept ${effect.mode === 'floor' ? 'at or above' : 'at or below'} ${points(effect.value)} for ${effect.duration_turns} weeks`;
@@ -149,6 +153,25 @@ function eventTitle(event: EventDefinition): string {
     .filter((effect): effect is EventEffect & { kind: 'narrative' } => effect.kind === 'narrative')
     .map((effect) => effect.text)
     .join(' ') || event.id;
+}
+
+/** What the English modal shows: the card's `localizations.en` correction when it has one (Codex #763). */
+function englishDisplay(event: EventDefinition, field: 'title' | 'narrative' | 'staff_assessment', persisted: string): string {
+  const override = event.localizations?.en?.[field];
+  return typeof override === 'string' && override.trim().length > 0 ? override : persisted;
+}
+
+function englishEvidence(event: EventDefinition): string[] {
+  const override = event.localizations?.en?.trigger_evidence;
+  return Array.isArray(override) && override.length > 0 ? override : (event.trigger_evidence ?? []);
+}
+
+function englishOption(event: EventDefinition, option: EventResponseOption): { label: string; description?: string } {
+  const override = event.localizations?.en?.response_options?.[option.id];
+  return {
+    label: override?.label?.trim() || option.label,
+    description: override?.description?.trim() || option.description,
+  };
 }
 
 describe('production modal-ready event catalog rendering', () => {
@@ -212,9 +235,9 @@ describe('production modal-ready event catalog rendering', () => {
         eventCatalog: new Map([[event.id, event]]),
       }));
 
-      expect(screen.getByRole('dialog', { name: restoreBosnianProperNames(eventTitle(event)) }), row.id).toBeTruthy();
+      expect(screen.getByRole('dialog', { name: restoreBosnianProperNames(englishDisplay(event, 'title', eventTitle(event))) }), row.id).toBeTruthy();
       expect(screen.getByText('Situation'), row.id).toBeTruthy();
-      expect(screen.getByText(displayEventProse(event.narrative ?? event.situation!)), row.id).toBeTruthy();
+      expect(screen.getByText(displayEventProse(englishDisplay(event, 'narrative', event.narrative ?? event.situation!))), row.id).toBeTruthy();
       // Council fix 4 (C1): the dossier shows the first source line free of developer text, or none.
       const sourceLine = resolveEventSourceLine(event, 'en');
       if (sourceLine) {
@@ -223,8 +246,8 @@ describe('production modal-ready event catalog rendering', () => {
       } else {
         expect(screen.queryByText('Source note'), row.id).toBeNull();
       }
-      expect(screen.getByText(playerSafeDossierText(displayEventProse(event.staff_assessment!))), row.id).toBeTruthy();
-      for (const evidence of event.trigger_evidence ?? []) {
+      expect(screen.getByText(playerSafeDossierText(displayEventProse(englishDisplay(event, 'staff_assessment', event.staff_assessment!)))), row.id).toBeTruthy();
+      for (const evidence of englishEvidence(event)) {
         expect(screen.getByText(playerSafeDossierText(displayEventProse(evidence))), row.id).toBeTruthy();
       }
       if (usesStaffRecommendation) {
@@ -247,9 +270,10 @@ describe('production modal-ready event catalog rendering', () => {
       expect(screen.queryByText('No immediate mechanical effects.'), row.id).toBeNull();
 
       for (const option of event.response_options ?? []) {
-        expect(screen.getByRole('button', { name: new RegExp(option.label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) }), `${row.id}:${option.id}`).toBeTruthy();
-        if (option.description) expect(screen.getByText(displayEventProse(option.description)), `${row.id}:${option.id}`).toBeTruthy();
-        for (const preview of expectedPreviewRows(option)) {
+        const shown = englishOption(event, option);
+        expect(screen.getByRole('button', { name: new RegExp(shown.label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) }), `${row.id}:${option.id}`).toBeTruthy();
+        if (shown.description) expect(screen.getByText(displayEventProse(shown.description)), `${row.id}:${option.id}`).toBeTruthy();
+        for (const preview of expectedPreviewRows({ ...option, label: shown.label, description: shown.description })) {
           expect(screen.getAllByText(preview).length, `${row.id}:${option.id}`).toBeGreaterThan(0);
         }
       }

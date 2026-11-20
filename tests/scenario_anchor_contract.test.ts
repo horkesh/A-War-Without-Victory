@@ -107,21 +107,19 @@ describe('Workstream E turn-52 invariants', () => {
         }
     });
 
-    it('persists the offered peace plans as a resolved chronology through Vance-Owen', () => {
+    it('holds Vance-Owen open at week 52: no row and no pointer inside its window (§6 E3a2)', () => {
         if (!state) return;
         const negotiation = state.military.negotiation;
         const history = negotiation?.peace_plan_history ?? [];
 
+        // §6 E3a2 ruling item 1: the plan resolves when all three answers are on the log
+        // (the RS Assembly card fires at t56-58) or at its close week 58, never before.
         expect(negotiation?.pending_peace_plan).toBeUndefined();
         expect(history.every(entry => entry.resolved)).toBe(true);
         expect(history.map(entry => entry.turn_offered)).toEqual(
             history.map(entry => entry.turn_offered).sort((a, b) => a - b),
         );
-        expect(history).toContainEqual(expect.objectContaining({
-            plan_id: 'vance_owen',
-            turn_offered: 40,
-            resolved: true,
-        }));
+        expect(history.some(entry => entry.plan_id === 'vance_owen')).toBe(false);
     });
 
     afterAll(async () => {

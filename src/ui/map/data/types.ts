@@ -489,25 +489,34 @@ export interface PatronConfidenceView {
 }
 
 /**
- * Compact summary of realized patron-defiance supply cuts for the PLAYER faction,
- * read from `state.military.patron_defiance_supply_cuts` (#117). Emergent-only;
- * absent (undefined) when there are no player-faction cuts (historical/calibration
- * mode never writes these). Display-only — never a reward framing.
+ * The player faction's patron supply cuts (patron-defiance panel, 2026-11-17), read from
+ * `state.military.patron_defiance_supply_cuts`: one receipt per defiance answer that drew a
+ * `patron_supply_cut`. Absent when the player faction has none. Pre-panel entries (no `tag`)
+ * are never shown: they recorded a display-only term that never reached combat.
  */
 export interface PatronDefianceCutsView {
-    /** Number of realized cuts recorded for the player faction. */
+    /** Number of patron cuts on record for the player faction. */
     count: number;
-    /** Most-recent cut fraction (0..1) by turn. */
+    /** The latest cut's own size (1 - multiplier, 0..1). */
     latestCutFraction: number;
-    /** Turn of the most-recent cut. */
+    /** Turn of the latest cut. */
     latestTurn: number;
-    /** material_support_level after the most-recent cut (0..1). */
+    /** Turn the latest cut ends (exclusive). */
+    latestExpiresTurn: number;
+    /** The patron's support (0..1) after the latest answer. Kept for the record; not shown as a cut. */
     latestSupportAfter: number;
-    /** Stable, newest-first material consequence receipt rows. */
+    /** Combined patron cut in force this turn, as the combat reader applies it (1 - floored product; 0 with none). */
+    activeCombinedCutFraction: number;
+    /** True when this turn's active cuts already reach the patron floor. */
+    activeFloorBinding: boolean;
+    /** Stable, newest-first receipt rows. */
     entries?: Array<{
         turn: number;
+        /** The answer that drew the cut, `<event_id>#<option_id>`. */
+        tag: string;
         cutFraction: number;
-        supportAfter: number;
+        expiresTurn: number;
+        floorBinding: boolean;
     }>;
 }
 
@@ -1517,6 +1526,12 @@ export interface LoadedGameState {
     /** Pending paramilitary deployment requests awaiting player decision. */
     pendingParamilitaryRequests?: LoadedParamilitaryRequest[];
     paramilitaryPolicy?: 'always_allow' | 'always_deny' | 'ask';
+    /**
+     * §6 design M (M-a): the highest standing paramilitary order the player may set, read through the one cap
+     * accessor (`paramilitaryStandingOrderCap`): the side's policy card's APPLIED answer, `ask` before it
+     * applies; null when the side has no policy card (HRHB) or there is no player.
+     */
+    paramilitaryPolicyCap?: 'always_allow' | 'always_deny' | 'ask' | null;
     /** Per-elite-brigade deployment history. */
     eliteBrigadeTracker?: Record<string, {
         total_loans: number;
@@ -1665,6 +1680,11 @@ export interface LoadedGameState {
         effects: Array<{ kind: string; description: string }>;
         isDecision: boolean;
         responseOptions?: Array<{ id: string; label: string; description?: string }>;
+        /** A player answer filed ahead of its card firing that has since applied: the card's fire turn
+         *  (§6 design T; answer_ahead_of_firing.ts). `turn` stays the turn the answer was filed. */
+        filedAnswerAppliedTurn?: number;
+        /** Player-facing label of the recorded response (decisions only). */
+        responseLabel?: string;
     }>;
 
     /** Pending event decisions awaiting player response. */
@@ -1692,6 +1712,8 @@ export interface LoadedGameState {
             effects: import('../../../sim/events/event_types.js').EventEffect[];
             sets_flags?: Record<string, string | number | boolean>;
             dimension_shifts?: import('../../../sim/events/event_types.js').DimensionShift[];
+            /** §6 E3a2: the plan answer this option records (null = no write); owns the plan modal while pending. */
+            plan_answer?: import('../../../sim/events/event_types.js').PlanAnswer | null;
         }>;
     }>;
 

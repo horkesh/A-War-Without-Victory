@@ -231,7 +231,10 @@ describe('DecisionConsequenceRecordsPanel', () => {
         rawGameState: {
           military: {
             patron_defiance_supply_cuts: [
-              { faction: 'RS', turn: 44, cut_fraction: 0.35, support_after: 0.45 },
+              {
+                faction: 'RS', turn: 44, cut_fraction: 0.05, support_after: 0.6,
+                tag: 'milosevic_vopp_pressure#resist_patron', expires_turn: 57, combined_multiplier: 0.95,
+              },
             ],
           },
         } as any,
@@ -240,9 +243,9 @@ describe('DecisionConsequenceRecordsPanel', () => {
 
     render(React.createElement(DecisionConsequenceRecordsPanel));
 
-    expect(screen.getByText('Patron defiance supply cut')).toBeTruthy();
-    expect(screen.getByText('Material support reduced')).toBeTruthy();
-    expect(screen.getByText('Serbia cut 35% of material support for VRS; support after cut 45%.')).toBeTruthy();
+    expect(screen.getByText('Patron supply cut')).toBeTruthy();
+    expect(screen.getByText('Combat effectiveness reduced')).toBeTruthy();
+    expect(screen.getByText('VRS: Serbia held back part of its materiel; combat effectiveness -5% for 13 weeks.')).toBeTruthy();
     expect(screen.getByText(`Patron relations / ${turnToDateString(44)}`)).toBeTruthy();
     expect(screen.queryByText(/Patron relations \/ Turn 44/)).toBeNull();
     expect(screen.getByText('Filed to Records')).toBeTruthy();
@@ -266,7 +269,10 @@ describe('DecisionConsequenceRecordsPanel', () => {
         rawGameState: {
           military: {
             patron_defiance_supply_cuts: [
-              { faction: 'RS', turn: 12, cut_fraction: 0.2, support_after: 0.6 },
+              {
+                faction: 'RS', turn: 12, cut_fraction: 0.03, support_after: 0.8,
+                tag: 'milosevic_isolation_warning_aug92#resist_patron', expires_turn: 25, combined_multiplier: 0.97,
+              },
             ],
           },
         } as any,
@@ -275,7 +281,7 @@ describe('DecisionConsequenceRecordsPanel', () => {
 
     render(React.createElement(DecisionConsequenceRecordsPanel));
 
-    expect(screen.getByText('Patron defiance supply cut')).toBeTruthy();
+    expect(screen.getByText('Patron supply cut')).toBeTruthy();
     expect(screen.getByText('Filed to Records')).toBeTruthy();
     expect(screen.queryByText('Chronicle decision 59')).toBeNull();
   });

@@ -184,12 +184,17 @@ function detect(state: GameState, side: Side): [number, number] {
 }
 
 /**
- * At Full Control, t1: the first pocket raises a request (the card is not enabled yet, so it is not pending), the human gives
- * the standing order in the review modal, and the side's card is then enabled.
+ * At Full Control, t1: the human gives the standing order in the review modal, and the side's card is then enabled.
+ *
+ * Since §6 T merged (T3, the manual request gate), no request reaches a manual player before the side's card has applied, and
+ * the review IPC refuses an approval while that gate holds, so a new campaign never reaches this state: it is a save an older
+ * build wrote (engine Q3). The request that build raised for the first pocket at t1 is restored as it left it, then the modal's
+ * order is filed as that build filed it.
  */
 function inPersonOrderBeforeTheCard(side: Side, order: Order): GameState {
     const state = humanState(side);
-    expect(detect(state, side)).toEqual([0, 1]);
+    expect(detect(state, side)).toEqual([0, 0]);
+    state.pending_paramilitary_requests = [{ target_osid: POCKETS[0]!, faction: side, strength: 150, mode: 'rear_pocket' }];
     modalOrder(state, side, order);
     expect(state.paramilitary_policy).toBe(order);
     expect(state.paramilitary_decision_history?.map((record) => [record.faction, record.decision]))

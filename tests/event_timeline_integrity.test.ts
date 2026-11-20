@@ -268,11 +268,13 @@ describe('Event timeline historical integrity', () => {
             'comply_withdraw_hwez',
             'defy_ultimatum_hwez',
         ]);
-        expect(ult.effect).toEqual({ kind: 'patron_pressure', faction: 'RS', delta: 10 });
-        expect(ult.effects).toEqual([{
+        // §6 E4: the card's patron effect is dropped (a NATO ultimatum is not a patron act; the
+        // per-turn override carries the pressure). Its own narrative now fills the required slot.
+        expect(ult.effect).toEqual({
             kind: 'narrative',
             text: "NATO demands VRS withdrawal of heavy weapons from around Sarajevo. The threat of air strikes becomes credible for the first time.",
-        }]);
+        });
+        expect(ult.effects).toEqual([]);
 
         expect([exclusion.trigger.turn_min, exclusion.trigger.turn_max]).toEqual([97, 98]);
         expect(exclusion.trigger.requires_events).toEqual(['nato_ultimatum_sarajevo_1994']);

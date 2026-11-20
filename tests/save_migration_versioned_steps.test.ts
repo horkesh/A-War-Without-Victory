@@ -73,7 +73,9 @@ describe('versioned save migration steps', () => {
 
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(41);
+        // v40 retired the September 1991 peace start (#773), §6 E2 took 41, §6 E4 took 42, §6 E3a2 took 43,
+        // the patron-defiance panel took 44.
+        expect(getLatestSchemaVersion()).toBe(44);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {

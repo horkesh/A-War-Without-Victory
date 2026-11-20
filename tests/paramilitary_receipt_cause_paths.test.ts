@@ -123,6 +123,14 @@ function marchToOutcome(state: GameState): void {
     throw new Error('a paramilitary sweep never reached its outcome');
 }
 
+/**
+ * The request an older build raised for the first pocket at t1. Since §6 T merged (T3), no request reaches a manual
+ * player before the side's card has applied, so only a save an older build wrote carries it.
+ */
+function restoreLegacyRequest(state: GameState): void {
+    state.pending_paramilitary_requests = [{ target_osid: POCKETS[0]!, faction: 'RS', strength: 150, mode: 'rear_pocket' }];
+}
+
 /** The review modal's Always allow (the `resolve-paramilitary-requests` IPC body). */
 function modalAlwaysAllow(state: GameState): void {
     state.paramilitary_policy = 'always_allow';
@@ -172,19 +180,19 @@ const noRng = () => 0;
 describe('§6 D1 stage 2: receipt causes on the panel\'s engine paths', () => {
     it('6a row: a Full Control sweep under a review-modal Always allow never reaches the cause-less receipt', () => {
         const state = rsHumanState();
-        // t1: one pocket raises a request (the card is not enabled yet); the human picks Always allow in the modal.
-        expect(detectAndMarch(state)).toEqual([0, 1]);
+        // t1: §6 T3 holds the manual player, so no request is raised; an older build's save carries one, and its
+        // modal Always allow was filed against it.
+        expect(detectAndMarch(state)).toEqual([0, 0]);
+        restoreLegacyRequest(state);
         modalAlwaysAllow(state);
         expect(state.paramilitary_decision_history?.map((record) => [record.faction, record.decision])).toEqual([['RS', 'allow']]);
-        // t2, still Full Control: the standing order sends the second pocket's sweep with no request.
+        // t2, still Full Control: the RS card has not applied, so T3 still holds and the modal order sends nothing
+        // (before §6 T, the standing order sent the second pocket's sweep here with no request).
         state.meta.turn = 2;
-        expect(detectAndMarch(state)).toEqual([1, 0]);
+        expect(detectAndMarch(state)).toEqual([0, 0]);
         marchToOutcome(state);
-
-        const shown = receipts(state);
-        expect(shown).toHaveLength(1);
-        expect(shown[0]!.cause).toBe('neutral');
-        expect(CAUSE_LESS_KEYS).not.toContain(shown[0]!.key);
+        // No sweep was sent without a request, so no receipt, and none with the cause-less text.
+        expect(receipts(state)).toEqual([]);
     });
 
     it('6a row: a Full Control sweep under the card\'s Always allow answered in person never reaches the cause-less receipt', () => {
@@ -208,8 +216,10 @@ describe('§6 D1 stage 2: receipt causes on the panel\'s engine paths', () => {
 
     it('C1: a review-modal Always allow kept at Observer is never credited to the historical policy (the cause is neutral)', () => {
         const state = rsHumanState();
-        // t1, Full Control: one pocket raises a request; the human picks Always allow in the modal, then answers the goals card.
-        expect(detectAndMarch(state)).toEqual([0, 1]);
+        // t1, Full Control: T3 raises no request; on the request an older build's save carries, the human picks Always
+        // allow in the modal, then answers the goals card.
+        expect(detectAndMarch(state)).toEqual([0, 0]);
+        restoreLegacyRequest(state);
         modalAlwaysAllow(state);
         answerGoalsInPerson(state);
         // t2: the human is at Observer; the card fires and is answered automatically with the historical default.
