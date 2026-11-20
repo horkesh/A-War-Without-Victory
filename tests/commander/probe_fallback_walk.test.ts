@@ -17,7 +17,7 @@ import { createRequire } from 'node:module';
 
 import type { CorpsFrontSector, FactionId, FormationId, FormationState, GameState } from '../../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../../src/state/game_state.js';
-import type { BrigadeEvaluation, CommanderBriefing, ZoneId } from '../../src/sim/combat/commander/commander_state.js';
+import type { BrigadeEvaluation, CommanderBriefing, CommanderPlan, CommanderPlanStatus, ZoneId } from '../../src/sim/combat/commander/commander_state.js';
 import type { SpatialContext } from '../../src/sim/spatial_context.js';
 import { emitCommanderOutput } from '../../src/sim/combat/commander/emit.js';
 import { COMMANDER_CREATION_PREFIX, resetReasonCodeTopicCacheForTests } from '../../src/sim/combat/reason_code_debug.js';
@@ -64,6 +64,8 @@ interface WalkHarnessOptions {
     /** Adds a 5000-man brigade with this id next to an undefended isolated enemy cell. */
     occupationBrigade?: string;
     corpsExhaustion?: number;
+    /** A pending commander plan of this status (not yet buildable into an operation). */
+    planStatus?: CommanderPlanStatus;
     topics?: string;
 }
 
@@ -315,9 +317,9 @@ function runWalkHarness(options: WalkHarnessOptions) {
             can_launch_ops: true,
         },
         {
-            plan: null,
+            plan: options.planStatus ? pendingPlan(options.planStatus) : null,
             action: 'none',
-            reason: 'no plan',
+            reason: options.planStatus ? 'plan pending' : 'no plan',
             decision_trace: { turn: TURN, winning_intent_id: null, candidates: [], hard_constraints: [], lessons_applied: [], relationships_applied: [] },
         },
         {
@@ -337,6 +339,23 @@ function runWalkHarness(options: WalkHarnessOptions) {
         : null;
     const probes = output.operations.filter((operation) => operation.type === 'probe');
     return { output, probes, receipt };
+}
+
+function pendingPlan(status: CommanderPlanStatus): CommanderPlan {
+    return {
+        plan_id: `plan_${CORPS_ID}_t${TURN}_opportunity`,
+        objective_description: 'offensive opportunity from zone:walk:0',
+        target_osids: [LANES.b.target],
+        required_brigades: 2,
+        assigned_brigades: [],
+        staging_zone: 'zone:walk:0' as ZoneId,
+        status,
+        created_turn: TURN - 1,
+        target_ready_turn: TURN + 1,
+        concentration_progress: 0.5,
+        viability_score: 0.8,
+        source: 'opportunity',
+    } as CommanderPlan;
 }
 
 function probeSummary(result: ReturnType<typeof runWalkHarness>) {
@@ -428,6 +447,25 @@ describe('F1b probe fallback walk', () => {
         expect(exhausted.probes).toEqual([]);
         expect(exhausted.receipt?.probe_gate_receipt?.target_selection_detail?.walk?.map((entry: { outcome: string }) => entry.outcome))
             .toEqual(['all_filtered', 'stopped_corps_exhausted']);
+    });
+
+    it('walks past rank 0 only while the corps has no plan concentrating, suspended or ready (the walk never takes the plan slot)', () => {
+        const scenario = { brigades: [{ id: 'b_alpha', lane: 'a' as const }, { id: 'b_bravo', lane: 'b' as const }], defenders: { a: 4_000 } };
+        for (const planStatus of ['concentrating', 'suspended'] as const) {
+            const pending = runWalkHarness({ ...scenario, planStatus, topics: 'commander_creation' });
+            expect(pending.probes).toEqual([]);
+            expect(pending.receipt?.probe_gate_receipt?.target_selection_detail?.walk?.map((entry: { outcome: string }) => entry.outcome))
+                .toEqual(['all_filtered', 'stopped_plan_pending']);
+        }
+        for (const planStatus of ['abandoned'] as const) {
+            expect(probeSummary(runWalkHarness({ ...scenario, planStatus })))
+                .toEqual([{ brigades: ['b_bravo'], objectives: [LANES.b.target] }]);
+        }
+    });
+
+    it('keeps rank 0 exactly as on main while a plan is pending', () => {
+        const result = runWalkHarness({ brigades: [{ id: 'b_alpha', lane: 'a' }, { id: 'b_bravo', lane: 'b' }], planStatus: 'concentrating' });
+        expect(probeSummary(result)).toEqual([{ brigades: ['b_alpha'], objectives: [LANES.a.target] }]);
     });
 
     it('keeps rank 0 exactly as on main for an exhausted corps', () => {
