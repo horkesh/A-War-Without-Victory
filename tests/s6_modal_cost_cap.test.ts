@@ -476,6 +476,24 @@ describe('M-a2 paramilitary_order_clamp_legacy_save: an old save whose modal ord
 
     // M pinned a third reader here, `detectOffensiveParamilitaryTargets`. §6 D1 stage 2 (§3, signed unanimously)
     // retired that detector (no production caller; tests/paramilitary_spawn_guard.test.ts), so the reader is gone.
+    // D1's own reader takes its place: the staff path, `resolveNonManualParamilitaryPolicy` (M: "D1 extends the clamp to
+    // its own readers when it rebases").
+    it('staff path (D1): a clamped order sends no sweep at Assisted, Delegated or Observer', () => {
+        for (const faction of ['RBiH', 'RS'] as const) {
+            for (const autonomy of [1, 2, 3]) {
+                const state = pocketState(faction, 6, autonomy);
+                applyCard(state, faction, 'ask');
+                // An older build's modal Always allow, filed after the card's Review: above the cap, read as Review.
+                state.paramilitary_policy = 'always_allow';
+                state.paramilitary_decision_history = [{
+                    id: `paramilitary:5:${STALE}`, turn: 5, target_osid: STALE, faction, strength: 150, decision: 'allow',
+                }];
+                const report = detectParamilitaryTargets(state, edges(), reverseMap(), undefined);
+                expect(spawnedFor(report, faction), `${faction} a${autonomy}`).toHaveLength(0);
+                expect(ownRequests(state, faction), `${faction} a${autonomy}`).toHaveLength(0);
+            }
+        }
+    });
 
     it('the Codex reads the order in force: an applied Refuse under a modal Always allow is a refusal', () => {
         const state = {
