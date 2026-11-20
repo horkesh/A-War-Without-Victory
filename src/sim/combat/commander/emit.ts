@@ -205,6 +205,13 @@ const POSTURE_MIN_OUTCOME: Record<ZonePosture, CorpsDirective['min_attack_outcom
     projecting: 'stalemate',
 };
 
+/** F1b: plan statuses that still need the corps' operation slot; the probe walk stops past rank 0 while one is pending. */
+const PENDING_PLAN_STATUSES: ReadonlySet<CommanderPlanStatus> = new Set([
+    'concentrating',
+    'suspended',
+    'ready',
+]);
+
 /** Plan statuses that produce operations. */
 const ACTIVE_PLAN_STATUSES: ReadonlySet<CommanderPlanStatus> = new Set([
     'executing',
@@ -2106,6 +2113,7 @@ interface CommanderCreationProbeWalkEntry {
         | 'skipped_contact_cell'
         | 'skipped_duplicate_sector_location'
         | 'stopped_corps_exhausted'
+        | 'stopped_plan_pending'
         | CommanderCreationProbeTargetSelectionStatus;
 }
 
@@ -3358,6 +3366,19 @@ function buildOperationsImpl(
                     location_osid: walkedLocation,
                     derived_sector_id: null,
                     outcome: 'stopped_corps_exhausted',
+                });
+                break;
+            }
+            // Panel revision 2 (ops seat, 2026-11-20): a walked probe holds the corps' operation slot,
+            // so it must not pre-empt the corps' own pending plan. While a plan is concentrating,
+            // suspended (a paused concentration) or ready, the corps looks only at its top brigade.
+            if (sortedRank > 0 && planDecision.plan && PENDING_PLAN_STATUSES.has(planDecision.plan.status)) {
+                walkReceipt?.push({
+                    sorted_rank: sortedRank,
+                    brigade_id: walked.brigade_id,
+                    location_osid: walkedLocation,
+                    derived_sector_id: null,
+                    outcome: 'stopped_plan_pending',
                 });
                 break;
             }
