@@ -260,12 +260,19 @@ export function reassignCorpsForBilateralWar(state: GameState, faction: FactionI
 
     rhs.bilateral_corps_release_progress[faction] = 0;
 
-    // F3b (2026-11-20): an early exit below means there is no diversion this turn, so the current
-    // pick is released like a displaced corps. The war can stop without a ceasefire or Washington
-    // (the alliance drifts back above HOSTILE_THRESHOLD), and nothing guarantees a later branch
-    // clears the pick; before F3b it kept the diversion tag, which the commander briefing reads as
-    // campaign role 'contain' once its directive empties. Writes nothing when there is no pick.
-    const lapse = (reason: 'not_applicable' | 'insufficient_corps' | 'no_bilateral_front'): BilateralCorpsReassignmentReport => {
+    // A lull (alliance between HOSTILE and ALLIED with no ceasefire) is NOT a release: the front still
+    // exists, the pick keeps its live targets and holds that front until the war resumes or the
+    // ceasefire / Washington branches release it (orchestrator ruling 2026-11-20). The canonical
+    // run has one at t62.
+    if (!isRbihHrhbCombatEnabled(state) || !isRbihHrhbAtWar(state)) {
+        return { diverted_corps_id: null, released_corps_id: null, release_progress: 0, joint_ops: false, reason: 'not_applicable' };
+    }
+
+    // F3b (2026-11-20): when the corps or the front really vanishes, there is nothing left to divert
+    // to, so the current pick is released like a displaced corps. Before F3b it kept the diversion
+    // tag, which the commander briefing reads as campaign role 'contain' once its directive empties.
+    // Writes nothing when there is no pick.
+    const lapse = (reason: 'insufficient_corps' | 'no_bilateral_front'): BilateralCorpsReassignmentReport => {
         if (currentDiverted) {
             if (currentCmd) {
                 clearBilateralDirective(currentCmd);
@@ -276,10 +283,6 @@ export function reassignCorpsForBilateralWar(state: GameState, faction: FactionI
         }
         return { diverted_corps_id: null, released_corps_id: currentDiverted, release_progress: 0, joint_ops: false, reason };
     };
-
-    if (!isRbihHrhbCombatEnabled(state) || !isRbihHrhbAtWar(state)) {
-        return lapse('not_applicable');
-    }
 
     const corpsList = getFactionCorps(state, faction);
     const minCorps = faction === 'HRHB' ? 3 : 4;
