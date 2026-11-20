@@ -323,6 +323,17 @@ export function reassignCorpsForBilateralWar(state: GameState, faction: FactionI
         return { diverted_corps_id: null, released_corps_id: null, release_progress: 0, joint_ops: false, reason: 'no_bilateral_front' };
     }
 
+    // F3 (2026-11-20): the diversion moves to another corps, so release the displaced one the way
+    // the ceasefire and Washington branches do. Before F3 it kept the diversion tag with zero
+    // targets, which the commander briefing reads as campaign role 'contain' (no fresh plans) for
+    // the rest of the war.
+    const displacedCorpsId = currentDiverted !== null && currentDiverted !== selected.corpsId ? currentDiverted : null;
+    if (displacedCorpsId && currentCmd) {
+        clearBilateralDirective(currentCmd);
+        currentCmd.stance = 'balanced';
+        currentCmd.status_reason = 'bilateral_front_rotated';
+    }
+
     rhs.bilateral_diverted_corps[faction] = selected.corpsId;
     const selectedCmd = command[selected.corpsId];
     if (selectedCmd) {
@@ -336,7 +347,7 @@ export function reassignCorpsForBilateralWar(state: GameState, faction: FactionI
         selectedCmd.status_reason = 'rbih_hrhb_bilateral_front_diversion';
     }
 
-    return { diverted_corps_id: selected.corpsId, released_corps_id: null, release_progress: 0, joint_ops: false, reason: 'diverted' };
+    return { diverted_corps_id: selected.corpsId, released_corps_id: displacedCorpsId, release_progress: 0, joint_ops: false, reason: 'diverted' };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
