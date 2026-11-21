@@ -551,12 +551,19 @@ function computeCorpsTargets(
             friendlyOsids: friendlyOsids.sort(),
         });
     }
-    // Sort sectors by threat_ratio descending (highest threat first — relieve pressure)
+    // Sort sectors by threat_ratio descending (highest threat first — relieve pressure).
+    // Hold targets use this order.
     corpsSectors.sort((a, b) => b.threatRatio - a.threatRatio);
 
     if (role === 'primary' || role === 'secondary') {
+        // P3 step 4 (Fable consult 4, run 2): an attacking corps takes its
+        // objectives from the WEAKEST enemy sector first (lowest threat_ratio),
+        // not the strongest. Strongest-first sent every attack at the best-held
+        // ground. The sort is stable, so equal ratios keep the order above.
+        // All factions.
+        const offensiveOrder = [...corpsSectors].sort((a, b) => a.threatRatio - b.threatRatio);
         const targets: string[] = [];
-        for (const sec of corpsSectors) {
+        for (const sec of offensiveOrder) {
             for (const osid of sec.enemyOsids) {
                 if (!targets.includes(osid) && targets.length < MAX_GATHERING_OFFENSIVE_TARGETS) {
                     targets.push(osid);

@@ -34,6 +34,12 @@ import type { SectorTopologyDiagnosticCollector } from './sector_topology_diagno
 import type { SectorTopologyNarrowReadState } from './sector_topology_narrow_reads.js';
 import { getQueuedDatedPrestageBrigadeIds } from './pre_planned_operations.js';
 import type { SectorTopologyWorkingFormation } from './sector_topology_narrow_formation.js';
+import {
+    buildContactOsidsByFaction,
+    FRONT_DONOR_HOME_DISTANCE_MAX_HOPS,
+    standsOnContactCell,
+    type ContactOsidsByFaction,
+} from './contact_cells.js';
 
 const REAR_GUARD_CORPS = new Set<string>(['vrs_1st_krajina', 'vrs_2nd_krajina']);
 const COLLAPSED_REAR_GUARD_ABSORPTION_CORPS = new Set<string>(['vrs_2nd_krajina']);
@@ -1590,10 +1596,23 @@ export function ensureMinimumSectorCoverage(
     // commitment. This mirrors isSectorUnstaffableByFaction's legal-donor contract:
     // operation participants follow their operation, and disrupted, digging-in,
     // loaned, or already-moving units are not free reserves.
+    // Defence fix D3: a brigade standing on a contact cell (attacked recently, still held)
+    // never leaves it. Every physical move below is a coverage donor move, so each donor
+    // filter refuses such a brigade. Built lazily: most calls move nobody.
+    let contactByFaction: ContactOsidsByFaction | undefined;
+    const leavesContactCell = (bid: FormationId): boolean => {
+        contactByFaction ??= buildContactOsidsByFaction(
+            formations,
+            state?.political.political_controllers,
+            state?.meta.turn,
+        );
+        return standsOnContactCell(formations[bid], contactByFaction);
+    };
     const isZeroAssignedRescueEligible = (bid: FormationId): boolean => {
         const formation = formations[bid];
         if (!formation?.location_osid) return false;
         if (opParticipants.has(bid)) return false;
+        if (leavesContactCell(bid)) return false;
         if ((formation.disrupted_turns ?? 0) > 0 || formation.disrupted === true) return false;
         if (formation.posture === 'dig_in' || pendingDigIn.has(bid)) return false;
         if (formation.elite_loan_state?.on_loan) return false;
@@ -1603,7 +1622,6 @@ export function ensureMinimumSectorCoverage(
         return true;
     };
     const LOCAL_FRONT_RELIEF_MAX_HOPS = 3;
-    const FRONT_DONOR_HOME_DISTANCE_MAX_HOPS = 4;
 
     // Dense call-scoped occupancy replaces repeated full formation scans while
     // retaining exactly the same eligibility rule and Map-like zero semantics.
@@ -2190,6 +2208,7 @@ export function ensureMinimumSectorCoverage(
                         if (opParticipants.has(entry.bid)) return null;
                         if (brigadeMovementState?.[entry.bid]?.status === 'in_transit') return null;
                         if (brigadeMovementOrders?.[entry.bid]) return null;
+                        if (leavesContactCell(entry.bid)) return null;
                         const target = pickVacantLocalFrontTarget(
                             entry.bid,
                             sector,
@@ -2283,6 +2302,7 @@ export function ensureMinimumSectorCoverage(
                     if (opParticipants.has(entry.bid)) return null;
                     if (brigadeMovementState?.[entry.bid]?.status === 'in_transit') return null;
                     if (brigadeMovementOrders?.[entry.bid]) return null;
+                    if (leavesContactCell(entry.bid)) return null;
                     if (entry.donorRole === 'front') {
                         if (claimTypeForSector(entry.donor, entry.bid) !== 'front') return null;
                         if (entry.donor.assigned_brigade_ids.length <= needed(entry.donor)) return null;
@@ -2419,6 +2439,7 @@ export function ensureMinimumSectorCoverage(
                             if (opParticipants.has(entry.bid)) return null;
                             if (brigadeMovementState?.[entry.bid]?.status === 'in_transit') return null;
                             if (brigadeMovementOrders?.[entry.bid]) return null;
+                            if (leavesContactCell(entry.bid)) return null;
                             if (entry.donorRole === 'front') {
                                 if (claimTypeForSector(entry.donor, entry.bid) !== 'front') return null;
                                 if (entry.donor.assigned_brigade_ids.length <= needed(entry.donor)) return null;

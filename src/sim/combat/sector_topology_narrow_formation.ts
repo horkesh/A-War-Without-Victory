@@ -56,11 +56,21 @@
  */
 
 import type { FormationState } from '../../state/game_state.js';
+import type { ContactEngagementRow } from './contact_cells.js';
 
 export interface SectorTopologyWorkingEliteLoanState {
     on_loan: boolean;
     loaned_to_corps: string | null;
     loan_start_turn: number | null;
+}
+
+/**
+ * Read-only engagement log, narrowed to what the defence-fix D3 contact-cell read uses
+ * (`ensureMinimumSectorCoverage`: a donor never leaves a contact cell). `BrigadeHistory`
+ * satisfies it.
+ */
+export interface SectorTopologyWorkingBrigadeHistory {
+    readonly engagements: readonly ContactEngagementRow[];
 }
 
 export type SectorTopologyWorkingFormation = Omit<Pick<FormationState,
@@ -71,4 +81,5 @@ export type SectorTopologyWorkingFormation = Omit<Pick<FormationState,
     | 'stranded_status' | 'elite_loan_state' | 'entrenchment_turns'
 >, 'elite_loan_state'> & {
     elite_loan_state?: SectorTopologyWorkingEliteLoanState;
+    brigade_history?: SectorTopologyWorkingBrigadeHistory;
 };

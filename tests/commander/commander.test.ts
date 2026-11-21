@@ -794,6 +794,38 @@ describe('plan', () => {
         expect(result.plan?.status).toBe('executing');
     });
 
+    it('clears an abandoned bilateral plan after Washington instead of re-abandoning it every turn (package P3 step 2)', () => {
+        const zoneId = 'zone:test_corps:0' as ZoneId;
+        const brigIds = ['b1', 'b2'].map(id => id as FormationId);
+        const zones = [makeZone({ zone_id: zoneId, posture: 'projecting', front_edge_count: 40, surplus_brigades: [], assigned_brigades: brigIds })];
+        const forces = makeForces(brigIds.map(id => makeEval({ brigade_id: id, current_zone: zoneId, is_combat_effective: true })), zones);
+        const plan: CommanderPlan = {
+            plan_id: 'plan_bilateral_after_washington',
+            objective_description: 'bilateral attack',
+            target_osids: ['op:vitez:e'],
+            required_brigades: 2,
+            assigned_brigades: brigIds,
+            staging_zone: zoneId,
+            status: 'abandoned',
+            created_turn: 90,
+            target_ready_turn: 94,
+            concentration_progress: 1,
+            viability_score: 1,
+            source: 'opportunity',
+            bilateral_offensive: true,
+        };
+        const briefing = makeMinimalBriefing({
+            state_ref: { political: { rbih_hrhb_state: { washington_signed: true, ceasefire_active: true } } } as unknown as GameState,
+        });
+
+        // Pre-fix: the bilateral check ran first and returned the plan 'abandoned' again, forever,
+        // so the corps never planned another operation after the Washington Agreement.
+        const result = managePlan(briefing, zones, forces, [], plan, 103);
+
+        expect(result.plan).toBeNull();
+        expect(result.reason).toBe('clearing abandoned plan');
+    });
+
     it('transitions to ready at 80% concentration', () => {
         const zoneId = 'zone:test_corps:0' as ZoneId;
         // 4 of 5 brigades at staging = 80%

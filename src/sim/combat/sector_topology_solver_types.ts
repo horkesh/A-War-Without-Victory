@@ -162,6 +162,22 @@ export interface SectorTopologyFormation {
      * 188-week run — see the R5 Phase 2e Task 4 step 5 session checkpoint.
      */
     readonly entrenchment_turns?: number;
+    /**
+     * Engagement rows (turn, osid, role, battle_id only) for the defence-fix D3
+     * contact-cell guard in `ensureMinimumSectorCoverage`.
+     */
+    readonly brigade_history?: SectorTopologyBrigadeHistorySnapshot;
+}
+
+export interface SectorTopologyEngagementRow {
+    readonly turn: number;
+    readonly osid: string;
+    readonly role: 'attacker' | 'defender';
+    readonly battle_id?: string;
+}
+
+export interface SectorTopologyBrigadeHistorySnapshot {
+    readonly engagements: readonly SectorTopologyEngagementRow[];
 }
 
 // ── 15. Movement ownership / 16. player sector direction ────────────────
