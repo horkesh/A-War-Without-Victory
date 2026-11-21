@@ -1080,6 +1080,16 @@ function defenderPowerAtCell(
     return computeDefenderPower(ctx.state, subject, cell as Osid, {}, 0, ctx.supplyStateByOsid);
 }
 
+/**
+ * Held in place: a loaned brigade, a dug-in brigade and one with a pending dig-in order
+ * never move for a relief. Binds the donor (R1, R2) and the departing occupant (R2, G2)
+ * alike (Codex #826 r4655197592).
+ */
+function isHeldInPlaceForRelief(ctx: ContactReliefContext, bid: string, formation: FormationState): boolean {
+    if (formation.elite_loan_state?.on_loan) return true;                                // loaned
+    return formation.posture === 'dig_in' || ctx.pendingDigIn.has(bid);                 // dug in
+}
+
 /** Donor guards for a relief (R1 and R2). */
 function isContactReliefDonorEligible(
     ctx: ContactReliefContext,
@@ -1098,8 +1108,7 @@ function isContactReliefDonorEligible(
     if ((formation.disrupted_turns ?? 0) > 0 || formation.disrupted === true) return false;
     if (ctx.state.military.brigade_movement_state?.[bid]?.status === 'in_transit') return false;
     if (ctx.state.military.brigade_movement_orders?.[bid]) return false;
-    if (formation.elite_loan_state?.on_loan) return false;                               // loaned
-    if (formation.posture === 'dig_in' || ctx.pendingDigIn.has(bid)) return false;       // dug in
+    if (isHeldInPlaceForRelief(ctx, bid, formation)) return false;                       // loaned / dug in
     if (ctx.mustHoldOsids.has(location)) return false;                                   // must-hold
     const contact = ctx.contactByFaction.get(faction);
     if (contact?.has(location)) return false;                                            // never leaves a contact cell
@@ -1180,7 +1189,10 @@ function relieveEmptyContactCell(
     nestedSet(ctx.reliefInboundByFaction, sector.faction).add(cell);
 }
 
-/** G1 binds the relieved brigade too; a disrupted, moving or ordered brigade stays where it is. */
+/**
+ * G1 binds the relieved brigade too; a disrupted, moving or ordered brigade stays where it is,
+ * and so does a loaned or dug-in one (the donor's held-in-place guard).
+ */
 function canRelievedBrigadeLeave(
     ctx: ContactReliefContext,
     bid: string,
@@ -1191,6 +1203,7 @@ function canRelievedBrigadeLeave(
     if ((formation.disrupted_turns ?? 0) > 0 || formation.disrupted === true) return false;
     if (ctx.state.military.brigade_movement_state?.[bid]?.status === 'in_transit') return false;
     if (ctx.state.military.brigade_movement_orders?.[bid]) return false;
+    if (isHeldInPlaceForRelief(ctx, bid, formation)) return false;                       // loaned / dug in
     return true;
 }
 

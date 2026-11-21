@@ -447,6 +447,41 @@ describe('D3 R2: a stronger brigade relieves an outpowered occupant', () => {
         expect(state.military.formations.spent.location_osid).toBe('f2');
     });
 
+    // Codex #826 r4655197592: the departing (weaker) occupant obeys the donor's movement guards.
+    // A loaned brigade, one with posture dig_in, or one with a pending dig-in order never
+    // moves for a relief; it stays and the cell keeps two defenders. A plain occupant still leaves.
+    const heldInPlace: Array<[string, Partial<FormationState>, boolean]> = [
+        ['loaned', { elite_loan_state: { on_loan: true, loaned_to_corps: CORPS, loan_start_turn: 5 } as FormationState['elite_loan_state'] }, false],
+        ['dig_in posture', { posture: 'dig_in' }, false],
+        ['pending dig-in order', {}, true],
+    ];
+
+    it.each(heldInPlace)('a %s occupant does not take the cell an adjacent relief vacated', (_label, overrides, pendingOrder) => {
+        const state = makeState({
+            hist: historyCarrier([defenderEngagement('f1', TURN - 1)]),
+            spent: brigade('spent', 'f1', { personnel: 400, morale: 20, entrenchment_turns: 6, ...overrides }),
+            fresh: brigade('fresh', 'r1', { personnel: 2500, morale: 80 }),
+        }, pendingOrder ? { brigade_posture_orders: [{ brigade_id: 'spent', posture: 'dig_in' }] } : {});
+        run(state, [sector()]);
+
+        expect(state.military.formations.fresh.location_osid).toBe('f1');
+        expect(state.military.formations.spent.location_osid).toBe('f1');
+        expect(orderTarget(state, 'spent')).toBeUndefined();
+    });
+
+    it.each(heldInPlace)('a %s occupant does not leave for a vacant quiet front cell once both stand on the cell', (_label, overrides, pendingOrder) => {
+        const state = makeState({
+            hist: historyCarrier([defenderEngagement('f1', TURN - 1)]),
+            spent: brigade('spent', 'f1', { personnel: 400, morale: 20, entrenchment_turns: 6, ...overrides }),
+            arrived: brigade('arrived', 'f1', { personnel: 2500, morale: 80, entrenchment_turns: 1 }),
+        }, pendingOrder ? { brigade_posture_orders: [{ brigade_id: 'spent', posture: 'dig_in' }] } : {});
+        run(state, [sector()]);
+
+        expect(state.military.formations.arrived.location_osid).toBe('f1');
+        expect(state.military.formations.spent.location_osid).toBe('f1');
+        expect(orderTarget(state, 'spent')).toBeUndefined();
+    });
+
     it('is strict: a candidate weaker as arrived than the dug-in occupant does not displace it', () => {
         const state = makeState({
             hist: historyCarrier([defenderEngagement('f1', TURN - 1), defenderEngagement('f5', TURN - 1)]),
