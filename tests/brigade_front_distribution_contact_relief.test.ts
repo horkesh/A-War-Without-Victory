@@ -447,6 +447,53 @@ describe('D3 R2: a stronger brigade relieves an outpowered occupant', () => {
         expect(state.military.formations.spent.location_osid).toBe('f2');
     });
 
+    // Codex #826 r4655197592 (seats 2026-11-21: ops, corps, historian): a LOANED occupant is not
+    // relieved. Its movement belongs to the loan system, and the fallback cell would be on the
+    // lender's front. R2 is not launched against it, and once paired on the cell it does not leave.
+    // A dug-in occupant, or one with a pending dig-in order, is still relieved (relief in place).
+    const onLoan = { elite_loan_state: { on_loan: true, loaned_to_corps: CORPS, loan_start_turn: 5 } as FormationState['elite_loan_state'] };
+
+    it('never launches a relief against a loaned occupant', () => {
+        const state = makeState({
+            hist: historyCarrier([defenderEngagement('f1', TURN - 1)]),
+            spent: brigade('spent', 'f1', { personnel: 400, morale: 20, entrenchment_turns: 6, ...onLoan }),
+            fresh: brigade('fresh', 'r1', { personnel: 2500, morale: 80 }),
+        });
+        run(state, [sector()]);
+
+        expect(state.military.formations.spent.location_osid).toBe('f1');
+        expect(state.military.formations.fresh.location_osid).toBe('r1');
+        expect(orderTarget(state, 'fresh')).toBeUndefined();
+        expect(orderTarget(state, 'spent')).toBeUndefined();
+    });
+
+    it('a loaned occupant does not leave once a relief stands on the cell with it', () => {
+        const state = makeState({
+            hist: historyCarrier([defenderEngagement('f1', TURN - 1)]),
+            spent: brigade('spent', 'f1', { personnel: 400, morale: 20, entrenchment_turns: 6, ...onLoan }),
+            arrived: brigade('arrived', 'f1', { personnel: 2500, morale: 80, entrenchment_turns: 1 }),
+        });
+        run(state, [sector()]);
+
+        expect(state.military.formations.spent.location_osid).toBe('f1');
+        expect(orderTarget(state, 'spent')).toBeUndefined();
+    });
+
+    it.each([
+        ['dig_in posture', { posture: 'dig_in' } as Partial<FormationState>, false],
+        ['pending dig-in order', {} as Partial<FormationState>, true],
+    ])('a %s occupant is still relieved in place (takes the cell the relief vacated)', (_label, overrides, pendingOrder) => {
+        const state = makeState({
+            hist: historyCarrier([defenderEngagement('f1', TURN - 1)]),
+            spent: brigade('spent', 'f1', { personnel: 400, morale: 20, entrenchment_turns: 6, ...overrides }),
+            fresh: brigade('fresh', 'r1', { personnel: 2500, morale: 80 }),
+        }, pendingOrder ? { brigade_posture_orders: [{ brigade_id: 'spent', posture: 'dig_in' }] } : {});
+        run(state, [sector()]);
+
+        expect(state.military.formations.fresh.location_osid).toBe('f1');
+        expect(state.military.formations.spent.location_osid).toBe('r1');
+    });
+
     it('is strict: a candidate weaker as arrived than the dug-in occupant does not displace it', () => {
         const state = makeState({
             hist: historyCarrier([defenderEngagement('f1', TURN - 1), defenderEngagement('f5', TURN - 1)]),

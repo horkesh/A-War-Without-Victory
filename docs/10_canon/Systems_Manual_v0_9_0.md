@@ -293,7 +293,8 @@ These rules are faction-blind and add no state.
   - An empty contact cell is taken by the nearest eligible brigade of the same corps (R1).
   - A brigade that outpowers the occupant at the cell relieves it in place (R2). It is valued without entrenchment against the occupant's dug-in value, and the occupant leaves only once the relief is on the cell.
   - No brigade leaves a contact cell to fill another.
-  - Operation participants of any phase, queued pre-planned, must-hold, loaned and dug-in brigades never move for relief.
+  - Donors: operation participants of any phase, queued pre-planned, must-hold, loaned and dug-in brigades (including a pending dig-in order) never move to give relief.
+  - Occupants: a dug-in occupant is relieved; relief in place replaces a unit in its prepared positions. A loaned occupant is never relieved: its movement belongs to the loan system, and the fallback cell would lie on the lender's front. An occupant in an operation is never relieved (G1). (Codex #826 r4655197592; ops, corps and historian seats 2026-11-21; BB2 p.418 Igman relief, BB1 p.426 attached units under the receiving command.)
   - The run-consistency validator applies the same donor rule.
 - **Objectives come from the weakest enemy sector first (P3 step 4).** An attacking corps takes its General Staff objectives from its enemy sectors in ascending threat ratio. Hold objectives keep the highest-threat-first order.
 - **Outcome.** Attacks on a prepared defence now usually fail at about pr 1 and below, as in the 1994-95 ARBiH pattern of many launches, most of them failing. A strong offensive (Farz, Sept 1995, pr 10 and above) still wins.
