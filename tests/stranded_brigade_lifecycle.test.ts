@@ -7,6 +7,7 @@
 
 import { describe, it, expect } from 'vitest';
 import {
+    classifyReleasedOperationParticipants,
     updateStrandedBrigadeLifecycle,
     STRANDED_COHESION_DECAY,
     STRANDED_MORALE_DECAY,
@@ -108,6 +109,7 @@ function makeState(overrides: {
     corps_front_sectors?: Record<string, CorpsFrontSector>;
     corps_command?: Record<string, CorpsCommandState>;
     last_supply_state_by_osid?: Record<string, string>;
+    displacement_origin_dest_arrivals?: Record<string, Record<string, number>>;
     turn?: number;
 } = {}): GameState {
     return {
@@ -131,6 +133,9 @@ function makeState(overrides: {
             political_controllers: overrides.political_controllers ?? {},
             last_supply_state_by_osid: overrides.last_supply_state_by_osid,
         },
+        ...(overrides.displacement_origin_dest_arrivals
+            ? { displacement: { displacement_origin_dest_arrivals: overrides.displacement_origin_dest_arrivals } }
+            : {}),
     } as unknown as GameState;
 }
 
@@ -812,6 +817,211 @@ describe('stranded_brigade_lifecycle', () => {
             // b2 stands on a supplied cell and reaches its sector by friendly BFS, so it is not stranded.
             // b1 is alone in the critical component and stays stranded.
             expect(updateStrandedBrigadeLifecycle(state, adj).newly_stranded).toEqual(['b1']);
+        });
+
+        // P3 row (b), narrowed P2-L (seat ruling V3, 2026-11-21). Garrison status goes only to a
+        // brigade that belongs to the pocket: enclave-tagged, home municipality (home_osid or
+        // origin_mun) among the pocket's municipalities, or its people's displacement arrivals
+        // landed in one. The >=2 garrison count is not narrowed: drifters still count.
+        describe('drifted brigades stay eligible for stranding', () => {
+            const GORAZDE = 'op:gorazde:gorazde_2';
+            const IZBISNO = 'op:foca:izbisno';
+            const HADZICI_HOME = 'op:hadzici:binjezevo';
+            const gorazdeAdj = new Map<Osid, Osid[]>([
+                [GORAZDE as Osid, [IZBISNO, 'op:gorazde:ustipraca_2'] as Osid[]],
+                [IZBISNO as Osid, [GORAZDE, 'op:foca:donje_zesce'] as Osid[]],
+                ['op:gorazde:ustipraca_2' as Osid, [GORAZDE] as Osid[]],
+                ['op:foca:donje_zesce' as Osid, [IZBISNO] as Osid[]],
+                [HADZICI_HOME as Osid, [] as Osid[]],
+            ]);
+            const gorazdeState = () => {
+                const formations = {
+                    arbih_102nd_motorized: makeBrigade('arbih_102nd_motorized', 'RBiH', 'arbih_1st_corps', IZBISNO, {
+                        home_osid: HADZICI_HOME, origin_mun: 'hadzici', personnel: 100,
+                    }),
+                    arbih_801st_light: makeBrigade('arbih_801st_light', 'RBiH', 'arbih_1st_corps', GORAZDE, {
+                        home_osid: GORAZDE, origin_mun: 'gorazde', tags: ['enclave'],
+                    }),
+                    arbih_831st_drina_lineage: makeBrigade('arbih_831st_drina_lineage', 'RBiH', 'arbih_1st_corps', GORAZDE, {
+                        home_osid: GORAZDE, origin_mun: 'gorazde',
+                    }),
+                };
+                const state = makeState({
+                    formations,
+                    corps_front_sectors: { 'sector:arbih_1st_corps': makeSector('arbih_1st_corps', 'RBiH', [GORAZDE, HADZICI_HOME]) },
+                    political_controllers: {
+                        [GORAZDE]: 'RBiH', [IZBISNO]: 'RBiH', [HADZICI_HOME]: 'RBiH',
+                        'op:gorazde:ustipraca_2': 'RS', 'op:foca:donje_zesce': 'RS',
+                    },
+                    last_supply_state_by_osid: { [GORAZDE]: 'critical', [IZBISNO]: 'critical', [HADZICI_HOME]: 'adequate' },
+                    // Hadžići's Bosniaks went to Sarajevo, not to the Goražde pocket.
+                    displacement_origin_dest_arrivals: { 'hadzici|RBiH': { centar_sarajevo: 500 } },
+                });
+                return { state, formations };
+            };
+
+            it('the 102nd left in a Goražde pocket is stranded by the lifecycle; the 831st is not', () => {
+                const { state, formations } = gorazdeState();
+                const report = updateStrandedBrigadeLifecycle(state, gorazdeAdj);
+                expect(report.newly_stranded).toEqual(['arbih_102nd_motorized']);
+                expect(report.orderly_withdrawal_orders).toEqual([]);
+                expect(formations.arbih_102nd_motorized.stranded_status).toBe('holding');
+                expect(formations.arbih_831st_drina_lineage.stranded_status).toBeUndefined();
+            });
+
+            it('the 102nd released by an operation in a Goražde pocket is stranded at release; the 831st is not', () => {
+                const { state, formations } = gorazdeState();
+                const report = classifyReleasedOperationParticipants(
+                    state, ['arbih_831st_drina_lineage', 'arbih_102nd_motorized'], gorazdeAdj,
+                );
+                expect(report.newly_stranded).toEqual(['arbih_102nd_motorized']);
+                expect(formations.arbih_102nd_motorized.stranded_status).toBe('holding');
+                expect(formations.arbih_831st_drina_lineage.stranded_status).toBeUndefined();
+            });
+
+            it('RS twin: the 16th Krajina in a Donji Vakuf pocket is stranded; the local 31st, counted with it, is not', () => {
+                const KORENICI = 'op:donji_vakuf:korenici';
+                const JEMANLICI = 'op:donji_vakuf:jemanlici';
+                const BANJA_LUKA = 'op:banja_luka:banja_luka_2';
+                const dvAdj = new Map<Osid, Osid[]>([
+                    [KORENICI as Osid, [JEMANLICI, 'op:donji_vakuf:komar_2'] as Osid[]],
+                    [JEMANLICI as Osid, [KORENICI] as Osid[]],
+                    ['op:donji_vakuf:komar_2' as Osid, [KORENICI] as Osid[]],
+                    [BANJA_LUKA as Osid, [] as Osid[]],
+                ]);
+                const formations = {
+                    rs_16th_krajina_motorized: makeBrigade('rs_16th_krajina_motorized', 'RS', 'vrs_1st_krajina', JEMANLICI, {
+                        home_osid: 'op:prijedor:prijedor_2', origin_mun: 'banja_luka',
+                    }),
+                    rs_31st_light_infantry: makeBrigade('rs_31st_light_infantry', 'RS', 'vrs_1st_krajina', KORENICI, {
+                        home_osid: 'op:donji_vakuf:komar_2', origin_mun: 'donji_vakuf',
+                    }),
+                };
+                const state = makeState({
+                    formations,
+                    corps_front_sectors: { 'sector:vrs_1st_krajina': makeSector('vrs_1st_krajina', 'RS', [KORENICI, BANJA_LUKA]) },
+                    political_controllers: {
+                        [KORENICI]: 'RS', [JEMANLICI]: 'RS', [BANJA_LUKA]: 'RS', 'op:donji_vakuf:komar_2': 'RBiH',
+                    },
+                    last_supply_state_by_osid: { [KORENICI]: 'critical', [JEMANLICI]: 'critical', [BANJA_LUKA]: 'adequate' },
+                    displacement_origin_dest_arrivals: { 'prijedor|RS': { banja_luka: 300 } },
+                });
+                const report = updateStrandedBrigadeLifecycle(state, dvAdj);
+                // The 31st is one of only two counters: it stays a garrison because the 16th still counts.
+                expect(report.newly_stranded).toEqual(['rs_16th_krajina_motorized']);
+                expect(formations.rs_31st_light_infantry.stranded_status).toBeUndefined();
+            });
+        });
+
+        describe('named real garrisons still count', () => {
+            it('Goražde: the 831st with only the tagged 808th (home cell lost) is a garrison', () => {
+                const GORAZDE = 'op:gorazde:gorazde_2';
+                const KOLOVARICE = 'op:gorazde:kolovarice';
+                const adjG = new Map<Osid, Osid[]>([
+                    [GORAZDE as Osid, [KOLOVARICE] as Osid[]],
+                    [KOLOVARICE as Osid, [GORAZDE, 'op:gorazde:ustipraca_2'] as Osid[]],
+                    ['op:gorazde:ustipraca_2' as Osid, [KOLOVARICE] as Osid[]],
+                ]);
+                const formations = {
+                    arbih_808th_liberation: makeBrigade('arbih_808th_liberation', 'RBiH', 'arbih_1st_corps', KOLOVARICE, {
+                        home_osid: 'op:gorazde:ustipraca_2', origin_mun: 'gorazde', tags: ['enclave'],
+                    }),
+                    arbih_831st_drina_lineage: makeBrigade('arbih_831st_drina_lineage', 'RBiH', 'arbih_1st_corps', GORAZDE, {
+                        home_osid: GORAZDE, origin_mun: 'gorazde',
+                    }),
+                };
+                const state = makeState({
+                    formations,
+                    corps_front_sectors: { 'sector:arbih_1st_corps': makeSector('arbih_1st_corps', 'RBiH', [GORAZDE]) },
+                    political_controllers: { [GORAZDE]: 'RBiH', [KOLOVARICE]: 'RBiH', 'op:gorazde:ustipraca_2': 'RS' },
+                    last_supply_state_by_osid: { [GORAZDE]: 'critical', [KOLOVARICE]: 'critical' },
+                });
+                expect(updateStrandedBrigadeLifecycle(state, adjG).newly_stranded).toEqual([]);
+                expect(formations.arbih_831st_drina_lineage.stranded_status).toBeUndefined();
+            });
+
+            describe('Srebrenica: 1st Cerska and 1st Kamenica belong through Vlasenica arrivals', () => {
+                const SREBRENICA = 'op:srebrenica:srebrenica_2';
+                const POTOCARI = 'op:srebrenica:potocari';
+                const CERSKA = 'op:vlasenica:cerska_2';
+                const TUZLA = 'op:tuzla:tuzla_2';
+                const adjS = new Map<Osid, Osid[]>([
+                    [SREBRENICA as Osid, [POTOCARI, CERSKA] as Osid[]],
+                    [POTOCARI as Osid, [SREBRENICA] as Osid[]],
+                    [CERSKA as Osid, [SREBRENICA] as Osid[]],
+                    [TUZLA as Osid, [] as Osid[]],
+                ]);
+                const srebrenicaState = (arrivals: Record<string, Record<string, number>>) => {
+                    const formations = {
+                        arbih_1st_cerska: makeBrigade('arbih_1st_cerska', 'RBiH', 'arbih_2nd_corps', SREBRENICA, {
+                            home_osid: CERSKA, origin_mun: 'vlasenica',
+                        }),
+                        arbih_1st_kamenica: makeBrigade('arbih_1st_kamenica', 'RBiH', 'arbih_2nd_corps', POTOCARI, {
+                            home_osid: CERSKA,
+                        }),
+                    };
+                    const state = makeState({
+                        formations,
+                        corps_front_sectors: { 'sector:arbih_2nd_corps': makeSector('arbih_2nd_corps', 'RBiH', [SREBRENICA, TUZLA]) },
+                        political_controllers: { [SREBRENICA]: 'RBiH', [POTOCARI]: 'RBiH', [TUZLA]: 'RBiH', [CERSKA]: 'RS' },
+                        last_supply_state_by_osid: { [SREBRENICA]: 'critical', [POTOCARI]: 'critical', [TUZLA]: 'adequate' },
+                        displacement_origin_dest_arrivals: arrivals,
+                    });
+                    return { state, formations };
+                };
+
+                it('both are kept while Vlasenica Bosniaks arrived in Srebrenica', () => {
+                    const { state, formations } = srebrenicaState({ 'vlasenica|RBiH': { srebrenica: 4000, tuzla: 9000 } });
+                    expect(updateStrandedBrigadeLifecycle(state, adjS).newly_stranded).toEqual([]);
+                    expect(formations.arbih_1st_cerska.stranded_status).toBeUndefined();
+                    expect(formations.arbih_1st_kamenica.stranded_status).toBeUndefined();
+                });
+
+                it('control: without Vlasenica Bosniak arrivals in Srebrenica both become holding', () => {
+                    // Arrivals elsewhere, or of another people, do not tie the brigades to the pocket.
+                    const { state, formations } = srebrenicaState({
+                        'vlasenica|RBiH': { tuzla: 9000 },
+                        'vlasenica|RS': { srebrenica: 100 },
+                    });
+                    expect(updateStrandedBrigadeLifecycle(state, adjS).newly_stranded).toEqual(['arbih_1st_cerska', 'arbih_1st_kamenica']);
+                    expect(formations.arbih_1st_cerska.stranded_status).toBe('holding');
+                    expect(formations.arbih_1st_kamenica.stranded_status).toBe('holding');
+                });
+            });
+
+            it('Ozren: 1st Ozren is kept because 1st Trebava and 4th Ozren count; both of them are holding', () => {
+                const PETROVO = 'op:gracanica:petrovo_2';
+                const JABLANICA = 'op:maglaj:jablanica';
+                const BANJA_LUKA = 'op:banja_luka:banja_luka_2';
+                const adjO = new Map<Osid, Osid[]>([
+                    [PETROVO as Osid, [JABLANICA, 'op:zavidovici:vozuca_2'] as Osid[]],
+                    [JABLANICA as Osid, [PETROVO] as Osid[]],
+                    ['op:zavidovici:vozuca_2' as Osid, [PETROVO] as Osid[]],
+                    [BANJA_LUKA as Osid, [] as Osid[]],
+                ]);
+                const formations = {
+                    rs_1st_ozren_light_infantry: makeBrigade('rs_1st_ozren_light_infantry', 'RS', 'vrs_1st_krajina', PETROVO, {
+                        home_osid: PETROVO, origin_mun: 'gracanica',
+                    }),
+                    rs_1st_trebava_infantry: makeBrigade('rs_1st_trebava_infantry', 'RS', 'vrs_1st_krajina', JABLANICA, {
+                        home_osid: 'op:modrica:skugric_gornji_2', origin_mun: 'modrica', personnel: 152,
+                    }),
+                    rs_4th_ozren_light_infantry: makeBrigade('rs_4th_ozren_light_infantry', 'RS', 'vrs_1st_krajina', PETROVO, {
+                        home_osid: 'op:zavidovici:vozuca_2', origin_mun: 'zavidovici', personnel: 100,
+                    }),
+                };
+                const state = makeState({
+                    formations,
+                    corps_front_sectors: { 'sector:vrs_1st_krajina': makeSector('vrs_1st_krajina', 'RS', [PETROVO, BANJA_LUKA]) },
+                    political_controllers: {
+                        [PETROVO]: 'RS', [JABLANICA]: 'RS', [BANJA_LUKA]: 'RS', 'op:zavidovici:vozuca_2': 'RBiH',
+                    },
+                    last_supply_state_by_osid: { [PETROVO]: 'critical', [JABLANICA]: 'critical', [BANJA_LUKA]: 'adequate' },
+                });
+                const report = updateStrandedBrigadeLifecycle(state, adjO);
+                expect(report.newly_stranded).toEqual(['rs_1st_trebava_infantry', 'rs_4th_ozren_light_infantry']);
+                expect(formations.rs_1st_ozren_light_infantry.stranded_status).toBeUndefined();
+            });
         });
     });
 
