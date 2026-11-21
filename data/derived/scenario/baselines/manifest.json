@@ -27,9 +27,9 @@
         "end_report.md": "5fd68e05df8788fc3a802d04e866f9967e6f9709cd15a59a2884aff8dfb02007",
         "final_save.json": "6519fba336cd36b549e74ade28fa79d7cdd5520355db637cd69d0786992e2825",
         "formation_delta.json": "79aae7db52a4a09115113b254f68a3e0c8eb3b814f00d682361453f3e5c3dcff",
-        "run_summary.json": "978ada4e2ffa7b6614773467b48161004f427cbb6998a446d84046458c667a08",
+        "run_summary.json": "8b8e1010370fd1c33583ad560b35f7b038e596395644a7dce6a63516722674ca",
         "watched_operations.json": "fcc49c59ab5dd4f2173ae80bd815ab536d7d59d6eea5c5dbfaa614b9d911a2d5",
-        "weekly_report.jsonl": "7247055f35ffe38f7143ba7c5b38441085500b2ccc78b29bf078b83d69d8aea9"
+        "weekly_report.jsonl": "71434915b64f8dd40d21129a786cc1e196b1e53809ad37b29fbe6be1e0e46ea6"
       },
       "id": "apr1992_188w",
       "scenario_path": "data/scenarios/apr1992_definitive_188w.json",
