@@ -1975,6 +1975,7 @@ type CommanderCreationExit =
     | 'reduction_overlap_suppressed'
     | 'fallback_probe_created'
     | 'fallback_probe_overlap_suppressed'
+    | 'fallback_probe_on_cooldown'
     | 'completed_no_operation';
 
 type CommanderCreationSite = 'general' | 'plan_probe' | 'reduction' | 'fallback_probe';
@@ -3479,6 +3480,13 @@ function buildOperationsImpl(
                         obs.reduction_participant_count = reductionParticipants.length;
                         obs.single_brigade_sufficient = singleBrigadeOccupationIsSufficient;
                         obs.escalate_to_operation = escalateToOperation;
+                    }
+                    // Codex #833 r4636529148: a local-occupation candidate lets the fallback in on probe
+                    // cooldown, an exemption that exists for the occupation operation. When the Army HQ
+                    // reservation forbids that operation, the downgraded probe obeys the cooldown.
+                    if (armyHqReservedPlanFellThrough && !escalateToOperation && probeOnCooldown) {
+                        markCommanderCreationExit(obs, 'fallback_probe_on_cooldown');
+                        return ops;
                     }
                     const probeOp = botOrdersPerfTime(
                         escalateToOperation
