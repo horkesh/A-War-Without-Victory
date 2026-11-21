@@ -978,6 +978,117 @@ export function cancelOffensivesForOct1995Ceasefire(state: GameState, turn: numb
     return cancelled;
 }
 
+/** Receipts of one `confirmLaunchedOperationOrders` pass, as `corps:name:t<start>` ids. */
+export interface LaunchOrderConfirmationReport {
+    /** Zero-order launches sent back to planning this turn (first refusal). */
+    demoted: string[];
+    /** Zero-order launches ended `zero_eligible_axis` this turn (second refusal). */
+    ended: string[];
+}
+
+/**
+ * P3 mismatch rider, fix B: post-emission launch confirmation.
+ *
+ * `advanceSectorOffensives` launches an operation on its own readiness view; bot order emission
+ * runs later in the same turn on a recomputed view and can refuse every participant. Such a
+ * launch is a paper launch: execution starts, nobody attacks and nobody moves, and the existing
+ * predicates cannot see it once any earlier attempt exists. This pass reads emission's own
+ * output, so the two views cannot drift apart.
+ *
+ * For each sector attack or probe that entered execution THIS turn through the sector
+ * transition (`planning_phase_started_turn` present), whose corps faction emitted bot orders
+ * (`factions`), and whose participants hold zero attack orders and zero movement (movement
+ * order or column in transit):
+ *  - first refusal: demote it to planning, restoring the planning clock and the OPSEC sector;
+ *  - second refusal: end it through the ordinary `zero_eligible_axis` recovery (1 turn, slot
+ *    freed, objective cooldown via the normal recovery tick).
+ * Skipped: player force-launched ops, linked preparation probes, COHA-paused ops (their clock
+ * shift can land `phase_started_turn` on this turn), corps bound by the Oct 1995 ceasefire, and
+ * ops whose every axis is in a late-phase hold (silence is their order).
+ * TG / Army HQ receipts written at launch are left; the re-launch re-marks them idempotently.
+ * Deterministic: corps in strictCompare order, operations in array order; no tuned number.
+ */
+export function confirmLaunchedOperationOrders(
+    state: GameState,
+    factions: readonly FactionId[],
+): LaunchOrderConfirmationReport {
+    const report: LaunchOrderConfirmationReport = { demoted: [], ended: [] };
+    const corpsCommand = state.military.corps_command;
+    if (!corpsCommand || factions.length === 0) return report;
+    const turn = state.meta?.turn ?? 0;
+    const factionSet = new Set<FactionId>(factions);
+    const attackOrders = state.military.brigade_attack_orders ?? {};
+    const movementOrders = state.military.brigade_movement_orders ?? {};
+    const movementState = state.military.brigade_movement_state ?? {};
+    const cohaActive = state.military.event_flags?.coha_active === true;
+    const hasAttackOrder = (brigadeId: FormationId): boolean => {
+        const target = attackOrders[brigadeId];
+        return typeof target === 'string' && target.length > 0;
+    };
+    const isMoving = (brigadeId: FormationId): boolean => {
+        const destination = movementOrders[brigadeId]?.destination_sids?.[0];
+        if (typeof destination === 'string' && destination.length > 0) return true;
+        return movementState[brigadeId]?.status === 'in_transit';
+    };
+
+    for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
+        const cmd = corpsCommand[corpsId];
+        if (!cmd || cmd.active_operations.length === 0) continue;
+        const faction = state.military.formations?.[corpsId]?.faction;
+        if (faction === undefined || !factionSet.has(faction)) continue;
+        if (isCorpsBoundByOct1995Ceasefire(state, corpsId)) continue;
+        for (const op of [...cmd.active_operations]) {
+            if (op.type !== 'sector_attack' && op.type !== 'probe') continue;
+            if (op.phase !== 'execution' || op.phase_started_turn !== turn) continue;
+            const planningStartedTurn = op.planning_phase_started_turn;
+            if (typeof planningStartedTurn !== 'number') continue;
+            if (op.was_force_launched === true || op.preparation_probe_link !== undefined) continue;
+            if (cohaActive && !isVlasicCohaExceptionOperation(state, corpsId, op, turn)) continue;
+            const axes = op.axes ?? [];
+            if (axes.length > 0 && axes.every((axis) => axis.late_phase?.phase === 'holding')) continue;
+
+            const participants = new Set<FormationId>(op.participating_brigades);
+            for (const axis of axes) {
+                for (const brigadeId of axis.assigned_brigades) participants.add(brigadeId);
+            }
+            const sortedParticipants = Array.from(participants).sort(strictCompare);
+            if (sortedParticipants.some((brigadeId) => hasAttackOrder(brigadeId) || isMoving(brigadeId))) continue;
+
+            const operationId = `${corpsId}:${op.name}:t${op.started_turn}`;
+            const demotions = (op.launch_demotion_count ?? 0) + 1;
+            op.launch_demotion_count = demotions;
+            if (demotions >= 2) {
+                for (const axis of axes) {
+                    if (axis.status === 'executing') axis.launch_blocker = 'zero_eligible_axis';
+                }
+                beginRecovery(op, turn, 'zero_eligible_axis', state, corpsId);
+                report.ended.push(operationId);
+                continue;
+            }
+
+            op.phase = 'planning';
+            op.phase_started_turn = planningStartedTurn;
+            delete op.planning_phase_started_turn;
+            // Undo the one launch write that would otherwise drift: the late-phase hold clock
+            // is set "exactly once" at launch and would start a week early on re-launch.
+            for (const axis of axes) {
+                const gate = axis.late_phase;
+                if (gate && gate.phase === 'holding' && gate.hold_started_turn === turn) {
+                    delete gate.hold_started_turn;
+                }
+            }
+            if (op.sector_id) {
+                if (!Array.isArray(state.military.opsec_sectors)) state.military.opsec_sectors = [];
+                if (!state.military.opsec_sectors.includes(op.sector_id)) {
+                    state.military.opsec_sectors.push(op.sector_id);
+                }
+            }
+            report.demoted.push(operationId);
+        }
+    }
+    return report;
+}
+
 function findLiveLinkedPreparationProbe(
     cmd: CorpsCommandState,
     parent: CorpsOperation,
@@ -1818,6 +1929,9 @@ export function advanceSectorOffensives(
                     beginRecovery(op, turn, 'ceasefire', state, corpsId);
                     continue;
                 }
+                // P3 mismatch rider: keep the planning clock so a launch that the same turn's
+                // order emission refuses can be demoted back (confirmLaunchedOperationOrders).
+                op.planning_phase_started_turn = op.phase_started_turn;
                 op.phase = 'execution';
                 op.phase_started_turn = turn;
                 op.recovery_reason = undefined;
@@ -2456,8 +2570,12 @@ function hasOnlyPoliticallyBlockedCurrentObjectives(
         || isRbihHrhbCombatBlocked(state, faction, controller);
 }
 
-/** Collect friendly OSIDs adjacent to a target objective for attack detection. */
-function collectAdjacentFriendlyOsids(state: GameState, corpsId: FormationId, targetOsid: string): Set<string> {
+/**
+ * Collect friendly OSIDs adjacent to a target objective for attack detection.
+ * Exported for the report-only `masked_by_march` idle-week check (combat_causality.ts).
+ * The result is a Set; callers only test membership, so its insertion order never leaks.
+ */
+export function collectAdjacentFriendlyOsids(state: GameState, corpsId: FormationId, targetOsid: string): Set<string> {
     const result = new Set<string>();
     if (!state.military.corps_front_sectors) return result;
     for (const sector of Object.values(state.military.corps_front_sectors)) {

@@ -236,7 +236,14 @@ function buildZeroBattleCombatCausalitySummary(): CombatCausalitySummary {
         total_orders_by_faction: {},
         invalid_operation_count: 0,
         zero_eligible_attacker_operation_count: 0,
-        recovery_without_logged_attempt_count: 0
+        recovery_without_logged_attempt_count: 0,
+        idle_execution_op_weeks: 0,
+        idle_execution_stationary_op_weeks: 0,
+        idle_execution_masked_op_weeks: 0,
+        paused_op_weeks: 0,
+        planning_grace_op_weeks: 0,
+        launch_demotions: 0,
+        launch_demotion_terminations: 0
     };
 }
 
@@ -3031,7 +3038,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 const weeklyCombatCausality = buildCombatCausalitySummary(
                     operationDiagnostics,
                     turnReport.bot_order_diagnostics,
-                    turnReport.attack_resolution_osid
+                    turnReport.attack_resolution_osid,
+                    turnReport.launch_order_confirmation
                 );
                 if (combatCausalitySummary === null) {
                     combatCausalitySummary = weeklyCombatCausality;
@@ -3070,7 +3078,23 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                             weeklyCombatCausality.zero_eligible_attacker_operation_count,
                         recovery_without_logged_attempt_count:
                             previousCombatCausality.recovery_without_logged_attempt_count +
-                            weeklyCombatCausality.recovery_without_logged_attempt_count
+                            weeklyCombatCausality.recovery_without_logged_attempt_count,
+                        // P3 mismatch rider: report-only op x week sums.
+                        idle_execution_op_weeks:
+                            previousCombatCausality.idle_execution_op_weeks + weeklyCombatCausality.idle_execution_op_weeks,
+                        idle_execution_stationary_op_weeks:
+                            previousCombatCausality.idle_execution_stationary_op_weeks +
+                            weeklyCombatCausality.idle_execution_stationary_op_weeks,
+                        idle_execution_masked_op_weeks:
+                            previousCombatCausality.idle_execution_masked_op_weeks +
+                            weeklyCombatCausality.idle_execution_masked_op_weeks,
+                        paused_op_weeks: previousCombatCausality.paused_op_weeks + weeklyCombatCausality.paused_op_weeks,
+                        planning_grace_op_weeks:
+                            previousCombatCausality.planning_grace_op_weeks + weeklyCombatCausality.planning_grace_op_weeks,
+                        launch_demotions: previousCombatCausality.launch_demotions + weeklyCombatCausality.launch_demotions,
+                        launch_demotion_terminations:
+                            previousCombatCausality.launch_demotion_terminations +
+                            weeklyCombatCausality.launch_demotion_terminations
                     };
                 }
                 combatCausalityWeekly.push({
