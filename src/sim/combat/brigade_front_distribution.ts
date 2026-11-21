@@ -1180,7 +1180,16 @@ function relieveEmptyContactCell(
     nestedSet(ctx.reliefInboundByFaction, sector.faction).add(cell);
 }
 
-/** G1 binds the relieved brigade too; a disrupted, moving or ordered brigade stays where it is. */
+/**
+ * A loaned occupant is not relieved: its movement belongs to the loan system, and the
+ * fallback cell would be on the lender's front (Codex #826 r4655197592; seats 2026-11-21).
+ * A dug-in occupant is relieved; relief in place replaces a unit in its prepared positions.
+ */
+function isLoanedOccupant(formation: FormationState): boolean {
+    return formation.elite_loan_state?.on_loan === true;
+}
+
+/** G1 binds the relieved brigade too; a disrupted, moving, ordered or loaned brigade stays where it is. */
 function canRelievedBrigadeLeave(
     ctx: ContactReliefContext,
     bid: string,
@@ -1191,6 +1200,7 @@ function canRelievedBrigadeLeave(
     if ((formation.disrupted_turns ?? 0) > 0 || formation.disrupted === true) return false;
     if (ctx.state.military.brigade_movement_state?.[bid]?.status === 'in_transit') return false;
     if (ctx.state.military.brigade_movement_orders?.[bid]) return false;
+    if (isLoanedOccupant(formation)) return false;                                        // loaned
     return true;
 }
 
@@ -1287,6 +1297,7 @@ function relieveOutpoweredOccupant(
     const occupant = formations[occupantId];
     if (!occupant || occupant.status !== 'active') return;
     if (ctx.protectedIds.has(occupantId)) return;                                       // G1
+    if (isLoanedOccupant(occupant)) return;                                             // loaned: never relieved
     if (ctx.state.military.brigade_movement_orders?.[occupantId]) return;
     if (ctx.state.military.brigade_movement_state?.[occupantId]?.status === 'in_transit') return;
     const occupantPower = defenderPowerAtCell(ctx, occupant, cell, false);
