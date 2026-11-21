@@ -619,6 +619,20 @@ export interface CorpsOperation {
     phase: 'planning' | 'execution' | 'recovery';
     started_turn: number;
     phase_started_turn: number;
+    /**
+     * P3 mismatch rider (launch order confirmation). The planning-phase `phase_started_turn`
+     * recorded at the sector planning -> execution transition, so a launch that the same turn's
+     * order emission refuses (zero participant attack orders, zero participant movement) can be
+     * demoted back to planning with its planning clock intact. Optional; absent on saves and
+     * operations that never launched through `advanceSectorOffensives`.
+     */
+    planning_phase_started_turn?: number;
+    /**
+     * P3 mismatch rider. Number of zero-order launches demoted back to planning by
+     * `confirmLaunchedOperationOrders`. The second ends the operation `zero_eligible_axis`.
+     * Optional; absent until the first demotion.
+     */
+    launch_demotion_count?: number;
     target_settlements?: SettlementId[];
     participating_brigades: FormationId[];
     // --- Multi-axis structure (standard for all operations) ---

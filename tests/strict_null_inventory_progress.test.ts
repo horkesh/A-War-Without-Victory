@@ -833,7 +833,10 @@ describe('strict null inventory progress', () => {
             // patron_defiance_supply_cuts[] receipt fields tag, expires_turn, combined_multiplier and
             // floor_binding, written only by the patron_supply_cut effect (played defiance answers;
             // absent on every hands-off run). No new type escape. 605 -> 610.
-            optional_fields_game_state: 610,
+            // P3 mismatch rider (2026-11-21): CorpsOperation.planning_phase_started_turn (written at
+            // the sector planning -> execution transition) and CorpsOperation.launch_demotion_count
+            // (absent until a zero-order launch is demoted). No new type escape. 610 -> 612.
+            optional_fields_game_state: 612,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
@@ -856,12 +859,14 @@ describe('strict null inventory progress', () => {
         // Patron-defiance panel: +5 sim (MilitaryState equipment_quality_modifiers[].source and
         // patron_defiance_supply_cuts[] tag / expires_turn / combined_multiplier / floor_binding).
         // 605 -> 610 / sim 367 -> 372.
-        expect(current.optional_field_domains.total).toBe(610);
+        // P3 mismatch rider: +2 sim (CorpsOperation.planning_phase_started_turn /
+        // launch_demotion_count). 610 -> 612 / sim 372 -> 374.
+        expect(current.optional_field_domains.total).toBe(612);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 372,
+            sim: 374,
             state: 228,
             ui_adapter: 0,
             unknown: 0,
