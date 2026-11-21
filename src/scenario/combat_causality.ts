@@ -3,7 +3,7 @@ import type { AxisLaunchReadinessDetail, AxisOrderGenerationDetail, CorpsOperati
 import { strictCompare } from '../state/validateGameState.js';
 import { isVlasicCohaExceptionOperation } from '../sim/combat/coha_operation_exception.js';
 import { isCorpsBoundByOct1995Ceasefire } from '../sim/combat/oct1995_ceasefire.js';
-import { collectAdjacentFriendlyOsids, type LaunchOrderConfirmationReport } from '../sim/combat/sector_offensive.js';
+import type { LaunchOrderConfirmationReport } from '../sim/combat/sector_offensive.js';
 import { computeMultiAxisPlanningDuration } from '../sim/combat/sector_offensive_axis_helpers.js';
 import type { BotDispatcherDecisionDetail, BotRouteDecisionDetail } from '../sim/combat/bot_brigade_ai_osid.js';
 
@@ -144,6 +144,40 @@ function getFormationCorpsId(formation: FormationState): FormationId | null {
 function getFormationById(state: GameState, formationId: FormationId): FormationState | undefined {
     const legacyFormations = (state as GameState & { formations?: Record<string, FormationState> }).formations;
     return state.military.formations?.[formationId] ?? legacyFormations?.[formationId];
+}
+
+/**
+ * Friendly cells of the corps' front that share a front edge with `objective` (report-only,
+ * for the `masked_by_march` idle-week flag). Edge ids are `osidA__osidB` pairs, in either
+ * order. Codex #837 r4651717330: the sim's `collectAdjacentFriendlyOsids` returns every
+ * friendly cell of a sub-segment that lists the objective, so a stationary brigade far down a
+ * multi-edge line counted as "at the objective". That helper stays as it is (the sim uses it);
+ * this report check reads the edges themselves. Returns a Set; callers only test membership.
+ */
+function collectObjectiveTouchingFriendlyOsids(
+    state: GameState,
+    corpsId: FormationId,
+    objective: string
+): Set<string> {
+    const result = new Set<string>();
+    const sectors = state.military.corps_front_sectors;
+    if (!sectors) return result;
+    for (const sector of Object.values(sectors)) {
+        if (sector.corps_id !== corpsId) continue;
+        for (const subSegment of sector.sub_segments) {
+            if (!subSegment.enemy_osids.includes(objective)) continue;
+            const friendly = new Set(subSegment.friendly_osids);
+            for (const edgeId of subSegment.edge_ids ?? []) {
+                const separator = edgeId.indexOf('__');
+                if (separator < 0) continue;
+                const a = edgeId.slice(0, separator);
+                const b = edgeId.slice(separator + 2);
+                if (a === objective && friendly.has(b)) result.add(b);
+                else if (b === objective && friendly.has(a)) result.add(a);
+            }
+        }
+    }
+    return result;
 }
 
 function getCurrentObjectives(operation: CorpsOperation): string[] {
@@ -455,7 +489,7 @@ export function buildOperationCombatDiagnostics(
                 } else {
                     const adjacentFriendly = new Set<string>();
                     for (const objective of currentObjectives) {
-                        for (const osid of collectAdjacentFriendlyOsids(state, corpsId, objective)) {
+                        for (const osid of collectObjectiveTouchingFriendlyOsids(state, corpsId, objective)) {
                             adjacentFriendly.add(osid);
                         }
                     }
