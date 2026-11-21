@@ -42,6 +42,7 @@ import {
     resolvePlayerEventDecisionWithOpeningPolicy,
 } from '../sim/events/opening_policy_transition.js';
 import { initializeNegotiationState } from '../sim/negotiation/initialize_negotiation_state.js';
+import { settlePendingPeacePlanFromRecord } from '../sim/negotiation/peace_plans.js';
 import { deferUnauthorizedHistoricalOperationsForPlayer } from '../sim/combat/historical_operation_authorization.js';
 import {
     applyDefinitionDimensionShifts,
@@ -900,12 +901,12 @@ export function resolveDesktopEventDecision(
     responseId: string,
     baseDir: string,
 ): GameState {
-    return resolvePlayerEventDecisionWithOpeningPolicy(
-        state,
-        loadDesktopEventDefinitions(baseDir),
-        eventId,
-        responseId,
-    );
+    const eventDefinitions = loadDesktopEventDefinitions(baseDir);
+    const resolved = resolvePlayerEventDecisionWithOpeningPolicy(state, eventDefinitions, eventId, responseId);
+    // §6 E3a2, Codex #827: an older save's fallback pointer is settled by this routed answer now,
+    // not by a second (modal) decision the advance gate would otherwise demand.
+    settlePendingPeacePlanFromRecord(resolved, eventDefinitions);
+    return resolved;
 }
 
 /**
@@ -949,6 +950,8 @@ export {
     serializeRuntimeState,
     serializeState,
 };
+// §6 design M (M-a1): the paramilitary review IPC's decision logic (validation, the T3 gate, the standing-order cap).
+export { resolveParamilitaryReviewRequests } from './paramilitary_review_ipc.js';
 export {
     PLAYER_DECISION_FAMILIES,
     summarizePlayerDecisions,

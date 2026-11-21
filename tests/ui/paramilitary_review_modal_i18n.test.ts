@@ -59,6 +59,9 @@ describe('Paramilitary review modal — i18n Car 3 (EN keys)', () => {
             'paramilitaryReview.alwaysDeny',
             'paramilitaryReview.alwaysAllow',
             'paramilitaryReview.policyHint',
+            'paramilitaryReview.policyCapHint',
+            'paramilitaryReview.alwaysAllowUnavailable',
+            'paramilitaryReview.error.cannotLoosen',
             'paramilitaryReview.close',
             'paramilitaryReview.submit',
             'paramilitaryReview.submitting',
@@ -91,7 +94,9 @@ describe('Paramilitary review modal — i18n Car 3 (EN keys)', () => {
         expect(en['paramilitaryReview.allowPacket']).toBe('Allow packet');
         expect(en['paramilitaryReview.alwaysDeny']).toBe('Always deny');
         expect(en['paramilitaryReview.alwaysAllow']).toBe('Always allow');
-        expect(en['paramilitaryReview.policyHint']).toBe('Use a standing order if you want future paramilitary packets resolved the same way. It applies only at Full Control: at Assisted, Delegated or Observer your staff decides rear-area sweeps without it.');
+        // §6 design M (M-a), §4 copy panel 2026-11-19: the per-act sentence joins the hint; the cap sentence is
+        // its own key, shown only for RBiH and RS (pinned with the BCS in tests/ui/s6_modal_cost_copy.test.ts).
+        expect(en['paramilitaryReview.policyHint']).toBe('Use a standing order if you want future paramilitary packets resolved the same way. It applies only at Full Control: at Assisted, Delegated or Observer your staff decides rear-area sweeps without it. Each sweep that takes its target counts against your side, however it was sent.');
         expect(en['paramilitaryReview.close']).toBe('Close');
         expect(en['paramilitaryReview.submit']).toBe('Submit Decisions');
         expect(en['paramilitaryReview.submitting']).toBe('Submitting...');

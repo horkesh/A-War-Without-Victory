@@ -2107,3 +2107,41 @@ describe('commander_creation caller pass markers (real generateAllCorpsOrders)',
         expect(serializeState(on.state)).toBe(serializeState(off.state));
     });
 });
+
+// F1 follow-up (Codex #828 r4630167606, r4630167627): the plan exits that fall through to the
+// fallback keep their own restriction there. The fallback may still probe.
+describe('F1 follow-up: the fallback keeps the plan exit restriction it fell through from', () => {
+    it('reserved_for_army_hq: the fallback probes but never escalates to a full operation', () => {
+        armyHqReservationOverride.value = true;
+        const inputs: EmitInputs = { briefing: boundedPositionBriefing(2, true), plan: makePlanDecision(), allocation: makeAllocation() };
+        setTopics('commander_creation');
+        const on = runEmit(inputs);
+        const row = parseRow(on.lines[0]!);
+        expect(row.exit).toBe('reserved_for_army_hq');
+        expect(on.output.operations.filter((operation) => operation.type !== 'probe')).toEqual([]);
+        expect(on.output.operations.map((operation) => operation.type)).toEqual(['probe']);
+        setTopics(undefined);
+        const off = runEmit({ briefing: boundedPositionBriefing(2, true), plan: makePlanDecision(), allocation: makeAllocation() });
+        expect(JSON.stringify(off.output.operations)).toBe(JSON.stringify(on.output.operations));
+    });
+
+    it('without the reservation the same bounded fallback still escalates (control)', () => {
+        armyHqReservationOverride.value = false;
+        const inputs: EmitInputs = { briefing: boundedPositionBriefing(2, true), plan: noPlan(10), allocation: makeAllocation() };
+        const out = runEmit(inputs);
+        expect(out.output.operations.some((operation) => operation.type !== 'probe')).toBe(true);
+    });
+
+    it('below_min_after_eligibility: no fallback probe by an enclave-ineligible brigade against the rejected objective', () => {
+        const inputs: EmitInputs = { briefing: makeIntelBriefing([0.25], { turn: 20, consecutiveProbes: 2 }), plan: makePlanDecision(), allocation: makeAllocation() };
+        (inputs.briefing as unknown as { brigades: unknown }).brigades = [
+            makeBrigade('b1', 'op:test:approach', { tags: ['enclave'] }),
+            makeBrigade('b2', 'op:test:approach', { tags: ['enclave'] }),
+        ];
+        setTopics('commander_creation');
+        const on = runEmit(inputs);
+        const row = parseRow(on.lines[0]!);
+        expect(row.exit).toBe('below_min_after_eligibility');
+        expect(on.output.operations).toEqual([]);
+    });
+});

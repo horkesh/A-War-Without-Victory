@@ -2146,6 +2146,7 @@ interface CommanderCreationObservation {
     fallback_considered?: boolean;
     probe_brigade_selected?: boolean;
     probe_objective_ids?: string[];
+    probe_objective_eligible?: boolean;
     probe_reachable?: boolean;
     target_is_bounded_position?: boolean;
     reduction_participant_count?: number;
@@ -2379,6 +2380,9 @@ function buildOperationsImpl(
     // participants, no objective, too few eligible, overlap), the corps still probes locally: those
     // exits leave this block and reach the probe/local-occupation fallback below with all of its
     // gates unchanged. active_slot_full stays a terminal return (no slot, no new operation of any kind).
+    // A plan stopped by the Army HQ reservation keeps that reservation in the fallback: it may
+    // probe, but it never escalates to a full operation (Codex #828 r4630167606).
+    let armyHqReservedPlanFellThrough = false;
     planBlock: if (
         planDecision.plan &&
         ACTIVE_PLAN_STATUSES.has(planDecision.plan.status) &&
@@ -2422,6 +2426,7 @@ function buildOperationsImpl(
             && corpsHasDueArmyHqReservation(briefing.state_ref, briefing.corps_id, briefing.turn)
         ) {
             markCommanderCreationExit(obs, 'reserved_for_army_hq');
+            armyHqReservedPlanFellThrough = true;
             break planBlock;
         }
         // Brigades the due queue head holds for its authored operation never join a commander
@@ -3298,7 +3303,15 @@ function buildOperationsImpl(
 
             // Skip probe if no enemy-adjacent OSIDs found — empty objectives cause immediate ZEA.
             if (obs) obs.probe_objective_ids = [...probeObjectives].sort(strictCompare);
-            if (probeObjectives.length > 0) {
+            // Enclave restriction (Codex #828 r4630167627): the probe brigade must be eligible for its
+            // objective, by the same predicate the plan, local-occupation and reduction paths ask. A plan
+            // rejected as below_min_after_eligibility therefore cannot reappear here as a probe.
+            const probeObjectiveEligible = probeObjectives.length > 0 && isBrigadeEligibleForOperationObjectives(
+                briefing.brigades.find((brigade) => brigade.id === probeBrigade.brigade_id),
+                probeObjectives,
+            );
+            if (obs && probeObjectives.length > 0) obs.probe_objective_eligible = probeObjectiveEligible;
+            if (probeObjectiveEligible) {
                 const probeReachable = botOrdersPerfTime(
                     `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.reachability`,
                     () => {
@@ -3444,7 +3457,8 @@ function buildOperationsImpl(
                         })();
                     const singleBrigadeOccupationIsSufficient = localOccupationCandidate != null
                         && reductionParticipants.length === 1;
-                    const escalateToOperation = targetIsBoundedPosition
+                    const escalateToOperation = !armyHqReservedPlanFellThrough
+                        && targetIsBoundedPosition
                         && (
                             reductionParticipants.length >= ISOLATED_POSITION_OPERATION_MIN_BRIGADES
                             || singleBrigadeOccupationIsSufficient
