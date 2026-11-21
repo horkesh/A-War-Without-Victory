@@ -19,7 +19,7 @@ import type { CorpsFrontSector, FactionId, FormationId, FormationState, GameStat
 import { CURRENT_SCHEMA_VERSION } from '../../src/state/game_state.js';
 import type { BrigadeEvaluation, CommanderBriefing, CommanderPlan, CommanderPlanStatus, ZoneId } from '../../src/sim/combat/commander/commander_state.js';
 import type { SpatialContext } from '../../src/sim/spatial_context.js';
-import { emitCommanderOutput } from '../../src/sim/combat/commander/emit.js';
+import { emitCommanderOutput, isPreWashingtonCroatBosniakFrontTarget } from '../../src/sim/combat/commander/emit.js';
 import { COMMANDER_CREATION_PREFIX, resetReasonCodeTopicCacheForTests } from '../../src/sim/combat/reason_code_debug.js';
 
 const require = createRequire(import.meta.url);
@@ -66,6 +66,10 @@ interface WalkHarnessOptions {
     corpsExhaustion?: number;
     /** A pending commander plan of this status (not yet buildable into an operation). */
     planStatus?: CommanderPlanStatus;
+    /** Controller of a lane's target (and its defender's faction); RS by default. */
+    laneControllers?: Partial<Record<keyof typeof LANES, FactionId>>;
+    /** RBiH-HRHB bilateral state: 'war' (fighting, pre-Washington) or 'washington' (signed). */
+    rbihHrhb?: 'war' | 'washington';
     topics?: string;
 }
 
@@ -143,9 +147,10 @@ function runWalkHarness(options: WalkHarnessOptions) {
     if (options.occupationBrigade) {
         attackers.push(formation(options.occupationBrigade, FACTION, OCCUPATION_APPROACH, 5_000));
     }
+    const laneController = (key: keyof typeof LANES): FactionId => options.laneControllers?.[key] ?? ENEMY;
     const defenders = laneKeys.map((key) => formation(
         `defender-${key}`,
-        ENEMY,
+        laneController(key),
         LANES[key].target,
         options.defenders?.[key] ?? LANES[key].defender,
     ));
@@ -172,7 +177,7 @@ function runWalkHarness(options: WalkHarnessOptions) {
         sector_id: SECTOR_ID,
         corps_id: CORPS_ID,
         faction: FACTION,
-        opposing_factions: [ENEMY],
+        opposing_factions: [...new Set([ENEMY, ...laneKeys.map(laneController)])].sort(),
         edge_ids: ['e1'],
         sub_segments: [{
             sub_segment_id: `subseg:${CORPS_ID}:0`,
@@ -195,7 +200,7 @@ function runWalkHarness(options: WalkHarnessOptions) {
     const politicalControllers: Record<string, FactionId> = {
         [REAR]: FACTION,
         ...Object.fromEntries(laneKeys.map((key) => [LANES[key].approach, FACTION])),
-        ...Object.fromEntries(laneKeys.map((key) => [LANES[key].target, ENEMY])),
+        ...Object.fromEntries(laneKeys.map((key) => [LANES[key].target, laneController(key)])),
         ...Object.fromEntries(DEPTHS.map((osid) => [osid, ENEMY])),
         ...(options.occupationBrigade ? { [OCCUPATION_APPROACH]: FACTION, [OCCUPATION_TARGET]: ENEMY } : {}),
     };
@@ -226,7 +231,23 @@ function runWalkHarness(options: WalkHarnessOptions) {
                 },
             },
         },
-        political: { political_controllers: politicalControllers },
+        political: {
+            political_controllers: politicalControllers,
+            ...(options.rbihHrhb ? {
+                war_alliance_rbih_hrhb: -0.5,
+                rbih_hrhb_state: {
+                    ceasefire_active: false,
+                    ceasefire_since_turn: null,
+                    washington_signed: options.rbihHrhb === 'washington',
+                    washington_turn: options.rbihHrhb === 'washington' ? TURN - 10 : null,
+                    stalemate_turns: 0,
+                    bilateral_flips_this_turn: 0,
+                    territorial_incidents_this_turn: 0,
+                    total_bilateral_flips: 0,
+                    allied_mixed_municipalities: [],
+                },
+            } : {}),
+        },
         displacement: {},
     } as unknown as GameState;
     const controlledBy = (owner: FactionId): ReadonlySet<string> => new Set(
@@ -527,5 +548,103 @@ describe('F1b probe fallback walk', () => {
             expect(logged.receipt).not.toBeNull();
             expect(JSON.stringify(logged.output.operations)).toBe(JSON.stringify(unlogged.output.operations));
         }
+    });
+});
+
+/**
+ * F1b narrowed (orchestrator ruling, rule 2): the walk never crosses the HVO-ARBiH front before
+ * Washington. A walked selection (rank >= 1) whose target is held by the corps' pre-Washington
+ * wartime opponent (RBiH corps -> HRHB target, HRHB corps -> RBiH target) is rejected while
+ * `rbih_hrhb_state.washington_signed` is false. Rank 0's own selection is unchanged.
+ */
+describe('F1b walk: no walk across the HVO-ARBiH front before Washington', () => {
+    const rankZeroFails = { a: 4_000 };
+
+    it('pre-Washington: an RBiH corps whose rank 0 is all_filtered does not walk to a brigade whose only viable target is HRHB-held', () => {
+        const result = runWalkHarness({
+            brigades: [{ id: 'b_alpha', lane: 'a' }, { id: 'b_bravo', lane: 'b' }],
+            defenders: rankZeroFails,
+            laneControllers: { b: 'HRHB' },
+            rbihHrhb: 'war',
+            topics: 'commander_creation',
+        });
+        expect(result.probes).toEqual([]);
+        const detail = result.receipt?.probe_gate_receipt?.target_selection_detail;
+        expect(detail?.walk?.map((entry: { outcome: string }) => entry.outcome))
+            .toEqual(['all_filtered', 'rejected_pre_washington_front']);
+        // With no selection the receipt keeps rank 0's evaluation.
+        expect(detail?.selected_brigade_id).toBe('b_alpha');
+        const reader = require('../../tools/diagnostics/commander_target_selection_reader.cjs');
+        expect(reader.detailErrors(result.receipt)).toEqual([]);
+        const unlogged = runWalkHarness({
+            brigades: [{ id: 'b_alpha', lane: 'a' }, { id: 'b_bravo', lane: 'b' }],
+            defenders: rankZeroFails,
+            laneControllers: { b: 'HRHB' },
+            rbihHrhb: 'war',
+        });
+        expect(JSON.stringify(unlogged.output.operations)).toBe(JSON.stringify(result.output.operations));
+    });
+
+    it('pre-Washington: the walk passes the rejected HRHB-front brigade and takes the next brigade with an RS target', () => {
+        const result = runWalkHarness({
+            brigades: [{ id: 'b_alpha', lane: 'a' }, { id: 'b_bravo', lane: 'b' }, { id: 'b_charlie', lane: 'c' }],
+            defenders: rankZeroFails,
+            laneControllers: { b: 'HRHB' },
+            rbihHrhb: 'war',
+            topics: 'commander_creation',
+        });
+        expect(probeSummary(result)).toEqual([{ brigades: ['b_charlie'], objectives: [LANES.c.target] }]);
+        expect(result.receipt?.probe_gate_receipt?.target_selection_detail?.walk?.map((entry: { outcome: string }) => entry.outcome))
+            .toEqual(['all_filtered', 'rejected_pre_washington_front', 'selected']);
+    });
+
+    it('pre-Washington: an RS-held target may be walked to', () => {
+        const result = runWalkHarness({
+            brigades: [{ id: 'b_alpha', lane: 'a' }, { id: 'b_bravo', lane: 'b' }],
+            defenders: rankZeroFails,
+            rbihHrhb: 'war',
+        });
+        expect(probeSummary(result)).toEqual([{ brigades: ['b_bravo'], objectives: [LANES.b.target] }]);
+    });
+
+    it('pre-Washington: rank 0 keeps its own unwalked selection of an HRHB-held target, as on main', () => {
+        const result = runWalkHarness({
+            brigades: [{ id: 'b_alpha', lane: 'a' }, { id: 'b_bravo', lane: 'b' }],
+            laneControllers: { a: 'HRHB' },
+            rbihHrhb: 'war',
+        });
+        expect(probeSummary(result)).toEqual([{ brigades: ['b_alpha'], objectives: [LANES.a.target] }]);
+    });
+
+    it('post-Washington: the rule is lifted; the walk is governed by the unchanged filters alone', () => {
+        const result = runWalkHarness({
+            brigades: [{ id: 'b_alpha', lane: 'a' }, { id: 'b_bravo', lane: 'b' }, { id: 'b_charlie', lane: 'c' }],
+            defenders: rankZeroFails,
+            laneControllers: { b: 'HRHB' },
+            rbihHrhb: 'washington',
+            topics: 'commander_creation',
+        });
+        const outcomes = result.receipt?.probe_gate_receipt?.target_selection_detail?.walk?.map((entry: { outcome: string }) => entry.outcome);
+        expect(outcomes).not.toContain('rejected_pre_washington_front');
+        // After Washington the existing politics filter (isRbihHrhbCombatBlocked) already removes the
+        // HRHB target, so b_bravo is all_filtered and the walk reaches b_charlie's RS target.
+        expect(outcomes).toEqual(['all_filtered', 'all_filtered', 'selected']);
+        expect(probeSummary(result)).toEqual([{ brigades: ['b_charlie'], objectives: [LANES.c.target] }]);
+    });
+
+    it('the front predicate: RBiH<->HRHB only, and only before Washington', () => {
+        const preWashington = { political: { rbih_hrhb_state: { washington_signed: false } } } as unknown as GameState;
+        const postWashington = { political: { rbih_hrhb_state: { washington_signed: true } } } as unknown as GameState;
+        const noBilateralState = { political: {} } as unknown as GameState;
+        expect(isPreWashingtonCroatBosniakFrontTarget(preWashington, 'RBiH', 'HRHB')).toBe(true);
+        expect(isPreWashingtonCroatBosniakFrontTarget(preWashington, 'HRHB', 'RBiH')).toBe(true);
+        expect(isPreWashingtonCroatBosniakFrontTarget(noBilateralState, 'RBiH', 'HRHB')).toBe(true);
+        expect(isPreWashingtonCroatBosniakFrontTarget(preWashington, 'RBiH', 'RS')).toBe(false);
+        expect(isPreWashingtonCroatBosniakFrontTarget(preWashington, 'HRHB', 'RS')).toBe(false);
+        expect(isPreWashingtonCroatBosniakFrontTarget(preWashington, 'RS', 'HRHB')).toBe(false);
+        expect(isPreWashingtonCroatBosniakFrontTarget(preWashington, 'RS', 'RBiH')).toBe(false);
+        expect(isPreWashingtonCroatBosniakFrontTarget(preWashington, 'RBiH', null)).toBe(false);
+        expect(isPreWashingtonCroatBosniakFrontTarget(postWashington, 'RBiH', 'HRHB')).toBe(false);
+        expect(isPreWashingtonCroatBosniakFrontTarget(postWashington, 'HRHB', 'RBiH')).toBe(false);
     });
 });

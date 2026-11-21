@@ -212,6 +212,24 @@ const PENDING_PLAN_STATUSES: ReadonlySet<CommanderPlanStatus> = new Set([
     'ready',
 ]);
 
+/**
+ * F1b narrowed (orchestrator ruling, rule 2): true when a probe target lies across the
+ * HVO-ARBiH front before Washington, i.e. a RBiH corps facing an HRHB-held target or a HRHB
+ * corps facing a RBiH-held target while `rbih_hrhb_state.washington_signed` (the canonical
+ * bilateral-suppression signal, see game_state.ts) is not true. The probe walk never selects
+ * such a target past rank 0. Pure: reads only the faction pair and washington_signed.
+ */
+export function isPreWashingtonCroatBosniakFrontTarget(
+    state: GameState,
+    corpsFaction: FactionId | string | null | undefined,
+    targetController: FactionId | string | null | undefined,
+): boolean {
+    const crossesFront = (corpsFaction === 'RBiH' && targetController === 'HRHB')
+        || (corpsFaction === 'HRHB' && targetController === 'RBiH');
+    if (!crossesFront) return false;
+    return state.political?.rbih_hrhb_state?.washington_signed !== true;
+}
+
 /** Plan statuses that produce operations. */
 const ACTIVE_PLAN_STATUSES: ReadonlySet<CommanderPlanStatus> = new Set([
     'executing',
@@ -2114,6 +2132,7 @@ interface CommanderCreationProbeWalkEntry {
         | 'skipped_duplicate_sector_location'
         | 'stopped_corps_exhausted'
         | 'stopped_plan_pending'
+        | 'rejected_pre_washington_front'
         | CommanderCreationProbeTargetSelectionStatus;
 }
 
@@ -3438,6 +3457,28 @@ function buildOperationsImpl(
                 walkedObjectives,
             );
             const walkedReachable = walkedEligible && isProbeReachable(walked, walkedObjectives);
+            // F1b narrowed (orchestrator ruling, rule 2): the walk never crosses the HVO-ARBiH front
+            // before Washington. A walked selection whose target the corps' pre-Washington wartime
+            // opponent holds is rejected and the walk goes on; rank 0's own selection is unchanged.
+            const walkedTarget = walkedObjectives[0];
+            const walkedTargetController = sortedRank > 0 && walkedReachable && walkedTarget != null
+                && briefing.state_ref && briefing.reverse_map
+                ? getPoliticalControllerOSID(briefing.state_ref, walkedTarget, briefing.reverse_map)
+                : null;
+            if (
+                walkedTargetController != null
+                && briefing.state_ref
+                && isPreWashingtonCroatBosniakFrontTarget(briefing.state_ref, briefing.faction, walkedTargetController)
+            ) {
+                walkReceipt?.push({
+                    sorted_rank: sortedRank,
+                    brigade_id: walked.brigade_id,
+                    location_osid: walkedLocation,
+                    derived_sector_id: walkedSectorId ?? null,
+                    outcome: 'rejected_pre_washington_front',
+                });
+                continue;
+            }
             if (sortedRank === 0) {
                 rankZeroObjectives = walkedObjectives;
                 rankZeroEligible = walkedObjectives.length > 0 ? walkedEligible : null;
