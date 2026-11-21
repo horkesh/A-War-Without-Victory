@@ -279,7 +279,8 @@ export function reassignCorpsForBilateralWar(state: GameState, faction: FactionI
                 currentCmd.stance = 'balanced';
                 currentCmd.status_reason = 'bilateral_diversion_lapsed';
             }
-            delete rhs.bilateral_diverted_corps![faction];
+            const divertedMap = rhs.bilateral_diverted_corps;
+            if (divertedMap) delete divertedMap[faction];
         }
         return { diverted_corps_id: null, released_corps_id: currentDiverted, release_progress: 0, joint_ops: false, reason };
     };
