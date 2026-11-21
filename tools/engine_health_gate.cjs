@@ -579,7 +579,8 @@ hard('zero_eligible_ops', measured.zero_eligible_ops <= band.zero_eligible_ops_m
 hard('invalid_op_weeks', measured.dead_ops <= band.dead_ops_max, `${measured.dead_ops} <= ${band.dead_ops_max}`);
 // P3 mismatch rider: a NEW ceiling, checked only once a band has blessed it (same pattern as
 // checkpoint_matched_min). It tightens nothing and loosens nothing that existed before.
-if (typeof band.idle_execution_ops_max === 'number') {
+// --engine-integrity-only keeps its pinned five-check contract; the full gate (CI, --strict) sees it.
+if (!flags.engineIntegrityOnly && typeof band.idle_execution_ops_max === 'number') {
   const got = measured.idle_execution_op_weeks;
   hard(
     'idle_execution_ops',
