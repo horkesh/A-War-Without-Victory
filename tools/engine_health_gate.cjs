@@ -13,9 +13,10 @@
  * is a separate, owner-gated step.
  *
  * USAGE:
- *   node tools/engine_health_gate.cjs <run_dir> [--horizon 40w|188w] [--update] [--force] [--strict] [--engine-integrity-only] [--json]
+ *   node tools/engine_health_gate.cjs <run_dir> [--horizon 40w|188w] [--thresholds <file>] [--update] [--force] [--strict] [--engine-integrity-only] [--json]
  *
  *   <run_dir>     a dir containing run_summary.json AND final_save.json
+ *   --thresholds  read/write this thresholds file instead of data/calibration/engine_health_thresholds.json
  *   --horizon     which threshold band to check against. Default inferred from weeks
  *                 (<=60 -> 40w, else 188w). Only '40w' and '188w' bands are seeded today;
  *                 a 52w run would infer '40w' — pass --horizon explicitly for other lengths.
@@ -42,7 +43,7 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 
 const REPO_ROOT = path.resolve(__dirname, '..');
-const THRESH_PATH = path.join(REPO_ROOT, 'data', 'calibration', 'engine_health_thresholds.json');
+const DEFAULT_THRESH_PATH = path.join(REPO_ROOT, 'data', 'calibration', 'engine_health_thresholds.json');
 
 function die(msg, code) {
   console.error('[engine_health_gate] ' + msg);
@@ -51,11 +52,14 @@ function die(msg, code) {
 
 // ---- args ----
 const args = process.argv.slice(2);
-const flags = { update: false, strict: false, json: false, force: false, engineIntegrityOnly: false, horizon: null };
+const flags = { update: false, strict: false, json: false, force: false, engineIntegrityOnly: false, horizon: null, thresholds: null };
 const positionals = [];
 for (let i = 0; i < args.length; i++) {
   const a = args[i];
-  if (a === '--update') flags.update = true;
+  // --thresholds <file>: read (and, with --update, write) this thresholds file instead of the
+  // repo default. Lets tests and draft lanes check a band without touching the blessed file.
+  if (a === '--thresholds') flags.thresholds = args[++i];
+  else if (a === '--update') flags.update = true;
   else if (a === '--strict') flags.strict = true;
   else if (a === '--json') flags.json = true;
   else if (a === '--force') flags.force = true;
@@ -63,8 +67,9 @@ for (let i = 0; i < args.length; i++) {
   else if (a === '--horizon') flags.horizon = args[++i];
   else positionals.push(a);
 }
+const THRESH_PATH = flags.thresholds ? path.resolve(flags.thresholds) : DEFAULT_THRESH_PATH;
 const runDir = positionals[0];
-if (!runDir) die('usage: node tools/engine_health_gate.cjs <run_dir> [--horizon 40w|188w] [--update] [--strict] [--engine-integrity-only] [--json]', 2);
+if (!runDir) die('usage: node tools/engine_health_gate.cjs <run_dir> [--horizon 40w|188w] [--thresholds <file>] [--update] [--strict] [--engine-integrity-only] [--json]', 2);
 if (flags.engineIntegrityOnly) {
   for (const [name, enabled] of [['--update', flags.update], ['--force', flags.force], ['--strict', flags.strict]]) {
     if (enabled) die(`${name} is incompatible with --engine-integrity-only`, 2);
@@ -395,6 +400,19 @@ const measured = {
   // Renamed in the REPORT (Phase 0 item 0.2) to say what it actually counts — op x turn instances,
   // not operations. The THRESHOLD KEY stays `dead_ops_max` so no threshold file needs migrating.
   dead_ops: cc.invalid_operation_count || 0,
+  // P3 mismatch rider (2026-11-21). Op x week instances of an execution week with no
+  // participant attack order and no battle, ignoring lifetime counters (stationary + masked by
+  // march). HARD ceiling `idle_execution_ops_max`, checked ONLY when the band carries it, so a
+  // band blessed before this counter existed stays green. null = the run predates the counter
+  // (never read as 0). The rest are ADVISORY and never gated: COHA/Oct-1995 pauses are canon,
+  // and gating planning deaths contradicts the 2026-08-26 owner ruling.
+  idle_execution_op_weeks: typeof cc.idle_execution_op_weeks === 'number' ? cc.idle_execution_op_weeks : null,
+  idle_execution_stationary_op_weeks: typeof cc.idle_execution_stationary_op_weeks === 'number' ? cc.idle_execution_stationary_op_weeks : null,
+  idle_execution_masked_op_weeks: typeof cc.idle_execution_masked_op_weeks === 'number' ? cc.idle_execution_masked_op_weeks : null,
+  paused_op_weeks: typeof cc.paused_op_weeks === 'number' ? cc.paused_op_weeks : null,
+  planning_grace_op_weeks: typeof cc.planning_grace_op_weeks === 'number' ? cc.planning_grace_op_weeks : null,
+  launch_demotions: typeof cc.launch_demotions === 'number' ? cc.launch_demotions : null,
+  launch_demotion_terminations: typeof cc.launch_demotion_terminations === 'number' ? cc.launch_demotion_terminations : null,
   ghost_destroyed: ghostDestroyed,
   stranded_brigades: stranded,
   consistency_failures: consistencyFailures,
@@ -458,6 +476,10 @@ function defaultBand() {
     // advisory band (informational unless --strict)
     kw_ratio_lo: +(measured.kw_ratio * 0.85).toFixed(3),
     kw_ratio_hi: +(measured.kw_ratio * 1.15).toFixed(3),
+    // P3 rider: blessed only from a run that measured it (an --update on an older run omits it).
+    ...(typeof measured.idle_execution_op_weeks === 'number'
+      ? { idle_execution_ops_max: measured.idle_execution_op_weeks }
+      : {}),
   };
 }
 /** Turn-boundary jitter absorbed by each per-checkpoint floor. See withHeadroom. */
@@ -486,6 +508,9 @@ function withHeadroom(band) {
     ),
     kw_ratio_lo: band.kw_ratio_lo,
     kw_ratio_hi: band.kw_ratio_hi,
+    ...(typeof band.idle_execution_ops_max === 'number'
+      ? { idle_execution_ops_max: ceilH(band.idle_execution_ops_max) }
+      : {}),
   };
 }
 
@@ -552,6 +577,32 @@ hard('zero_eligible_ops', measured.zero_eligible_ops <= band.zero_eligible_ops_m
 // Label says `invalid_op_weeks` because that is what the engine counter measures — op x turn
 // instances, not operations. The threshold key remains `dead_ops_max`; nothing migrates.
 hard('invalid_op_weeks', measured.dead_ops <= band.dead_ops_max, `${measured.dead_ops} <= ${band.dead_ops_max}`);
+// P3 mismatch rider: a NEW ceiling, checked only once a band has blessed it (same pattern as
+// checkpoint_matched_min). It tightens nothing and loosens nothing that existed before.
+// --engine-integrity-only keeps its pinned five-check contract; the full gate (CI, --strict) sees it.
+if (!flags.engineIntegrityOnly && typeof band.idle_execution_ops_max === 'number') {
+  const got = measured.idle_execution_op_weeks;
+  hard(
+    'idle_execution_ops',
+    got != null && got <= band.idle_execution_ops_max,
+    got == null
+      ? `run emitted no idle_execution_op_weeks (expected <= ${band.idle_execution_ops_max}) — engine predates the counter`
+      : `${got} <= ${band.idle_execution_ops_max} (stationary ${measured.idle_execution_stationary_op_weeks ?? '?'}, masked ${measured.idle_execution_masked_op_weeks ?? '?'})`
+  );
+}
+
+// ── P3 RIDER ADVISORY, NEVER GATED ──────────────────────────────────────────────────────────
+// paused_op_weeks (COHA / Oct-1995 ceasefire: canon), planning_grace_op_weeks (planning past
+// planning_duration: owner ruling 2026-08-26, never gated) and launch demotions (fix B).
+if (measured.idle_execution_op_weeks == null) {
+  console.log('  [ADVISORY] idle_execution   UNAVAILABLE — run predates the P3 rider counters; NOT reporting a 0 that would be a lookup failure');
+} else {
+  console.log(
+    `  [ADVISORY] idle_execution   ${measured.idle_execution_op_weeks} op-weeks (stationary ${measured.idle_execution_stationary_op_weeks}, masked ${measured.idle_execution_masked_op_weeks})`
+    + `  paused ${measured.paused_op_weeks}  planning_grace ${measured.planning_grace_op_weeks}`
+    + `  launch_demotions ${measured.launch_demotions} (ended ${measured.launch_demotion_terminations})`,
+  );
+}
 
 // ── ADVISORY, NEVER GATED (Phase 0 item 0.2) ────────────────────────────────────────────────
 // The corrected, axis-scoped view of the same question, computed from operation_aars.json.

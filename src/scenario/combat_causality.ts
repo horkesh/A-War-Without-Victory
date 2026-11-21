@@ -2,6 +2,9 @@ import type { AttackResolutionOsidReport } from '../sim/combat/attack_resolution
 import type { AxisLaunchReadinessDetail, AxisOrderGenerationDetail, CorpsOperation, FactionId, FormationId, FormationState, GameState } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
 import { isVlasicCohaExceptionOperation } from '../sim/combat/coha_operation_exception.js';
+import { isCorpsBoundByOct1995Ceasefire } from '../sim/combat/oct1995_ceasefire.js';
+import { collectAdjacentFriendlyOsids, type LaunchOrderConfirmationReport } from '../sim/combat/sector_offensive.js';
+import { computeMultiAxisPlanningDuration } from '../sim/combat/sector_offensive_axis_helpers.js';
 import type { BotDispatcherDecisionDetail, BotRouteDecisionDetail } from '../sim/combat/bot_brigade_ai_osid.js';
 
 export interface BotOrderDiagnosticsSnapshot {
@@ -73,7 +76,26 @@ export interface OperationCombatDiagnostic {
     recovery_reason: string | null;
     invalid_for_combat_calibration: boolean;
     invalidation_reasons: OperationCombatInvalidationReason[];
+    /**
+     * P3 mismatch rider, REPORT-ONLY (no sim state). Set on an execution week that is not
+     * paused, in which no participant holds an attack order, the operation fought no battle and
+     * gained no ground. It ignores the lifetime attempt counters, which is why the
+     * invalidation reasons above cannot see a lull after an earlier attempt.
+     *  - `all_stationary`: no participant is moving.
+     *  - `masked_by_march`: some participant is moving, and at least one stationary participant
+     *    already sits on a friendly OSID adjacent to a current objective (it could have attacked).
+     * Absent on every other week. A plain march week (nobody yet at the objective) is not idle.
+     */
+    idle_execution_week?: OperationIdleExecutionWeek;
+    /** P3 rider: a planning/execution week paused by COHA or the October 1995 ceasefire. */
+    lifecycle_paused_week?: true;
+    /** P3 rider: a planning week past `planning_duration` (not paused). Report-only. */
+    planning_grace_week?: true;
+    /** P3 rider: zero-order launches demoted so far (`CorpsOperation.launch_demotion_count`). */
+    launch_demotion_count?: number;
 }
+
+export type OperationIdleExecutionWeek = 'all_stationary' | 'masked_by_march';
 
 export type CombatCausalityInvalidationReason =
     | 'zero_battles'
@@ -94,6 +116,20 @@ export interface CombatCausalitySummary {
     invalid_operation_count: number;
     zero_eligible_attacker_operation_count: number;
     recovery_without_logged_attempt_count: number;
+    /**
+     * P3 mismatch rider, report-only op x week counters. They never feed
+     * `valid_for_combat_calibration`, `invalid_operation_count` or the existing gated counters.
+     * `idle_execution_op_weeks` = stationary + masked; the health gate checks it against
+     * `idle_execution_ops_max` only when a band carries that key.
+     */
+    idle_execution_op_weeks: number;
+    idle_execution_stationary_op_weeks: number;
+    idle_execution_masked_op_weeks: number;
+    paused_op_weeks: number;
+    planning_grace_op_weeks: number;
+    /** Zero-order launches demoted to planning / ended `zero_eligible_axis` (launch confirmation). */
+    launch_demotions: number;
+    launch_demotion_terminations: number;
 }
 
 function sortedFormationIds(ids: Iterable<string>): string[] {
@@ -393,6 +429,55 @@ export function buildOperationCombatDiagnostics(
             ) {
                 invalidationReasons.push('recovery_without_logged_attempt');
             }
+
+            // ── P3 mismatch rider: report-only week flags (no sim state, no invalidation). ──
+            // Paused = the COHA lifecycle pause (resolver receipt, or the flag itself when no
+            // resolver report exists) or the corps bound by the October 1995 ceasefire.
+            const offensiveLifecycle = operation.type === 'sector_attack'
+                || operation.type === 'probe'
+                || operation.type === 'feint';
+            const cohaPaused = (lifecyclePaused || state.military.event_flags?.coha_active === true)
+                && !isVlasicCohaExceptionOperation(state, corpsId, operation, currentTurn);
+            const pausedWeek = offensiveLifecycle
+                && (operation.phase === 'planning' || operation.phase === 'execution')
+                && (cohaPaused || isCorpsBoundByOct1995Ceasefire(state, corpsId));
+            let idleExecutionWeek: OperationIdleExecutionWeek | undefined;
+            if (
+                offensiveLifecycle &&
+                !pausedWeek &&
+                operation.phase === 'execution' &&
+                attackAttemptCount === 0 &&
+                battleCount === 0 &&
+                (operation.territory_gained_this_turn ?? 0) === 0
+            ) {
+                if (movementOrderCount === 0) {
+                    idleExecutionWeek = 'all_stationary';
+                } else {
+                    const adjacentFriendly = new Set<string>();
+                    for (const objective of currentObjectives) {
+                        for (const osid of collectAdjacentFriendlyOsids(state, corpsId, objective)) {
+                            adjacentFriendly.add(osid);
+                        }
+                    }
+                    const stationaryAtObjective = brigades.some((brigadeId) => {
+                        const movementTarget = orderSnapshot?.movement_orders_by_brigade?.[brigadeId];
+                        if (typeof movementTarget === 'string' && movementTarget.length > 0) return false;
+                        const location = getFormationById(state, brigadeId)?.location_osid;
+                        return typeof location === 'string' && adjacentFriendly.has(location);
+                    });
+                    if (stationaryAtObjective) idleExecutionWeek = 'masked_by_march';
+                }
+            }
+            const planningDuration = operation.planning_duration
+                ?? (Array.isArray(operation.axes) && operation.axes.length > 0
+                    ? computeMultiAxisPlanningDuration(operation.axes)
+                    : 1);
+            const planningGraceWeek = offensiveLifecycle
+                && !pausedWeek
+                && operation.phase === 'planning'
+                && currentTurn - operation.phase_started_turn > planningDuration;
+            const launchDemotionCount = operation.launch_demotion_count ?? 0;
+
             diagnostics.push({
                 corps_id: corpsId,
                 faction_id: factionId,
@@ -420,7 +505,11 @@ export function buildOperationCombatDiagnostics(
                     : {}),
                 recovery_reason: recoveryReason,
                 invalid_for_combat_calibration: invalidationReasons.length > 0,
-                invalidation_reasons: invalidationReasons
+                invalidation_reasons: invalidationReasons,
+                ...(idleExecutionWeek !== undefined ? { idle_execution_week: idleExecutionWeek } : {}),
+                ...(pausedWeek ? { lifecycle_paused_week: true as const } : {}),
+                ...(planningGraceWeek ? { planning_grace_week: true as const } : {}),
+                ...(launchDemotionCount > 0 ? { launch_demotion_count: launchDemotionCount } : {}),
             });
         } // end for-of active_operations
     }
@@ -430,7 +519,8 @@ export function buildOperationCombatDiagnostics(
 export function buildCombatCausalitySummary(
     operationDiagnostics: OperationCombatDiagnostic[],
     orderSnapshot: BotOrderDiagnosticsSnapshot | undefined,
-    osidResolution: AttackResolutionOsidReport | undefined
+    osidResolution: AttackResolutionOsidReport | undefined,
+    launchConfirmation?: LaunchOrderConfirmationReport
 ): CombatCausalitySummary {
     const invalidationReasons = new Set<CombatCausalityInvalidationReason>();
     const totalBattles = osidResolution?.battles?.length ?? 0;
@@ -454,10 +544,18 @@ export function buildCombatCausalitySummary(
     let totalMovementOnlyExecutionTurns = 0;
     let zeroEligibleAttackerOperationCount = 0;
     let recoveryWithoutLoggedAttemptCount = 0;
+    let idleStationaryOpWeeks = 0;
+    let idleMaskedOpWeeks = 0;
+    let pausedOpWeeks = 0;
+    let planningGraceOpWeeks = 0;
     for (const diagnostic of operationDiagnostics) {
         totalObjectiveAttempts += diagnostic.objective_attempt_count;
         totalObjectiveCaptures += diagnostic.objective_capture_count;
         totalMovementOnlyExecutionTurns += diagnostic.movement_only_execution_turns;
+        if (diagnostic.idle_execution_week === 'all_stationary') idleStationaryOpWeeks += 1;
+        if (diagnostic.idle_execution_week === 'masked_by_march') idleMaskedOpWeeks += 1;
+        if (diagnostic.lifecycle_paused_week === true) pausedOpWeeks += 1;
+        if (diagnostic.planning_grace_week === true) planningGraceOpWeeks += 1;
         if (!diagnostic.invalid_for_combat_calibration) continue;
         invalidOperationCount += 1;
         if (diagnostic.invalidation_reasons.includes('execution_without_attack_orders')) {
@@ -492,6 +590,13 @@ export function buildCombatCausalitySummary(
         total_orders_by_faction: totalOrdersByFaction,
         invalid_operation_count: invalidOperationCount,
         zero_eligible_attacker_operation_count: zeroEligibleAttackerOperationCount,
-        recovery_without_logged_attempt_count: recoveryWithoutLoggedAttemptCount
+        recovery_without_logged_attempt_count: recoveryWithoutLoggedAttemptCount,
+        idle_execution_op_weeks: idleStationaryOpWeeks + idleMaskedOpWeeks,
+        idle_execution_stationary_op_weeks: idleStationaryOpWeeks,
+        idle_execution_masked_op_weeks: idleMaskedOpWeeks,
+        paused_op_weeks: pausedOpWeeks,
+        planning_grace_op_weeks: planningGraceOpWeeks,
+        launch_demotions: launchConfirmation?.demoted.length ?? 0,
+        launch_demotion_terminations: launchConfirmation?.ended.length ?? 0,
     };
 }

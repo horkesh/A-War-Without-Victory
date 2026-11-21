@@ -164,7 +164,7 @@ import {
 } from '../combat/commander_march_correction.js';
 import { evaluateHomeReturn } from '../combat/brigade_home_return.js';
 import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
-import { advanceSectorOffensives, cancelOffensivesForOct1995Ceasefire, updateSectorOffensiveResults, reevaluateWeakenedOperations } from '../combat/sector_offensive.js';
+import { advanceSectorOffensives, cancelOffensivesForOct1995Ceasefire, confirmLaunchedOperationOrders, updateSectorOffensiveResults, reevaluateWeakenedOperations } from '../combat/sector_offensive.js';
 import {
     clampCorpsStancesForOct1995Ceasefire,
     isCorpsBoundByOct1995Ceasefire,
@@ -2848,6 +2848,15 @@ export const warPhases: NamedPhase[] = [
                         },
                     );
                     context.report.player_historical_operation_assist = assistDiagnostics;
+                }
+
+                // P3 mismatch rider, fix B: confirm this turn's launches against the orders just
+                // emitted. Only factions this pass emitted for (`factions`) are judged; a manual
+                // player's own orders are never second-guessed. Inside the operational-data branch
+                // on purpose: without emission there is no evidence either way.
+                const launchConfirmation = confirmLaunchedOperationOrders(context.state, factions);
+                if (launchConfirmation.demoted.length > 0 || launchConfirmation.ended.length > 0) {
+                    context.report.launch_order_confirmation = launchConfirmation;
                 }
             }
             // When operational data unavailable: no bot brigade orders (AoR path removed).
