@@ -2913,3 +2913,113 @@ describe('commander emission overlap guards', () => {
         expect(op?.was_force_launched).toBe(true);
     });
 });
+
+// Fable consult 8 appendix A change 1: a non-bilateral plan's operation is also manned from the
+// plan's own assault group (surplus, may join, can reach, combat ready), not only from the
+// objective's primary-sector roster. Before this, a group standing outside that sector left a
+// paper plan: the plan launched and no operation was built.
+describe('plan assault group mans its own operation (Fable consult 8 change 1)', () => {
+    function emitGroupOutsideSector(options: {
+        bilateral?: boolean;
+        surplusIds?: readonly string[];
+        b2Location?: string;
+        observe?: boolean;
+    } = {}) {
+        const sector = makeSector();
+        const targetSector = {
+            ...sector,
+            assigned_brigade_ids: ['b3'] as FormationId[],
+            reserve_brigade_ids: [],
+            sub_segments: [{ ...sector.sub_segments[0]!, primary_brigade_ids: ['b3'] as FormationId[] }],
+        } as CorpsFrontSector;
+        const base = makeBriefing([], [
+            makeBrigade('b1', 'op:test:approach'),
+            makeBrigade('b2', options.b2Location ?? 'op:test:approach'),
+            makeBrigade('b3', 'op:test:approach'),
+        ]);
+        const briefing = {
+            ...base,
+            sectors: [targetSector],
+            ...(options.bilateral ? { bilateral_offensive: true } : {}),
+        } as CommanderBriefing;
+        const planDecision = makePlanDecision();
+        planDecision.plan = {
+            ...planDecision.plan!,
+            assigned_brigades: ['b1', 'b2'] as FormationId[],
+            ...(options.bilateral ? { bilateral_offensive: true } : {}),
+        } as any;
+        const allocation: AllocationResult = {
+            ...makeAllocation(),
+            surplus_pool: (options.surplusIds ?? ['b1', 'b2']).map(makeEval),
+        };
+        setReasonCodeTopics(options.observe ? 'commander_creation' : undefined);
+        const lines: string[] = [];
+        const spy = options.observe
+            ? vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+                lines.push(args.map(String).join(' '));
+            })
+            : undefined;
+        try {
+            const output = emitCommanderOutput(
+                briefing, [], makeForces(), allocation, planDecision, makeDecisions(), makeThreats(),
+            );
+            const rows = lines
+                .filter((line) => line.startsWith('[commander_creation] '))
+                .map((line) => JSON.parse(line.slice('[commander_creation] '.length)) as Record<string, unknown>);
+            return { output, rows };
+        } finally {
+            spy?.mockRestore();
+        }
+    }
+
+    it('builds the plan operation from an assault group standing outside the primary sector', () => {
+        // The primary sector rosters only b3 (not surplus). The plan's group b1+b2 stands outside
+        // that roster; both are surplus, may join, reach the objective and are combat ready.
+        const { output } = emitGroupOutsideSector();
+        expect(output.operations).toHaveLength(1);
+        expect(output.operations[0]).toMatchObject({
+            type: 'sector_attack',
+            objectives: ['op:test:objective'],
+            participating_brigades: ['b1', 'b2'],
+        });
+    });
+
+    it('keeps a group member that is no longer surplus out of the operation', () => {
+        // b2 left the surplus pool; b3 (sector roster) is surplus, so b1 + b3 man the operation.
+        const { output } = emitGroupOutsideSector({ surplusIds: ['b1', 'b3'] });
+        const participants = output.operations.flatMap(op => op.participating_brigades);
+        expect(participants).toContain('b1');
+        expect(participants).not.toContain('b2');
+        expect(output.operations[0]?.participating_brigades).toEqual(['b1', 'b3']);
+    });
+
+    it('keeps a group member that cannot reach the objective out of the operation', () => {
+        // b2 stands on an unconnected, non-friendly OSID: no friendly path to the approach.
+        const { output } = emitGroupOutsideSector({ surplusIds: ['b1', 'b2', 'b3'], b2Location: 'op:test:far' });
+        const participants = output.operations.flatMap(op => op.participating_brigades);
+        expect(participants).toContain('b1');
+        expect(participants).not.toContain('b2');
+        expect(output.operations[0]?.participating_brigades).toEqual(['b1', 'b3']);
+    });
+
+    it('leaves the bilateral path unchanged: a non-surplus bilateral member still joins', () => {
+        const { output } = emitGroupOutsideSector({ bilateral: true, surplusIds: ['b1'] });
+        expect(output.operations).toHaveLength(1);
+        expect(output.operations[0]?.participating_brigades).toEqual(['b1', 'b2']);
+    });
+
+    it('records a plan-group receipt on the commander_creation row for a non-bilateral plan only', () => {
+        // b1 surplus+reach; b2 surplus but unreachable; b3 is sector roster (not in the group).
+        const { rows } = emitGroupOutsideSector({
+            surplusIds: ['b1', 'b2', 'b3'], b2Location: 'op:test:far', observe: true,
+        });
+        const planRow = rows.find(row => row.plan_group_receipt !== undefined);
+        expect(planRow?.plan_group_receipt).toEqual({
+            assigned: 2, surplus: 2, may_join: 2, reach: 1, ready: 1, added: 1,
+        });
+
+        const bilateral = emitGroupOutsideSector({ bilateral: true, surplusIds: ['b1'], observe: true });
+        expect(bilateral.rows.length).toBeGreaterThan(0);
+        expect(bilateral.rows.every(row => row.plan_group_receipt === undefined)).toBe(true);
+    });
+});
