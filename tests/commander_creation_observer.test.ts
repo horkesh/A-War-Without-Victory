@@ -2145,3 +2145,42 @@ describe('F1 follow-up: the fallback keeps the plan exit restriction it fell thr
         expect(on.output.operations).toEqual([]);
     });
 });
+
+// Codex #833 r4636529148: a plan stopped by the Army HQ reservation reaches the fallback; when a
+// local-occupation candidate is present the fallback is entered even on probe cooldown (the
+// cooldown exemption is for the occupation operation). The reservation then forbids that
+// operation, so the downgraded probe must still obey the four-turn probe cooldown.
+describe('Codex #833: a reservation-downgraded probe obeys the probe cooldown', () => {
+    function reservedLocalInputs(onCooldown: boolean): EmitInputs {
+        const inputs = localOccupationInputs();
+        inputs.plan = makePlanDecision();
+        const turn = inputs.briefing.turn;
+        (inputs.briefing as any).previous_state = {
+            operation_history: onCooldown ? [{ type: 'probe', started_turn: turn - 1 }] : [],
+        };
+        return inputs;
+    }
+
+    it('on cooldown: no probe while the reservation forbids the occupation operation', () => {
+        armyHqReservationOverride.value = true;
+        setTopics('commander_creation');
+        const out = runEmit(reservedLocalInputs(true));
+        const row = parseRow(out.lines[0]!);
+        expect(row.exit).toBe('reserved_for_army_hq');
+        expect(row.probe_on_cooldown).toBe(true);
+        expect(out.output.operations).toEqual([]);
+    });
+
+    it('off cooldown: the reservation-downgraded probe is still emitted (control)', () => {
+        armyHqReservationOverride.value = true;
+        const out = runEmit(reservedLocalInputs(false));
+        expect(out.output.operations.map((operation) => operation.type)).toEqual(['probe']);
+    });
+
+    it('on cooldown without the reservation: the local occupation operation keeps its exemption (control)', () => {
+        armyHqReservationOverride.value = false;
+        const out = runEmit(reservedLocalInputs(true));
+        expect(out.output.operations.length).toBeGreaterThan(0);
+        expect(out.output.operations.every((operation) => operation.type !== 'probe')).toBe(true);
+    });
+});
