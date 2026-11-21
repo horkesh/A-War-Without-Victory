@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { FormationState, GameState } from '../src/state/game_state.js';
 import { updateStrandedBrigadeLifecycle } from '../src/sim/combat/stranded_brigade_lifecycle.js';
-import { evacuateFormationsSeveredByCapture } from '../src/sim/combat/salient_withdrawal.js';
+import { evacuateFormationsSeveredByCapture, SALIENT_GARRISON_RETENTION_MIN_BRIGADES } from '../src/sim/combat/salient_withdrawal.js';
 
 function brigade(id: string, location: string, overrides: Partial<FormationState> = {}): FormationState {
     return {
@@ -393,6 +393,83 @@ describe('owner-directed 102nd evacuation from the Odzak pocket', () => {
 
         expect(report.evacuated_formation_ids).toEqual([]);
         expect(state.military.formations.hrhb_102nd_brigade.location_osid).toBe(NOVO_SELO);
+    });
+});
+
+describe('garrisoned pockets hold (package P2-R)', () => {
+    it('keeps two brigades in a cut-off pocket in place instead of pulling them through the neck', () => {
+        const state = stateWith({
+            first: brigade('first', 'pocket'),
+            second: brigade('second', 'pocket'),
+        });
+        const before = structuredClone(state);
+
+        const report = evacuateFormationsSeveredByCapture(state, 'neck', 'RBiH', adjacency);
+
+        expect(SALIENT_GARRISON_RETENTION_MIN_BRIGADES).toBe(2);
+        expect(report.evacuated_formation_ids).toEqual([]);
+        expect(state.military.formations).toEqual(before.military.formations);
+    });
+
+    it('still withdraws a lone brigade from its pocket', () => {
+        const state = stateWith({ lone: brigade('lone', 'pocket') });
+
+        const report = evacuateFormationsSeveredByCapture(state, 'neck', 'RBiH', adjacency);
+
+        expect(report.evacuated_formation_ids).toEqual(['lone']);
+        expect(state.military.formations.lone.location_osid).toBe('rear');
+    });
+
+    it('never withdraws a brigade into a retained garrisoned pocket', () => {
+        // lone -- neck(RS, just captured) -- garrisoned pocket; neck -- rear (main).
+        // Breadth-first search meets the garrisoned pocket first; it must not be a destination.
+        const targetAdjacency = new Map<string, readonly string[]>([
+            ['lone_cell', ['neck']],
+            ['neck', ['lone_cell', 'held', 'rear']],
+            ['held', ['neck']],
+            ['rear', ['neck', 'rear2']],
+            ['rear2', ['rear']],
+        ]);
+        const state = stateWith({
+            lone: brigade('lone', 'lone_cell'),
+            held_a: brigade('held_a', 'held'),
+            held_b: brigade('held_b', 'held'),
+        });
+        Object.assign(state.political.political_controllers as Record<string, string>, {
+            lone_cell: 'RBiH', held: 'RBiH', neck: 'RS', rear: 'RBiH', rear2: 'RBiH',
+        });
+
+        const report = evacuateFormationsSeveredByCapture(state, 'neck', 'RBiH', targetAdjacency);
+
+        expect(report.evacuated_formation_ids).toEqual(['lone']);
+        expect(state.military.formations.lone.location_osid).toBe('rear');
+        expect(state.military.formations.held_a.location_osid).toBe('held');
+        expect(state.military.formations.held_b.location_osid).toBe('held');
+    });
+
+    it('keeps the authored 102nd relocation when two other brigades hold the Odzak pocket', () => {
+        const state = orasjeState();
+        for (const id of ['hrhb_103rd_brigade', 'hrhb_104th_brigade']) {
+            state.military.formations[id] = brigade(id, NOVO_SELO, { faction: 'HRHB', corps_id: 'hvo_northwest_bosnia' });
+        }
+
+        const report = evacuateFormationsSeveredByCapture(state, GAREVAC, 'HRHB', orasjeAdjacency);
+
+        expect(report.evacuated_formation_ids).toEqual(['hrhb_102nd_brigade']);
+        expect(state.military.formations.hrhb_102nd_brigade.location_osid).toBe(ORASJE);
+        expect(state.military.formations.hrhb_103rd_brigade.location_osid).toBe(NOVO_SELO);
+        expect(state.military.formations.hrhb_104th_brigade.location_osid).toBe(NOVO_SELO);
+    });
+
+    it('does not count the authored 102nd toward a garrison', () => {
+        const state = orasjeState();
+        state.military.formations.hrhb_103rd_brigade = brigade('hrhb_103rd_brigade', NOVO_SELO, {
+            faction: 'HRHB', corps_id: 'hvo_northwest_bosnia',
+        });
+
+        const report = evacuateFormationsSeveredByCapture(state, GAREVAC, 'HRHB', orasjeAdjacency);
+
+        expect(report.evacuated_formation_ids).toEqual(['hrhb_102nd_brigade', 'hrhb_103rd_brigade']);
     });
 });
 

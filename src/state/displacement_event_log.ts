@@ -28,13 +28,23 @@
  * Math.random / Date.now / async; iteration over the input event itself only.
  */
 
-import type { DisplacementEvent, GameState } from './game_state.js';
+import type { DisplacementEvent, FactionId, GameState } from './game_state.js';
 
 /**
  * Bucket key for events with no caused_by attribution. Distinct from any
  * canonical faction id so we never collide with 'RBiH' / 'RS' / 'HRHB'.
  */
 export const UNKNOWN_CAUSER_BUCKET = '_unknown';
+
+/**
+ * Outer key of `displacement_origin_dest_arrivals`: `${origin_mun}|${ethnicity}`.
+ * Ethnicity is the ethnicity-aligned FactionId ('RBiH' | 'RS' | 'HRHB'), so a
+ * brigade's own people are keyed by its faction. Single source for the writer
+ * below and for every reader (reconstitution Path B, P2-L pocket membership).
+ */
+export function originDestArrivalsKey(originMun: string, ethnicity: FactionId): string {
+    return `${originMun}|${ethnicity}`;
+}
 
 /**
  * Append a DisplacementEvent to state.displacement.displacement_event_log
@@ -137,7 +147,7 @@ export function appendDisplacementEvent(
             state.displacement.displacement_origin_dest_arrivals = {};
         }
         const odMap = state.displacement.displacement_origin_dest_arrivals;
-        const compositeKey = `${event.origin_mun}|${event.ethnicity}`;
+        const compositeKey = originDestArrivalsKey(event.origin_mun, event.ethnicity);
         const destBucket = (odMap[compositeKey] ??= {});
         destBucket[event.dest_mun] = (destBucket[event.dest_mun] ?? 0) + settled;
     }

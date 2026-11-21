@@ -103,7 +103,7 @@ function makeState(): GameState {
                     active_operations: [{
                         name: 'Assembly operation',
                         type: 'sector_attack',
-                        phase: 'planning',
+                        phase: 'execution',
                         started_turn: 0,
                         participating_brigades: ['operation_participant'],
                     }],
@@ -143,5 +143,29 @@ describe('standing OG reactive-defense availability', () => {
         expect(isStandingOgDefenseBrigadeAvailable(state, 'ordered' as FormationId)).toBe(false);
         expect(isStandingOgDefenseBrigadeAvailable(state, 'arbih_246th_vitezka_mountain' as FormationId)).toBe(true);
         expect(isStandingOgDefenseBrigadeAvailable(state, 'arbih_1st_cerska' as FormationId)).toBe(false);
+    });
+
+    it('defence fix D1: a participant of an operation still in planning stays in the defence roster', () => {
+        const state = makeState();
+        const op = (state.military.corps_command as any).arbih_test_corps.active_operations[0];
+
+        op.phase = 'planning';
+        expect(isStandingOgDefenseBrigadeAvailable(state, 'operation_participant' as FormationId)).toBe(true);
+
+        op.phase = 'execution';
+        expect(isStandingOgDefenseBrigadeAvailable(state, 'operation_participant' as FormationId)).toBe(false);
+
+        op.phase = 'recovery';
+        expect(isStandingOgDefenseBrigadeAvailable(state, 'operation_participant' as FormationId)).toBe(false);
+    });
+
+    it('defence fix D1: a planning-phase participant that has marched or holds an order is still excluded', () => {
+        const state = makeState();
+        const op = (state.military.corps_command as any).arbih_test_corps.active_operations[0];
+        op.phase = 'planning';
+        op.participating_brigades = ['operation_participant', 'moving', 'ordered'];
+
+        expect(isStandingOgDefenseBrigadeAvailable(state, 'moving' as FormationId)).toBe(false);
+        expect(isStandingOgDefenseBrigadeAvailable(state, 'ordered' as FormationId)).toBe(false);
     });
 });

@@ -276,6 +276,39 @@ never seed it, and captured, uncontrolled or missing origins offer no protection
 grant adequate supply, weaken the critical-supply stranded rule, change ordinary combat retreat,
 or protect control that combat actually lost.
 
+**Garrisoned-pocket retention (package P2-R, 2026-11-18):** the same withdrawal also retains any
+cut-off component that holds at least two (`SALIENT_GARRISON_RETENTION_MIN_BRIGADES`) of the
+displaced faction's active brigades; those brigades stay and defend the pocket instead of being
+moved through the captured cell in one turn. A lone stranded brigade still withdraws. A retained
+pocket is never a withdrawal destination: brigades are only ever withdrawn to the main component
+and own-origin pockets. A brigade with an owner-authored evacuation rule (the 102nd below) neither
+counts toward a garrison nor is held by one. The rule is faction-blind, grants no supply, and leaves
+the critical-supply stranded rule in force, so a held pocket costs its garrison cohesion and men.
+
+**Defence of a held line (defence fix D1-D3 and P3 step 4, 2026-11-19; four-seat panel, two rounds):**
+These rules are faction-blind and add no state.
+- **A planned operation does not empty the line (D1).** A brigade named in an operation that is still in planning, and that has not marched or received a movement order, stays in its sector's defence roster. Only executing and recovering participants leave it. The resolver and the planner's predictor share that roster.
+- **Enemy territory is read off the ground (D2).** The −2 morale drift for standing in enemy territory applies only when both the municipality and the cell the brigade stands on are below 30% of its own people (1991 census). A brigade holding its own people's village inside an other-majority municipality does not drain. The +2 and the other drift branches still read the municipality.
+- **Relief in place on contact cells (D3).** A contact cell is a held front cell that was defended within the commander's recapture window.
+  - An empty contact cell is taken by the nearest eligible brigade of the same corps (R1).
+  - A brigade that outpowers the occupant at the cell relieves it in place (R2). It is valued without entrenchment against the occupant's dug-in value, and the occupant leaves only once the relief is on the cell.
+  - No brigade leaves a contact cell to fill another.
+  - Operation participants of any phase, queued pre-planned, must-hold, loaned and dug-in brigades never move for relief.
+  - The run-consistency validator applies the same donor rule.
+- **Objectives come from the weakest enemy sector first (P3 step 4).** An attacking corps takes its General Staff objectives from its enemy sectors in ascending threat ratio. Hold objectives keep the highest-threat-first order.
+- **Outcome.** Attacks on a prepared defence now usually fail at about pr 1 and below, as in the 1994-95 ARBiH pattern of many launches, most of them failing. A strong offensive (Farz, Sept 1995, pr 10 and above) still wins.
+- **A plan's own assault group mans its operation (Fable consult 8, change 1, 2026-11-21).** For a non-bilateral plan the operation builder adds the plan's `assigned_brigades` to the objective sector's pool, under the same tests: surplus (which also excludes brigades the due pre-planned queue head holds), may join, can reach the objective in time, and combat ready. Before, a plan whose group stood outside the objective's sector launched and built nothing (a "paper plan"). The bilateral path is unchanged.
+- **The RBiH Sarajevo-corps stance rule is retired (Fable consult 8, change 2).** It forced an RBiH corps defensive whenever its derived home municipality (the most common brigade location) was a Sarajevo municipality. On main it never applied: removing it leaves main's hashes unchanged in both modes, byte-identical. Under the defence rules above, the 1st Corps' brigade count tipped from Goražde to Novi Grad and the rule switched on by accident. The corps' doctrine stance, the besieged-zone planning rule and the odds filter still restrain it.
+- **Accepted as final (orchestrator ruling, 2026-11-21).** A corps probes with its top-ranked brigade or not at all (the single-brigade probe lock), and ties are broken alphabetically by brigade id. Both are deterministic probe-selection simplifications.
+- **Measured (P3 unit with both changes, 188 weeks):** battles per week 2.62 historical and 2.63 emergent, against main's 2.45 and 2.44. Every guard passes. Operations built by the ARBiH 1st-4th Corps in weeks 99-178 rise from 4-5 to 8-13, and 3-6 of them fail. Each failed 1st Corps assault at Ilidža costs about 1,300-1,600 ARBiH killed. **These casualty figures are not fidelity evidence:** the record has no numeric figure, only "exceptionally heavy casualties" for the June 1995 offensive (BB1 print p. 406, n. 245).
+- **Historical basis** (Balkan Battlegrounds; "print" is the printed page):
+  - Igman/Bjelašnica (Oct 1994) and Treskavica (Nov 1994): about 100 sq km taken, Trnovo not reached (BB2 Annex 57, print pp. 499-504).
+  - June 1995 Sarajevo offensive: the 1st Corps with loaned brigades from the 2nd, 3rd and 7th Corps took "only three small villages on Mt. Igman" (BB1 print pp. 404-405, nn. 200-222), and was abandoned after heavy losses (print p. 406, n. 245).
+  - Bihać 1994: the 5th Corps' Grmeč 94 took the Grabež plateau, and the VRS/SVK Štit 94 counteroffensive followed. The HVO 101st Bihać Brigade collapsed on 20 Nov 1994 (BB2 Annexes 60-61, print pp. 521-535).
+  - Kupres: Kupres fell to the HVO on 3 Nov 1994, attacked by the ARBiH 7th Corps and the HVO against the VRS 2nd Krajina Corps (BB2 Annex 58, print pp. 507-511).
+  - Zvezda 94 at Goražde (28 Mar-10 Apr 1994): run by the Herzegovina Corps with the Drina Corps (BB2 Annex 49, print pp. 459-463).
+  - Unverified: the ICTY Galić and D. Milošević judgements (no ICTY text in the repository), the name "Operation T", Skok-1 and Ilidža/Hrasnica in 1994-95.
+
 **Owner-directed 102nd Odžak→Orašje evacuation (2026-10-28):** when the capture-triggered
 salient lifecycle would evacuate `hrhb_102nd_brigade` from the Odžak/Bosanski Šamac neck, the
 brigade is placed in its own held Orašje pocket and retains `hvo_northwest_bosnia` rather than

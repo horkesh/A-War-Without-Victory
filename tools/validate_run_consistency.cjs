@@ -153,6 +153,38 @@ function buildOperationParticipantSet(state) {
     return participants;
 }
 
+// Mirrors src/sim/combat/contact_cells.ts (defence fix D3): a coverage donor never
+// leaves a contact cell, a held cell defended within the commander's recapture window
+// (engagement turn in [turn - 8, turn - 1], friction records excluded).
+const RECENT_RECAPTURE_WINDOW_TURNS = 8;
+
+function buildContactOsidsByFaction(state) {
+    const result = new Map();
+    const controllers = state.political?.political_controllers;
+    const turn = state.meta?.turn;
+    if (!controllers || typeof turn !== 'number') return result;
+    const floor = Math.max(0, turn - RECENT_RECAPTURE_WINDOW_TURNS);
+    for (const formation of Object.values(state.military?.formations ?? {})) {
+        const faction = formation?.faction;
+        const engagements = formation?.brigade_history?.engagements;
+        if (!faction || !Array.isArray(engagements)) continue;
+        for (const engagement of engagements) {
+            if (engagement?.role !== 'defender') continue;
+            if (engagement.turn < floor || engagement.turn >= turn) continue;
+            if (typeof engagement.battle_id === 'string' && engagement.battle_id.includes(':friction:')) continue;
+            if (controllers[engagement.osid] !== faction) continue;
+            if (!result.has(faction)) result.set(faction, new Set());
+            result.get(faction).add(engagement.osid);
+        }
+    }
+    return result;
+}
+
+function standsOnContactCell(formation, contactByFaction) {
+    if (!formation?.location_osid || !formation?.faction) return false;
+    return contactByFaction.get(formation.faction)?.has(formation.location_osid) === true;
+}
+
 function countActiveFieldBrigadesByOsid(state) {
     const counts = new Map();
     for (const formation of Object.values(state.military?.formations ?? {})) {
@@ -402,6 +434,7 @@ function buildSectorCoverageDonorContext(state) {
         adjacency,
         opParticipants: buildOperationParticipantSet(state),
         activeCounts: countActiveFieldBrigadesByOsid(state),
+        contactByFaction: buildContactOsidsByFaction(state),
         factionContext,
     };
 }
@@ -459,6 +492,7 @@ function collectLegalSectorDonorCandidates(state, recipientSector, targetOsids) 
         if (!isFieldBrigadeKind(formation.kind)) return;
         if ((formation.disrupted_turns ?? 0) > 0) return;
         if (donorCtx.opParticipants.has(entry.bid)) return;
+        if (standsOnContactCell(formation, donorCtx.contactByFaction)) return;
         if (entry.donorRole === 'front') {
             const claim = classifySectorPosition(
                 formation.location_osid,
@@ -532,6 +566,7 @@ function collectSectorFloorShortfallIssues(state) {
     const brigadeMovementState = state.military?.brigade_movement_state ?? {};
     const brigadeMovementOrders = state.military?.brigade_movement_orders ?? {};
     const activeCounts = countActiveFieldBrigadesByOsid(state);
+    const contactByFaction = buildContactOsidsByFaction(state);
     const byFaction = new Map();
     for (const sector of sectors) {
         const list = byFaction.get(sector.faction) ?? [];
@@ -596,6 +631,7 @@ function collectSectorFloorShortfallIssues(state) {
             if (opParticipants.has(entry.bid)) continue;
             if (brigadeMovementState[entry.bid]?.status === 'in_transit') continue;
             if (brigadeMovementOrders[entry.bid]) continue;
+            if (standsOnContactCell(formation, contactByFaction)) continue;
             const legalTarget = findLegalReliefTarget(
                 formation,
                 vacantFrontOsids,
@@ -646,6 +682,7 @@ function collectSectorFloorShortfallIssues(state) {
                 if (opParticipants.has(entry.bid)) continue;
                 if (brigadeMovementState[entry.bid]?.status === 'in_transit') continue;
                 if (brigadeMovementOrders[entry.bid]) continue;
+                if (standsOnContactCell(formation, contactByFaction)) continue;
                 if (entry.donorRole === 'front') {
                     const claim = classifySectorPosition(
                         formation.location_osid,

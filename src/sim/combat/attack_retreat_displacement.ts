@@ -15,7 +15,8 @@
  * TRUTH INVARIANTS:
  * - Deterministic: sorted formation IDs and OSID iteration; no Math.random()
  * - Never writes brigade_movement_orders — only location_osid and retreat/advance state
- * - Brigades are NEVER destroyed by retreat — worst case inactive with minimal personnel
+ * - Retreat never destroys a brigade that has a reachable friendly cell; with none, it is
+ *   dissolved through the canonical dissolution record (package P2-D) so it can reconstitute
  *
  * MOVEMENT TIER: T4 — Combat Consequence (see MOVEMENT_AUTHORITY.md)
  * ═══════════════════════════════════════════════════════════════
@@ -40,7 +41,7 @@ import {
     type Osid
 } from './osid_adjacency.js';
 import { getEnclaveCapitalOsid, isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
-import { removeFromActiveOperation } from './brigade_dissolution.js';
+import { dissolveFormationAsDestroyed, removeFromActiveOperation } from './brigade_dissolution.js';
 import { getCorpsHqOsid } from './corps_front_sectors.js';
 import { invalidateBrigadeJourney } from './brigade_journey_lifecycle.js';
 import type { CombatOutcome } from './combat_math.js';
@@ -460,7 +461,8 @@ export interface ForceRetreatOptions {
 
 /**
  * Force-retreat a formation to a friendly OSID with heavy penalties.
- * Never destroys the brigade — worst case it goes to reserve status with minimal personnel.
+ * Only when no friendly cell can be reached is the formation destroyed, through the canonical
+ * dissolution record (package P2-D).
  */
 export function forceRetreatWithPenalties(
     state: GameState,
@@ -482,19 +484,29 @@ export function forceRetreatWithPenalties(
         relocateFormationAfterCombat(state, formation, dest);
         f.last_retreat_from = { osid: sourceOsid, turn: state.meta?.turn ?? 0 };
     } else {
-        // Absolute last resort: no friendly territory exists at all — brigade disperses
-        // This should only happen if the entire faction's territory is lost
+        // Absolute last resort: no friendly ground it can reach — the formation is destroyed.
+        // Package P2-D (2026-11-18): it is dissolved through the canonical dissolution record
+        // (reserve share, destroyed lifecycle, destruction turn), so reconstitution can see it.
+        // It used to go inactive with no destroyed record and was lost for good. Only the kinds
+        // the dissolution pass and reconstitution own (brigade, og) take this record; any other
+        // kind (phantoms, HQs, militia) keeps the plain terminal path, so no reserve share is
+        // minted for a unit that can never re-form (seat ops r1).
         relocateFormationAfterCombat(state, formation, undefined);
-        removeFromActiveOperation(state, formation.id, formation.corps_id);
-        formation.status = 'inactive';
-        formation.destruction_turn = state.meta?.turn ?? 0;
+        if (formation.kind === 'brigade' || formation.kind === 'og') {
+            dissolveFormationAsDestroyed(state, formation.id, opts?.adjacency);
+        } else {
+            removeFromActiveOperation(state, formation.id, formation.corps_id);
+            formation.status = 'inactive';
+            formation.destruction_turn = state.meta?.turn ?? 0;
+        }
     }
 }
 
 /**
  * Displace any active formation that has location_osid in an OSID not controlled by its faction.
  * Used after attack resolution (and optionally at end of turn) to enforce invariant: no brigade in enemy territory.
- * Brigades are NEVER destroyed — they retreat with penalties.
+ * Brigades retreat with penalties; only one with no reachable friendly cell is destroyed
+ * (forceRetreatWithPenalties, package P2-D).
  */
 export function displaceFormationsInEnemyTerritory(
     state: GameState,
