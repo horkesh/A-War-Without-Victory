@@ -606,6 +606,10 @@ const MAX_CONSECUTIVE_FAILURES_ON_CURRENT = 3;
  *  no brigade can find an attackable target (e.g. ARBiH 1st Corps under siege). */
 const MAX_MOVEMENT_ONLY_EXECUTION_TURNS = 4;
 
+/** Execution turns without a logged attack (lifetime 0), or without any participant attack or
+ *  move order (any lifetime), before the no-attack exit ends the operation. */
+const MAX_EXECUTION_TURNS_ZERO_ATTACKS = 5;
+
 /** Zero-progress failure abort threshold for multi-axis operations (Issue #29).
  *  When total axis failures reach this number AND zero objectives have been
  *  captured AND at least 1 attack has been made (not just marching), the
@@ -935,6 +939,7 @@ function beginRecovery(
     }
     settleLinkedPreparationProbeOnRecovery(state, resolvedHostCorpsId, op);
     op.force_launch = false;
+    delete op.silent_execution_turn_streak;
     // Clean up OPSEC marking when operation leaves active phase
     if (op.sector_id && Array.isArray(state.military.opsec_sectors)) {
         state.military.opsec_sectors = state.military.opsec_sectors.filter(s => s !== op.sector_id);
@@ -1087,6 +1092,74 @@ export function confirmLaunchedOperationOrders(
         }
     }
     return report;
+}
+
+/**
+ * Never-ending-op exit (P3 brief 13, ruling 1): post-emission silence streak.
+ *
+ * The no-attack exit used to fire only while an operation's lifetime attack count was 0, so an
+ * operation that attacked early and then went silent sat in execution until max_failures (its
+ * participants kept attack posture, which resets the idle streak, but drew no orders). This pass
+ * reads the same turn's emission output, after `confirmLaunchedOperationOrders`, and keeps
+ * `silent_execution_turn_streak` on each executing sector attack or probe:
+ *  - +1 when no participant (operation roster plus every axis's assigned brigades) holds an
+ *    attack order and none has a move in flight (movement order, or column packing, in transit
+ *    or unpacking). Attack posture without an order is not an order.
+ *  - deleted when any participant attacks or moves, when every axis is in a late-phase hold
+ *    (silence is their order), and on every operation not in execution.
+ * Frozen (no change): factions this pass did not emit bot orders for (a manual player's
+ * operation is never judged by bot silence), corps bound by the October 1995 ceasefire, and
+ * COHA-paused operations (except the Vlašić exception).
+ * The exit itself is in `advanceSectorOffensives`, beside the lifetime-0 exit, through the same
+ * `beginRecovery(..., getNoAttemptRecoveryReason(op))`. The field is absent whenever it is 0.
+ * Deterministic: corps in strictCompare order, operations in array order; no tuned number.
+ */
+export function recordExecutionOrderSilence(
+    state: GameState,
+    factions: readonly FactionId[],
+): void {
+    const corpsCommand = state.military.corps_command;
+    if (!corpsCommand || factions.length === 0) return;
+    const turn = state.meta?.turn ?? 0;
+    const factionSet = new Set<FactionId>(factions);
+    const attackOrders = state.military.brigade_attack_orders ?? {};
+    const movementOrders = state.military.brigade_movement_orders ?? {};
+    const movementState = state.military.brigade_movement_state ?? {};
+    const cohaActive = state.military.event_flags?.coha_active === true;
+    const isActive = (brigadeId: FormationId): boolean => {
+        const target = attackOrders[brigadeId];
+        if (typeof target === 'string' && target.length > 0) return true;
+        const destination = movementOrders[brigadeId]?.destination_sids?.[0];
+        if (typeof destination === 'string' && destination.length > 0) return true;
+        const status = movementState[brigadeId]?.status;
+        return status === 'packing' || status === 'in_transit' || status === 'unpacking';
+    };
+
+    for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
+        const cmd = corpsCommand[corpsId];
+        if (!cmd || cmd.active_operations.length === 0) continue;
+        const faction = state.military.formations?.[corpsId]?.faction;
+        if (faction === undefined || !factionSet.has(faction)) continue;
+        if (isCorpsBoundByOct1995Ceasefire(state, corpsId)) continue;
+        for (const op of cmd.active_operations) {
+            if (op.phase !== 'execution' || (op.type !== 'sector_attack' && op.type !== 'probe')) {
+                if (op.silent_execution_turn_streak !== undefined) delete op.silent_execution_turn_streak;
+                continue;
+            }
+            if (cohaActive && !isVlasicCohaExceptionOperation(state, corpsId, op, turn)) continue;
+            const axes = op.axes ?? [];
+            const participants = new Set<FormationId>(op.participating_brigades);
+            for (const axis of axes) {
+                for (const brigadeId of axis.assigned_brigades) participants.add(brigadeId);
+            }
+            const allHolding = axes.length > 0 && axes.every((axis) => axis.late_phase?.phase === 'holding');
+            if (allHolding || Array.from(participants).sort(strictCompare).some(isActive)) {
+                if (op.silent_execution_turn_streak !== undefined) delete op.silent_execution_turn_streak;
+                continue;
+            }
+            op.silent_execution_turn_streak = (op.silent_execution_turn_streak ?? 0) + 1;
+        }
+    }
 }
 
 function findLiveLinkedPreparationProbe(
@@ -1954,6 +2027,7 @@ export function advanceSectorOffensives(
                 // formTgsAtReadyTransition is idempotent.
                 formTgsAtReadyTransition(state, op, turn, staticAdjacency);
                 markOperationExecuting(state, corpsId, op);
+                delete op.silent_execution_turn_streak;
 
                 if (multiAxis) {
                     for (const axis of op.axes!) resetAxisForExecution(axis);
@@ -2041,13 +2115,19 @@ export function advanceSectorOffensives(
             // (idle_execution_turn_streak, movement_only_execution_turns) from
             // accumulating fast enough. Canon-approved: equivalent to corps commander
             // discretion to abort when operational window has closed (Systems Manual §7.6).
-            const MAX_EXECUTION_TURNS_ZERO_ATTACKS = 5;
             if ((op.attack_attempt_count ?? 0) === 0) {
                 const executionTurnsElapsed = turn - (op.phase_started_turn ?? turn);
                 if (executionTurnsElapsed >= MAX_EXECUTION_TURNS_ZERO_ATTACKS) {
                     beginRecovery(op, turn, getNoAttemptRecoveryReason(op), state);
                     continue;
                 }
+            }
+            // Never-ending-op exit: the same exit for an op that attacked earlier and has since
+            // issued no attack or move order for MAX_EXECUTION_TURNS_ZERO_ATTACKS consecutive
+            // emission turns (streak kept by recordExecutionOrderSilence).
+            if ((op.silent_execution_turn_streak ?? 0) >= MAX_EXECUTION_TURNS_ZERO_ATTACKS) {
+                beginRecovery(op, turn, getNoAttemptRecoveryReason(op), state);
+                continue;
             }
 
             if (op.type === 'probe' && !multiAxis && (op.attack_attempt_count ?? 0) > 0) {
