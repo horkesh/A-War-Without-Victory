@@ -164,7 +164,7 @@ import {
 } from '../combat/commander_march_correction.js';
 import { evaluateHomeReturn } from '../combat/brigade_home_return.js';
 import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
-import { advanceSectorOffensives, cancelOffensivesForOct1995Ceasefire, confirmLaunchedOperationOrders, updateSectorOffensiveResults, reevaluateWeakenedOperations } from '../combat/sector_offensive.js';
+import { advanceSectorOffensives, cancelOffensivesForOct1995Ceasefire, confirmLaunchedOperationOrders, recordExecutionOrderSilence, updateSectorOffensiveResults, reevaluateWeakenedOperations } from '../combat/sector_offensive.js';
 import {
     clampCorpsStancesForOct1995Ceasefire,
     isCorpsBoundByOct1995Ceasefire,
@@ -2858,6 +2858,9 @@ export const warPhases: NamedPhase[] = [
                 if (launchConfirmation.demoted.length > 0 || launchConfirmation.ended.length > 0) {
                     context.report.launch_order_confirmation = launchConfirmation;
                 }
+                // Never-ending-op exit (P3 brief 13): count each executing op's turns with no
+                // participant attack or move order, judged on the same emission output.
+                recordExecutionOrderSilence(context.state, factions);
             }
             // When operational data unavailable: no bot brigade orders (AoR path removed).
         }

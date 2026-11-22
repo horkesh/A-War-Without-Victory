@@ -694,6 +694,14 @@ export interface CorpsOperation {
     movement_only_execution_turns?: number;
     /** Consecutive idle execution turns (legacy — used when axes is absent). */
     idle_execution_turn_streak?: number;
+    /**
+     * Never-ending-op exit (P3 brief 13, ruling 1). Consecutive execution turns on which bot
+     * order emission gave no participant an attack order and no participant a move in flight
+     * (`recordExecutionOrderSilence`). At 5 the operation leaves through the no-attack exit
+     * whatever its lifetime attack count. Optional and absent whenever it is 0, so saves that
+     * predate it load unchanged.
+     */
+    silent_execution_turn_streak?: number;
     /** Operation-specific attack approval override. */
     min_attack_outcome?: CorpsDirective['min_attack_outcome'];
     /** Operation tempo preset. */
