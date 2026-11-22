@@ -12,7 +12,7 @@ import {
     isVlasicCohaWindow,
 } from '../src/sim/combat/coha_operation_exception.js';
 import { initializeCasualtyLedger } from '../src/state/casualty_ledger.js';
-import { buildOperationCombatDiagnostics } from '../src/scenario/combat_causality.js';
+import { buildCombatCausalitySummary, buildOperationCombatDiagnostics } from '../src/scenario/combat_causality.js';
 import { turnToCompletedWeekRange } from '../src/ui/map/utils/formatters.js';
 
 function makeState(): GameState {
@@ -466,6 +466,32 @@ describe('COHA operation pause', () => {
             report,
         )[0]!;
         expect(diagnostic.invalidation_reasons).not.toContain('execution_without_attack_orders');
+    });
+
+    it('counts a COHA-paused zero-order execution week as paused, never as idle or invalid', () => {
+        const state = makeState();
+        state.military.brigade_attack_orders = undefined;
+        const report = resolveAttackOrdersOsid(
+            state,
+            [],
+            new Map<string, string[]>(),
+        );
+        const orderSnapshot = {
+            attack_orders_by_brigade: {},
+            movement_orders_by_brigade: {},
+            attack_orders_by_corps: {},
+            attack_orders_by_faction: {},
+            eligible_attackers_by_corps: {},
+        };
+        const diagnostics = buildOperationCombatDiagnostics(state, orderSnapshot, report);
+        const summary = buildCombatCausalitySummary(diagnostics, orderSnapshot, report);
+
+        expect(diagnostics[0]!.invalidation_reasons).toEqual([]);
+        expect(diagnostics[0]!.lifecycle_paused_week).toBe(true);
+        expect(diagnostics[0]!.idle_execution_week).toBeUndefined();
+        expect(summary.paused_op_weeks).toBe(1);
+        expect(summary.idle_execution_op_weeks).toBe(0);
+        expect(summary.invalid_operation_count).toBe(0);
     });
 
     it('keeps the exception closed outside the window and for unrelated operations', () => {

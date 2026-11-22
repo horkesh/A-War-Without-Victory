@@ -133,3 +133,90 @@ describe('engine health gate stranded-formation domain', () => {
         expect(result.stderr).toContain(`${incompatible} is incompatible with --engine-integrity-only`);
     });
 });
+
+describe('engine health gate idle-execution ceiling (P3 mismatch rider)', () => {
+    const BASE_BAND = {
+        zero_eligible_ops_max: 3,
+        dead_ops_max: 3,
+        ghost_destroyed_max: 3,
+        stranded_brigades_max: 3,
+        consistency_failures_max: 99,
+        matched_osids_min: 0,
+        checkpoint_matched_min: {},
+        kw_ratio_lo: 0,
+        kw_ratio_hi: 99,
+    };
+
+    function runGate(idleWeeks: number, band: Record<string, unknown>) {
+        const runDir = mkdtempSync(join(tmpdir(), 'engine-health-idle-'));
+        try {
+            writeFileSync(join(runDir, 'run_summary.json'), JSON.stringify({
+                weeks: 188,
+                combat_causality: {
+                    idle_execution_op_weeks: idleWeeks,
+                    idle_execution_stationary_op_weeks: idleWeeks,
+                    idle_execution_masked_op_weeks: 0,
+                    paused_op_weeks: 7,
+                    planning_grace_op_weeks: 4,
+                    launch_demotions: 2,
+                    launch_demotion_terminations: 1,
+                },
+                destroyed_brigades: [],
+                historical_fit: { osid_pair_match: { matched_osids: 1 }, checkpoints: [] },
+            }));
+            writeFileSync(join(runDir, 'final_save.json'), JSON.stringify({
+                meta: { turn: 188 },
+                military: { formations: {}, corps_command: {} },
+            }));
+            const thresholdsPath = join(runDir, 'thresholds.json');
+            writeFileSync(thresholdsPath, JSON.stringify({ '188w': band }));
+            const result = spawnSync(process.execPath, [
+                resolve('tools/engine_health_gate.cjs'),
+                runDir,
+                '--horizon',
+                '188w',
+                '--thresholds',
+                thresholdsPath,
+                '--json',
+            ], { cwd: process.cwd(), encoding: 'utf8' });
+            const jsonLine = result.stdout.split(/\r?\n/).find((line) => line.startsWith('{"horizon"'));
+            expect(jsonLine, result.stderr).toBeDefined();
+            return { status: result.status, report: JSON.parse(jsonLine!) };
+        } finally {
+            rmSync(runDir, { recursive: true, force: true });
+        }
+    }
+
+    it('enforces idle_execution_ops_max as a hard ceiling when the band carries it', () => {
+        const over = runGate(5, { ...BASE_BAND, idle_execution_ops_max: 4 });
+        expect(over.report.measured.idle_execution_op_weeks).toBe(5);
+        expect(over.report.checks).toEqual(expect.arrayContaining([
+            expect.objectContaining({ name: 'idle_execution_ops', hard: true, ok: false }),
+        ]));
+        expect(over.status).toBe(1);
+
+        const under = runGate(4, { ...BASE_BAND, idle_execution_ops_max: 4 });
+        expect(under.report.checks).toEqual(expect.arrayContaining([
+            expect.objectContaining({ name: 'idle_execution_ops', hard: true, ok: true }),
+        ]));
+        expect(under.status).toBe(0);
+    });
+
+    it('ignores the idle-execution measure when the band does not carry the ceiling', () => {
+        const absent = runGate(500, BASE_BAND);
+        expect(absent.report.checks.map((check: { name: string }) => check.name)).not.toContain('idle_execution_ops');
+        expect(absent.status).toBe(0);
+    });
+
+    it('reports paused, planning-grace and launch-demotion weeks as advisory measures only', () => {
+        const run = runGate(0, BASE_BAND);
+        expect(run.report.measured.paused_op_weeks).toBe(7);
+        expect(run.report.measured.planning_grace_op_weeks).toBe(4);
+        expect(run.report.measured.launch_demotions).toBe(2);
+        expect(run.report.measured.launch_demotion_terminations).toBe(1);
+        const names = run.report.checks.map((check: { name: string }) => check.name);
+        expect(names).not.toContain('paused_op_weeks');
+        expect(names).not.toContain('planning_grace_op_weeks');
+        expect(names).not.toContain('launch_demotions');
+    });
+});

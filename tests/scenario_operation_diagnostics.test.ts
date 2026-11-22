@@ -613,6 +613,135 @@ describe('combat causality diagnostics', () => {
         assert.deepEqual(diagnostics[0]!.invalidation_reasons, []);
     });
 
+    it('marks an all-stationary execution lull as an idle week without adding an invalidation reason', () => {
+        const state = makeState();
+        state.military.corps_command!['corps_1']!.active_operations = [{
+            ...state.military.corps_command!['corps_1']!.active_operations[0],
+            attack_attempt_count: 2,
+        }] as any;
+
+        const orderSnapshot = makeOrderSnapshot({});
+        const report = makeOsidReport([]);
+        const diagnostics = buildOperationCombatDiagnostics(state, orderSnapshot, report);
+        const summary = buildCombatCausalitySummary(diagnostics, orderSnapshot, report);
+
+        assert.equal(diagnostics.length, 1);
+        assert.equal(diagnostics[0]!.idle_execution_week, 'all_stationary');
+        assert.deepEqual(diagnostics[0]!.invalidation_reasons, []);
+        assert.equal(diagnostics[0]!.invalid_for_combat_calibration, false);
+        assert.equal(summary.idle_execution_op_weeks, 1);
+        assert.equal(summary.idle_execution_stationary_op_weeks, 1);
+        assert.equal(summary.idle_execution_masked_op_weeks, 0);
+        assert.equal(summary.invalid_operation_count, 0);
+    });
+
+    it('marks a zero-order execution week as masked by march when a stationary participant sits adjacent to the objective', () => {
+        const state = makeState();
+        state.military.corps_command!['corps_1']!.active_operations = [{
+            ...state.military.corps_command!['corps_1']!.active_operations[0],
+            attack_attempt_count: 2,
+        }] as any;
+        (state.military as any).corps_front_sectors = {
+            'sector:corps_1:0': {
+                sector_id: 'sector:corps_1:0',
+                corps_id: 'corps_1',
+                sub_segments: [{
+                    sub_segment_id: 'ss:0',
+                    edge_ids: ['op:enemy:obj1__op:rs:staging'],
+                    friendly_osids: ['op:rs:staging'],
+                    enemy_osids: ['op:enemy:obj1'],
+                }],
+            },
+        };
+        (state as any).formations.b1.location_osid = 'op:rs:rear';
+
+        const orderSnapshot = makeOrderSnapshot({}, { b1: 'op:rs:staging' });
+        const report = makeOsidReport([]);
+        const diagnostics = buildOperationCombatDiagnostics(state, orderSnapshot, report);
+        const summary = buildCombatCausalitySummary(diagnostics, orderSnapshot, report);
+
+        assert.equal(diagnostics[0]!.idle_execution_week, 'masked_by_march');
+        assert.deepEqual(diagnostics[0]!.invalidation_reasons, []);
+        assert.equal(summary.idle_execution_op_weeks, 1);
+        assert.equal(summary.idle_execution_masked_op_weeks, 1);
+        assert.equal(summary.idle_execution_stationary_op_weeks, 0);
+    });
+
+    it('does not count a stationary participant on a friendly cell of the sub-segment that does not touch the objective (Codex #837)', () => {
+        const state = makeState();
+        state.military.corps_command!['corps_1']!.active_operations = [{
+            ...state.military.corps_command!['corps_1']!.active_operations[0],
+            attack_attempt_count: 2,
+        }] as any;
+        // One sub-segment, two edges: staging touches the objective, far_line touches only
+        // another enemy cell further down the same line.
+        (state.military as any).corps_front_sectors = {
+            'sector:corps_1:0': {
+                sector_id: 'sector:corps_1:0',
+                corps_id: 'corps_1',
+                sub_segments: [{
+                    sub_segment_id: 'ss:0',
+                    edge_ids: ['op:enemy:obj1__op:rs:staging', 'op:enemy:other__op:rs:far_line'],
+                    friendly_osids: ['op:rs:far_line', 'op:rs:staging'],
+                    enemy_osids: ['op:enemy:obj1', 'op:enemy:other'],
+                }],
+            },
+        };
+        (state as any).formations.b1.location_osid = 'op:rs:rear';
+        (state as any).formations.b2.location_osid = 'op:rs:far_line';
+
+        const orderSnapshot = makeOrderSnapshot({}, { b1: 'op:rs:staging' });
+        const report = makeOsidReport([]);
+        const diagnostics = buildOperationCombatDiagnostics(state, orderSnapshot, report);
+        const summary = buildCombatCausalitySummary(diagnostics, orderSnapshot, report);
+
+        assert.equal(diagnostics[0]!.idle_execution_week, undefined);
+        assert.equal(summary.idle_execution_op_weeks, 0);
+        assert.equal(summary.idle_execution_masked_op_weeks, 0);
+    });
+
+    it('still marks masked_by_march when the stationary participant stands on the cell that touches the objective', () => {
+        const state = makeState();
+        state.military.corps_command!['corps_1']!.active_operations = [{
+            ...state.military.corps_command!['corps_1']!.active_operations[0],
+            attack_attempt_count: 2,
+        }] as any;
+        (state.military as any).corps_front_sectors = {
+            'sector:corps_1:0': {
+                sector_id: 'sector:corps_1:0',
+                corps_id: 'corps_1',
+                sub_segments: [{
+                    sub_segment_id: 'ss:0',
+                    // Edge endpoints in either order.
+                    edge_ids: ['op:rs:staging__op:enemy:obj1', 'op:enemy:other__op:rs:far_line'],
+                    friendly_osids: ['op:rs:far_line', 'op:rs:staging'],
+                    enemy_osids: ['op:enemy:obj1', 'op:enemy:other'],
+                }],
+            },
+        };
+        (state as any).formations.b1.location_osid = 'op:rs:rear';
+        (state as any).formations.b2.location_osid = 'op:rs:staging';
+
+        const orderSnapshot = makeOrderSnapshot({}, { b1: 'op:rs:staging' });
+        const diagnostics = buildOperationCombatDiagnostics(state, orderSnapshot, makeOsidReport([]));
+
+        assert.equal(diagnostics[0]!.idle_execution_week, 'masked_by_march');
+    });
+
+    it('does not mark a genuine march week (no stationary participant at the objective) as idle', () => {
+        const state = makeState();
+        state.military.corps_command!['corps_1']!.active_operations = [{
+            ...state.military.corps_command!['corps_1']!.active_operations[0],
+            attack_attempt_count: 2,
+        }] as any;
+        (state.military as any).corps_front_sectors = {};
+
+        const orderSnapshot = makeOrderSnapshot({}, { b1: 'op:rs:front' });
+        const diagnostics = buildOperationCombatDiagnostics(state, orderSnapshot, makeOsidReport([]));
+
+        assert.equal(diagnostics[0]!.idle_execution_week, undefined);
+    });
+
     it('keeps the legacy eligible-attacker metric bound to operation-local final attack orders, not the whole corps', () => {
         const state = makeState();
         const diagnostics = buildOperationCombatDiagnostics(

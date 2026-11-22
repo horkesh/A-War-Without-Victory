@@ -343,6 +343,35 @@ describe('open RBiH-HRHB war doctrine', () => {
         expect(state.military.corps_command![corpsId].stance).toBe('offensive');
     });
 
+    it('does not force an RBiH corps defensive because its brigades stand in Sarajevo (Fable consult 8 change 2)', () => {
+        // The retired rule keyed on the corps' derived home municipality (the most common brigade
+        // location), so a count tipping to Novi Grad switched the 1st Corps to a besieged-garrison
+        // defensive stance by accident.
+        const corpsId = 'arbih_1st_corps';
+        const sarajevoBrigade = (id: string) => ({
+            ...makeBrigade(id, corpsId, 'RBiH'),
+            location_osid: 'op:novi_grad_sarajevo:cell_1',
+            home_osid: 'op:novi_grad_sarajevo:cell_1',
+        });
+        const state = makeState({
+            turn: 120,
+            allianceValue: 0.5,
+            mobilizationStartedTurn: 28,
+            formations: {
+                // OOB corps are corps_asset, so the home municipality is derived from brigade locations.
+                [corpsId]: { id: corpsId, faction: 'RBiH', kind: 'corps_asset', status: 'active' } as any,
+                arbih_brig_1: sarajevoBrigade('arbih_brig_1'),
+                arbih_brig_2: sarajevoBrigade('arbih_brig_2'),
+            },
+            corpsCommand: { [corpsId]: makeCorpsCommand('offensive') },
+            corpsFrontSectors: { [`sector:${corpsId}`]: makeSector(corpsId, 'RBiH', ['RS']) },
+        });
+
+        generateCorpsStanceOrders(state, 'RBiH', [], new Map());
+
+        expect(state.military.corps_command![corpsId].stance).not.toBe('defensive');
+    });
+
     it('keeps a central Bosnia HVO corps defensive', () => {
         const corpsId = 'hvo_central_bosnia';
         const state = makeState({

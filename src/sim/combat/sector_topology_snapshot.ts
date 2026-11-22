@@ -142,6 +142,9 @@ function captureFormation(id: FormationId, f: {
     stranded_status?: SectorTopologyFormation['stranded_status'];
     elite_loan_state?: { on_loan: boolean; loaned_to_corps: string | null; loan_start_turn: number | null };
     entrenchment_turns?: number;
+    brigade_history?: {
+        engagements?: readonly { turn: number; osid: string; role: 'attacker' | 'defender'; battle_id?: string }[];
+    };
 }): SectorTopologyFormation {
     let eliteLoanState: SectorTopologyEliteLoanSnapshot | undefined;
     if (f.elite_loan_state) {
@@ -151,6 +154,17 @@ function captureFormation(id: FormationId, f: {
             loan_start_turn: f.elite_loan_state.loan_start_turn,
         });
     }
+    // Defence fix D3: the contact-cell guard reads these four engagement fields only.
+    const brigadeHistory = f.brigade_history?.engagements
+        ? Object.freeze({
+            engagements: Object.freeze(f.brigade_history.engagements.map((engagement) => Object.freeze({
+                turn: engagement.turn,
+                osid: engagement.osid,
+                role: engagement.role,
+                battle_id: engagement.battle_id,
+            }))),
+        })
+        : undefined;
     return Object.freeze({
         id,
         faction: f.faction,
@@ -178,6 +192,7 @@ function captureFormation(id: FormationId, f: {
         stranded_status: f.stranded_status,
         elite_loan_state: eliteLoanState,
         entrenchment_turns: f.entrenchment_turns,
+        brigade_history: brigadeHistory,
     });
 }
 

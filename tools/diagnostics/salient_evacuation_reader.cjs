@@ -36,6 +36,7 @@ const knownTerminals = new Set([
     'ineligible_enclave', 'ineligible_no_location', 'ineligible_at_captured_osid',
     'already_connected_to_main', 'ineligible_start_not_displaced_control',
     'ineligible_operation_participant', 'ineligible_operation_staging', 'no_route', 'evacuated',
+    'garrisoned_pocket_retained',
 ]);
 const passes = [];
 const strings = value => Array.isArray(value) && value.every(v => typeof v === 'string') && new Set(value).size === value.length;

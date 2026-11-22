@@ -67,6 +67,7 @@ import type { OperationStormCheckReport } from './combat/operation_storm.js';
 import type { AttackResolutionOsidReport } from './combat/attack_resolution_osid.js';
 import type { BotOrderDiagnosticsSnapshot } from '../scenario/combat_causality.js';
 import type { BotOrderGenerationDiagnostics } from './combat/bot_brigade_ai_osid.js';
+import type { LaunchOrderConfirmationReport } from './combat/sector_offensive.js';
 import type { MovementPhaseDiagnostics } from './combat/movement_phase_diagnostic.js';
 import type { FrontDistributionDiagnostics } from './combat/front_distribution_diagnostic.js';
 import type { CorpsAiReportEntry } from './combat/bot_corps_ai.js';
@@ -235,6 +236,8 @@ export interface TurnReport {
     phase_e_pressure_update?: PhaseEPressureDiffusionReport;
     front_emergence_report?: FrontDescriptor[];
     bot_order_diagnostics?: BotOrderDiagnosticsSnapshot;
+    /** P3 rider: launches the same turn's order emission refused (set only when non-empty). */
+    launch_order_confirmation?: LaunchOrderConfirmationReport;
     movement_phase_diagnostics?: MovementPhaseDiagnostics;
     front_distribution_diagnostics?: FrontDistributionDiagnostics;
     /** Legacy SID combat fallback; canonical war-phase combat lives in attack_resolution_osid. */

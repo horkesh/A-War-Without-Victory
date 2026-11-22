@@ -259,14 +259,36 @@ export function reassignCorpsForBilateralWar(state: GameState, faction: FactionI
     }
 
     rhs.bilateral_corps_release_progress[faction] = 0;
+
+    // A lull (alliance between HOSTILE and ALLIED with no ceasefire) is NOT a release: the front still
+    // exists, the pick keeps its live targets and holds that front until the war resumes or the
+    // ceasefire / Washington branches release it (orchestrator ruling 2026-11-20). The canonical
+    // run has one at t62.
     if (!isRbihHrhbCombatEnabled(state) || !isRbihHrhbAtWar(state)) {
         return { diverted_corps_id: null, released_corps_id: null, release_progress: 0, joint_ops: false, reason: 'not_applicable' };
     }
 
+    // F3b (2026-11-20): when the corps or the front really vanishes, there is nothing left to divert
+    // to, so the current pick is released like a displaced corps. Before F3b it kept the diversion
+    // tag, which the commander briefing reads as campaign role 'contain' once its directive empties.
+    // Writes nothing when there is no pick.
+    const lapse = (reason: 'insufficient_corps' | 'no_bilateral_front'): BilateralCorpsReassignmentReport => {
+        if (currentDiverted) {
+            if (currentCmd) {
+                clearBilateralDirective(currentCmd);
+                currentCmd.stance = 'balanced';
+                currentCmd.status_reason = 'bilateral_diversion_lapsed';
+            }
+            const divertedMap = rhs.bilateral_diverted_corps;
+            if (divertedMap) delete divertedMap[faction];
+        }
+        return { diverted_corps_id: null, released_corps_id: currentDiverted, release_progress: 0, joint_ops: false, reason };
+    };
+
     const corpsList = getFactionCorps(state, faction);
     const minCorps = faction === 'HRHB' ? 3 : 4;
     if (corpsList.length < minCorps) {
-        return { diverted_corps_id: null, released_corps_id: null, release_progress: 0, joint_ops: false, reason: 'insufficient_corps' };
+        return lapse('insufficient_corps');
     }
 
     const otherFaction: FactionId = faction === 'HRHB' ? 'RBiH' : 'HRHB';
@@ -275,7 +297,7 @@ export function reassignCorpsForBilateralWar(state: GameState, faction: FactionI
         .filter(sec => sec.faction === faction && sec.opposing_factions.includes(otherFaction))
         .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
     if (sectors.length === 0) {
-        return { diverted_corps_id: null, released_corps_id: null, release_progress: 0, joint_ops: false, reason: 'no_bilateral_front' };
+        return lapse('no_bilateral_front');
     }
 
     const scored = corpsList.map(corps => {
@@ -320,7 +342,18 @@ export function reassignCorpsForBilateralWar(state: GameState, faction: FactionI
 
     const selected = scored[0];
     if (!selected) {
-        return { diverted_corps_id: null, released_corps_id: null, release_progress: 0, joint_ops: false, reason: 'no_bilateral_front' };
+        return lapse('no_bilateral_front');
+    }
+
+    // F3 (2026-11-20): the diversion moves to another corps, so release the displaced one the way
+    // the ceasefire and Washington branches do. Before F3 it kept the diversion tag with zero
+    // targets, which the commander briefing reads as campaign role 'contain' (no fresh plans) for
+    // the rest of the war.
+    const displacedCorpsId = currentDiverted !== null && currentDiverted !== selected.corpsId ? currentDiverted : null;
+    if (displacedCorpsId && currentCmd) {
+        clearBilateralDirective(currentCmd);
+        currentCmd.stance = 'balanced';
+        currentCmd.status_reason = 'bilateral_front_rotated';
     }
 
     rhs.bilateral_diverted_corps[faction] = selected.corpsId;
@@ -336,7 +369,7 @@ export function reassignCorpsForBilateralWar(state: GameState, faction: FactionI
         selectedCmd.status_reason = 'rbih_hrhb_bilateral_front_diversion';
     }
 
-    return { diverted_corps_id: selected.corpsId, released_corps_id: null, release_progress: 0, joint_ops: false, reason: 'diverted' };
+    return { diverted_corps_id: selected.corpsId, released_corps_id: displacedCorpsId, release_progress: 0, joint_ops: false, reason: 'diverted' };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -1437,6 +1437,55 @@ describe('Front priority target population', () => {
         expect(fp!.offensive_targets!.length).toBeLessThanOrEqual(10);
     });
 
+    it('P3 step 4: offensive_targets come from the weakest enemy sector first', () => {
+        const state = makeMinimalState({
+            turn: 8,
+            formations: {
+                b1: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+                b2: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+                b3: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+                b4: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+            },
+        });
+        // 10 cells in each sector, so the cap (10) is filled by one sector alone.
+        const strong = Array.from({ length: 10 }, (_, i) => `op:strong:s_${String(i).padStart(2, '0')}`);
+        const weak = Array.from({ length: 10 }, (_, i) => `op:weak:w_${String(i).padStart(2, '0')}`);
+        (state.military as any).corps_front_sectors = {
+            s_strong: makeSector({ sector_id: 's_strong', corps_id: 'vrs_1st_krajina', enemy_osids: strong, threat_ratio: 2.5 }),
+            s_weak: makeSector({ sector_id: 's_weak', corps_id: 'vrs_1st_krajina', enemy_osids: weak, threat_ratio: 0.4 }),
+        };
+
+        const assessment = assessTheater(state, 'RS');
+        const plan = generateCampaignPlan(state, 'RS', assessment, 8, 'regular_cadence', false);
+        const fp = plan.front_priorities.find(p => p.corps_id === 'vrs_1st_krajina');
+
+        expect(fp!.role).toBe('primary');
+        expect(fp!.offensive_targets).toEqual(weak);
+    });
+
+    it('P3 step 4: hold_targets keep the highest-threat sector first', () => {
+        const state = makeMinimalState({
+            turn: 8,
+            formations: {
+                b1: { faction: 'RS', corps_id: 'vrs_drina', personnel: 100 },
+            },
+        });
+        const calm = Array.from({ length: 10 }, (_, i) => `op:calm:c_${String(i).padStart(2, '0')}`);
+        const pressed = Array.from({ length: 10 }, (_, i) => `op:pressed:p_${String(i).padStart(2, '0')}`);
+        (state.military as any).corps_front_sectors = {
+            s_calm: makeSector({ sector_id: 's_calm', corps_id: 'vrs_drina', friendly_osids: calm, threat_ratio: 0.4 }),
+            s_pressed: makeSector({ sector_id: 's_pressed', corps_id: 'vrs_drina', friendly_osids: pressed, threat_ratio: 2.5 }),
+        };
+
+        const assessment = assessTheater(state, 'RS');
+        const plan = generateCampaignPlan(state, 'RS', assessment, 8, 'regular_cadence', false);
+        const fp = plan.front_priorities.find(p => p.corps_id === 'vrs_drina');
+
+        expect(fp!.role).toBe('contain');
+        // Hold cap is 8, filled entirely from the pressed sector.
+        expect(fp!.hold_targets).toEqual(pressed.slice(0, 8));
+    });
+
     it('no sectors → no targets (graceful)', () => {
         const state = makeMinimalState({
             turn: 8,

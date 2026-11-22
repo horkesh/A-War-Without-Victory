@@ -1975,6 +1975,7 @@ type CommanderCreationExit =
     | 'reduction_overlap_suppressed'
     | 'fallback_probe_created'
     | 'fallback_probe_overlap_suppressed'
+    | 'fallback_probe_on_cooldown'
     | 'completed_no_operation';
 
 type CommanderCreationSite = 'general' | 'plan_probe' | 'reduction' | 'fallback_probe';
@@ -2156,6 +2157,19 @@ interface CommanderCreationObservation {
     overlap_found?: boolean;
     overlap_detail?: CommanderCreationOverlapDetail;
     probe_gate_receipt?: CommanderCreationProbeGateReceipt;
+    /**
+     * Non-bilateral plans only (Fable consult 8 change 1): the plan's assault group counted after
+     * each successive filter (surplus, may join, can reach, combat ready), and how many of the
+     * ready members were added beyond the primary-sector pool. Observation only.
+     */
+    plan_group_receipt?: {
+        assigned: number;
+        surplus: number;
+        may_join: number;
+        reach: number;
+        ready: number;
+        added: number;
+    };
 }
 
 function commanderCreationOperation(site: CommanderCreationSite, op: CorpsOperation): CommanderCreationBuiltOperation {
@@ -2536,6 +2550,31 @@ function buildOperationsImpl(
                     && canReach(id)
                     && isCombatReadyParticipant(briefing, id)),
             ])].sort(strictCompare);
+        }
+        if (!activePlan.bilateral_offensive) {
+            // Fable consult 8 appendix A change 1: the planner forms an assault group, but the
+            // builder used to man the operation only from the objective's primary-sector roster.
+            // A plan whose group stands outside that sector became a paper plan (it launched and
+            // no operation was built). The plan's own group may now man its operation too, under
+            // the same tests as the sector roster; unlike the bilateral path the surplus test is kept.
+            const groupAssigned = activePlan.assigned_brigades ?? [];
+            const groupSurplus = groupAssigned.filter(id => surplusSet.has(id));
+            const groupMayJoin = groupSurplus.filter(id => mayJoinPlanOperation(id));
+            const groupReach = groupMayJoin.filter(id => canReach(id));
+            const groupReady = groupReach.filter(id => isCombatReadyParticipant(briefing, id));
+            const sectorPoolSet = new Set(primaryPool);
+            const groupAdded = new Set(groupReady.filter(id => !sectorPoolSet.has(id))).size;
+            primaryPool = [...new Set([...primaryPool, ...groupReady])].sort(strictCompare);
+            if (obs) {
+                obs.plan_group_receipt = {
+                    assigned: groupAssigned.length,
+                    surplus: groupSurplus.length,
+                    may_join: groupMayJoin.length,
+                    reach: groupReach.length,
+                    ready: groupReady.length,
+                    added: groupAdded,
+                };
+            }
         }
 
         // Adjacent-sector attachments: bounded by ADJACENT_SECTOR_ATTACH_RATE per sector.
@@ -3479,6 +3518,13 @@ function buildOperationsImpl(
                         obs.reduction_participant_count = reductionParticipants.length;
                         obs.single_brigade_sufficient = singleBrigadeOccupationIsSufficient;
                         obs.escalate_to_operation = escalateToOperation;
+                    }
+                    // Codex #833 r4636529148: a local-occupation candidate lets the fallback in on probe
+                    // cooldown, an exemption that exists for the occupation operation. When the Army HQ
+                    // reservation forbids that operation, the downgraded probe obeys the cooldown.
+                    if (armyHqReservedPlanFellThrough && !escalateToOperation && probeOnCooldown) {
+                        markCommanderCreationExit(obs, 'fallback_probe_on_cooldown');
+                        return ops;
                     }
                     const probeOp = botOrdersPerfTime(
                         escalateToOperation

@@ -40,6 +40,7 @@
  */
 
 import type { FactionId, FormationId, FormationState, GameState, MunicipalityId } from '../../state/game_state.js';
+import { originDestArrivalsKey } from '../../state/displacement_event_log.js';
 import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { ensureBrigadeHistory } from './brigade_history_recorder.js';
@@ -208,7 +209,7 @@ function findRefugeeMunicipality(
     // event has a numeric settled (defaulted to 0 at append sites).
     const odAgg = state.displacement?.displacement_origin_dest_arrivals;
     if (!odAgg) return undefined;
-    const compositeKey = `${homeMun}|${faction}`;
+    const compositeKey = originDestArrivalsKey(homeMun, faction);
     const destBucket = odAgg[compositeKey];
     if (!destBucket) return undefined;
 

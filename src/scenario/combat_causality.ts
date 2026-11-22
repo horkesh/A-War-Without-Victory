@@ -1,7 +1,15 @@
 import type { AttackResolutionOsidReport } from '../sim/combat/attack_resolution_osid.js';
 import type { AxisLaunchReadinessDetail, AxisOrderGenerationDetail, CorpsOperation, FactionId, FormationId, FormationState, GameState } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
+import {
+    deriveOperationEndRule,
+    type OperationEndRulePrior,
+    type OperationEndRuleReceipt,
+} from './operation_end_rule.js';
 import { isVlasicCohaExceptionOperation } from '../sim/combat/coha_operation_exception.js';
+import { isCorpsBoundByOct1995Ceasefire } from '../sim/combat/oct1995_ceasefire.js';
+import type { LaunchOrderConfirmationReport } from '../sim/combat/sector_offensive.js';
+import { computeMultiAxisPlanningDuration } from '../sim/combat/sector_offensive_axis_helpers.js';
 import type { BotDispatcherDecisionDetail, BotRouteDecisionDetail } from '../sim/combat/bot_brigade_ai_osid.js';
 
 export interface BotOrderDiagnosticsSnapshot {
@@ -73,7 +81,39 @@ export interface OperationCombatDiagnostic {
     recovery_reason: string | null;
     invalid_for_combat_calibration: boolean;
     invalidation_reasons: OperationCombatInvalidationReason[];
+    /**
+     * P3 mismatch rider, REPORT-ONLY (no sim state). Set on an execution week that is not
+     * paused, in which no participant holds an attack order, the operation fought no battle and
+     * gained no ground. It ignores the lifetime attempt counters, which is why the
+     * invalidation reasons above cannot see a lull after an earlier attempt.
+     *  - `all_stationary`: no participant is moving.
+     *  - `masked_by_march`: some participant is moving, and at least one stationary participant
+     *    already sits on a friendly OSID adjacent to a current objective (it could have attacked).
+     * Absent on every other week. A plain march week (nobody yet at the objective) is not idle.
+     */
+    idle_execution_week?: OperationIdleExecutionWeek;
+    /** P3 rider: a planning/execution week paused by COHA or the October 1995 ceasefire. */
+    lifecycle_paused_week?: true;
+    /** P3 rider: a planning week past `planning_duration` (not paused). Report-only. */
+    planning_grace_week?: true;
+    /** P3 rider: zero-order launches demoted so far (`CorpsOperation.launch_demotion_count`). */
+    launch_demotion_count?: number;
+    /**
+     * End-rule receipt rider, REPORT-ONLY: the never-ending-op silence streak on an execution
+     * week (`CorpsOperation.silent_execution_turn_streak`, deleted when the op enters recovery).
+     * Absent when 0.
+     */
+    silent_execution_turn_streak?: number;
+    /**
+     * End-rule receipt rider, REPORT-ONLY: on the week the operation entered recovery, the
+     * specific exit rule behind its coarse `recovery_reason` (operation_end_rule.ts).
+     */
+    end_rule?: string;
+    /** Per-axis end rules on the recovery-entry week, keyed by axis_id. */
+    end_rule_axes?: Record<string, string>;
 }
+
+export type OperationIdleExecutionWeek = 'all_stationary' | 'masked_by_march';
 
 export type CombatCausalityInvalidationReason =
     | 'zero_battles'
@@ -94,6 +134,20 @@ export interface CombatCausalitySummary {
     invalid_operation_count: number;
     zero_eligible_attacker_operation_count: number;
     recovery_without_logged_attempt_count: number;
+    /**
+     * P3 mismatch rider, report-only op x week counters. They never feed
+     * `valid_for_combat_calibration`, `invalid_operation_count` or the existing gated counters.
+     * `idle_execution_op_weeks` = stationary + masked; the health gate checks it against
+     * `idle_execution_ops_max` only when a band carries that key.
+     */
+    idle_execution_op_weeks: number;
+    idle_execution_stationary_op_weeks: number;
+    idle_execution_masked_op_weeks: number;
+    paused_op_weeks: number;
+    planning_grace_op_weeks: number;
+    /** Zero-order launches demoted to planning / ended `zero_eligible_axis` (launch confirmation). */
+    launch_demotions: number;
+    launch_demotion_terminations: number;
 }
 
 function sortedFormationIds(ids: Iterable<string>): string[] {
@@ -108,6 +162,40 @@ function getFormationCorpsId(formation: FormationState): FormationId | null {
 function getFormationById(state: GameState, formationId: FormationId): FormationState | undefined {
     const legacyFormations = (state as GameState & { formations?: Record<string, FormationState> }).formations;
     return state.military.formations?.[formationId] ?? legacyFormations?.[formationId];
+}
+
+/**
+ * Friendly cells of the corps' front that share a front edge with `objective` (report-only,
+ * for the `masked_by_march` idle-week flag). Edge ids are `osidA__osidB` pairs, in either
+ * order. Codex #837 r4651717330: the sim's `collectAdjacentFriendlyOsids` returns every
+ * friendly cell of a sub-segment that lists the objective, so a stationary brigade far down a
+ * multi-edge line counted as "at the objective". That helper stays as it is (the sim uses it);
+ * this report check reads the edges themselves. Returns a Set; callers only test membership.
+ */
+function collectObjectiveTouchingFriendlyOsids(
+    state: GameState,
+    corpsId: FormationId,
+    objective: string
+): Set<string> {
+    const result = new Set<string>();
+    const sectors = state.military.corps_front_sectors;
+    if (!sectors) return result;
+    for (const sector of Object.values(sectors)) {
+        if (sector.corps_id !== corpsId) continue;
+        for (const subSegment of sector.sub_segments) {
+            if (!subSegment.enemy_osids.includes(objective)) continue;
+            const friendly = new Set(subSegment.friendly_osids);
+            for (const edgeId of subSegment.edge_ids ?? []) {
+                const separator = edgeId.indexOf('__');
+                if (separator < 0) continue;
+                const a = edgeId.slice(0, separator);
+                const b = edgeId.slice(separator + 2);
+                if (a === objective && friendly.has(b)) result.add(b);
+                else if (b === objective && friendly.has(a)) result.add(a);
+            }
+        }
+    }
+    return result;
 }
 
 function getCurrentObjectives(operation: CorpsOperation): string[] {
@@ -209,7 +297,13 @@ export function createBotOrderDiagnosticsSnapshot(
 export function buildOperationCombatDiagnostics(
     state: GameState,
     orderSnapshot: BotOrderDiagnosticsSnapshot | undefined,
-    osidResolution: AttackResolutionOsidReport | undefined
+    osidResolution: AttackResolutionOsidReport | undefined,
+    endRules?: {
+        /** Previous week's operation views (snapshotOperationEndRulePriors). */
+        priors?: ReadonlyMap<string, OperationEndRulePrior>;
+        /** Filled with each recovery-entry receipt, keyed by operation id; first write wins. */
+        sink?: Map<string, OperationEndRuleReceipt>;
+    }
 ): OperationCombatDiagnostic[] {
     const suppressedAttackOrders = new Set(
         (osidResolution?.suppressed_attack_orders ?? [])
@@ -393,6 +487,76 @@ export function buildOperationCombatDiagnostics(
             ) {
                 invalidationReasons.push('recovery_without_logged_attempt');
             }
+
+            // ── P3 mismatch rider: report-only week flags (no sim state, no invalidation). ──
+            // Paused = the COHA lifecycle pause (resolver receipt, or the flag itself when no
+            // resolver report exists) or the corps bound by the October 1995 ceasefire.
+            const offensiveLifecycle = operation.type === 'sector_attack'
+                || operation.type === 'probe'
+                || operation.type === 'feint';
+            const cohaPaused = (lifecyclePaused || state.military.event_flags?.coha_active === true)
+                && !isVlasicCohaExceptionOperation(state, corpsId, operation, currentTurn);
+            const pausedWeek = offensiveLifecycle
+                && (operation.phase === 'planning' || operation.phase === 'execution')
+                && (cohaPaused || isCorpsBoundByOct1995Ceasefire(state, corpsId));
+            let idleExecutionWeek: OperationIdleExecutionWeek | undefined;
+            if (
+                offensiveLifecycle &&
+                !pausedWeek &&
+                operation.phase === 'execution' &&
+                attackAttemptCount === 0 &&
+                battleCount === 0 &&
+                (operation.territory_gained_this_turn ?? 0) === 0
+            ) {
+                if (movementOrderCount === 0) {
+                    idleExecutionWeek = 'all_stationary';
+                } else {
+                    const adjacentFriendly = new Set<string>();
+                    for (const objective of currentObjectives) {
+                        for (const osid of collectObjectiveTouchingFriendlyOsids(state, corpsId, objective)) {
+                            adjacentFriendly.add(osid);
+                        }
+                    }
+                    const stationaryAtObjective = brigades.some((brigadeId) => {
+                        const movementTarget = orderSnapshot?.movement_orders_by_brigade?.[brigadeId];
+                        if (typeof movementTarget === 'string' && movementTarget.length > 0) return false;
+                        const location = getFormationById(state, brigadeId)?.location_osid;
+                        return typeof location === 'string' && adjacentFriendly.has(location);
+                    });
+                    if (stationaryAtObjective) idleExecutionWeek = 'masked_by_march';
+                }
+            }
+            const planningDuration = operation.planning_duration
+                ?? (Array.isArray(operation.axes) && operation.axes.length > 0
+                    ? computeMultiAxisPlanningDuration(operation.axes)
+                    : 1);
+            const planningGraceWeek = offensiveLifecycle
+                && !pausedWeek
+                && operation.phase === 'planning'
+                && currentTurn - operation.phase_started_turn > planningDuration;
+            const launchDemotionCount = operation.launch_demotion_count ?? 0;
+            const silentExecutionStreak = operation.phase === 'execution'
+                ? (operation.silent_execution_turn_streak ?? 0)
+                : 0;
+            // End-rule receipt rider (report-only): name the rule on the recovery-entry week.
+            let endRule: OperationEndRuleReceipt | undefined;
+            if (enteredRecoveryThisTurn) {
+                const sectors = state.military.corps_front_sectors;
+                endRule = deriveOperationEndRule(operation, {
+                    turn: currentTurn,
+                    prior: endRules?.priors?.get(operationId),
+                    sector_missing: typeof operation.sector_id === 'string'
+                        && sectors !== undefined
+                        && sectors[operation.sector_id] === undefined,
+                    inactive_axis_ids: (operation.axes ?? [])
+                        .filter((axis) => !axis.assigned_brigades
+                            .some((brigadeId) => getFormationById(state, brigadeId)?.status === 'active'))
+                        .map((axis) => axis.axis_id)
+                        .sort(strictCompare),
+                });
+                if (endRules?.sink && !endRules.sink.has(operationId)) endRules.sink.set(operationId, endRule);
+            }
+
             diagnostics.push({
                 corps_id: corpsId,
                 faction_id: factionId,
@@ -420,7 +584,14 @@ export function buildOperationCombatDiagnostics(
                     : {}),
                 recovery_reason: recoveryReason,
                 invalid_for_combat_calibration: invalidationReasons.length > 0,
-                invalidation_reasons: invalidationReasons
+                invalidation_reasons: invalidationReasons,
+                ...(idleExecutionWeek !== undefined ? { idle_execution_week: idleExecutionWeek } : {}),
+                ...(pausedWeek ? { lifecycle_paused_week: true as const } : {}),
+                ...(planningGraceWeek ? { planning_grace_week: true as const } : {}),
+                ...(launchDemotionCount > 0 ? { launch_demotion_count: launchDemotionCount } : {}),
+                ...(silentExecutionStreak > 0 ? { silent_execution_turn_streak: silentExecutionStreak } : {}),
+                ...(endRule !== undefined ? { end_rule: endRule.end_rule } : {}),
+                ...(endRule?.end_rule_axes !== undefined ? { end_rule_axes: endRule.end_rule_axes } : {}),
             });
         } // end for-of active_operations
     }
@@ -430,7 +601,8 @@ export function buildOperationCombatDiagnostics(
 export function buildCombatCausalitySummary(
     operationDiagnostics: OperationCombatDiagnostic[],
     orderSnapshot: BotOrderDiagnosticsSnapshot | undefined,
-    osidResolution: AttackResolutionOsidReport | undefined
+    osidResolution: AttackResolutionOsidReport | undefined,
+    launchConfirmation?: LaunchOrderConfirmationReport
 ): CombatCausalitySummary {
     const invalidationReasons = new Set<CombatCausalityInvalidationReason>();
     const totalBattles = osidResolution?.battles?.length ?? 0;
@@ -454,10 +626,18 @@ export function buildCombatCausalitySummary(
     let totalMovementOnlyExecutionTurns = 0;
     let zeroEligibleAttackerOperationCount = 0;
     let recoveryWithoutLoggedAttemptCount = 0;
+    let idleStationaryOpWeeks = 0;
+    let idleMaskedOpWeeks = 0;
+    let pausedOpWeeks = 0;
+    let planningGraceOpWeeks = 0;
     for (const diagnostic of operationDiagnostics) {
         totalObjectiveAttempts += diagnostic.objective_attempt_count;
         totalObjectiveCaptures += diagnostic.objective_capture_count;
         totalMovementOnlyExecutionTurns += diagnostic.movement_only_execution_turns;
+        if (diagnostic.idle_execution_week === 'all_stationary') idleStationaryOpWeeks += 1;
+        if (diagnostic.idle_execution_week === 'masked_by_march') idleMaskedOpWeeks += 1;
+        if (diagnostic.lifecycle_paused_week === true) pausedOpWeeks += 1;
+        if (diagnostic.planning_grace_week === true) planningGraceOpWeeks += 1;
         if (!diagnostic.invalid_for_combat_calibration) continue;
         invalidOperationCount += 1;
         if (diagnostic.invalidation_reasons.includes('execution_without_attack_orders')) {
@@ -492,6 +672,13 @@ export function buildCombatCausalitySummary(
         total_orders_by_faction: totalOrdersByFaction,
         invalid_operation_count: invalidOperationCount,
         zero_eligible_attacker_operation_count: zeroEligibleAttackerOperationCount,
-        recovery_without_logged_attempt_count: recoveryWithoutLoggedAttemptCount
+        recovery_without_logged_attempt_count: recoveryWithoutLoggedAttemptCount,
+        idle_execution_op_weeks: idleStationaryOpWeeks + idleMaskedOpWeeks,
+        idle_execution_stationary_op_weeks: idleStationaryOpWeeks,
+        idle_execution_masked_op_weeks: idleMaskedOpWeeks,
+        paused_op_weeks: pausedOpWeeks,
+        planning_grace_op_weeks: planningGraceOpWeeks,
+        launch_demotions: launchConfirmation?.demoted.length ?? 0,
+        launch_demotion_terminations: launchConfirmation?.ended.length ?? 0,
     };
 }

@@ -177,6 +177,33 @@ export function dissolveCombatIneffectiveBrigades(
         // dissolution path and bypasses the 2-of-3 (or 3-of-3 enclave) criteria.
         if (!moraleCollapseTrigger && criteriaCount < requiredCriteria) continue;
 
+        report.dissolved_brigades.push(dissolveFormationAsDestroyed(state, fid, osidAdjacency));
+        report.dissolved_count++;
+    }
+
+    return report;
+}
+
+/**
+ * Dissolve one formation as destroyed: part of its personnel returns to the faction's strategic
+ * reserve, salvaged equipment goes to the nearest same-corps brigade, it leaves its operation, and it
+ * is marked `status='inactive'`, `lifecycle_status='destroyed'` with a `destruction_turn`, the
+ * record brigade reconstitution reads. Shared by the dissolution pass and the force-retreat dead end
+ * (package P2-D, 2026-11-18: a defender with no retreat used to go inactive with no destroyed record,
+ * so it never reconstituted). It never touches `stranded_status` (EH-3: a 'collapsed' record is
+ * load-bearing and stays as written).
+ */
+export function dissolveFormationAsDestroyed(
+    state: GameState,
+    fid: FormationId,
+    osidAdjacency?: ReadonlyMap<string, readonly string[]>,
+): DissolutionReport['dissolved_brigades'][number] {
+    const formations = state.military.formations ?? {};
+    const formationIds = Object.keys(formations).sort((a, b) => strictCompare(a, b));
+    const f = formations[fid]!;
+    const personnel = f.personnel ?? 0;
+    const cohesion = f.cohesion ?? 0;
+    {
         // Dissolve
         const personnelToReserve = Math.floor(personnel * DISSOLUTION_PERSONNEL_TO_RESERVE_RATE);
 
@@ -251,8 +278,7 @@ export function dissolveCombatIneffectiveBrigades(
             f.composition.aa_systems = 0;
         }
 
-        // Record dissolution
-        report.dissolved_brigades.push({
+        const record = {
             id: fid,
             name: f.name ?? fid,
             faction: f.faction ?? 'unknown',
@@ -260,7 +286,7 @@ export function dissolveCombatIneffectiveBrigades(
             cohesion,
             morale: f.morale ?? 0,
             personnel_to_reserve: personnelToReserve,
-        });
+        };
 
         // Remove from active operation before marking inactive
         removeFromActiveOperation(state, fid, f.corps_id);
@@ -273,8 +299,6 @@ export function dissolveCombatIneffectiveBrigades(
         // Record destruction turn for reconstitution delay
         f.destruction_turn = state.meta?.turn ?? 0;
 
-        report.dissolved_count++;
+        return record;
     }
-
-    return report;
 }

@@ -833,7 +833,12 @@ describe('strict null inventory progress', () => {
             // patron_defiance_supply_cuts[] receipt fields tag, expires_turn, combined_multiplier and
             // floor_binding, written only by the patron_supply_cut effect (played defiance answers;
             // absent on every hands-off run). No new type escape. 605 -> 610.
-            optional_fields_game_state: 610,
+            // P3 mismatch rider (2026-11-21): CorpsOperation.planning_phase_started_turn (written at
+            // the sector planning -> execution transition) and CorpsOperation.launch_demotion_count
+            // (absent until a zero-order launch is demoted). No new type escape. 610 -> 612.
+            // Never-ending-op exit (2026-11-22): CorpsOperation.silent_execution_turn_streak
+            // (absent until an executing op issues a turn with no orders). No new type escape. 612 -> 613.
+            optional_fields_game_state: 613,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
@@ -856,12 +861,15 @@ describe('strict null inventory progress', () => {
         // Patron-defiance panel: +5 sim (MilitaryState equipment_quality_modifiers[].source and
         // patron_defiance_supply_cuts[] tag / expires_turn / combined_multiplier / floor_binding).
         // 605 -> 610 / sim 367 -> 372.
-        expect(current.optional_field_domains.total).toBe(610);
+        // P3 mismatch rider: +2 sim (CorpsOperation.planning_phase_started_turn /
+        // launch_demotion_count). 610 -> 612 / sim 372 -> 374.
+        // Never-ending-op exit: +1 sim (CorpsOperation.silent_execution_turn_streak). 612 -> 613 / sim 374 -> 375.
+        expect(current.optional_field_domains.total).toBe(613);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 372,
+            sim: 375,
             state: 228,
             ui_adapter: 0,
             unknown: 0,

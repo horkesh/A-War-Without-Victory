@@ -279,18 +279,19 @@ describe('LANE-NIGHTSHIFT-SRK-SIEGE-MORALE-AUDIT — SRK stance under siege doct
     it('T6 (faction-symmetric sanity): override is corps_id-keyed — does not fire on RBiH/HRHB corps', () => {
         // Confirm the SRK override does not accidentally clamp non-RS corps.
         // Use a fictional RBiH corps_id 'arbih_1st_corps' (not vrs_sarajevo_romanija).
-        const state = makeState({
-            turn: 10,
-            corpsId: 'arbih_1st_corps',
-            homeMun: 'centar_sarajevo',
-            faction: 'RBiH',
-        });
-        // RBiH corps in Sarajevo munis goes defensive via existing E2 logic
-        // (no army HQ override), not via the SRK clamp.
-        generateCorpsStanceOrders(state, 'RBiH', [], new Map());
-
-        const stance = state.military.corps_command!['arbih_1st_corps'].stance;
-        // RBiH Sarajevo guard sets defensive when no HQ override
-        expect(stance).toBe('defensive');
+        // The RBiH Sarajevo-corps defensive guard is retired (Fable consult 8 change 2), so a
+        // Sarajevo-based RBiH corps must get exactly the stance an identical corps elsewhere gets:
+        // nothing keyed on SRK or on Sarajevo municipalities touches it.
+        const stanceAt = (homeMun: string) => {
+            const state = makeState({
+                turn: 10,
+                corpsId: 'arbih_1st_corps',
+                homeMun,
+                faction: 'RBiH',
+            });
+            generateCorpsStanceOrders(state, 'RBiH', [], new Map());
+            return state.military.corps_command!['arbih_1st_corps'].stance;
+        };
+        expect(stanceAt('centar_sarajevo')).toBe(stanceAt('zenica'));
     });
 });

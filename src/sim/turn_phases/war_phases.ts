@@ -164,7 +164,7 @@ import {
 } from '../combat/commander_march_correction.js';
 import { evaluateHomeReturn } from '../combat/brigade_home_return.js';
 import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
-import { advanceSectorOffensives, cancelOffensivesForOct1995Ceasefire, updateSectorOffensiveResults, reevaluateWeakenedOperations } from '../combat/sector_offensive.js';
+import { advanceSectorOffensives, cancelOffensivesForOct1995Ceasefire, confirmLaunchedOperationOrders, recordExecutionOrderSilence, updateSectorOffensiveResults, reevaluateWeakenedOperations } from '../combat/sector_offensive.js';
 import {
     clampCorpsStancesForOct1995Ceasefire,
     isCorpsBoundByOct1995Ceasefire,
@@ -1803,6 +1803,7 @@ export const warPhases: NamedPhase[] = [
             const adjacency = spatial.preCombat.adjacency as Map<Osid, Osid[]>;
             const diagnostics = distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency, {
                 population1991ByMun: context.input.municipalityPopulation1991,
+                supplyStateByOsid: context.report?.supply_resolution?.supply_state_by_osid ?? null,
                 diagnosticCallsite: 'distribute-brigades-to-front', completedTurn: context.state.meta.turn,
                 invocationOrdinal: nextFrontDistributionInvocationOrdinal(context.report.front_distribution_diagnostics),
             });
@@ -2850,6 +2851,18 @@ export const warPhases: NamedPhase[] = [
                     );
                     context.report.player_historical_operation_assist = assistDiagnostics;
                 }
+
+                // P3 mismatch rider, fix B: confirm this turn's launches against the orders just
+                // emitted. Only factions this pass emitted for (`factions`) are judged; a manual
+                // player's own orders are never second-guessed. Inside the operational-data branch
+                // on purpose: without emission there is no evidence either way.
+                const launchConfirmation = confirmLaunchedOperationOrders(context.state, factions);
+                if (launchConfirmation.demoted.length > 0 || launchConfirmation.ended.length > 0) {
+                    context.report.launch_order_confirmation = launchConfirmation;
+                }
+                // Never-ending-op exit (P3 brief 13): count each executing op's turns with no
+                // participant attack or move order, judged on the same emission output.
+                recordExecutionOrderSilence(context.state, factions);
             }
             // When operational data unavailable: no bot brigade orders (AoR path removed).
         }
@@ -3368,12 +3381,25 @@ export const warPhases: NamedPhase[] = [
     },
     {
         name: 'morale-drift',
-        run: (context) => {
+        run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             const engagedIds = context.report.attack_resolution_osid?.engaged_formation_ids ?? [];
+            // Defence fix D2: the cell's 1991 composition, so "enemy territory" reads the ground
+            // (static data; the same loader and cache the combat phase uses).
+            let ethnicComp;
+            const od = getOperationalData(context);
+            if (od?.opData?.operationalToCanonical) {
+                try {
+                    const ethnicityData = await loadSettlementEthnicityData(turnDataFilePath(context, 'data/derived/settlement_ethnicity_data.json'));
+                    ethnicComp = computeOsidEthnicComposition(od.opData.operationalToCanonical, ethnicityData);
+                } catch {
+                    // Non-fatal: without cell data the municipality rule applies unchanged.
+                }
+            }
             context.report.morale_drift_report = runMoraleDrift(
                 context.state, engagedIds, context.input.municipalityPopulation1991,
-                context.report.supply_resolution?.supply_state_by_osid
+                context.report.supply_resolution?.supply_state_by_osid,
+                ethnicComp
             );
         }
     },

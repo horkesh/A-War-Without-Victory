@@ -98,6 +98,9 @@ export function buildDetachedWorkingFormations(
             stranded_status: f.stranded_status,
             elite_loan_state: f.elite_loan_state ? { ...f.elite_loan_state } : undefined,
             entrenchment_turns: f.entrenchment_turns,
+            brigade_history: f.brigade_history
+                ? { engagements: f.brigade_history.engagements.map((engagement) => ({ ...engagement })) }
+                : undefined,
         };
     }
     return working;

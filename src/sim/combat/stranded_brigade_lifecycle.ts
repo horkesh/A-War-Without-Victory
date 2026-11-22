@@ -16,13 +16,15 @@
  * No Math.random(), no timestamps, no Date.now().
  */
 
-import type { GameState, FormationId, FactionId } from '../../state/game_state.js';
+import type { GameState, FormationId, FactionId, FormationState } from '../../state/game_state.js';
 import { isEnclaveBrigade } from './enclave_resilience.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import type { Osid } from './osid_adjacency.js';
+import { originDestArrivalsKey } from '../../state/displacement_event_log.js';
+import { munFromOsid, type Osid } from './osid_adjacency.js';
 import { isFriendlyFaction } from '../early_war/alliance_update.js';
 import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
 import { getQueuedPrePlannedBrigadeIds } from './pre_planned_operations.js';
+import { SALIENT_GARRISON_RETENTION_MIN_BRIGADES, countsTowardPocketGarrison } from './salient_withdrawal.js';
 import {
     isMovementOwnedActiveLoanDeployment,
     isMovementOwnedHomeReturn,
@@ -107,6 +109,109 @@ function isInActiveOperation(state: GameState, brigadeId: FormationId, corpsId: 
 }
 
 /**
+ * Garrisoned critical pocket (package P2-L, 2026-11-18). The pocket is the faction's own
+ * critical-supply cells connected to the brigade's cell. It is a held garrison, not a place
+ * where brigades are lost, when it holds ground of the brigade's own corps sectors and at least
+ * `SALIENT_GARRISON_RETENTION_MIN_BRIGADES` of the faction's active brigades (the same number
+ * that keeps such a pocket from being evacuated). Its brigades are then not stranded: no
+ * stranded decay, the faction cohesion floor applies, and they stay on their corps' rosters.
+ * The pocket is still unsupplied: the ordinary unsupplied loss and the critical-supply refill
+ * block are unchanged. A lone cut-off brigade stays stranded. Faction-blind.
+ *
+ * Narrowed (P3 row b, seat ruling V3, 2026-11-21): the status goes only to a brigade that
+ * belongs to the pocket (`belongsToPocket`). A remnant from another sector left behind by an
+ * operation or a routine posting is not one of the pocket's defenders and takes the ordinary
+ * stranded path. The >=2 garrison count is NOT narrowed: such drifters still count toward it.
+ * Deterministic: BFS over sorted frontiers; formations in sorted id order.
+ */
+function isGarrisonedCriticalPocket(
+    formation: FormationState,
+    locationOsid: string,
+    faction: FactionId,
+    corpsId: string,
+    state: GameState,
+    adjacency: ReadonlyMap<Osid, readonly Osid[]>,
+): boolean {
+    const controllers = state.political.political_controllers ?? {};
+    const supply = state.political.last_supply_state_by_osid ?? {};
+    const pocket = new Set<string>([locationOsid]);
+    let frontier = [locationOsid];
+    while (frontier.length > 0) {
+        const next: string[] = [];
+        for (const osid of frontier) {
+            for (const neighbor of adjacency.get(osid as Osid) ?? []) {
+                if (pocket.has(neighbor)) continue;
+                if (controllers[neighbor] !== faction || supply[neighbor] !== 'critical') continue;
+                pocket.add(neighbor);
+                next.push(neighbor);
+            }
+        }
+        next.sort(strictCompare);
+        frontier = next;
+    }
+
+    const sectors = state.military.corps_front_sectors ?? {};
+    let holdsOwnSector = false;
+    for (const sectorId of Object.keys(sectors).sort(strictCompare)) {
+        const sector = sectors[sectorId];
+        if (!sector || sector.corps_id !== corpsId) continue;
+        if (sector.territory_osids.some((osid) => pocket.has(osid))) { holdsOwnSector = true; break; }
+    }
+    if (!holdsOwnSector) return false;
+
+    const formations = state.military.formations ?? {};
+    let garrison = 0;
+    for (const id of Object.keys(formations).sort(strictCompare)) {
+        const member = formations[id];
+        if (!countsTowardPocketGarrison(member, faction) || !pocket.has(member.location_osid)) continue;
+        garrison += 1;
+        if (garrison >= SALIENT_GARRISON_RETENTION_MIN_BRIGADES) return belongsToPocket(formation, pocket, state);
+    }
+    return false;
+}
+
+/**
+ * Does this brigade belong to the pocket it stands in (P3 row b, seat ruling V3)?
+ * True when any of:
+ * - it is enclave-tagged;
+ * - one of its home municipalities (that of `home_osid`, and `origin_mun`) is a pocket municipality;
+ * - its own people from a home municipality settled in a pocket municipality
+ *   (`displacement_origin_dest_arrivals` > 0, the same filter reconstitution Path B uses
+ *   to decide where a brigade may re-form). The arrivals key is `${origin_mun}|${ethnicity}`
+ *   with the ethnicity-aligned faction, built by the shared `originDestArrivalsKey`.
+ * A brigade with no recorded home cannot be told apart from the pocket's own and keeps the
+ * pre-narrowing behaviour (belongs). No new constant; set membership only, so deterministic.
+ */
+function belongsToPocket(formation: FormationState, pocket: ReadonlySet<string>, state: GameState): boolean {
+    if (isEnclaveBrigade(formation)) return true;
+    const homeMuns = new Set<string>();
+    const homeOsidMun = formation.home_osid ? munFromOsid(formation.home_osid) : undefined;
+    if (homeOsidMun) homeMuns.add(homeOsidMun);
+    if (formation.origin_mun) homeMuns.add(formation.origin_mun);
+    if (homeMuns.size === 0) return true;
+
+    const pocketMuns = new Set<string>();
+    for (const osid of pocket) {
+        const mun = munFromOsid(osid);
+        if (mun) pocketMuns.add(mun);
+    }
+    for (const mun of homeMuns) {
+        if (pocketMuns.has(mun)) return true;
+    }
+
+    const arrivals = state.displacement?.displacement_origin_dest_arrivals;
+    if (!arrivals || !formation.faction) return false;
+    for (const homeMun of homeMuns) {
+        const destBucket = arrivals[originDestArrivalsKey(homeMun, formation.faction)];
+        if (!destBucket) continue;
+        for (const mun of pocketMuns) {
+            if ((destBucket[mun] ?? 0) > 0) return true;
+        }
+    }
+    return false;
+}
+
+/**
  * BFS reachability: can brigade reach any OSID in a same-corps sector's territory
  * via friendly-controlled OSIDs?
  *
@@ -114,6 +219,7 @@ function isInActiveOperation(state: GameState, brigadeId: FormationId, corpsId: 
  * Deterministic: BFS frontier sorted by strictCompare at each level.
  */
 function canReachCorpsSectorFront(
+    formation: FormationState,
     locationOsid: string,
     faction: FactionId,
     corpsId: string,
@@ -130,9 +236,10 @@ function canReachCorpsSectorFront(
     // faction sources over friendly-controlled graph paths. A critical OSID is
     // therefore isolated even if sector partitioning has wrapped that pocket in
     // a one-cell same-corps sector. Sector membership must not self-certify a
-    // surrounded brigade as reachable.
+    // surrounded brigade as reachable. A held garrison is the exception (package
+    // P2-L): it is cut off, not lost, so it keeps its corps' standing rules.
     if (state.political.last_supply_state_by_osid?.[locationOsid] === 'critical') {
-        return false;
+        return isGarrisonedCriticalPocket(formation, locationOsid, faction, corpsId, state, adjacency);
     }
 
     // Build target set: all territory OSIDs from same-corps sectors
@@ -237,6 +344,7 @@ export function classifyReleasedOperationParticipants(
         }
 
         if (canReachCorpsSectorFront(
+            formation,
             formation.location_osid,
             formation.faction,
             formation.corps_id,
@@ -341,7 +449,7 @@ export function updateStrandedBrigadeLifecycle(
         }
 
         const reachable = canReachCorpsSectorFront(
-            f.location_osid, f.faction, corpsId, state, adjacency,
+            f, f.location_osid, f.faction, corpsId, state, adjacency,
         );
 
         const currentStatus = f.stranded_status ?? 'none';

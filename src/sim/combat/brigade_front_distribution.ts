@@ -40,14 +40,22 @@
 import type { CorpsFrontSector, CorpsCommandState, FactionId, FormationState, GameState, OperationAxis } from '../../state/game_state.js';
 import type { MunicipalityPopulation1991Map } from '../../state/population_share.js';
 import { getFactionAlignedPopulationShare } from '../../state/population_share.js';
+import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { munFromOsid } from './osid_adjacency.js';
+import { munFromOsid, type Osid } from './osid_adjacency.js';
 import { bfsDistance } from './sector_utils.js';
 import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
 import { ENABLE_STANDING_OG_RESERVE_COMMIT } from './standing_og_defense.js';
 import { isEnclaveMovementDestinationAllowed } from './enclave_resilience.js';
-import { getQueuedDatedPrestageBrigadeIds } from './pre_planned_operations.js';
+import { getQueuedDatedPrestageBrigadeIds, getQueuedPrePlannedBrigadeIds } from './pre_planned_operations.js';
 import { createFrontDistributionRecorder, type FrontDistributionCallsite, type FrontDistributionDiagnostics, type FrontDistributionRecorder } from './front_distribution_diagnostic.js';
+import { computeDefenderPower } from './combat_math.js';
+import {
+    buildContactOsidsByFaction,
+    FRONT_DONOR_HOME_DISTANCE_MAX_HOPS,
+    standsOnContactCell,
+    type ContactOsidsByFaction,
+} from './contact_cells.js';
 
 type CorpsAssetFormationState = FormationState & {
     active_operations?: CorpsCommandState['active_operations'];
@@ -58,6 +66,8 @@ export interface FrontDistributionOptions {
     frontGapRepairMaxHops?: number;
     enableStandingOgReserveCommit?: boolean;
     population1991ByMun?: MunicipalityPopulation1991Map;
+    /** This turn's supply by OSID: D3 values a relief at the contact cell's supply. */
+    supplyStateByOsid?: SupplyStateByOsidReport | null;
     diagnosticCallsite?: FrontDistributionCallsite;
     completedTurn?: number;
     invocationOrdinal?: number;
@@ -266,6 +276,7 @@ function disperseStackedRearBrigadesForSector(
     adjacency: Map<string, string[]>,
     friendlySet: Set<string> | undefined,
     opParticipants: Set<string>,
+    contactByFaction: ContactOsidsByFaction,
     options: FrontDistributionOptions = {},
     recorder?: FrontDistributionRecorder,
 ): void {
@@ -300,6 +311,8 @@ function disperseStackedRearBrigadesForSector(
         if (opParticipants.has(bid)) continue;
         if ((f.disrupted_turns ?? 0) > 0) continue;
         if (frontOsids.has(f.location_osid)) continue;
+        // D3: a brigade never leaves a contact cell (any sector's).
+        if (standsOnContactCell(f, contactByFaction)) continue;
         const movementState = state.military.brigade_movement_state;
         if (movementState?.[bid]?.status === 'in_transit') continue;
         // Pending movement orders belong to the existing authority (player-staged,
@@ -372,6 +385,7 @@ function commitReserveToThreatenedFront(
     adjacency: Map<string, string[]>,
     friendlySet: Set<string> | undefined,
     opParticipants: Set<string>,
+    contactByFaction: ContactOsidsByFaction,
     options: FrontDistributionOptions = {},
     recorder?: FrontDistributionRecorder,
 ): void {
@@ -411,6 +425,7 @@ function commitReserveToThreatenedFront(
         .filter((entry) => (entry.formation.disrupted_turns ?? 0) === 0)
         .filter((entry) => !(state.military.brigade_movement_state?.[entry.bid]?.status === 'in_transit'))
         .filter((entry) => !state.military.brigade_movement_orders?.[entry.bid])
+        .filter((entry) => !standsOnContactCell(entry.formation, contactByFaction))
         .map((entry) => {
             const reachableTargets = targetFrontOsids
                 .filter((target) => isFormationDestinationAllowed(entry.formation, target))
@@ -476,6 +491,7 @@ function fillEmptyFrontSubsegmentsFromSectorReserve(
     adjacency: Map<string, string[]>,
     friendlySet: Set<string> | undefined,
     opParticipants: Set<string>,
+    contactByFaction: ContactOsidsByFaction,
     options: FrontDistributionOptions = {},
     recorder?: FrontDistributionRecorder,
 ): void {
@@ -533,6 +549,7 @@ function fillEmptyFrontSubsegmentsFromSectorReserve(
             .filter((entry) => (entry.formation.disrupted_turns ?? 0) === 0)
             .filter((entry) => !(state.military.brigade_movement_state?.[entry.bid]?.status === 'in_transit'))
             .filter((entry) => !state.military.brigade_movement_orders?.[entry.bid])
+            .filter((entry) => !standsOnContactCell(entry.formation, contactByFaction))
             .map((entry) => {
                 const distToTargets = (subSegment.friendly_osids ?? [])
                     .filter((target) => (activeCounts.get(target) ?? 0) === 0)
@@ -589,6 +606,7 @@ function deconflictSharedFrontOsidStacks(
     adjacency: Map<string, string[]>,
     friendlyByFaction: Map<FactionId, Set<string>>,
     opParticipants: Set<string>,
+    contactByFaction: ContactOsidsByFaction,
     recorder?: FrontDistributionRecorder,
 ): void {
     const formations = state.military.formations ?? {};
@@ -657,6 +675,7 @@ function deconflictSharedFrontOsidStacks(
             .filter((claim) => (claim.formation.disrupted_turns ?? 0) === 0)
             .filter((claim) => !(state.military.brigade_movement_state?.[claim.bid]?.status === 'in_transit'))
             .filter((claim) => !state.military.brigade_movement_orders?.[claim.bid])
+            .filter((claim) => !standsOnContactCell(claim.formation, contactByFaction))
             .sort((a, b) =>
                 strictCompare(a.sector.sector_id, b.sector.sector_id)
                 || strictCompare(a.bid, b.bid)
@@ -744,6 +763,7 @@ function pinGarrisonToMustHoldFrontEdge(
     friendlyByFaction: Map<FactionId, Set<string>>,
     opParticipants: Set<string>,
     sectors: CorpsFrontSector[],
+    contactByFaction: ContactOsidsByFaction,
     recorder?: FrontDistributionRecorder,
 ): void {
     const mustHoldByCorps = state.military.must_hold_osids_by_corps;
@@ -804,6 +824,7 @@ function pinGarrisonToMustHoldFrontEdge(
                 .filter((e) => movementState?.[e.bid]?.status !== 'in_transit')
                 .filter((e) => !state.military.brigade_movement_orders?.[e.bid])
                 .filter((e) => !pinnedBrigades.has(e.bid))                                 // one must-hold per brigade per pass
+                .filter((e) => !standsOnContactCell(e.f, contactByFaction))                // D3: never leave a contact cell
                 .filter((e) => e.f.location_osid !== target)
                 .filter((e) => isFormationDestinationAllowed(e.f, target))
                 .map((e) => ({
@@ -847,6 +868,498 @@ function pinGarrisonToMustHoldFrontEdge(
     }
 }
 
+// ── Defence fix D3: relief in place on contact cells (seats r2, 2026-11-18) ──
+//
+// A contact cell is a front cell the faction still holds and was attacked on within the
+// commander's recapture window, read from persisted brigade_history (contact_cells.ts).
+// R1: an EMPTY contact cell is taken by the nearest eligible same-corps brigade of the
+// same friendly component (distance, then power at the cell, then id).
+// R2: when a candidate valued at the cell as arrived (entrenchment 0) strictly outpowers
+// the lone occupant valued as it stands (dug in), the candidate marches in (power, then
+// distance, then id). The occupant leaves only once the relief stands on the cell (G2):
+// the weaker of the two then takes the cell the relief vacated when that is known
+// (adjacent relief), otherwise the nearest vacant quiet front cell of its corps; failing
+// both it stays. The entrenchment-0 comparison is the hysteresis against swapping back.
+// Faction-blind. No new state: "relief on the way" is read from movement orders/state.
+
+function isFieldBrigadeKind(kind: FormationState['kind']): boolean {
+    return kind === 'brigade' || kind === 'og' || kind === 'operational_group' || kind === 'hv_phantom';
+}
+
+interface ContactReliefContext {
+    state: GameState;
+    adjacency: Map<string, string[]>;
+    friendlyByFaction: Map<FactionId, Set<string>>;
+    contactByFaction: ContactOsidsByFaction;
+    /** G1: active-operation participants in any phase, dated prestage and queued pre-planned brigades. */
+    protectedIds: Set<string>;
+    mustHoldOsids: Set<string>;
+    pendingDigIn: Set<string>;
+    /** Every sector front cell, by faction ("is this donor on a front cell?"). */
+    frontOsidsByFaction: Map<string, Set<string>>;
+    /** Every sector front cell, by corps (where a relieved brigade may go). */
+    frontOsidsByCorps: Map<string, Set<string>>;
+    /** Own active field brigades per cell, by faction; kept current on direct moves. */
+    occupantsByFaction: Map<string, Map<string, string[]>>;
+    /** Cells with a relief on the way or already relieved in this pass, by faction. */
+    reliefInboundByFaction: Map<string, Set<string>>;
+    /** Brigades this step has already moved or ordered. */
+    used: Set<string>;
+    supplyStateByOsid: SupplyStateByOsidReport | null;
+}
+
+function nestedSet(map: Map<string, Set<string>>, key: string): Set<string> {
+    let set = map.get(key);
+    if (!set) {
+        set = new Set<string>();
+        map.set(key, set);
+    }
+    return set;
+}
+
+function buildContactReliefContext(
+    state: GameState,
+    sectors: CorpsFrontSector[],
+    adjacency: Map<string, string[]>,
+    friendlyByFaction: Map<FactionId, Set<string>>,
+    opParticipants: Set<string>,
+    contactByFaction: ContactOsidsByFaction,
+    options: FrontDistributionOptions,
+): ContactReliefContext {
+    const formations = state.military.formations ?? {};
+    const protectedIds = new Set<string>(opParticipants);
+    for (const bid of getQueuedPrePlannedBrigadeIds(state)) protectedIds.add(bid);
+
+    const mustHoldOsids = new Set<string>();
+    for (const corpsId of Object.keys(state.military.must_hold_osids_by_corps ?? {}).sort(strictCompare)) {
+        for (const osid of state.military.must_hold_osids_by_corps?.[corpsId] ?? []) mustHoldOsids.add(osid);
+    }
+
+    const pendingDigIn = new Set<string>(
+        (state.military.brigade_posture_orders ?? [])
+            .filter((order) => order.posture === 'dig_in')
+            .map((order) => order.brigade_id),
+    );
+
+    const frontOsidsByFaction = new Map<string, Set<string>>();
+    const frontOsidsByCorps = new Map<string, Set<string>>();
+    for (const sector of sectors) {
+        const set = nestedSet(frontOsidsByFaction, sector.faction);
+        const corpsSet = nestedSet(frontOsidsByCorps, sector.corps_id);
+        for (const subSegment of sector.sub_segments ?? []) {
+            for (const osid of subSegment.friendly_osids ?? []) {
+                set.add(osid);
+                corpsSet.add(osid);
+            }
+        }
+    }
+
+    const occupantsByFaction = new Map<string, Map<string, string[]>>();
+    const reliefInboundByFaction = new Map<string, Set<string>>();
+    for (const bid of Object.keys(formations).sort(strictCompare)) {
+        const formation = formations[bid];
+        if (!formation || formation.status !== 'active' || !isFieldBrigadeKind(formation.kind)) continue;
+        const location = formation.location_osid;
+        if (location) {
+            let byOsid = occupantsByFaction.get(formation.faction);
+            if (!byOsid) {
+                byOsid = new Map<string, string[]>();
+                occupantsByFaction.set(formation.faction, byOsid);
+            }
+            const list = byOsid.get(location) ?? [];
+            list.push(bid);
+            byOsid.set(location, list);
+        }
+        const order = state.military.brigade_movement_orders?.[bid];
+        const movement = state.military.brigade_movement_state?.[bid];
+        const inbound = nestedSet(reliefInboundByFaction, formation.faction);
+        for (const destination of order?.destination_sids ?? []) inbound.add(destination);
+        if (movement?.status === 'in_transit') {
+            for (const destination of movement.destination_sids ?? []) inbound.add(destination);
+        }
+    }
+
+    return {
+        state,
+        adjacency,
+        friendlyByFaction,
+        contactByFaction,
+        protectedIds,
+        mustHoldOsids,
+        pendingDigIn,
+        frontOsidsByFaction,
+        frontOsidsByCorps,
+        occupantsByFaction,
+        reliefInboundByFaction,
+        used: new Set<string>(),
+        supplyStateByOsid: options.supplyStateByOsid ?? null,
+    };
+}
+
+function occupantsAt(ctx: ContactReliefContext, faction: string, osid: string): string[] {
+    return ctx.occupantsByFaction.get(faction)?.get(osid) ?? [];
+}
+
+function relocateOccupant(ctx: ContactReliefContext, faction: string, bid: string, from: string, to: string): void {
+    let byOsid = ctx.occupantsByFaction.get(faction);
+    if (!byOsid) {
+        byOsid = new Map<string, string[]>();
+        ctx.occupantsByFaction.set(faction, byOsid);
+    }
+    byOsid.set(from, (byOsid.get(from) ?? []).filter((id) => id !== bid));
+    byOsid.set(to, [...(byOsid.get(to) ?? []), bid].sort(strictCompare));
+}
+
+/**
+ * Friendly-path distance from every cell to `origin`, mirroring `bfsDistance(cell, origin,
+ * adjacency, friendlySet)`: intermediate cells must be friendly, the end cells need not be,
+ * and the depth cap is MAX_REDISTRIBUTION_DISTANCE. One BFS per contact cell.
+ */
+function friendlyDistancesTo(
+    origin: string,
+    adjacency: Map<string, string[]>,
+    friendlySet: Set<string> | undefined,
+): Map<string, number> {
+    const distances = new Map<string, number>([[origin, 0]]);
+    let frontier = [origin];
+    for (let depth = 0; depth < MAX_REDISTRIBUTION_DISTANCE && frontier.length > 0; depth++) {
+        const next: string[] = [];
+        for (const osid of frontier) {
+            for (const neighbor of adjacency.get(osid) ?? []) {
+                if (distances.has(neighbor)) continue;
+                distances.set(neighbor, depth + 1);
+                if (friendlySet && !friendlySet.has(neighbor)) continue;
+                next.push(neighbor);
+            }
+        }
+        frontier = next;
+    }
+    return distances;
+}
+
+/** Existing front-donor guard: the target stays within FRONT_DONOR_HOME_DISTANCE_MAX_HOPS of home. */
+function reliefTargetPreservesHomeDistance(
+    formation: FormationState,
+    target: string,
+    adjacency: Map<string, string[]>,
+): boolean {
+    const home = formation.home_osid;
+    if (!home) return true;
+    if (home === target) return true;
+    const visited = new Set<string>([home]);
+    let frontier = [home];
+    for (let hop = 1; hop <= FRONT_DONOR_HOME_DISTANCE_MAX_HOPS && frontier.length > 0; hop++) {
+        const next: string[] = [];
+        for (const osid of frontier) {
+            for (const neighbor of adjacency.get(osid) ?? []) {
+                if (visited.has(neighbor)) continue;
+                if (neighbor === target) return true;
+                visited.add(neighbor);
+                next.push(neighbor);
+            }
+        }
+        frontier = next;
+    }
+    return false;
+}
+
+/**
+ * Defender power at `cell`. A relief is valued "as arrived": standing on the cell at
+ * entrenchment 0 with that cell's supply. An occupant is valued as it stands (dug in).
+ * Terrain is common to both and omitted (no terrain cache at distribution time).
+ */
+function defenderPowerAtCell(
+    ctx: ContactReliefContext,
+    formation: FormationState,
+    cell: string,
+    asArrived: boolean,
+): number {
+    const subject: FormationState = asArrived
+        ? { ...formation, location_osid: cell, entrenchment_turns: 0 }
+        : formation;
+    return computeDefenderPower(ctx.state, subject, cell as Osid, {}, 0, ctx.supplyStateByOsid);
+}
+
+/** Donor guards for a relief (R1 and R2). */
+function isContactReliefDonorEligible(
+    ctx: ContactReliefContext,
+    bid: string,
+    formation: FormationState | undefined,
+    corpsId: string,
+    faction: string,
+    target: string,
+): formation is FormationState {
+    if (!formation || formation.status !== 'active' || !isFieldBrigadeKind(formation.kind)) return false;
+    if (formation.faction !== faction || formation.corps_id !== corpsId) return false;
+    const location = formation.location_osid;
+    if (!location || location === target) return false;
+    if (ctx.used.has(bid)) return false;
+    if (ctx.protectedIds.has(bid)) return false;                                         // G1
+    if ((formation.disrupted_turns ?? 0) > 0 || formation.disrupted === true) return false;
+    if (ctx.state.military.brigade_movement_state?.[bid]?.status === 'in_transit') return false;
+    if (ctx.state.military.brigade_movement_orders?.[bid]) return false;
+    if (formation.elite_loan_state?.on_loan) return false;                               // loaned
+    if (formation.posture === 'dig_in' || ctx.pendingDigIn.has(bid)) return false;       // dug in
+    if (ctx.mustHoldOsids.has(location)) return false;                                   // must-hold
+    const contact = ctx.contactByFaction.get(faction);
+    if (contact?.has(location)) return false;                                            // never leaves a contact cell
+    // Historian: a whole brigade leaves a front cell only if no neighbour is a contact cell.
+    if (ctx.frontOsidsByFaction.get(faction)?.has(location)
+        && (ctx.adjacency.get(location) ?? []).some((neighbor) => contact?.has(neighbor))) return false;
+    if (!isFormationDestinationAllowed(formation, target)) return false;                 // enclave
+    if (!reliefTargetPreservesHomeDistance(formation, target, ctx.adjacency)) return false; // home distance
+    return true;
+}
+
+interface ContactReliefCandidate {
+    bid: string;
+    formation: FormationState;
+    origin: string;
+    dist: number;
+    power: number;
+}
+
+function collectContactReliefCandidates(
+    ctx: ContactReliefContext,
+    sector: CorpsFrontSector,
+    cell: string,
+): ContactReliefCandidate[] {
+    const formations = ctx.state.military.formations ?? {};
+    const distances = friendlyDistancesTo(cell, ctx.adjacency, ctx.friendlyByFaction.get(sector.faction));
+    const candidates: ContactReliefCandidate[] = [];
+    for (const bid of Object.keys(formations).sort(strictCompare)) {
+        const formation = formations[bid];
+        if (!isContactReliefDonorEligible(ctx, bid, formation, sector.corps_id, sector.faction, cell)) continue;
+        const origin = formation.location_osid as string;
+        const dist = distances.get(origin);
+        if (dist === undefined || dist <= 0 || dist > MAX_REDISTRIBUTION_DISTANCE) continue;  // same component
+        candidates.push({ bid, formation, origin, dist, power: defenderPowerAtCell(ctx, formation, cell, true) });
+    }
+    return candidates;
+}
+
+/** Move directly when adjacent (the existing ≤1-hop convention), otherwise issue a column march. */
+function executeContactRelief(
+    ctx: ContactReliefContext,
+    faction: string,
+    bid: string,
+    formation: FormationState,
+    target: string,
+    dist: number,
+): void {
+    const origin = formation.location_osid as string;
+    if (dist <= 1) {
+        formation.location_osid = target;
+        formation.entrenchment_turns = 0;
+        relocateOccupant(ctx, faction, bid, origin, target);
+    } else {
+        if (!ctx.state.military.brigade_movement_orders) ctx.state.military.brigade_movement_orders = {};
+        ctx.state.military.brigade_movement_orders[bid] = createColumnMovementOrder(target);
+    }
+    ctx.used.add(bid);
+}
+
+/** R1: the nearest eligible same-corps, same-component brigade takes an empty contact cell. */
+function relieveEmptyContactCell(
+    ctx: ContactReliefContext,
+    sector: CorpsFrontSector,
+    cell: string,
+    opParticipants: Set<string>,
+    recorder?: FrontDistributionRecorder,
+): void {
+    const candidates = collectContactReliefCandidates(ctx, sector, cell)
+        .sort((a, b) => a.dist - b.dist || b.power - a.power || strictCompare(a.bid, b.bid));
+    const best = candidates[0];
+    if (!best) return;
+    recorder?.recordWrite({ helper: 'contact_cell_relief', action_kind: best.dist <= 1 ? 'direct_location' : 'column_order',
+        formation_id: best.bid, sectors: [sector], op_participants: opParticipants,
+        candidate_ids: candidates.map((entry) => entry.bid), target_ids: [cell], target_osid: cell,
+        distance: best.dist, score: best.power,
+        feature_inputs: { rule: 'r1_empty_contact_cell', sector_id: sector.sector_id, origin_osid: best.origin, power_as_arrived: best.power } });
+    executeContactRelief(ctx, sector.faction, best.bid, best.formation, cell, best.dist);
+    nestedSet(ctx.reliefInboundByFaction, sector.faction).add(cell);
+}
+
+/**
+ * A loaned occupant is not relieved: its movement belongs to the loan system, and the
+ * fallback cell would be on the lender's front (Codex #826 r4655197592; seats 2026-11-21).
+ * A dug-in occupant is relieved; relief in place replaces a unit in its prepared positions.
+ */
+function isLoanedOccupant(formation: FormationState): boolean {
+    return formation.elite_loan_state?.on_loan === true;
+}
+
+/** G1 binds the relieved brigade too; a disrupted, moving, ordered or loaned brigade stays where it is. */
+function canRelievedBrigadeLeave(
+    ctx: ContactReliefContext,
+    bid: string,
+    formation: FormationState | undefined,
+): formation is FormationState {
+    if (!formation || formation.status !== 'active' || !isFieldBrigadeKind(formation.kind)) return false;
+    if (ctx.used.has(bid) || ctx.protectedIds.has(bid)) return false;                   // G1
+    if ((formation.disrupted_turns ?? 0) > 0 || formation.disrupted === true) return false;
+    if (ctx.state.military.brigade_movement_state?.[bid]?.status === 'in_transit') return false;
+    if (ctx.state.military.brigade_movement_orders?.[bid]) return false;
+    if (isLoanedOccupant(formation)) return false;                                        // loaned
+    return true;
+}
+
+/**
+ * Where a relieved brigade goes when the cell its relief vacated is not known (the
+ * relief marched in and its order is consumed): the nearest vacant quiet front cell of
+ * its corps, own-held, in the same component, with nothing heading to it.
+ */
+function nearestVacantQuietFrontCell(
+    ctx: ContactReliefContext,
+    faction: string,
+    formation: FormationState,
+    cell: string,
+): { target: string; dist: number } | null {
+    const corpsFront = ctx.frontOsidsByCorps.get(formation.corps_id ?? '');
+    if (!corpsFront || corpsFront.size === 0) return null;
+    const contact = ctx.contactByFaction.get(faction);
+    const friendlySet = ctx.friendlyByFaction.get(faction);
+    const inbound = ctx.reliefInboundByFaction.get(faction);
+    const distances = friendlyDistancesTo(cell, ctx.adjacency, friendlySet);
+    return [...corpsFront]
+        .filter((target) => target !== cell && !contact?.has(target))
+        .filter((target) => !friendlySet || friendlySet.has(target))
+        .filter((target) => occupantsAt(ctx, faction, target).length === 0 && !inbound?.has(target))
+        .filter((target) => isFormationDestinationAllowed(formation, target))
+        .map((target) => ({ target, dist: distances.get(target) ?? Infinity }))
+        .filter((entry) => entry.dist > 0 && entry.dist <= MAX_REDISTRIBUTION_DISTANCE)
+        .sort((a, b) => a.dist - b.dist || strictCompare(a.target, b.target))[0] ?? null;
+}
+
+/**
+ * R2, second half (G2): the relief stands on the cell, so of the two brigades on it the
+ * strictly weaker (both valued as they stand) leaves: to the cell the relief vacated when
+ * known, else the nearest vacant quiet front cell of its corps. Failing both it stays, and
+ * the cell keeps two defenders. Equal power: nobody leaves.
+ */
+function releaseWeakerOfReliefPair(
+    ctx: ContactReliefContext,
+    sector: CorpsFrontSector,
+    cell: string,
+    pair: readonly string[],
+    opParticipants: Set<string>,
+    recorder?: FrontDistributionRecorder,
+    vacatedOsid?: string,
+): void {
+    const formations = ctx.state.military.formations ?? {};
+    const [firstId, secondId] = [...pair].sort(strictCompare);
+    const first = firstId ? formations[firstId] : undefined;
+    const second = secondId ? formations[secondId] : undefined;
+    if (!firstId || !secondId || !first || !second) return;
+    const firstPower = defenderPowerAtCell(ctx, first, cell, false);
+    const secondPower = defenderPowerAtCell(ctx, second, cell, false);
+    if (firstPower === secondPower) return;
+    const firstIsWeaker = firstPower < secondPower;
+    const leaverId = firstIsWeaker ? firstId : secondId;
+    const leaver = firstIsWeaker ? first : second;
+    const keeperId = firstIsWeaker ? secondId : firstId;
+    if (!canRelievedBrigadeLeave(ctx, leaverId, leaver)) return;
+
+    let destination: { target: string; dist: number } | null = null;
+    if (vacatedOsid
+        && occupantsAt(ctx, sector.faction, vacatedOsid).length === 0
+        && isFormationDestinationAllowed(leaver, vacatedOsid)) {
+        destination = { target: vacatedOsid, dist: 1 };
+    }
+    destination ??= nearestVacantQuietFrontCell(ctx, sector.faction, leaver, cell);
+    if (!destination) return;
+
+    recorder?.recordWrite({ helper: 'contact_cell_relief', action_kind: destination.dist <= 1 ? 'direct_location' : 'column_order',
+        formation_id: leaverId, sectors: [sector], op_participants: opParticipants,
+        candidate_ids: [firstId, secondId], target_ids: [destination.target], target_osid: destination.target,
+        distance: destination.dist, score: Math.min(firstPower, secondPower),
+        feature_inputs: { rule: 'r2_relieved_brigade_leaves', sector_id: sector.sector_id, contact_osid: cell,
+            keeper_id: keeperId, keeper_power: Math.max(firstPower, secondPower), leaver_power: Math.min(firstPower, secondPower),
+            vacated_osid: vacatedOsid ?? null } });
+    executeContactRelief(ctx, sector.faction, leaverId, leaver, destination.target, destination.dist);
+    nestedSet(ctx.reliefInboundByFaction, sector.faction).add(destination.target);
+}
+
+/**
+ * R2, first half: a candidate that strictly outpowers the lone occupant at the cell (the
+ * candidate as arrived, the occupant as it stands) marches in; the occupant stays until
+ * the relief is on the cell (G2). G1: an occupant in an operation is never relieved.
+ */
+function relieveOutpoweredOccupant(
+    ctx: ContactReliefContext,
+    sector: CorpsFrontSector,
+    cell: string,
+    occupantId: string,
+    opParticipants: Set<string>,
+    recorder?: FrontDistributionRecorder,
+): void {
+    const formations = ctx.state.military.formations ?? {};
+    const occupant = formations[occupantId];
+    if (!occupant || occupant.status !== 'active') return;
+    if (ctx.protectedIds.has(occupantId)) return;                                       // G1
+    if (isLoanedOccupant(occupant)) return;                                             // loaned: never relieved
+    if (ctx.state.military.brigade_movement_orders?.[occupantId]) return;
+    if (ctx.state.military.brigade_movement_state?.[occupantId]?.status === 'in_transit') return;
+    const occupantPower = defenderPowerAtCell(ctx, occupant, cell, false);
+    const candidates = collectContactReliefCandidates(ctx, sector, cell)
+        .filter((candidate) => candidate.power > occupantPower)                          // strict
+        .sort((a, b) => b.power - a.power || a.dist - b.dist || strictCompare(a.bid, b.bid));
+    const best = candidates[0];
+    if (!best) return;
+    recorder?.recordWrite({ helper: 'contact_cell_relief', action_kind: best.dist <= 1 ? 'direct_location' : 'column_order',
+        formation_id: best.bid, sectors: [sector], op_participants: opParticipants,
+        candidate_ids: candidates.map((entry) => entry.bid), target_ids: [cell], target_osid: cell,
+        distance: best.dist, score: best.power,
+        feature_inputs: { rule: 'r2_outpowered_occupant', sector_id: sector.sector_id, origin_osid: best.origin,
+            occupant_id: occupantId, occupant_power: occupantPower, power_as_arrived: best.power } });
+    executeContactRelief(ctx, sector.faction, best.bid, best.formation, cell, best.dist);
+    nestedSet(ctx.reliefInboundByFaction, sector.faction).add(cell);
+    // An adjacent relief is on the cell now: the occupant takes the cell it vacated.
+    if (best.dist <= 1) {
+        releaseWeakerOfReliefPair(ctx, sector, cell, [occupantId, best.bid], opParticipants, recorder, best.origin);
+    }
+}
+
+/**
+ * D3 step: relief in place on every sector's contact cells. Sectors and cells in
+ * strictCompare order; one relief per cell at a time (a cell with a relief already on
+ * the way is skipped). Empty cell: R1. One occupant: R2. Two (a relief has arrived):
+ * the weaker leaves. Larger stacks are left alone.
+ */
+function relieveContactCells(
+    state: GameState,
+    sectors: CorpsFrontSector[],
+    adjacency: Map<string, string[]>,
+    friendlyByFaction: Map<FactionId, Set<string>>,
+    opParticipants: Set<string>,
+    contactByFaction: ContactOsidsByFaction,
+    options: FrontDistributionOptions,
+    recorder?: FrontDistributionRecorder,
+): void {
+    if (contactByFaction.size === 0) return;
+    const ctx = buildContactReliefContext(state, sectors, adjacency, friendlyByFaction, opParticipants, contactByFaction, options);
+    for (const sector of [...sectors].sort((a, b) => strictCompare(a.sector_id, b.sector_id))) {
+        if (!sector.sub_segments || sector.sub_segments.length === 0) continue;
+        const contact = contactByFaction.get(sector.faction);
+        if (!contact || contact.size === 0) continue;
+        const cells = [...new Set(sector.sub_segments.flatMap((subSegment) => subSegment.friendly_osids ?? []))]
+            .filter((osid) => contact.has(osid))
+            .sort(strictCompare);
+        for (const cell of cells) {
+            if (ctx.reliefInboundByFaction.get(sector.faction)?.has(cell)) continue;
+            const occupants = occupantsAt(ctx, sector.faction, cell);
+            if (occupants.length === 0) {
+                relieveEmptyContactCell(ctx, sector, cell, opParticipants, recorder);
+            } else if (occupants.length === 1) {
+                const [occupantId] = occupants;
+                if (occupantId) relieveOutpoweredOccupant(ctx, sector, cell, occupantId, opParticipants, recorder);
+            } else if (occupants.length === 2) {
+                releaseWeakerOfReliefPair(ctx, sector, cell, occupants, opParticipants, recorder);
+            }
+        }
+    }
+}
+
 export function distributeBrigadesToFront(
     state: GameState,
     sectors: CorpsFrontSector[],
@@ -870,6 +1383,11 @@ export function distributeBrigadesToFront(
         s.add(osid);
     }
 
+    // D3: contact cells at this turn. Every pass below respects "a brigade never leaves a
+    // contact cell"; the relief step runs first.
+    const contactByFaction = buildContactOsidsByFaction(formations, state.political?.political_controllers, state.meta?.turn);
+    relieveContactCells(state, sectors, adjacency, friendlyByFaction, opParticipants, contactByFaction, options, recorder);
+
     for (const sector of sectors) {
         // Skip sectors with no sub-segments
         if (!sector.sub_segments || sector.sub_segments.length === 0) continue;
@@ -883,6 +1401,7 @@ export function distributeBrigadesToFront(
                 adjacency,
                 friendlyByFaction.get(sector.faction),
                 opParticipants,
+                contactByFaction,
                 options,
             );
             continue;
@@ -932,6 +1451,9 @@ export function distributeBrigadesToFront(
                     const loc = f?.location_osid;
                     if (!loc || !frontOsidSet.has(loc)) return false;
                     if ((osidCount.get(loc) ?? 0) < 2) return false;
+                    // D3: a brigade never leaves a contact cell (a relief arriving at
+                    // entrenchment 0 must not be unstacked off the cell it relieves).
+                    if (standsOnContactCell(f, contactByFaction)) return false;
                     // Don't uproot entrenched brigades — only redistribute fresh arrivals.
                     // Ruling D step 3: an entrenched brigade that is surplus on its cell (another
                     // brigade that is not leaving holds it) may still spread; the cell stays held.
@@ -975,6 +1497,7 @@ export function distributeBrigadesToFront(
                 const loc = f.location_osid;
                 if (!loc) continue;
                 if (frontOsidSet.has(loc)) continue; // Already at front
+                if (standsOnContactCell(f, contactByFaction)) continue; // D3: never leaves a contact cell
 
                 // Skip brigades already in transit — re-issuing orders resets their progress
                 const movementState = state.military.brigade_movement_state;
@@ -1063,6 +1586,7 @@ export function distributeBrigadesToFront(
             adjacency,
             friendlyByFaction.get(sector.faction),
             opParticipants,
+            contactByFaction,
             options,
             recorder,
         );
@@ -1073,6 +1597,7 @@ export function distributeBrigadesToFront(
             adjacency,
             friendlyByFaction.get(sector.faction),
             opParticipants,
+            contactByFaction,
             options,
             recorder,
         );
@@ -1083,15 +1608,16 @@ export function distributeBrigadesToFront(
             adjacency,
             friendlyByFaction.get(sector.faction),
             opParticipants,
+            contactByFaction,
             options,
             recorder,
         );
     }
 
-    deconflictSharedFrontOsidStacks(state, sectors, adjacency, friendlyByFaction, opParticipants, recorder);
+    deconflictSharedFrontOsidStacks(state, sectors, adjacency, friendlyByFaction, opParticipants, contactByFaction, recorder);
 
     // Scenario-authored garrison repair: pin an idle same-corps brigade onto any
     // friendly, currently-undefended must-hold OSID. Narrowly scoped; see guards above.
-    pinGarrisonToMustHoldFrontEdge(state, adjacency, friendlyByFaction, opParticipants, sectors, recorder);
+    pinGarrisonToMustHoldFrontEdge(state, adjacency, friendlyByFaction, opParticipants, sectors, contactByFaction, recorder);
     return recorder?.finish();
 }
