@@ -44,14 +44,6 @@ import {
 const REAR_GUARD_CORPS = new Set<string>(['vrs_1st_krajina', 'vrs_2nd_krajina']);
 const COLLAPSED_REAR_GUARD_ABSORPTION_CORPS = new Set<string>(['vrs_2nd_krajina']);
 const VRS_1K_LINE_DISTANCE_MAX_HOPS = 6;
-
-/**
- * Brigades more than this many hops from home_osid are skipped for sector
- * assignment so that existing recall mechanisms (evaluateHomeReturn,
- * recall-drifted-brigades) can pull them back instead of locking them
- * into a distant sector.
- */
-export const DRIFT_RECALL_SECTOR_SKIP_HOPS = 6;
 const FEINT_THREAT_MULTIPLIER = 1.5;
 /**
  * Maximum BFS hops for truthful sector reachability checks.
