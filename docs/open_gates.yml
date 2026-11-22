@@ -92,10 +92,13 @@ gates:
       displacement fixes), batch B (officers and politics) and batch C (singles), as listed
       in the BC19 row; the slot 1 items #677, #680 and the SE7E-h fix are merged. Part 2: the
       1994-95 attack and defence package P0 to P6 (the #686 trace and the dead-site
-      retirements, the defence trace, the defence repairs, planner odds, RF-STRENGTH's live
-      change, the ARBiH plan lockout (probes stop at 30), RF-PK), with Farz P1, P-A, P-B and the
-      enclave guard passing at every merge. Shipping the passive ARBiH as final behaviour is
-      not an option. (2) Every roadmap §4.1 RF row is disposed: BC14 merged, BC15 with SE6 and
+      retirements, the defence trace, the defence repairs, planner odds, P4 RF-STRENGTH's live
+      change (open), P5 the ARBiH plan lockout, P6 RF-PK re-measured on current main, then
+      retired or fixed), with Farz P1, P-A, P-B and the enclave guard passing at every merge.
+      P5 is closed: the package (#826, #828) gave the 1st to 4th Corps operations again, and
+      the probe-exhaustion lock that remains is ACCEPT AS FINAL (#841, orchestrator ruling
+      2026-11-22, Systems Manual "Defence of a held line"); the probe gate and the unlock
+      instrument do not ship. Shipping the passive ARBiH as final behaviour is not an option. (2) Every roadmap §4.1 RF row is disposed: BC14 merged, BC15 with SE6 and
       SE10 decided by the defence repairs, BC16
       merged, BC17 held for the calibration pass, BC18 closed as decided, BC19 as listed in
       its row. (3) One 188-week run at the candidate commit, repeated once for determinism:
@@ -105,7 +108,8 @@ gates:
       first measurement was historical on both sides; all three factions are re-measured at
       RF-CALIBRATION-RESIGNOFF); the historical-mode result was met before the freeze, and
       both are re-run at the frozen commit. (5) The final-behaviour record
-      (docs/40_reports/governance/20261115_FINAL_BEHAVIOUR_AT_1_0.md) is merged. (6) One
+      (docs/40_reports/governance/20261115_FINAL_BEHAVIOUR_AT_1_0.md; held in the coordination
+      repo-docs until 1.0 under the docs relocation, #820) is merged. (6) One
       named commit is recorded as the frozen source in the roadmap and the owner is told. (7) A hands-off
       emergent 188-week run at the frozen commit passes the history guards (Farz, enclave,
       the western-Bosnia cascade) and the historian accepts its divergences. It used to end at

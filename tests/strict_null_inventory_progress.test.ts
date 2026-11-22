@@ -52,8 +52,6 @@ const PHASE_2_COMBAT_BATCH_11_FILES = [
 ];
 
 const PHASE_2_COMBAT_BATCH_12_FILES = [
-    'src/sim/combat/rear_pocket_consolidation.ts',
-    'src/sim/combat/sector_rearrangement.ts',
     'src/sim/combat/subsegment_assignment.ts',
 ];
 

@@ -324,13 +324,21 @@ export function deriveSupplyState(
 }
 
 /**
+ * Fixed connectivity factor for local production capacity. The former per-settlement
+ * connectivity term (1 if reachable, else 0.5) was always 0.5 in a campaign because the
+ * legacy reachable_controlled set is empty; retired 2026-11-22 (dead code; hash unchanged).
+ */
+export const LOCAL_PRODUCTION_CONNECTIVITY_FACTOR = 0.5;
+
+/**
  * Derives local production capacity per municipality from existing state.
- * Canon: Production constrained by authority, population, exhaustion, connectivity (Systems §15).
- * No new mechanics: uses faction profile (authority, exhaustion), displacement, supply reachability.
+ * Canon: Production constrained by authority, population, exhaustion (Systems §15);
+ * connectivity is not modelled (fixed named factor).
+ * No new mechanics: uses faction profile (authority, exhaustion) and displacement.
  */
 export function deriveLocalProductionCapacity(
     state: GameState,
-    supplyReport: SupplyReachabilityReport,
+    _supplyReport: SupplyReachabilityReport,
     settlements: Map<string, SettlementRecord>
 ): LocalProductionCapacityReport {
     const turn = state.meta.turn;
@@ -342,10 +350,6 @@ export function deriveLocalProductionCapacity(
     }
 
     const by_municipality: LocalProductionCapacityEntry[] = [];
-    const reachableByFaction = new Map<string, Set<string>>();
-    for (const fac of supplyReport.factions) {
-        reachableByFaction.set(fac.faction_id, new Set(fac.reachable_controlled));
-    }
 
     for (const munId of [...munIds].sort()) {
         const sidsInMun: string[] = [];
@@ -361,7 +365,6 @@ export function deriveLocalProductionCapacity(
         let controlling_faction_id: string | null = null;
         let authorityMult = 1;
         let exhaustionMult = 1;
-        let connectivity = 0;
 
         for (const sid of sidsInMun) {
             const status = getSettlementControlStatus(state, sid);
@@ -372,8 +375,6 @@ export function deriveLocalProductionCapacity(
                     authorityMult = Math.max(0, Math.min(1, (faction.profile.authority ?? 0) / 100));
                     exhaustionMult = Math.max(0, 1 - (faction.profile.exhaustion ?? 0) / 200);
                 }
-                const reachable = reachableByFaction.get(status.side);
-                if (reachable?.has(sid)) connectivity = 1;
                 break;
             }
         }
@@ -385,7 +386,7 @@ export function deriveLocalProductionCapacity(
             populationMult = Math.min(1, effective / displacement.original_population);
         }
 
-        const capacity = Math.max(0, Math.min(1, authorityMult * exhaustionMult * populationMult * (connectivity || 0.5)));
+        const capacity = Math.max(0, Math.min(1, authorityMult * exhaustionMult * populationMult * LOCAL_PRODUCTION_CONNECTIVITY_FACTOR));
         by_municipality.push({ mun_id: munId, capacity, controlling_faction_id });
     }
 

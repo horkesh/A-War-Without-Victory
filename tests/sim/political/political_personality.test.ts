@@ -4,7 +4,7 @@
  * Covers:
  * 1. Personality profiles — all 3 factions present, RS archetype, unknown faction error
  * 2. Dimension weights validation — each faction's weights sum to 1.0 (±0.001)
- * 3. Historian-verified parameters — war_crimes_tolerance bounds per ICTY verdicts
+ * 3. Historian-verified parameters — war_crimes_tolerance retired (2026-11-22, never read)
  * 4. computeSituationWeight — early/late/mid-game interpolation
  * 5. computePoliticalAssessment — determinism, field presence, numeric bounds
  * 6. Faction differentiation — RS vs RBiH score ordering, territory_trend fallback
@@ -133,8 +133,6 @@ describe('Group 1: Personality profiles', () => {
         const personality = getPoliticalPersonality('RS');
         expect(personality).toBeDefined();
         expect(personality.faction).toBe('RS');
-        // RS archetype: maximalist territorial, high war_crimes_tolerance, high military reliance
-        expect(personality.war_crimes_tolerance).toBeGreaterThanOrEqual(0.65);
         // Must have dimension_weights (the negotiation capital scoring axes)
         expect(personality.dimension_weights).toBeDefined();
         expect(typeof personality.dimension_weights).toBe('object');
@@ -182,19 +180,12 @@ describe('Group 2: Dimension weights sum to 1.0', () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe('Group 3: Historian-verified parameters', () => {
-    it('7. RS war_crimes_tolerance >= 0.65 (ICTY-verified: four JCEs, Directive 7)', () => {
-        const rs = getPoliticalPersonality('RS');
-        expect(rs.war_crimes_tolerance).toBeGreaterThanOrEqual(0.65);
-    });
-
-    it('8. RBiH war_crimes_tolerance <= 0.15 (ICTY-verified: no leadership JCE)', () => {
-        const rbih = getPoliticalPersonality('RBiH');
-        expect(rbih.war_crimes_tolerance).toBeLessThanOrEqual(0.15);
-    });
-
-    it('9. HRHB war_crimes_tolerance >= 0.50 (Historian correction: Prlic/Kordic → raised to 0.55)', () => {
-        const hrhb = getPoliticalPersonality('HRHB');
-        expect(hrhb.war_crimes_tolerance).toBeGreaterThanOrEqual(0.50);
+    // Cases 7-9 pinned war_crimes_tolerance values. The field was never read by any
+    // scorer or assessment and was RETIRED 2026-11-22 (§6 sitting 8-0, lane C).
+    it('7-9. war_crimes_tolerance is retired: no faction personality carries it', () => {
+        for (const faction of ['RS', 'RBiH', 'HRHB'] as FactionId[]) {
+            expect(getPoliticalPersonality(faction)).not.toHaveProperty('war_crimes_tolerance');
+        }
     });
 });
 
@@ -378,7 +369,6 @@ describe('Group 8: Personality interface shape completeness', () => {
     it('20. All 3 faction personalities have the expected top-level fields', () => {
         const requiredFields = [
             'faction',
-            'war_crimes_tolerance',
             'dimension_weights',
         ];
 
@@ -387,15 +377,6 @@ describe('Group 8: Personality interface shape completeness', () => {
             for (const field of requiredFields) {
                 expect(p, `${faction} personality missing field: ${field}`).toHaveProperty(field);
             }
-        }
-    });
-
-    it('21. war_crimes_tolerance is a number in [0, 1] for all factions', () => {
-        for (const faction of ['RS', 'RBiH', 'HRHB'] as FactionId[]) {
-            const p = getPoliticalPersonality(faction);
-            expect(typeof p.war_crimes_tolerance).toBe('number');
-            expect(p.war_crimes_tolerance).toBeGreaterThanOrEqual(0);
-            expect(p.war_crimes_tolerance).toBeLessThanOrEqual(1);
         }
     });
 

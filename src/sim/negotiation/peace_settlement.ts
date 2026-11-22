@@ -357,7 +357,7 @@ function keepHeldEnclaves(
  * Enclave cells the contiguity pass must not absorb: enclaves with an explicit cell list or
  * a capital (Goražde, Srebrenica, Žepa, Teočak, Sarajevo, the Croat pockets), held by their
  * own entity. Prefix-only definitions (the whole-municipality Bihać pocket) are too broad
- * here, as in rear_pocket_consolidation.ts. Enclave absorption is §6/enclave-delegated.
+ * here. Enclave absorption is §6/enclave-delegated.
  */
 function isEnclaveCellOfSide(osid: string, faction: FactionId): boolean {
     const fed = (f: string) => f === 'RBiH' || f === 'HRHB';
