@@ -1509,8 +1509,8 @@ const DEFENDER_PATRON_BORDER_STATES: Readonly<Record<FactionId, readonly string[
 
 /**
  * Share of a bounded position's external ring the attacking corps must hold itself
- * before a co-belligerent-held minority segment counts as sealed. Mirrors
- * `ABANDONMENT_DOMINANCE_SHARE` in `rear_pocket_consolidation.ts`: an ally's map
+ * before a co-belligerent-held minority segment counts as sealed. The retired rear-pocket abandonment rule used the same 2/3 share:
+ * an ally's map
  * colour does not invest a position — the attacker's own line does.
  */
 const ISOLATED_POSITION_RING_DOMINANCE_SHARE = 2 / 3;

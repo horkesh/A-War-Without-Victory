@@ -386,6 +386,13 @@ export function getMoraleResistFloor(faction: string): number {
  * Consider a faction×period attacker modifier: RS w0-12 could apply 0.75× to this
  * base rate to reflect JNA-inheritance firepower advantage in the blitz phase. */
 export const BASE_ATTACKER_LOSS_RATE = 0.08;
+/** Attacker-loss multiplier for a FAILED probe only: every attacker is on a probe
+ * operation and the outcome is `repulsed` or `catastrophic`. Applied as the last
+ * factor of the attacker base casualties (computeFinalCasualties). 1.0 is exact
+ * (x * 1.0 === x in IEEE-754), so this constant is hash-neutral as shipped. It is the
+ * named data lever for the calibration pass's killed-per-failed-probe row (target
+ * 2-4:1; lane C Part 5 F2 ruling, 2026-11-22). Every other attack ignores it. */
+export const PROBE_FAILED_ATTACKER_LOSS_MULT = 1.0;
 /** Increased 0.028→0.042 (n482)→0.06 (n536: defender casualties also too low).
  * ARBiH fighters in homeland didn't retreat — they fought to the last, taking
  * heavier losses but also bleeding the attacker. Op Corridor: HVO 918 KIA defending. */

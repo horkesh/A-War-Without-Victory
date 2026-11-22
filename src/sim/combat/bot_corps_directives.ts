@@ -51,7 +51,6 @@ import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supply_state_derivation.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
-import { evaluateCorpsOffensiveLaunch, evaluateSectorOffensiveLaunch } from './sector_offensive.js';
 import { getEquipmentOffensivePriority, resolveEquipmentClass } from './sector_offensive_launch_helpers.js';
 import { CONFIDENCE_ROUGH_STRENGTH, INTEL_GATE_LAUNCH_THRESHOLD, MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT } from './sector_intel_constants.js';
 import { getSectorIntelConfidence, getStalestSectorIntelConfidence } from './sector_intel.js';
@@ -63,7 +62,6 @@ import {
 } from '../local_truces.js';
 import { areRbihHrhbAllied, isRbihHrhbCombatEnabled } from '../early_war/alliance_update.js';
 import { getCorpsCommander, getEffectiveCompetence, assignOperationCommander } from './officer_system.js';
-import { concentrateSectorsForOffensive, rearrangeSectorsForCorps } from './sector_rearrangement.js';
 import { splitNonContiguousSectors, GARRISON_BUDGET_EDGES_PER_BRIGADE } from './corps_front_sectors.js';
 import { MIN_BRIGADES_FOR_SECTOR_ATTACK } from './operation_reinforcement_constants.js';
 import type { FactionGraphAnalysis } from './osid_graph_analysis.js';
@@ -191,66 +189,6 @@ export const AGGRESSION_FLOOR: Record<string, number> = {
     'defensive': -0.30,
     'reorganize': -0.50,
 };
-
-/**
- * After a completed operation, how many turns before the corps may launch ops in a DIFFERENT theater.
- * 8 turns ≈ 2 months of reconsolidation. Prevents a corps from immediately pivoting to an
- * opportunistic secondary theater the turn after its primary operation ends. Same-theater
- * follow-on ops are always allowed regardless of cooldown (they share theater with the last op).
- */
-export const SECONDARY_OP_COOLDOWN_TURNS = 5;
-/** Offensive corps use shorter cooldown — sustained pressure is the point of offensive stance. */
-export const SECONDARY_OP_COOLDOWN_TURNS_OFFENSIVE = 3;
-
-/** Probes are cheaper than full offensives — allow at higher exhaustion.
- *  Threshold = MAX_EXHAUSTION_FOR_OPERATION + PROBE_EXHAUSTION_MARGIN. */
-export const PROBE_EXHAUSTION_MARGIN = 10;
-
-/**
- * Collect all objective OSIDs from an operation (from both the flat objectives list and
- * all axis objectives). Used for theater-overlap detection.
- */
-function getOperationObjectives(op: CorpsOperation): Set<string> {
-    const objectives = new Set<string>(op.objectives ?? []);
-    if (op.axes) {
-        for (const axis of op.axes) {
-            for (const obj of axis.objectives ?? []) objectives.add(obj);
-        }
-    }
-    return objectives;
-}
-
-/** Extract municipality slug from OSID (format: op:municipality:slug → municipality). */
-function getMunicipalityFromOsid(osid: string): string | undefined {
-    const parts = osid.split(':');
-    return parts.length >= 3 ? parts[1] : undefined;
-}
-
-/**
- * Returns true when two operations share the same theater — same sector_id, at least one
- * overlapping objective OSID, OR at least one overlapping objective municipality.
- * Municipality-level overlap handles pre-planned ops (no sector_id) targeting the same
- * area as auto-generated follow-on ops that have different but co-located objectives.
- */
-function operationsShareTheater(op1: CorpsOperation, op2Sector: string | undefined, op2Objectives: Set<string>): boolean {
-    if (op1.sector_id && op2Sector && op1.sector_id === op2Sector) return true;
-    const op1Objectives = getOperationObjectives(op1);
-    // Direct OSID overlap
-    for (const obj of op1Objectives) {
-        if (op2Objectives.has(obj)) return true;
-    }
-    // Municipality-level overlap (e.g. Koridor → 'brcko' and follow-on Brcko ops)
-    const op1Municipalities = new Set<string>();
-    for (const obj of op1Objectives) {
-        const mun = getMunicipalityFromOsid(obj);
-        if (mun) op1Municipalities.add(mun);
-    }
-    for (const obj of op2Objectives) {
-        const mun = getMunicipalityFromOsid(obj);
-        if (mun && op1Municipalities.has(mun)) return true;
-    }
-    return false;
-}
 
 /**
  * Should the bot launch a probe-type operation instead of a full sector_attack?

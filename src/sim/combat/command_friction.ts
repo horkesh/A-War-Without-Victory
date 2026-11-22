@@ -4,16 +4,12 @@
  * Deterministic: identical state + inputs → same multiplier; no randomness.
  */
 
-import { computeFrontEdges } from '../../map/front_edges.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 import type { FactionId, GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 /** Friction contribution per point of faction exhaustion. */
 const FRICTION_PER_EXHAUSTION = 0.01;
-
-/** Friction contribution per front edge for that faction. */
-const FRICTION_PER_FRONT_EDGE = 0.02;
 
 /** Maximum multiplier (cap so deltas remain bounded). */
 const MAX_MULTIPLIER = 10;
@@ -27,22 +23,21 @@ const MAX_MULTIPLIER = 10;
 export function getCommandFrictionMultiplier(
     state: GameState,
     factionId: FactionId,
-    settlementEdges: EdgeRecord[]
+    _settlementEdges: EdgeRecord[]
 ): number {
     if (state.meta.phase !== 'war') {
         return 1;
     }
 
     const exhaustion = (state.political.war_exhaustion ?? {})[factionId] ?? 0;
-    const frontEdges = computeFrontEdges(state, settlementEdges);
-    let frontEdgeCount = 0;
-    for (const fe of frontEdges) {
-        if (fe.side_a === factionId || fe.side_b === factionId) frontEdgeCount += 1;
-    }
 
-    const raw = 1 + exhaustion * FRICTION_PER_EXHAUSTION + frontEdgeCount * FRICTION_PER_FRONT_EDGE;
+    const raw = 1 + exhaustion * FRICTION_PER_EXHAUSTION;
     return Math.max(1, Math.min(MAX_MULTIPLIER, raw));
 }
+
+// The settlementEdges parameter is kept for call-site compatibility; the former
+// front-edge friction term was always 0 in a campaign and was retired 2026-11-22
+// (dead code; hash unchanged).
 
 /**
  * Compute command friction multipliers for all factions (deterministic order).
