@@ -51,7 +51,6 @@ import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supply_state_derivation.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
-import { evaluateCorpsOffensiveLaunch, evaluateSectorOffensiveLaunch } from './sector_offensive.js';
 import { getEquipmentOffensivePriority, resolveEquipmentClass } from './sector_offensive_launch_helpers.js';
 import { CONFIDENCE_ROUGH_STRENGTH, INTEL_GATE_LAUNCH_THRESHOLD, MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT } from './sector_intel_constants.js';
 import { getSectorIntelConfidence, getStalestSectorIntelConfidence } from './sector_intel.js';
@@ -63,7 +62,6 @@ import {
 } from '../local_truces.js';
 import { areRbihHrhbAllied, isRbihHrhbCombatEnabled } from '../early_war/alliance_update.js';
 import { getCorpsCommander, getEffectiveCompetence, assignOperationCommander } from './officer_system.js';
-import { concentrateSectorsForOffensive, rearrangeSectorsForCorps } from './sector_rearrangement.js';
 import { splitNonContiguousSectors, GARRISON_BUDGET_EDGES_PER_BRIGADE } from './corps_front_sectors.js';
 import { MIN_BRIGADES_FOR_SECTOR_ATTACK } from './operation_reinforcement_constants.js';
 import type { FactionGraphAnalysis } from './osid_graph_analysis.js';

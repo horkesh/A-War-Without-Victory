@@ -27,14 +27,7 @@ describe('combat graph BFS queue cursor contracts', () => {
         }
     });
 
-    it('rear-pocket and contiguous-set BFS regions use head cursors, not Array.shift()', () => {
-        const rearRaw = readFileSync(resolve('src/sim/combat/rear_pocket_consolidation.ts'), 'utf8');
-        const rearRegion = regionBetween(
-            rearRaw,
-            'export function consolidateRearPockets(',
-            '        // Mark all cluster members as checked',
-        );
-
+    it('contiguous-set BFS regions use head cursors, not Array.shift()', () => {
         const warAdjRaw = readFileSync(resolve('src/sim/combat/war_adjacency.ts'), 'utf8');
         const contiguousRegion = regionBetween(
             warAdjRaw,
@@ -49,7 +42,7 @@ describe('combat graph BFS queue cursor contracts', () => {
             '/** Find the component index with the most OSIDs.',
         );
 
-        for (const region of [rearRegion, contiguousRegion, componentsRegion]) {
+        for (const region of [contiguousRegion, componentsRegion]) {
             expect(region).not.toContain('.shift()');
             expect(region).not.toMatch(/\bDate\.now\s*\(/);
             expect(region).not.toMatch(/\bnew\s+Date\s*\(/);

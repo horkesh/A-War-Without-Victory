@@ -6,7 +6,6 @@ import {
     computePlanningDuration,
     advanceSectorOffensives,
     evaluateOperationProgress,
-    evaluateSectorOffensiveLaunch,
     getMomentumAggressionBonus,
     getMomentumMinOutcome,
 } from '../src/sim/combat/sector_offensive.js';
@@ -74,83 +73,6 @@ function makeMinimalState(turn: number, formations: Record<string, Partial<Forma
             political_controllers: {},
         } as any,
     } as GameState;
-}
-
-function makeLaunchState(turn = 5): GameState {
-    const state = makeMinimalState(turn, {
-        corps_1: { kind: 'corps' as any, personnel: 0, location_osid: undefined, hq_sid: 'S1', tags: [] },
-        b1: { corps_id: 'corps_1' as any, location_osid: 'op:front:1', hq_sid: 'S1', equipment_class: 'mechanized' as any },
-        b2: { corps_id: 'corps_1' as any, location_osid: 'op:front:2', hq_sid: 'S1', equipment_class: 'motorized' as any },
-        b3: { corps_id: 'corps_1' as any, location_osid: 'op:front:3', hq_sid: 'S1', equipment_class: 'light_infantry' as any },
-        d1: { faction: 'RBiH' as FactionId, corps_id: 'enemy_corps' as any, location_osid: 'op:enemy:1', personnel: 600, cohesion: 65, hq_sid: 'S2' },
-        d2: { faction: 'RBiH' as FactionId, corps_id: 'enemy_corps' as any, location_osid: 'op:enemy:1', personnel: 600, cohesion: 65, hq_sid: 'S2' },
-    });
-
-    state.military.corps_front_sectors = {
-        'sector:corps_1:0': {
-            sector_id: 'sector:corps_1:0',
-            corps_id: 'corps_1',
-            faction: 'RS',
-            opposing_factions: ['RBiH'],
-            edge_ids: ['edge:1', 'edge:2', 'edge:3'],
-            sub_segments: [{
-                sub_segment_id: 'subseg:sector:corps_1:0:0',
-                edge_ids: ['edge:1', 'edge:2', 'edge:3'],
-                friendly_osids: ['op:front:1', 'op:front:2', 'op:front:3'],
-                enemy_osids: ['op:enemy:1'],
-                primary_brigade_ids: ['b1', 'b2', 'b3'],
-                length_edges: 3,
-            }],
-            length_edges: 3,
-            territory_osids: ['op:front:1', 'op:front:2', 'op:front:3'],
-            assigned_brigade_ids: ['b1', 'b2', 'b3'],
-            reserve_brigade_ids: [],
-            density: 1,
-            threat_ratio: 1,
-            defensive_power: 100,
-            sector_stance: 'attack',
-            stance_source: 'bot',
-        },
-        enemy_sector_1: {
-            sector_id: 'enemy_sector_1',
-            corps_id: 'enemy_corps',
-            faction: 'RBiH',
-            opposing_factions: ['RS'],
-            edge_ids: ['edge:enemy:1'],
-            sub_segments: [{
-                sub_segment_id: 'subseg:enemy_sector_1:0',
-                edge_ids: ['edge:enemy:1'],
-                friendly_osids: ['op:enemy:1'],
-                enemy_osids: ['op:front:1', 'op:front:2', 'op:front:3'],
-                primary_brigade_ids: ['d1', 'd2'],
-                length_edges: 1,
-            }],
-            length_edges: 1,
-            territory_osids: ['op:enemy:1'],
-            assigned_brigade_ids: ['d1', 'd2'],
-            reserve_brigade_ids: [],
-            density: 1,
-            threat_ratio: 1,
-            defensive_power: 100,
-            sector_stance: 'defend',
-            stance_source: 'bot',
-        },
-    } as any;
-
-    state.military.war_front_edges_osid = [
-        { a: 'op:front:1', b: 'op:enemy:1', edge_id: 'front1__enemy1', side_a: 'RS', side_b: 'RBiH' },
-        { a: 'op:front:2', b: 'op:enemy:1', edge_id: 'front2__enemy1', side_a: 'RS', side_b: 'RBiH' },
-        { a: 'op:front:3', b: 'op:enemy:1', edge_id: 'front3__enemy1', side_a: 'RS', side_b: 'RBiH' },
-    ] as any;
-
-    state.political.political_controllers = {
-        'op:front:1': 'RS',
-        'op:front:2': 'RS',
-        'op:front:3': 'RS',
-        'op:enemy:1': 'RBiH',
-    } as any;
-
-    return state;
 }
 
 describe('pre-planned operations', () => {
@@ -331,113 +253,6 @@ describe('operation naming', () => {
     });
 });
 
-describe('sector offensive launch evaluation', () => {
-    it('launches when the current feasibility and opening-attack gates are satisfied', () => {
-        const state = makeLaunchState();
-
-        const op = evaluateSectorOffensiveLaunch(
-            state,
-            'corps_1',
-            'sector:corps_1:0',
-            'RS' as FactionId,
-            ['b1', 'b2', 'b3'],
-            ['op:enemy:1'],
-            ['op:enemy:1'],
-            null,
-        );
-
-        expect(op).not.toBeNull();
-        expect(op?.type).toBe('sector_attack');
-        expect(op?.phase).toBe('planning');
-        expect(op?.sector_id).toBe('sector:corps_1:0');
-        expect(op?.objectives).toEqual(['op:enemy:1']);
-        expect(op?.participating_brigades).toEqual(['b1', 'b2', 'b3']);
-    });
-
-    it('rejects launches when fewer than two brigades are available', () => {
-        const state = makeLaunchState();
-
-        const op = evaluateSectorOffensiveLaunch(
-            state,
-            'corps_1',
-            'sector:corps_1:0',
-            'RS' as FactionId,
-            ['b1'],
-            ['op:enemy:1'],
-            ['op:enemy:1'],
-            null,
-        );
-
-        expect(op).toBeNull();
-    });
-
-    // The reserve-on branch (critical reachability upgraded to strained by a full reserve) was
-    // retired 2026-11-17 with the supply-reserve economy (Fable consult 6): supply is reachability
-    // only, so critical-supply brigades are excluded from a new offensive, as with reserves off.
-    it('excludes critical-supply brigades from a new offensive, even on an old save carrying the reserve flag', () => {
-        const state = makeLaunchState();
-        state.meta.supply_reserves_enabled = true;
-
-        const supplyReport: SupplyStateByOsidReport = {
-            schema: 1,
-            turn: 5,
-            factions: [{
-                faction_id: 'RS',
-                by_osid: [
-                    { osid: 'op:front:1', state: 'critical' },
-                    { osid: 'op:front:2', state: 'critical' },
-                    { osid: 'op:front:3', state: 'critical' },
-                ],
-            }],
-        };
-
-        const op = evaluateSectorOffensiveLaunch(
-            state,
-            'corps_1',
-            'sector:corps_1:0',
-            'RS' as FactionId,
-            ['b1', 'b2', 'b3'],
-            ['op:enemy:1'],
-            ['op:enemy:1'],
-            supplyReport,
-        );
-
-        expect(op).toBeNull();
-    });
-
-    it('records full supply readiness for strained brigades (reserve-based readiness retired)', () => {
-        const state = makeLaunchState();
-        state.meta.supply_reserves_enabled = true;
-        state.military.general_supply_reserve = { RS: 45 } as any;
-
-        const supplyReport: SupplyStateByOsidReport = {
-            schema: 1,
-            turn: 5,
-            factions: [{
-                faction_id: 'RS',
-                by_osid: [
-                    { osid: 'op:front:1', state: 'strained' },
-                    { osid: 'op:front:2', state: 'strained' },
-                    { osid: 'op:front:3', state: 'strained' },
-                ],
-            }],
-        };
-
-        const op = evaluateSectorOffensiveLaunch(
-            state,
-            'corps_1',
-            'sector:corps_1:0',
-            'RS' as FactionId,
-            ['b1', 'b2', 'b3'],
-            ['op:enemy:1'],
-            ['op:enemy:1'],
-            supplyReport,
-        );
-
-        expect(op).not.toBeNull();
-        expect(op?.supply_readiness).toBe(1.0);
-    });
-});
 
 describe('sector offensive momentum helpers', () => {
     it('scales aggression bonus with momentum', () => {
