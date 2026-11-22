@@ -90,7 +90,6 @@ Constants modified as a result of AI commander observations:
 | Constant | Old | New | File |
 |----------|-----|-----|------|
 | `STRAINED_DENSITY_THRESHOLD` | 0.167 (fixed) | 0.08/0.12/0.167 (by stance) | `bot_corps_directives.ts` |
-| `SECONDARY_OP_COOLDOWN_TURNS_OFFENSIVE` | 8 (shared) | 3 | `bot_corps_directives.ts` |
 | `ENTRENCHMENT_EFFECTIVE_CAP_TURNS` | uncapped | 26 | `combat_math.ts` |
 | `DEFAULT_INIT_ALLIANCE` | 0.35 | 0.75 | `alliance_update.ts` |
 | `PATRON_PRESSURE_COEFF` | 0.015 | 0.018 | `alliance_update.ts` |
