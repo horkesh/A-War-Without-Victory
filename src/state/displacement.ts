@@ -301,6 +301,8 @@ export interface DisplacementRoutingRecord {
     to_mun: MunicipalityId;
     amount: number;
     reason: string;
+    /** The people moved, where the row records a group's re-route (A4 `capture_pass_through`). Turn report only. */
+    group?: FactionId;
 }
 
 /**

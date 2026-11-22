@@ -311,6 +311,16 @@ function isSafeHolderForGroup(
 }
 
 /**
+ * Batch A row A4 (RB2), §6 seats 2026-11-22: whether people sheltering in a municipality stay put when
+ * `captor` takes it. They stay under their own side or a side never yet at war with them, the same
+ * family test as the RB9 return (`isSafeHolderForGroup`), which cannot be reused here because its
+ * expeller argument would be the captor itself. Every other group is moved on (the capture pass-through).
+ */
+export function captorShelters(state: GameState, group: FactionId, captor: FactionId): boolean {
+    return group === captor || !haveEverBeenAtWar(state, group, captor);
+}
+
+/**
  * RB9 return rule. A dormant record whose OSID has been held safely for RETURN_HOLD_WEEKS brings its
  * routed survivors home: the same number leave that group's refugee population (the origin camp
  * first, then `displaced_in` in the order the cohort was routed), so each person is still counted once.
@@ -706,6 +716,13 @@ function routeDisplacedCohort(
         trackMilitiaPool?: boolean;
         requireBrigadePresence?: boolean;
         eventReason?: string;
+        /**
+         * A4: record each move as a turn-report row with this reason and the group, and write NO
+         * displacement event (a second move of people already displaced must not feed
+         * `displacement_origin_dest_arrivals`, which places brigade reconstitution, nor `refugees_received`).
+         * Ignored when `eventReason` is set.
+         */
+        reportReason?: string;
         causedByFaction?: FactionId;
     }
 ): { routed: number; remaining: number } {
@@ -772,6 +789,14 @@ function routeDisplacedCohort(
                 killed: 0,
                 fled_abroad: 0,
                 settled: routed,
+            });
+        } else if (options.reportReason) {
+            report.routing.push({
+                from_mun: sourceMunId,
+                to_mun: targetMunId,
+                amount: routed,
+                reason: options.reportReason,
+                group: faction
             });
         }
 
@@ -1203,17 +1228,21 @@ export function processDisplacementTakeover(
             // RF-5B (§6 panel, Calibration seat C1): a policy wave changes no holder, so the
             // people sheltering in the municipality (the holder's own refugees above all) are
             // not moved on; re-routing them handed the expelling side extra manpower.
+            // A4 (RB2, §6 seats 2026-11-22): at a capture, groups the captor shelters (its own people, or a
+            // side never yet at war with it) stay; the others are moved on, recorded as a turn-report row
+            // (`capture_pass_through`) and never as a displacement event.
             if (!isPolicyTimer && dispState.displaced_in > 0) {
                 const byFaction = dispState.displaced_in_by_faction ?? {};
                 const fKeys = Object.keys(byFaction).sort(strictCompare);
                 for (const fid of fKeys) {
+                    if (captorShelters(state, fid as FactionId, timer.to_faction)) continue;
                     let rem = Math.max(0, Math.floor(byFaction[fid] ?? 0));
                     if (rem <= 0) continue;
                     const result = routeDisplacedCohort(
                         state, munId, fid, rem,
                         friendlyMunsByFaction[fid],
                         settlements, routedByPoolKey, report,
-                        { causedByFaction: timer.to_faction }
+                        { causedByFaction: timer.to_faction, reportReason: 'capture_pass_through' }
                     );
                     byFaction[fid] = result.remaining;
                 }
