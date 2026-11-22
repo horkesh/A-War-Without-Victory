@@ -120,6 +120,7 @@ import {
     getIntelAmbushDefenderCasualtyMult,
     getIntelExecutionFrictionMultipliers,
     selectWeightedPrimaryDefender,
+    PROBE_FAILED_ATTACKER_LOSS_MULT,
 } from './combat_math.js';
 // OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR moved to attack_post_battle_effects.ts
 // Nested default-OFF ambush-DEPTH amplifier (packet 20260605_INTEL_AMBUSH_FRICTION_DESIGN).
@@ -1026,6 +1027,11 @@ export function resolveAttackOrdersOsid(
             bombardmentMult,
             attackerCount: attackerFormations.length,
             powerRatio,
+            // Failed probe only: every attacker is on a probe op and the attack failed.
+            failedProbeAttackerLossMult: (outcome === 'repulsed' || outcome === 'catastrophic')
+                && attackerFormations.every((attacker) => attackerOperationMatches.get(attacker.id)?.op.type === 'probe')
+                ? PROBE_FAILED_ATTACKER_LOSS_MULT
+                : 1,
         });
         const defenderCasualtyShares = defenderFormation
             ? computeDefenderCasualtyShares({

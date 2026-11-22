@@ -12,8 +12,8 @@
  * MUST have a PoliticalAssessment in scope at call time. No assessment = use pickBotResponseV1 fallback.
  *
  * Historian gate applied 2026-04-05:
- * - RBiH war_crimes_tolerance = 0.10 (hard floor, never changes regardless of situation_score)
- * - HRHB war_crimes_tolerance = 0.55 (raised from 0.4 per Prlic/Kordic ICTY findings)
+ * - war_crimes_tolerance RETIRED 2026-11-22 (§6 sitting 8-0, lane C): a constant nothing read;
+ *   no scorer or assessment consumed it, so it shaped no decision. Removal is hash-neutral.
  * - RS patron_confidence weight = 0.20, static all war. (B5 fix 5, 2026-11-16, historian + game-designer:
  *   an earlier note that it "decays post-1993" was inaccurate. Pale's regard for Belgrade rose and fell
  *   with each plan — defiant on Vance-Owen May 1993, compliant Aug-Oct 1993, defiant on the Contact
@@ -76,11 +76,6 @@ export interface PoliticalPersonality {
         /** War week at which the late weight fully applies. */
         war_week_crossover: number;
     };
-    /**
-     * Tolerance for war crimes by subordinates. [0, 1].
-     * ICTY-verified: RS = 0.70, HRHB = 0.55, RBiH = 0.10.
-     */
-    war_crimes_tolerance: number;
 }
 
 /**
@@ -118,13 +113,9 @@ export interface PoliticalAssessment {
  *
  * Historian gate 2026-04-05:
  * - RS: Karadzic — Expansionist-Nationalist. Four JCEs, Directive 7.
- *   war_crimes_tolerance = 0.70 (ICTY-verified). patron_confidence 0.20
- *   (static; the Pale-Belgrade split is state, see the header).
+ *   patron_confidence 0.20 (static; the Pale-Belgrade split is state, see the header).
  * - RBiH: Izetbegovic — Survival-Internationalist. No leadership-directed JCE.
- *   war_crimes_tolerance = 0.10 (hard floor).
  * - HRHB: Boban — Opportunist-Patron-Dependent. Reactive to Zagreb.
- *   war_crimes_tolerance = 0.55 (Prlic/Kordic ICTY findings on systematic
- *   HVO ethnic cleansing policy; raised from 0.4).
  *
  * Note: 'humanitarian_standing' is not in the canonical DimensionId union but
  * is included as a forward-compatibility key. It will be treated as weight 0
@@ -156,7 +147,6 @@ export const POLITICAL_PERSONALITIES: Record<FactionId, PoliticalPersonality> = 
             late: 0.4,
             war_week_crossover: 120,
         },
-        war_crimes_tolerance: 0.70,
     },
 
     RBiH: {
@@ -179,7 +169,6 @@ export const POLITICAL_PERSONALITIES: Record<FactionId, PoliticalPersonality> = 
             late: 0.4,
             war_week_crossover: 120,
         },
-        war_crimes_tolerance: 0.10,
     },
 
     HRHB: {
@@ -203,7 +192,6 @@ export const POLITICAL_PERSONALITIES: Record<FactionId, PoliticalPersonality> = 
             late: 0.4,
             war_week_crossover: 120,
         },
-        war_crimes_tolerance: 0.55,
     },
 };
 

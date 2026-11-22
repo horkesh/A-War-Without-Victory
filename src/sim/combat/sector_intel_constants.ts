@@ -18,8 +18,6 @@ export interface FactionReconProfile {
     recon_range: number;
     /** Confidence gained when a brigade executes a probe action against the enemy sector. */
     probe_confidence_gain: number;
-    /** Fraction of normal casualties incurred by a probing brigade. */
-    probe_casualty_factor: number;
 }
 
 /** Faction recon profiles (constants, not unit-level).
@@ -44,21 +42,18 @@ export const FACTION_RECON_PROFILES: Record<NonNullable<FactionId>, FactionRecon
         confidence_decay_per_turn: 0.10,   // was 0.08 — intel goes stale universally
         recon_range: 2,
         probe_confidence_gain: 0.50,
-        probe_casualty_factor: 0.15,
     },
     RS: {
         passive_buildup_per_turn: 0.08,
         confidence_decay_per_turn: 0.12,   // was 0.10 — blitz intel fades within ~16 turns
         recon_range: 1,
         probe_confidence_gain: 0.35,
-        probe_casualty_factor: 0.25,
     },
     HRHB: {
         passive_buildup_per_turn: 0.08,
         confidence_decay_per_turn: 0.12,   // was 0.10 — intel goes stale universally
         recon_range: 1,
         probe_confidence_gain: 0.35,
-        probe_casualty_factor: 0.25,
     },
 };
 

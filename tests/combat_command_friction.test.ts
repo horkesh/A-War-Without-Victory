@@ -1,7 +1,7 @@
 /**
  * Phase D Step 6: Command friction tests.
  * - Identical state yields identical friction factor (determinism).
- * - Intent degradation increases with exhaustion and front length.
+ * - Intent degradation increases with exhaustion.
  */
 
 import { describe, expect, it } from 'vitest';

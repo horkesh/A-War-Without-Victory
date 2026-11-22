@@ -343,8 +343,6 @@ export interface TurnReport {
     }>;
     /** Paramilitary rear pocket cleanup report */
     paramilitary_sweep?: import('./combat/paramilitary_sweep.js').ParamilitarySweepReport;
-    /** Post-paramilitary regular-force consolidation of surrounded undefended pockets. */
-    rear_pocket_consolidation?: import('./combat/rear_pocket_consolidation.js').RearPocketConsolidationReport;
     /** Sector combat power ratings report */
     sector_combat_ratings?: import('./combat/sector_combat_rating.js').SectorCombatRatingReport;
     /** Operation preparation phase events (intel, staging, probes, assessments). */
