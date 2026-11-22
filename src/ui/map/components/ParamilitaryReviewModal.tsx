@@ -194,7 +194,8 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                         {t('paramilitaryReview.packetHint')}
                     </div>
                     <div className="mt-1 text-[16px] leading-relaxed text-[#ddd1b3]">
-                        {t('paramilitaryReview.policyHint')}
+                        {/* §6 D1 stage 2 round 4s: a side with no policy card (no cap) gets the no-card hint (§4 copy panel). */}
+                        {t(state && policyCap === null ? 'paramilitaryReview.policyHintNoCard' : 'paramilitaryReview.policyHint')}
                     </div>
                     {policyCap !== null && (
                         <div

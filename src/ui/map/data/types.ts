@@ -728,9 +728,12 @@ export interface ParamilitaryUnrequestedView {
      *   for the side between that answer and the sweep;
      * - `standing_order_automatic`: the same, but the card was answered automatically with the historical policy (Observer);
      * - `neutral`: a paramilitary decision was filed for the side after the card answer (the review modal can change the order
-     *   there), so the order in force is not derivable; the receipt gives one cause-neutral line.
-     * Absent: the saved basis shows no Always allow (Always deny, Review, unanswered, or no card), which no stage-2 rule sweeps
-     * under, so the save comes from the stage-1 rule and the receipt keeps the stage-1 cause.
+     *   there), so the order in force is not derivable; the receipt gives one cause-neutral line;
+     * - `historical_default_staff`: the side has no policy card in the registry and no paramilitary decision of the player's
+     *   was filed for it up to the sweep's turn, so its staff followed the bot's historical default (round 4s P2, owner rule
+     *   2026-11-22). A card answer counts only once its card has applied it by the sweep's turn (round 4 R3).
+     * Absent: a side with a card whose saved basis shows no applied Always allow (Always deny, Review, unanswered), which no
+     * stage-2 rule sweeps under, so the save comes from the stage-1 rule and the receipt keeps the stage-1 cause.
      */
     cause?: 'standing_order' | 'standing_order_automatic' | 'neutral' | 'historical_default_staff';
 }

@@ -12,7 +12,21 @@ import { paramilitaryPolicyFlagKey, PARAMILITARY_POLICY_CARD_ID_BY_FACTION } fro
 import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
 import type { FactionId } from '../src/state/game_state.js';
 
-function rawSave(faction: FactionId, log: unknown[], history: unknown[] = []): any {
+/** The turn each policy card fired in these saves: RBiH's answer filed at t0 applies at t4 (§6 T2); RS fires at t1 (round 4a). */
+const DEFAULT_FIRED: Record<string, number> = { rbih_paramilitary_policy_1992: 4, rs_paramilitary_policy_1992: 1 };
+
+function rawSave(
+    faction: FactionId,
+    log: unknown[],
+    history: unknown[] = [],
+    options: { fired?: Record<string, number>; captured?: boolean } = {},
+): any {
+    // Round 4 R3: a card answer is a receipt cause only once the card has applied it, so a save says when each card fired.
+    const fired = options.fired ?? Object.fromEntries(
+        [...new Set((log as Array<{ event_id: string }>).map((entry) => entry.event_id))]
+            .filter((id) => id in DEFAULT_FIRED)
+            .map((id) => [id, DEFAULT_FIRED[id]!]),
+    );
     return {
         meta: { turn: 9, phase: 'war', player_faction: faction },
         military: {
@@ -23,10 +37,15 @@ function rawSave(faction: FactionId, log: unknown[], history: unknown[] = []): a
                 },
             },
             event_decision_log: log,
+            fired_event_ids: Object.keys(fired),
+            event_fire_counts: Object.fromEntries(Object.keys(fired).map((id) => [id, 1])),
+            event_last_fired_turn: fired,
         },
         political: {
             political_controllers: {},
-            control_events: [{ turn: 5, settlement_id: 'op:kakanj:biljesevo', mechanism: 'paramilitary', from: 'RS', to: faction }],
+            control_events: options.captured === false
+                ? []
+                : [{ turn: 5, settlement_id: 'op:kakanj:biljesevo', mechanism: 'paramilitary', from: 'RS', to: faction }],
         },
         paramilitary_decision_history: history,
     };
@@ -73,8 +92,48 @@ describe('the unrequested-sweep receipt cause is derived from the saved basis', 
         expect(causeOf(rawSave('RS', [
             { event_id: 'rs_paramilitary_policy_1992', response_id: 'always_allow', decision_source: 'player', faction: 'RS', turn: 7 },
         ]))).toBeUndefined();
-        // No card for the side (HRHB) and nothing filed: the stage-1 cause.
-        expect(causeOf(rawSave('HRHB', []))).toBeUndefined();
+        // A side with no card and nothing filed is no longer a stage-1 case: round 4s P2 names the historical default (below).
+    });
+
+    it('round 4 R3: an RBiH Always allow filed at t0 whose card has not fired by the sweep never names the cause', () => {
+        const filed = [{ event_id: 'rbih_paramilitary_policy_1992', response_id: 'always_allow', decision_source: 'player', faction: 'RBiH', turn: 0 }];
+        // Not fired at all (an older build's save): no cause from the answer, so the stage-1 cause stays.
+        expect(causeOf(rawSave('RBiH', filed, [], { fired: {} }))).toBeUndefined();
+        // Fired only after the sweep (t6 > t5): the same.
+        expect(causeOf(rawSave('RBiH', filed, [], { fired: { rbih_paramilitary_policy_1992: 6 } }))).toBeUndefined();
+        // Applied by the sweep turn: the standing order sent it.
+        expect(causeOf(rawSave('RBiH', filed, [], { fired: { rbih_paramilitary_policy_1992: 4 } }))).toBe('standing_order');
+    });
+
+    describe('round 4s P2: a side with no policy card (owner rule 2026-11-22)', () => {
+        it('no card and no own record up to the sweep: the historical default the staff followed, swept and dissolved alike', () => {
+            expect(PARAMILITARY_POLICY_CARD_ID_BY_FACTION.HRHB).toBeUndefined();
+            expect(causeOf(rawSave('HRHB', []))).toBe('historical_default_staff');
+            expect(causeOf(rawSave('HRHB', [], [], { captured: false }))).toBe('historical_default_staff');
+            // A pre-stage-2 save looks the same (HRHB staff then swept as the bot did, the same default): pinned on purpose.
+        });
+
+        it('an own record on the basis (an in-person Always allow filed at or before the sweep) gives the neutral line', () => {
+            for (const filedTurn of [3, 5]) {
+                expect(causeOf(rawSave('HRHB', [], [
+                    { id: `paramilitary:${filedTurn}:op:x:y`, turn: filedTurn, target_osid: 'op:x:y', faction: 'HRHB', strength: 150, decision: 'allow' },
+                ])), `t${filedTurn}`).toBe('neutral');
+            }
+        });
+
+        it('an Always deny filed AFTER the sweep does not change that sweep\'s cause', () => {
+            expect(causeOf(rawSave('HRHB', [], [
+                { id: 'paramilitary:7:op:x:y', turn: 7, target_osid: 'op:x:y', faction: 'HRHB', strength: 150, decision: 'deny' },
+            ]))).toBe('historical_default_staff');
+        });
+
+        it('another side\'s record is not HRHB\'s, and the card sides are unchanged', () => {
+            expect(causeOf(rawSave('HRHB', [], [
+                { id: 'paramilitary:3:op:x:y', turn: 3, target_osid: 'op:x:y', faction: 'RS', strength: 150, decision: 'allow' },
+            ]))).toBe('historical_default_staff');
+            expect(causeOf(rawSave('RBiH', []))).toBeUndefined();
+            expect(causeOf(rawSave('RS', []))).toBeUndefined();
+        });
     });
 
     it('a decision filed for the side after the card answer (the review modal can change the order there): one cause-neutral line', () => {
