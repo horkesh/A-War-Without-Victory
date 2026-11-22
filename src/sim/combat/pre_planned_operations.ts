@@ -2577,22 +2577,37 @@ function isLivePlanningApproachDestination(
         || isFriendlyFaction(controller, formation.faction, state);
 }
 
-function prestageReservedPrePlannedElites(
+type PrestageReservation = {
+    axis: PrePlannedOp['axes'][number] & { staging_osid: string };
+    brigadeId: FormationId;
+    formation: FormationState;
+};
+
+/**
+ * The brigades the dated pre-staging pass marshals for one plan this turn, in the pass's own
+ * order (axis order, then sorted authored id). Null when the plan's window is closed: no
+ * `prestage_from` or the turn is before it, the faction is not staff-controlled, the live
+ * operation has left `planning`, or the plan is already resolved. Per brigade it applies the
+ * pass's skips: unresolvable, held by a different queue head, committed to another live
+ * operation, or on a Main Staff loan this plan may not take over.
+ *
+ * Pure: shared by `prestageReservedPrePlannedElites` (which acts on every entry) and
+ * `getActivePrestageReservedBrigadeIds` (which reports them), so the two cannot drift.
+ */
+function collectPrestageReservations(
     state: GameState,
     def: PrePlannedOp,
     turn: number,
-    adjacency?: Map<Osid, Osid[]>,
-    reverseMap?: OperationalToCanonicalReverseMap,
-): void {
-    if (def.prestage_from == null || turn < def.prestage_from) return;
-    if (!selectStaffControlledFactions(state).includes(def.faction)) return;
+): { liveOperation: CorpsOperation | undefined; reservations: PrestageReservation[] } | null {
+    if (def.prestage_from == null || turn < def.prestage_from) return null;
+    if (!selectStaffControlledFactions(state).includes(def.faction)) return null;
     const command = state.military.corps_command?.[def.corps];
     const liveOperation = command?.active_operations?.find((operation) => operation.name === def.name);
-    if (liveOperation && liveOperation.phase !== 'planning') return;
-    if (prePlannedOperationAlreadyResolved(state, def)) return;
+    if (liveOperation && liveOperation.phase !== 'planning') return null;
+    if (prePlannedOperationAlreadyResolved(state, def)) return null;
     const formations = state.military.formations ?? {};
-    const movementState = state.military.brigade_movement_state ?? {};
     const headHeldBrigadeIds = getQueuedHeadHeldBrigadeIds(state, def);
+    const reservations: PrestageReservation[] = [];
     for (const axis of def.axes) {
         if (!axis.staging_osid) continue;
         for (const authoredFormationId of [...axis.brigades].sort(strictCompare)) {
@@ -2610,107 +2625,124 @@ function prestageReservedPrePlannedElites(
             if (formation.elite_loan_state?.on_loan
                 && (formation.elite_loan_state.loaned_to_corps !== def.corps
                     || !isEliteAuthoredForHistoricalOperation(brigadeId, def.name))) continue;
-            const location = formation.location_osid;
-            const atStaging = location === axis.staging_osid;
-            const transit = movementState[brigadeId];
-            const order = state.military.brigade_movement_orders?.[brigadeId];
-            const activeTransit = transit?.status === 'in_transit';
-            const consumedDestinations = activeTransit
-                ? transit?.destination_sids ?? []
-                : order?.destination_sids ?? [];
-            const consumedDestination = consumedDestinations[0];
-            // Staging is an ordinary concentration destination, not an approach
-            // hold: a return-to-staging order must not masquerade as valid
-            // operation geometry.
-            const consumedApproach = consumedDestination !== axis.staging_osid
-                && isLivePlanningApproachDestination(
-                    state,
-                    liveOperation,
-                    brigadeId,
-                    consumedDestinations,
-                    adjacency,
-                    reverseMap,
-                );
-            const atApproach = Boolean(location) && isLivePlanningApproachDestination(
+            reservations.push({ axis: axis as PrestageReservation['axis'], brigadeId, formation });
+        }
+    }
+    return { liveOperation, reservations };
+}
+
+function prestageReservedPrePlannedElites(
+    state: GameState,
+    def: PrePlannedOp,
+    turn: number,
+    adjacency?: Map<Osid, Osid[]>,
+    reverseMap?: OperationalToCanonicalReverseMap,
+): void {
+    const collected = collectPrestageReservations(state, def, turn);
+    if (!collected) return;
+    const { liveOperation } = collected;
+    const movementState = state.military.brigade_movement_state ?? {};
+    for (const { axis, brigadeId, formation } of collected.reservations) {
+        const location = formation.location_osid;
+        const atStaging = location === axis.staging_osid;
+        const transit = movementState[brigadeId];
+        const order = state.military.brigade_movement_orders?.[brigadeId];
+        const activeTransit = transit?.status === 'in_transit';
+        const consumedDestinations = activeTransit
+            ? transit?.destination_sids ?? []
+            : order?.destination_sids ?? [];
+        const consumedDestination = consumedDestinations[0];
+        // Staging is an ordinary concentration destination, not an approach
+        // hold: a return-to-staging order must not masquerade as valid
+        // operation geometry.
+        const consumedApproach = consumedDestination !== axis.staging_osid
+            && isLivePlanningApproachDestination(
                 state,
                 liveOperation,
                 brigadeId,
-                location ? [location as SettlementId] : [],
+                consumedDestinations,
                 adjacency,
                 reverseMap,
             );
-            const movementOwner = activeTransit ? transit?.owner : order?.owner;
-            const authoredHistoricalElite = isSectorAssignmentExemptCorpsId(formation.corps_id)
-                && isEliteAuthoredForHistoricalOperation(brigadeId, def.name);
-            const protectedMovement = (activeTransit || order != null)
-                && movementOwner !== 'bot_discretionary'
-                && !authoredHistoricalElite;
+        const atApproach = Boolean(location) && isLivePlanningApproachDestination(
+            state,
+            liveOperation,
+            brigadeId,
+            location ? [location as SettlementId] : [],
+            adjacency,
+            reverseMap,
+        );
+        const movementOwner = activeTransit ? transit?.owner : order?.owner;
+        const authoredHistoricalElite = isSectorAssignmentExemptCorpsId(formation.corps_id)
+            && isEliteAuthoredForHistoricalOperation(brigadeId, def.name);
+        const protectedMovement = (activeTransit || order != null)
+            && movementOwner !== 'bot_discretionary'
+            && !authoredHistoricalElite;
 
-            if (atStaging) {
-                if (consumedApproach) continue;
-                // Legacy at-staging datum selection: ANY retained movement
-                // state's destinations are considered, including packing and
-                // unpacking where status is not yet in_transit.
-                const legacyDestinations = transit?.destination_sids ?? order?.destination_sids ?? [];
-                const orderedAway = legacyDestinations.length > 0
-                    && !legacyDestinations.includes(axis.staging_osid as SettlementId);
-                // Original at-staging rule: ANY Main Staff exempt formation's
-                // away movement is reclaimable, independent of authored elite
-                // reservation membership.
-                const reclaimable = transit?.owner === 'bot_discretionary'
-                    || order?.owner === 'bot_discretionary'
-                    || isSectorAssignmentExemptCorpsId(formation.corps_id);
-                if (orderedAway && reclaimable) {
-                    delete state.military.brigade_movement_state?.[brigadeId];
-                    delete state.military.brigade_movement_orders?.[brigadeId];
-                }
-                continue;
-            }
-
-            if (activeTransit) {
-                if (consumedApproach || protectedMovement) continue;
-                // A live approach location is the operation's own assembly
-                // point: cancel a discretionary departure and hold there.
-                if (atApproach) {
-                    delete state.military.brigade_movement_state?.[brigadeId];
-                    delete state.military.brigade_movement_orders?.[brigadeId];
-                    continue;
-                }
-                if (transit?.destination_sids?.includes(axis.staging_osid as SettlementId)) continue;
+        if (atStaging) {
+            if (consumedApproach) continue;
+            // Legacy at-staging datum selection: ANY retained movement
+            // state's destinations are considered, including packing and
+            // unpacking where status is not yet in_transit.
+            const legacyDestinations = transit?.destination_sids ?? order?.destination_sids ?? [];
+            const orderedAway = legacyDestinations.length > 0
+                && !legacyDestinations.includes(axis.staging_osid as SettlementId);
+            // Original at-staging rule: ANY Main Staff exempt formation's
+            // away movement is reclaimable, independent of authored elite
+            // reservation membership.
+            const reclaimable = transit?.owner === 'bot_discretionary'
+                || order?.owner === 'bot_discretionary'
+                || isSectorAssignmentExemptCorpsId(formation.corps_id);
+            if (orderedAway && reclaimable) {
                 delete state.military.brigade_movement_state?.[brigadeId];
                 delete state.military.brigade_movement_orders?.[brigadeId];
-            } else if (order) {
-                if (consumedApproach) continue;
-                if (atApproach) {
-                    if (protectedMovement) continue;
-                    delete state.military.brigade_movement_orders?.[brigadeId];
-                    continue;
-                }
-                // Legacy off-staging fallback: a non-transit pending order is
-                // retargeted to the authored staging area regardless of owner.
+            }
+            continue;
+        }
+
+        if (activeTransit) {
+            if (consumedApproach || protectedMovement) continue;
+            // A live approach location is the operation's own assembly
+            // point: cancel a discretionary departure and hold there.
+            if (atApproach) {
+                delete state.military.brigade_movement_state?.[brigadeId];
                 delete state.military.brigade_movement_orders?.[brigadeId];
-            } else if (atApproach) {
-                // The brigade already stands at its own current lawful
-                // approach while the operation is planning: hold, never emit a
-                // return-to-staging order.
                 continue;
             }
-
-            if (formation.posture === 'dig_in') {
-                formation.posture = 'defend';
-                formation.dig_in_progress = 0;
+            if (transit?.destination_sids?.includes(axis.staging_osid as SettlementId)) continue;
+            delete state.military.brigade_movement_state?.[brigadeId];
+            delete state.military.brigade_movement_orders?.[brigadeId];
+        } else if (order) {
+            if (consumedApproach) continue;
+            if (atApproach) {
+                if (protectedMovement) continue;
+                delete state.military.brigade_movement_orders?.[brigadeId];
+                continue;
             }
-            if (!state.military.brigade_movement_orders) state.military.brigade_movement_orders = {};
-            // This dated authored commitment owns the movement slot over
-            // discretionary sector routing and later march correction, including
-            // while the operation is queued behind an earlier authored operation.
-            const concentrationOrder = {
-                destination_sids: [axis.staging_osid as SettlementId],
-                stance: 'column' as const,
-                owner: 'authored_preplanned' as const,
-            };
-            state.military.brigade_movement_orders[brigadeId] = concentrationOrder;
+            // Legacy off-staging fallback: a non-transit pending order is
+            // retargeted to the authored staging area regardless of owner.
+            delete state.military.brigade_movement_orders?.[brigadeId];
+        } else if (atApproach) {
+            // The brigade already stands at its own current lawful
+            // approach while the operation is planning: hold, never emit a
+            // return-to-staging order.
+            continue;
         }
+
+        if (formation.posture === 'dig_in') {
+            formation.posture = 'defend';
+            formation.dig_in_progress = 0;
+        }
+        if (!state.military.brigade_movement_orders) state.military.brigade_movement_orders = {};
+        // This dated authored commitment owns the movement slot over
+        // discretionary sector routing and later march correction, including
+        // while the operation is queued behind an earlier authored operation.
+        const concentrationOrder = {
+            destination_sids: [axis.staging_osid as SettlementId],
+            stance: 'column' as const,
+            owner: 'authored_preplanned' as const,
+        };
+        state.military.brigade_movement_orders[brigadeId] = concentrationOrder;
     }
 }
 
@@ -2722,23 +2754,59 @@ export function prestageDeferredPrePlannedElites(
 ): void {
     const turn = state.meta.turn;
     for (const def of ALL_PRE_PLANNED) {
-        if (def.enqueue_from != null) {
-            const command = state.military.corps_command?.[def.corps];
-            if (turn >= def.enqueue_from && command
-                && !prePlannedOperationAlreadyResolved(state, def)
-                && !hasDeclinedPrePlannedAuthorization(state, def)
-                && !command.queued_operations?.includes(def.name)
-                && !command.active_operations.some((op) => op.name === def.name)) {
-                command.queued_operations = [...(command.queued_operations ?? []), def.name];
-            }
-            // A terminal queue removal (declined or already owned) must also
-            // stop this dated plan from continuing to marshal its old force.
-            if (!command?.queued_operations?.includes(def.name)
-                && !command?.active_operations.some((op) => op.name === def.name)) continue;
-            if (hasDeclinedPrePlannedAuthorization(state, def)) continue;
+        if (shouldEnqueueDatedPrePlanned(state, def, turn)) {
+            const command = state.military.corps_command![def.corps]!;
+            command.queued_operations = [...(command.queued_operations ?? []), def.name];
         }
+        if (!isDatedPrestageQueueGateOpen(state, def)) continue;
         prestageReservedPrePlannedElites(state, def, turn, adjacency, reverseMap);
     }
+}
+
+/** True when the pass would append this dated plan to its corps queue this turn. Pure. */
+function shouldEnqueueDatedPrePlanned(state: GameState, def: PrePlannedOp, turn: number): boolean {
+    if (def.enqueue_from == null || turn < def.enqueue_from) return false;
+    const command = state.military.corps_command?.[def.corps];
+    return command != null
+        && !prePlannedOperationAlreadyResolved(state, def)
+        && !hasDeclinedPrePlannedAuthorization(state, def)
+        && !command.queued_operations?.includes(def.name)
+        && !(command.active_operations ?? []).some((op) => op.name === def.name);
+}
+
+/**
+ * The enqueue/queue/declined gate of the pre-staging pass, read after any enqueue this turn.
+ * A plan with an `enqueue_from` marshals only while it is queued or live and not declined: a
+ * terminal queue removal (declined or already owned) must also stop it marshaling its old force.
+ * Plans without an `enqueue_from` always pass. Pure.
+ */
+function isDatedPrestageQueueGateOpen(state: GameState, def: PrePlannedOp): boolean {
+    if (def.enqueue_from == null) return true;
+    const command = state.military.corps_command?.[def.corps];
+    if (!command?.queued_operations?.includes(def.name)
+        && !(command?.active_operations ?? []).some((op) => op.name === def.name)) return false;
+    return !hasDeclinedPrePlannedAuthorization(state, def);
+}
+
+/**
+ * P3 candidate B (G-a, 2026-11-22): every brigade the dated pre-staging pass
+ * (`prestageDeferredPrePlannedElites`) marshals for a dated plan this turn. Built from the very
+ * same gates and skips as the pass (`isDatedPrestageQueueGateOpen` + `collectPrestageReservations`),
+ * so a brigade is in this set exactly when the pass may delete or replace its discretionary order.
+ * A plan the pass would enqueue this turn counts as queued. Callers that must not hand such a
+ * brigade a competing order (empty-sector relief) skip it; the dated operation keeps priority.
+ * Pure: writes nothing. Iteration follows the catalog order; the result is a set.
+ */
+export function getActivePrestageReservedBrigadeIds(state: GameState): Set<FormationId> {
+    const reserved = new Set<FormationId>();
+    const turn = state.meta?.turn ?? 0;
+    if (!state.military) return reserved;
+    for (const def of ALL_PRE_PLANNED) {
+        if (!shouldEnqueueDatedPrePlanned(state, def, turn) && !isDatedPrestageQueueGateOpen(state, def)) continue;
+        const collected = collectPrestageReservations(state, def, turn);
+        for (const reservation of collected?.reservations ?? []) reserved.add(reservation.brigadeId);
+    }
+    return reserved;
 }
 
 // PERMITTED CREATION ENTRY POINT — pre-planned and player-queued operations only.

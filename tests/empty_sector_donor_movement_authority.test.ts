@@ -32,6 +32,7 @@ import type { BrigadeEvaluationContext } from '../src/sim/combat/bot_brigade_eva
 import { createColumnMovementOrder } from '../src/sim/combat/brigade_movement_order_helpers.js';
 import { processOsidColumnMovement } from '../src/sim/combat/osid_column_movement.js';
 import { spatialFriendlyDistance } from '../src/sim/spatial_context.js';
+import { correctMarchOrders, correctTransitStates } from '../src/sim/combat/commander_march_correction.js';
 import type { OperationalToCanonicalReverseMap } from '../src/data/operational_data.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
 import type { TerrainScalarsData, TerrainScalars } from '../src/map/terrain_scalars.js';
@@ -137,7 +138,7 @@ function makeAdjacency(edges: Array<[string, string]>): Map<Osid, Osid[]> {
  *     above its own `ceil(length_edges / 8)` line minimum and is a legal donor.
  *   - The only route DONOR_LOCATION -> ROUTE_MIDDLE -> EMPTY_FRONT is friendly.
  */
-function makeFixture() {
+function makeFixture(route: string[] = [ROUTE_MIDDLE]) {
     const emptySector = makeSector({
         sectorId: 'sector:corps_a:empty',
         frontOsids: [EMPTY_FRONT],
@@ -158,15 +159,15 @@ function makeFixture() {
             900,
         ) as SectorTopologyWorkingFormation,
     };
+    const chain = [DONOR_LOCATION, ...route, EMPTY_FRONT];
     const adjacency = makeAdjacency([
-        [DONOR_LOCATION, ROUTE_MIDDLE],
-        [ROUTE_MIDDLE, EMPTY_FRONT],
+        ...chain.slice(1).map((osid, index) => [chain[index]!, osid] as [string, string]),
         [DONOR_LOCATION, DONOR_SECOND_LOCATION],
     ]);
     const friendlyOsids = new Set<string>([
         DONOR_LOCATION,
         DONOR_SECOND_LOCATION,
-        ROUTE_MIDDLE,
+        ...route,
         EMPTY_FRONT,
     ]);
     const componentOf = new Map<string, number>(
@@ -629,5 +630,149 @@ describe('empty reachable same-corps sector donor movement authority', () => {
         expect(state.military.formations!.donor_brigade!.location_osid).toBe(EMPTY_FRONT);
         expect(state.military.brigade_movement_state?.donor_brigade).toBeUndefined();
         expect(fixture.emptySector.assigned_brigade_ids).toContain('donor_brigade');
+    });
+});
+
+// P3 candidate B (2026-11-22), G-b: a relief used to live one turn. The next turn T1 dropped it
+// (the target already had a transit heading to it, and a donor in transit was ineligible), so the
+// regenerated directive no longer authorised the march and commander-correct-march-orders deleted
+// the transit. These tests run the real T1 -> emit -> correction functions across turn boundaries.
+describe('empty-sector relief survives the turn boundary until the donor arrives', () => {
+    const SUBSEG_DONOR = 'subseg:sector:corps_a:donor';
+
+    function emitDirective(briefing: any, intent: ReturnType<typeof computeEmptySectorReliefReassignments>) {
+        return emitCommanderOutput(
+            briefing,
+            [] as any,
+            { total_brigades: 2 } as any,
+            { zones: [], garrison_locks: [], surplus_pool: [] } as any,
+            { plan: null, action: 'none', reason: 'relief persistence', alternatives: [] } as any,
+            {
+                stance_changes: [],
+                reserve_shifts: [],
+                empty_sector_relief_reassignments: intent,
+                reinforcement_requests: [],
+                activity_entries: [],
+            } as any,
+            { threatened_zones: [], global_threat_level: 'low' } as any,
+            null,
+        ).directive;
+    }
+
+    function setupTurnN(route: string[] = [ROUTE_MIDDLE]) {
+        const fixture = makeFixture(route);
+        // The donor is a line brigade on its own sub-segment, so march correction restricts it.
+        fixture.formations.donor_brigade!.assigned_sub_segment_id = SUBSEG_DONOR;
+        fixture.formations.donor_brigade_second!.assigned_sub_segment_id = SUBSEG_DONOR;
+        const state = makePipelineState(fixture);
+        state.meta.turn = 30;
+        const briefing = makeBriefing(fixture, state);
+        briefing.turn = 30;
+
+        // Turn N: T1 intent, emit, T2 column order.
+        const intent = computeEmptySectorReliefReassignments(briefing);
+        expect(intent.map((r) => r.brigade_id)).toEqual(['donor_brigade']);
+        const directive = emitDirective(briefing, intent);
+        state.military.corps_command = { [CORPS_ID]: { directive } } as any;
+        const marchContext = makeSectorMarchContext(fixture, state, directive as any);
+        expect(evaluateSectorMarch(marchContext)).toBe(true);
+        const destination = marchContext.result.column_march_orders.donor_brigade!;
+        expect(destination).toBe(EMPTY_FRONT);
+        state.military.brigade_movement_orders = {
+            donor_brigade: { ...createColumnMovementOrder(destination), owner: 'bot_discretionary' } as any,
+        };
+
+        const chain = [DONOR_LOCATION, ...route, EMPTY_FRONT];
+        const edges = [
+            ...chain.slice(1).map((osid, index) => makeEdge(chain[index]!, osid)),
+            makeEdge(DONOR_LOCATION, DONOR_SECOND_LOCATION),
+        ];
+        const osids = [DONOR_LOCATION, DONOR_SECOND_LOCATION, ...route, EMPTY_FRONT];
+        return {
+            fixture,
+            state,
+            edges,
+            reverseMap: makeReverseMap(osids),
+            terrain: makeFlatTerrain(osids),
+        };
+    }
+
+    /** One later turn: T3 movement, partition, T1 decide, emit, then march correction. */
+    function runTurn(ctx: ReturnType<typeof setupTurnN>) {
+        const { fixture, state } = ctx;
+        state.meta.turn += 1;
+        processOsidColumnMovement(state, ctx.edges, ctx.reverseMap, ctx.terrain, fixture.adjacency);
+        classifyBrigadesByTerritory(
+            fixture.sectors,
+            FACTION as any,
+            fixture.formations,
+            fixture.adjacency,
+            fixture.friendlyOsids,
+            fixture.componentOf,
+            new Map(),
+            undefined,
+            state,
+        );
+        const briefing = makeBriefing(fixture, state);
+        briefing.turn = state.meta.turn;
+        const intent = computeEmptySectorReliefReassignments(briefing);
+        const directive = emitDirective(briefing, intent);
+        state.military.corps_command = { [CORPS_ID]: { directive } } as any;
+        correctMarchOrders(state, fixture.adjacency as Map<string, string[]>);
+        correctTransitStates(state, fixture.adjacency as Map<string, string[]>);
+        return { intent, directive };
+    }
+
+    it('turn N+1: T1 re-emits the same relief and march correction keeps the donor transit', () => {
+        const ctx = setupTurnN();
+        const { intent, directive } = runTurn(ctx);
+
+        expect(intent).toEqual([{
+            brigade_id: 'donor_brigade',
+            to_sector_id: ctx.fixture.emptySector.sector_id,
+            reason: 'empty front sector requires corps relief',
+        }]);
+        expect(directive.sector_reassignment_orders).toEqual([{
+            brigade_id: 'donor_brigade',
+            to_sector_id: ctx.fixture.emptySector.sector_id,
+            empty_sector_relief: true,
+        }]);
+        expect(ctx.state.military.formations!.donor_brigade!.location_osid).toBe(DONOR_LOCATION);
+        expect(ctx.state.military.brigade_movement_state?.donor_brigade?.status).toBe('in_transit');
+        expect(ctx.state.military.brigade_movement_state?.donor_brigade?.destination_sids).toEqual([EMPTY_FRONT]);
+    });
+
+    it.each([
+        ['a 2-hop route (one move)', [ROUTE_MIDDLE]],
+        ['a 6-hop route (the donor spends a turn off its own front)', [ROUTE_MIDDLE, 'op:route:r2', 'op:route:r3', 'op:route:r4', 'op:route:r5']],
+    ])('lifecycle over %s: the donor arrives; then no re-emit and no reverse order for 3 turns', (_label, route) => {
+        const ctx = setupTurnN(route);
+        let guard = 0;
+        while (ctx.state.military.formations!.donor_brigade!.location_osid !== EMPTY_FRONT && guard < 6) {
+            runTurn(ctx);
+            if (ctx.state.military.formations!.donor_brigade!.location_osid !== EMPTY_FRONT) {
+                expect(ctx.state.military.brigade_movement_state?.donor_brigade?.destination_sids).toEqual([EMPTY_FRONT]);
+            }
+            guard += 1;
+        }
+        expect(ctx.state.military.formations!.donor_brigade!.location_osid).toBe(EMPTY_FRONT);
+        ensureMinimumSectorCoverage(
+            ctx.fixture.sectors,
+            ctx.fixture.formations,
+            ctx.fixture.adjacency,
+            ctx.fixture.friendlyOsids,
+            ctx.fixture.componentOf,
+            ctx.state,
+        );
+        expect(ctx.fixture.emptySector.assigned_brigade_ids).toContain('donor_brigade');
+
+        for (let turn = 0; turn < 3; turn++) {
+            const { intent, directive } = runTurn(ctx);
+            expect(intent.filter((r) => r.brigade_id === 'donor_brigade')).toEqual([]);
+            expect((directive.sector_reassignment_orders ?? []).filter((o) => o.brigade_id === 'donor_brigade')).toEqual([]);
+            expect(ctx.state.military.formations!.donor_brigade!.location_osid).toBe(EMPTY_FRONT);
+            expect(ctx.state.military.brigade_movement_orders?.donor_brigade).toBeUndefined();
+            expect(ctx.state.military.brigade_movement_state?.donor_brigade).toBeUndefined();
+        }
     });
 });

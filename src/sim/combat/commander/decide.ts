@@ -35,6 +35,11 @@ import { isEnclaveMovementDestinationAllowed } from '../enclave_resilience.js';
 import { isSectorRosterEligibleFormation } from '../sector_roster_eligibility.js';
 import { TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS } from '../brigade_assignment.js';
 import { stableSectorKey } from '../sector_intel.js';
+import { getActivePrestageReservedBrigadeIds, getHeadQueuedPrePlannedBrigadeIds } from '../pre_planned_operations.js';
+import { getDueArmyHqReservedBrigadeIds } from '../triggered_operations.js';
+import { getAllAxisBrigades } from '../sector_offensive_axis_helpers.js';
+import { isEliteReservedForHistoricalOperation } from '../historical_elite_reservations.js';
+import { OPERATION_OPPORTUNITY_CATALOG } from '../operation_opportunities.js';
 import type {
     CommanderBeliefState,
     CommanderBriefing,
@@ -172,7 +177,7 @@ export function makeDecisions(
 
     // 4b. Empty-sector relief is explicit T1 intent. T2/T3 perform the march;
     // this decision phase never mutates formation location or sector buckets.
-    const emptySectorReliefReassignments = computeEmptySectorReliefReassignments(briefing);
+    const emptySectorReliefReassignments = computeEmptySectorReliefReassignments(briefing, currentPlan);
 
     // 5. Plan suspension check
     const { suspend_plan, suspend_reason } = evaluatePlanSuspension(
@@ -202,15 +207,106 @@ function getSectorFrontOsids(sector: CorpsFrontSector): string[] {
     return [...osids].sort(strictCompare);
 }
 
-function buildActiveOperationParticipantSet(briefing: CommanderBriefing): Set<FormationId> {
-    const participants = new Set<FormationId>();
-    const commands = briefing.state_ref?.military.corps_command ?? {};
+/** Commander plan statuses that already hold their assigned brigades (managePlan runs before decide). */
+const RELIEF_HOLDING_PLAN_STATUSES: ReadonlySet<CommanderPlan['status']> = new Set(['concentrating', 'ready', 'executing']);
+/** Opportunity proposals that are still awaiting a decision (not yet resolved). */
+const LIVE_OPPORTUNITY_PROPOSAL_STATUSES: ReadonlySet<string> = new Set(['eligible_pending_review', 'delayed']);
+
+/**
+ * Brigades another authority will claim, so an empty-sector relief must not take them
+ * (P3 candidate B, 2026-11-22). Each source is the authority's own helper or field:
+ *  - any active operation's participants and axis rosters, in every phase (`getAllAxisBrigades`);
+ *  - the due queue head's authored roster (`getHeadQueuedPrePlannedBrigadeIds`);
+ *  - the dated pre-staging pass's roster (`getActivePrestageReservedBrigadeIds`), which would
+ *    otherwise delete or replace the relief order at the start of the next turn;
+ *  - the roster of a due Army HQ operation (`getDueArmyHqReservedBrigadeIds`);
+ *  - the commander's own plan while it concentrates, is ready or executes (its op may not exist yet);
+ *  - the catalog axes of an opportunity whose proposal is still live in `operation_opportunities`.
+ * Historical elite reservations are per brigade and turn; the donor filter checks them directly.
+ * Read-only.
+ */
+function buildReliefReservedBrigadeSet(
+    briefing: CommanderBriefing,
+    currentPlan: CommanderPlan | null,
+): Set<FormationId> {
+    const reserved = new Set<FormationId>();
+    const state = briefing.state_ref;
+    if (!state) return reserved;
+    const commands = state.military?.corps_command ?? {};
     for (const corpsId of Object.keys(commands).sort(strictCompare)) {
         for (const operation of commands[corpsId]?.active_operations ?? []) {
-            for (const brigadeId of operation.participating_brigades ?? []) participants.add(brigadeId);
+            for (const brigadeId of operation.participating_brigades ?? []) reserved.add(brigadeId);
+            for (const brigadeId of getAllAxisBrigades(operation) ?? []) reserved.add(brigadeId);
         }
     }
-    return participants;
+    for (const brigadeId of getHeadQueuedPrePlannedBrigadeIds(state)) reserved.add(brigadeId);
+    for (const brigadeId of getActivePrestageReservedBrigadeIds(state)) reserved.add(brigadeId);
+    for (const brigadeId of getDueArmyHqReservedBrigadeIds(state, briefing.turn)) reserved.add(brigadeId);
+    if (currentPlan && RELIEF_HOLDING_PLAN_STATUSES.has(currentPlan.status)) {
+        for (const brigadeId of currentPlan.assigned_brigades) reserved.add(brigadeId);
+    }
+    const liveOpportunityIds = new Set(
+        (state.military?.operation_opportunities ?? [])
+            .filter((proposal) => LIVE_OPPORTUNITY_PROPOSAL_STATUSES.has(proposal.status))
+            .map((proposal) => proposal.opportunity_id),
+    );
+    if (liveOpportunityIds.size > 0) {
+        for (const def of OPERATION_OPPORTUNITY_CATALOG) {
+            if (!liveOpportunityIds.has(def.opportunity_id)) continue;
+            for (const axis of def.axes) {
+                for (const brigadeId of axis.brigades) reserved.add(brigadeId);
+            }
+        }
+    }
+    return reserved;
+}
+
+/**
+ * The donor of a relief this corps sent last turn that is still on its way to this empty sector
+ * (P3 candidate B, G-b). Read from existing state only: last turn's directive names the brigade as
+ * an `empty_sector_relief` reassignment, and its pending movement order or its movement state
+ * (packing, in transit, unpacking) is heading to this sector's front. Not once it stands on that
+ * front or is on the sector's line roster (arrived), and not when another authority now reserves
+ * it. The caller only asks for a sector that is still empty, so a staffed sector stops it too.
+ * Lowest id wins when two qualify, so the result is independent of input order.
+ */
+function findInFlightReliefDonor(
+    briefing: CommanderBriefing,
+    targetSector: CorpsFrontSector,
+    targetOsids: ReadonlySet<string>,
+    reserved: ReadonlySet<FormationId>,
+    reservedDonors: ReadonlySet<FormationId>,
+): FormationId | null {
+    const state = briefing.state_ref;
+    if (!state) return null;
+    const previousRelief = new Set(
+        (state.military.corps_command?.[briefing.corps_id]?.directive?.sector_reassignment_orders ?? [])
+            .filter((order) => order.empty_sector_relief === true)
+            .map((order) => order.brigade_id),
+    );
+    if (previousRelief.size === 0) return null;
+    // Arrival is the line roster or the front itself. An own reserve/rear relief (SE7E) is on the
+    // sector's reserve/rear roster from the start, so those rosters do not mean it has arrived.
+    const onTargetLine = new Set<FormationId>(targetSector.assigned_brigade_ids);
+    const headsToTarget = (destinations: readonly string[] | undefined): boolean =>
+        (destinations ?? []).some((osid) => targetOsids.has(osid));
+    const donors = briefing.brigades
+        .filter((brigade) => {
+            if (!previousRelief.has(brigade.id)) return false;
+            if (brigade.faction !== briefing.faction || brigade.corps_id !== briefing.corps_id) return false;
+            if (reserved.has(brigade.id) || reservedDonors.has(brigade.id)) return false;
+            if (isEliteReservedForHistoricalOperation(brigade.id, briefing.turn)) return false;
+            if (brigade.elite_loan_state?.on_loan) return false;
+            if (onTargetLine.has(brigade.id)) return false;
+            if (brigade.location_osid != null && targetOsids.has(brigade.location_osid)) return false;
+            const order = state.military.brigade_movement_orders?.[brigade.id];
+            const movement = state.military.brigade_movement_state?.[brigade.id];
+            return headsToTarget(order?.destination_sids)
+                || (movement != null && movement.status !== 'deployed' && headsToTarget(movement.destination_sids));
+        })
+        .map((brigade) => brigade.id)
+        .sort(strictCompare);
+    return donors[0] ?? null;
 }
 
 function hasPendingReliefForTargets(
@@ -284,16 +380,25 @@ function canReleaseReliefDonor(placement: ReliefDonorPlacement): boolean {
  * - It is skipped when one of its own reserve/rear brigades already stands on its front
  *   (the front is held; only the buckets lag).
  *
- * Donor eligibility is unchanged (dug in, under an order, moving, operation-bound,
- * disrupted and loaned brigades are excluded). At most one donor per empty sector per
- * pass, and a donor serves at most one sector (Engine Invariant 14.9: one deterministic
- * reassignment intent per empty, reachable same-corps sector).
+ * Donors under an order, moving, disrupted or loaned are excluded; dug-in donors rank last.
+ * Brigades another authority will claim are excluded too (`buildReliefReservedBrigadeSet`:
+ * operation participants and axis rosters, the due queue head, the dated pre-staging roster,
+ * a due Army HQ roster, the commander's own committed plan, live opportunity proposals; and
+ * historical elite reservations). At most one donor per empty sector per pass, and a donor
+ * serves at most one sector (Engine Invariant 14.9: one deterministic reassignment intent per
+ * empty, reachable same-corps sector).
+ *
+ * Persistence (P3 candidate B, 2026-11-22): a relief whose donor is still on its way to a
+ * sector that is still empty is re-emitted unchanged each pass (`findInFlightReliefDonor`), so
+ * the regenerated directive keeps authorising the march until the donor arrives. Before, the
+ * relief lived one turn and march correction then deleted the donor's transit.
  *
  * Residuals (known): a frontless sector whose own rear was taken by a sector with no own
  * pool, or whose whole own pool is dug in, waits for a later pass.
  */
 export function computeEmptySectorReliefReassignments(
     briefing: CommanderBriefing,
+    currentPlan: CommanderPlan | null = null,
 ): EmptySectorReliefReassignment[] {
     const state = briefing.state_ref;
     if (!state) return [];
@@ -325,7 +430,7 @@ export function computeEmptySectorReliefReassignments(
     ];
     if (emptySectors.length === 0) return [];
 
-    const operationParticipants = buildActiveOperationParticipantSet(briefing);
+    const reservedElsewhere = buildReliefReservedBrigadeSet(briefing, currentPlan);
     const pendingDigIn = new Set(
         (state.military.brigade_posture_orders ?? [])
             .filter((order) => order.posture === 'dig_in')
@@ -341,7 +446,6 @@ export function computeEmptySectorReliefReassignments(
 
     for (const targetSector of emptySectors) {
         const targetOsids = new Set(getSectorFrontOsids(targetSector));
-        if (hasPendingReliefForTargets(briefing, targetOsids)) continue;
         const ownReserve = new Set<FormationId>(targetSector.reserve_brigade_ids);
         const ownRear = new Set<FormationId>(targetSector.rear_brigade_ids ?? []);
         const hasOwnPool = ownReserve.size + ownRear.size > 0;
@@ -351,12 +455,29 @@ export function computeEmptySectorReliefReassignments(
             (ownReserve.has(brigade.id) || ownRear.has(brigade.id))
             && brigade.location_osid != null
             && targetOsids.has(brigade.location_osid))) continue;
+        // G-b (P3 candidate B): a relief sent earlier whose donor is still on its way is re-emitted
+        // unchanged, so the regenerated directive keeps authorising the march and march correction
+        // (`isMovementAuthorizedByCorpsReassignment`) keeps the order or transit until arrival.
+        const inFlightDonor = findInFlightReliefDonor(
+            briefing, targetSector, targetOsids, reservedElsewhere, reservedDonors,
+        );
+        if (inFlightDonor) {
+            reservedDonors.add(inFlightDonor);
+            results.push({
+                brigade_id: inFlightDonor,
+                to_sector_id: targetSector.sector_id,
+                reason: 'empty front sector requires corps relief',
+            });
+            continue;
+        }
+        if (hasPendingReliefForTargets(briefing, targetOsids)) continue;
 
         const eligible = briefing.brigades
             .filter((brigade) => {
                 if (brigade.faction !== briefing.faction || brigade.corps_id !== briefing.corps_id) return false;
                 if (!isSectorRosterEligibleFormation(brigade) || !brigade.location_osid) return false;
-                if (reservedDonors.has(brigade.id) || operationParticipants.has(brigade.id)) return false;
+                if (reservedDonors.has(brigade.id) || reservedElsewhere.has(brigade.id)) return false;
+                if (isEliteReservedForHistoricalOperation(brigade.id, briefing.turn)) return false;
                 if ((brigade.disrupted_turns ?? 0) > 0 || brigade.disrupted === true) return false;
                 // A dug-in brigade is a legal donor (package P2 step 1, 2026-11-16): moving forfeits its
                 // dig-in, released by the march's `defend` posture order. It ranks after donors that are not

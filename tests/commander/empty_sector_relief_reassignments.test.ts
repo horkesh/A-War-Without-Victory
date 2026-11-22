@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import { computeEmptySectorReliefReassignments } from '../../src/sim/combat/commander/decide.js';
+import * as prePlanned from '../../src/sim/combat/pre_planned_operations.js';
+import { OPERATION_OPPORTUNITY_CATALOG } from '../../src/sim/combat/operation_opportunities.js';
+
+const { _ALL_PRE_PLANNED } = prePlanned;
 
 function makeSector(
     sectorId: string,
@@ -409,5 +413,331 @@ describe('empty-sector relief reassignment', () => {
         expect(computeEmptySectorReliefReassignments(briefing)).toEqual([]);
         expect(briefing.state_ref.military.formations.relief_brigade.location_osid)
             .toBe('op:test:rear');
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// P3 candidate B (2026-11-22): a relief lasts until the donor arrives (G-b), and the donor filter
+// skips every brigade another authority will reclaim next turn (G-a and the reservation skips).
+// ═══════════════════════════════════════════════════════════════════════════
+
+const RELIEF_TARGET = 'sector:test:empty';
+const reliefFor = (brigadeId: string, sectorId = RELIEF_TARGET) => ({
+    brigade_id: brigadeId,
+    to_sector_id: sectorId,
+    reason: 'empty front sector requires corps relief',
+});
+
+/** Last turn's corps directive, as emit writes it for an empty-sector relief. */
+function setPreviousReliefDirective(briefing: any, brigadeId: string, sectorId = RELIEF_TARGET) {
+    const command = briefing.state_ref.military.corps_command ?? {};
+    briefing.state_ref.military.corps_command = {
+        ...command,
+        test_corps: {
+            ...(command.test_corps ?? {}),
+            active_operations: command.test_corps?.active_operations ?? [],
+            directive: {
+                sector_reassignment_orders: [{ brigade_id: brigadeId, to_sector_id: sectorId, empty_sector_relief: true }],
+            },
+        },
+    };
+}
+
+/**
+ * Two legal rear donors: `nearId` at op:test:rear (4 hops to the empty front) and
+ * `unreserved_far` at op:test:deep (5 hops). Without any reservation the near one wins.
+ */
+function makeTwoDonorBriefing(nearId: string, turn = 94) {
+    const briefing = makeBriefing();
+    const near = briefing.state_ref.military.formations.relief_brigade;
+    delete briefing.state_ref.military.formations.relief_brigade;
+    near.id = nearId;
+    near.name = nearId;
+    briefing.state_ref.military.formations[nearId] = near;
+
+    briefing.spatial.adjacency.set('op:test:deep', ['op:test:rear']);
+    briefing.spatial.adjacency.set('op:test:rear', [...(briefing.spatial.adjacency.get('op:test:rear') ?? []), 'op:test:deep']);
+    briefing.spatial.friendlyOsidsByFaction.get('RBiH')!.add('op:test:deep');
+    const far = structuredClone(near);
+    far.id = 'unreserved_far';
+    far.name = 'unreserved_far';
+    far.location_osid = 'op:test:deep';
+    far.home_osid = 'op:test:deep';
+    briefing.state_ref.military.formations.unreserved_far = far;
+    briefing.brigades = [near, far];
+
+    const donorSector = briefing.sectors.find((s: { sector_id: string }) => s.sector_id === 'sector:test:donor');
+    donorSector.rear_brigade_ids = [nearId, 'unreserved_far'];
+    briefing.turn = turn;
+    briefing.state_ref.meta.turn = turn;
+    return briefing;
+}
+
+/** Resolve every dated plan except Zvezda 94, so only its reservation is live in the fixture. */
+function onlyZvezda94Open(state: any) {
+    state.operation_history = _ALL_PRE_PLANNED
+        .filter((def) => def.name !== 'Operation Zvezda 94')
+        .map((def) => ({ corps_id: def.corps, operation_name: def.name }));
+}
+
+function zvezdaPrestageState(briefing: any, livePhase?: 'planning' | 'execution' | 'recovery') {
+    const state = briefing.state_ref;
+    state.factions = [{ id: 'RS' }, { id: 'RBiH' }, { id: 'HRHB' }];
+    onlyZvezda94Open(state);
+    state.military.corps_command = livePhase
+        ? {
+            vrs_drina: {
+                queued_operations: [],
+                active_operations: [{
+                    name: 'Operation Zvezda 94',
+                    type: 'attack',
+                    phase: livePhase,
+                    participating_brigades: ['rs_65th_protection_motorized_regiment'],
+                }],
+            },
+        }
+        : {};
+}
+
+describe('P3 candidate B: an empty-sector relief persists while the donor is en route (G-b)', () => {
+    it('re-emits the same relief for a donor sent last turn and now in transit toward the sector', () => {
+        const briefing = makeBriefing();
+        setPreviousReliefDirective(briefing, 'relief_brigade');
+        briefing.state_ref.military.brigade_movement_state = {
+            relief_brigade: { status: 'in_transit', stance: 'column', destination_sids: ['op:test:front'] },
+        };
+
+        expect(computeEmptySectorReliefReassignments(briefing)).toEqual([reliefFor('relief_brigade')]);
+    });
+
+    it('re-emits the same relief while the donor still holds the pending column order toward the sector', () => {
+        const briefing = makeBriefing();
+        setPreviousReliefDirective(briefing, 'relief_brigade');
+        briefing.state_ref.military.brigade_movement_orders = {
+            relief_brigade: { destination_sids: ['op:test:front'], stance: 'column', owner: 'bot_discretionary' },
+        };
+
+        expect(computeEmptySectorReliefReassignments(briefing)).toEqual([reliefFor('relief_brigade')]);
+    });
+
+    it('does not adopt an order toward the sector that was not a relief (no relief tag last turn)', () => {
+        const briefing = makeBriefing();
+        briefing.state_ref.military.brigade_movement_state = {
+            relief_brigade: { status: 'in_transit', stance: 'column', destination_sids: ['op:test:front'] },
+        };
+
+        expect(computeEmptySectorReliefReassignments(briefing)).toEqual([]);
+    });
+
+    it('does not re-emit once the donor has arrived on the target sector roster', () => {
+        const briefing = makeBriefing();
+        setPreviousReliefDirective(briefing, 'relief_brigade');
+        const donor = briefing.state_ref.military.formations.relief_brigade;
+        donor.location_osid = 'op:test:front';
+        briefing.state_ref.military.brigade_movement_state = {
+            relief_brigade: { status: 'unpacking', stance: 'column', destination_sids: ['op:test:front'] },
+        };
+        const target = briefing.sectors.find((s: { sector_id: string }) => s.sector_id === RELIEF_TARGET);
+        const donorSector = briefing.sectors.find((s: { sector_id: string }) => s.sector_id === 'sector:test:donor');
+        donorSector.rear_brigade_ids = [];
+        target.rear_brigade_ids = ['relief_brigade'];
+
+        expect(computeEmptySectorReliefReassignments(briefing)).toEqual([]);
+    });
+
+    it('does not re-emit when the target sector is no longer empty, and sends no reverse order for 3 turns', () => {
+        const briefing = makeBriefing();
+        setPreviousReliefDirective(briefing, 'relief_brigade');
+        briefing.state_ref.military.brigade_movement_state = {
+            relief_brigade: { status: 'in_transit', stance: 'column', destination_sids: ['op:test:front'] },
+        };
+        const target = briefing.sectors.find((s: { sector_id: string }) => s.sector_id === RELIEF_TARGET);
+        target.assigned_brigade_ids = ['someone_else'];
+        target.sub_segments[0].primary_brigade_ids = ['someone_else'];
+
+        for (let turn = 13; turn <= 15; turn++) {
+            briefing.turn = turn;
+            briefing.state_ref.meta.turn = turn;
+            const result = computeEmptySectorReliefReassignments(briefing);
+            expect(result.filter((r) => r.brigade_id === 'relief_brigade')).toEqual([]);
+            // The movement has ended in the meantime (correction deleted it): still nothing.
+            briefing.state_ref.military.brigade_movement_state = {};
+        }
+    });
+
+    it('is deterministic: shuffled brigade and sector order give the identical relief', () => {
+        const build = (reverse: boolean) => {
+            const briefing = makeTwoDonorBriefing('second_donor', 12);
+            setPreviousReliefDirective(briefing, 'second_donor');
+            briefing.state_ref.military.brigade_movement_state = {
+                second_donor: { status: 'in_transit', stance: 'column', destination_sids: ['op:test:front'] },
+            };
+            if (reverse) {
+                briefing.brigades = [...briefing.brigades].reverse();
+                briefing.sectors = [...briefing.sectors].reverse();
+                const donorSector = briefing.sectors.find((s: { sector_id: string }) => s.sector_id === 'sector:test:donor');
+                donorSector.rear_brigade_ids = [...donorSector.rear_brigade_ids].reverse();
+                briefing.state_ref.military.formations = Object.fromEntries(
+                    Object.entries(briefing.state_ref.military.formations).reverse(),
+                );
+            }
+            return computeEmptySectorReliefReassignments(briefing);
+        };
+        const forward = build(false);
+        expect(forward).toEqual([reliefFor('second_donor')]);
+        expect(build(true)).toEqual(forward);
+    });
+});
+
+describe('P3 candidate B: the relief donor filter skips reserved brigades (G-a + reservation skips)', () => {
+    it('does not take a brigade the dated pre-staging pass reclaims (op not yet live); a farther free donor goes', () => {
+        const briefing = makeTwoDonorBriefing('rs_1st_podrinje');
+        zvezdaPrestageState(briefing);
+
+        expect(computeEmptySectorReliefReassignments(briefing)).toEqual([reliefFor('unreserved_far')]);
+    });
+
+    it('does not take a pre-staging brigade while the dated op is live in planning and it is not a participant', () => {
+        const briefing = makeTwoDonorBriefing('rs_1st_podrinje');
+        zvezdaPrestageState(briefing, 'planning');
+
+        expect(computeEmptySectorReliefReassignments(briefing)).toEqual([reliefFor('unreserved_far')]);
+    });
+
+    it('window closed: the brigade is a legal donor again once the op is in execution or recovery', () => {
+        for (const phase of ['execution', 'recovery'] as const) {
+            const briefing = makeTwoDonorBriefing('rs_1st_podrinje');
+            zvezdaPrestageState(briefing, phase);
+            expect(computeEmptySectorReliefReassignments(briefing)).toEqual([reliefFor('rs_1st_podrinje')]);
+        }
+    });
+
+    it('window closed: the brigade is a legal donor before prestage_from', () => {
+        const briefing = makeTwoDonorBriefing('rs_1st_podrinje', 78);
+        zvezdaPrestageState(briefing);
+
+        expect(computeEmptySectorReliefReassignments(briefing)).toEqual([reliefFor('rs_1st_podrinje')]);
+    });
+
+    it('skips a brigade named only in an active operation axis roster', () => {
+        const briefing = makeTwoDonorBriefing('axis_only', 12);
+        briefing.state_ref.military.corps_command = {
+            other_corps: {
+                active_operations: [{
+                    name: 'Axis Roster Op',
+                    type: 'attack',
+                    phase: 'planning',
+                    participating_brigades: [],
+                    axes: [{ axis_id: 'main', assigned_brigades: ['axis_only'], objectives: [] }],
+                }],
+            },
+        };
+
+        expect(computeEmptySectorReliefReassignments(briefing)).toEqual([reliefFor('unreserved_far')]);
+    });
+
+    it('skips a brigade in the commander\'s own concentrating plan, but not one in a suspended plan', () => {
+        const plan = (status: string) => ({ status, assigned_brigades: ['planned_brigade'] }) as any;
+        const concentrating = makeTwoDonorBriefing('planned_brigade', 12);
+        expect(computeEmptySectorReliefReassignments(concentrating, plan('concentrating')))
+            .toEqual([reliefFor('unreserved_far')]);
+        const suspended = makeTwoDonorBriefing('planned_brigade', 12);
+        expect(computeEmptySectorReliefReassignments(suspended, plan('suspended')))
+            .toEqual([reliefFor('planned_brigade')]);
+    });
+
+    it('skips a brigade named in a catalog opportunity with a live proposal, not one already resolved', () => {
+        const def = OPERATION_OPPORTUNITY_CATALOG[0]!;
+        const brigadeId = def.axes[0]!.brigades[0]!;
+        const proposal = (status: string) => [{
+            opportunity_id: def.opportunity_id,
+            proposal_id: `OPP_10_${def.opportunity_id}`,
+            eligibility_turn: 10,
+            expires_turn: 40,
+            status,
+        }];
+        const live = makeTwoDonorBriefing(brigadeId, 12);
+        live.state_ref.military.operation_opportunities = proposal('eligible_pending_review');
+        expect(computeEmptySectorReliefReassignments(live)).toEqual([reliefFor('unreserved_far')]);
+
+        const declined = makeTwoDonorBriefing(brigadeId, 12);
+        declined.state_ref.military.operation_opportunities = proposal('declined');
+        expect(computeEmptySectorReliefReassignments(declined)).toEqual([reliefFor(brigadeId)]);
+    });
+
+    it('skips a brigade held by a due queue head (head-queued pre-planned roster)', () => {
+        const briefing = makeTwoDonorBriefing('rs_1st_podrinje');
+        // No staff-controlled factions: the dated pre-staging pass is off, only the queue head holds.
+        briefing.state_ref.military.corps_command = {
+            vrs_drina: { queued_operations: ['Operation Zvezda 94'], active_operations: [] },
+        };
+
+        expect(computeEmptySectorReliefReassignments(briefing)).toEqual([reliefFor('unreserved_far')]);
+    });
+
+    it('skips a brigade under a historical elite reservation, and takes it once the reservation lapses', () => {
+        const held = makeTwoDonorBriefing('rs_1st_guards_motorized', 100);
+        expect(computeEmptySectorReliefReassignments(held)).toEqual([reliefFor('unreserved_far')]);
+        const released = makeTwoDonorBriefing('rs_1st_guards_motorized', 114);
+        expect(computeEmptySectorReliefReassignments(released)).toEqual([reliefFor('rs_1st_guards_motorized')]);
+    });
+
+    it('parity: the predicate returns exactly the brigades whose order the pre-staging pass deletes or replaces', () => {
+        const state: any = {
+            meta: { turn: 94 },
+            factions: [{ id: 'RS' }, { id: 'RBiH' }, { id: 'HRHB' }],
+            military: {
+                formations: {},
+                corps_command: {
+                    other_corps: {
+                        queued_operations: [],
+                        active_operations: [{
+                            name: 'Some Other Op', type: 'attack', phase: 'execution',
+                            participating_brigades: ['rs_1st_birac'],
+                        }],
+                    },
+                },
+                brigade_movement_orders: {},
+                brigade_movement_state: {},
+            },
+            political: { political_controllers: {} },
+        };
+        onlyZvezda94Open(state);
+        const zvezda = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Zvezda 94')!;
+        const roster = [...new Set(zvezda.axes.flatMap((axis) => axis.brigades as string[]))].sort();
+        const ids = [...roster, 'unreserved_x'];
+        for (const id of ids) {
+            state.military.formations[id] = {
+                id, name: id, faction: 'RS', kind: 'brigade', status: 'active', created_turn: 0,
+                assignment: null, corps_id: 'vrs_drina', location_osid: 'op:test:elsewhere',
+            };
+            state.military.brigade_movement_orders[id] = {
+                destination_sids: ['op:test:away'], stance: 'column', owner: 'bot_discretionary',
+            };
+        }
+        // One roster brigade stands at its axis staging and is ordered away (the at-staging branch).
+        const stagingAxis = zvezda.axes.find((axis) => axis.brigades.includes('rs_1st_podrinje' as any))!;
+        state.military.formations.rs_1st_podrinje.location_osid = stagingAxis.staging_osid;
+        // One roster brigade is on a Main Staff loan to another corps: the pass leaves it alone.
+        state.military.formations.rs_1st_guards_motorized.elite_loan_state = {
+            on_loan: true, loaned_to_corps: 'vrs_other', loan_start_turn: 90,
+        };
+
+        const predicate = (prePlanned as any).getActivePrestageReservedBrigadeIds;
+        expect(typeof predicate).toBe('function');
+        const reserved = [...(predicate(state) as Set<string>)].sort();
+
+        const after = structuredClone(state);
+        prePlanned.prestageDeferredPrePlannedElites(after);
+        const changed = ids.filter((id) =>
+            JSON.stringify(after.military.brigade_movement_orders[id] ?? null)
+            !== JSON.stringify(state.military.brigade_movement_orders[id])).sort();
+
+        expect(reserved).toEqual(changed);
+        expect(reserved).toContain('rs_1st_podrinje');
+        expect(reserved).not.toContain('rs_1st_birac'); // conflicting commitment
+        expect(reserved).not.toContain('rs_1st_guards_motorized'); // loaned elsewhere
+        expect(after.military.brigade_movement_orders.unreserved_x)
+            .toEqual(state.military.brigade_movement_orders.unreserved_x);
     });
 });

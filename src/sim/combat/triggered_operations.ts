@@ -1485,10 +1485,49 @@ const ARMY_HQ_RESERVATION_EXPIRY_TURNS = 3;
  * def fields. Panel: operations-expert, corps-army-commander, historian, scenario-tester, integrator.
  */
 export function corpsHasDueArmyHqReservation(state: GameState, corpsId: string, turn: number): boolean {
-    if (!ENABLE_TG_ARMY_HQ_OPS) return false;
-    const cc = state.military.corps_command;
+    return findDueArmyHqDefs(state, corpsId, turn, true).length > 0;
+}
+
+/**
+ * P3 candidate B (2026-11-22): the authored roster of every Army HQ operation that is due by the
+ * same test as `corpsHasDueArmyHqReservation` (S2), over every corps that is a primary corps of
+ * such an operation. An empty-sector relief must not take one of these brigades away from the
+ * authored operation that is about to be ordered. Authored ids are kept, and also resolved to the
+ * live formation id (OOB alias). Pure: writes nothing. Faction-blind; keyed only on def fields.
+ */
+export function getDueArmyHqReservedBrigadeIds(state: GameState, turn: number): Set<FormationId> {
+    const reserved = new Set<FormationId>();
+    if (!ENABLE_TG_ARMY_HQ_OPS) return reserved;
+    const formations = state.military?.formations ?? {};
+    const primaryCorps = [...new Set(TRIGGERED_OPS
+        .filter((def) => !!def.army_hq_op_id)
+        .map((def) => def.primary_corps))].sort(strictCompare);
+    for (const corpsId of primaryCorps) {
+        for (const def of findDueArmyHqDefs(state, corpsId, turn, false)) {
+            for (const axis of def.axes) {
+                for (const authoredId of axis.brigades) {
+                    reserved.add(authoredId);
+                    const resolved = resolveOperationFormation(formations, authoredId).formation_id;
+                    if (resolved) reserved.add(resolved);
+                }
+            }
+        }
+    }
+    return reserved;
+}
+
+/** Army HQ defs of this primary corps that are due (S2), in army_hq_op_id order. Pure. */
+function findDueArmyHqDefs(
+    state: GameState,
+    corpsId: string,
+    turn: number,
+    firstOnly: boolean,
+): Array<TriggeredOpDef & { army_hq_op_id: string }> {
+    const due: Array<TriggeredOpDef & { army_hq_op_id: string }> = [];
+    if (!ENABLE_TG_ARMY_HQ_OPS) return due;
+    const cc = state.military?.corps_command;
     const cmd = cc?.[corpsId];
-    if (!cmd) return false;
+    if (!cmd) return due;
     const defs = TRIGGERED_OPS
         .filter((d): d is TriggeredOpDef & { army_hq_op_id: string } => !!d.army_hq_op_id && d.primary_corps === corpsId)
         .sort((a, b) => strictCompare(a.army_hq_op_id, b.army_hq_op_id));
@@ -1537,9 +1576,10 @@ export function corpsHasDueArmyHqReservation(state: GameState, corpsId: string, 
         // its elite loans and restages are applied only by the injection path after it succeeds.
         const built = buildOperation({ ...def, axes: liveAxes }, state, turn);
         if ('failure' in built) continue;
-        return true;
+        due.push(def);
+        if (firstOnly) break;
     }
-    return false;
+    return due;
 }
 
 /**

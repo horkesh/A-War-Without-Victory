@@ -4,6 +4,7 @@ import { describe, it, vi } from 'vitest';
 import { checkTriggeredOperations, corpsHasDueArmyHqReservation, injectArmyHqOperations, _TRIGGERED_OPS } from '../src/sim/combat/triggered_operations.js';
 import { warPhases } from '../src/sim/turn_phases/war_phases.js';
 import { finalizeOperationAAR } from '../src/sim/combat/operation_aar.js';
+import { computeEmptySectorReliefReassignments } from '../src/sim/combat/commander/decide.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { createRequire } from 'node:module';
 
@@ -457,6 +458,87 @@ describe('checkTriggeredOperations', () => {
             corpsHasDueArmyHqReservation(state, 'arbih_3rd_corps', 175);
             corpsHasDueArmyHqReservation(state, 'arbih_3rd_corps', 178);
             assert.equal(JSON.stringify(state), before);
+        });
+    });
+
+    // P3 candidate B (2026-11-22): an empty-sector relief must not take a brigade on the roster of
+    // a due Army HQ operation (the same S2 "due" test), so the authored operation keeps its force.
+    describe('empty-sector relief skips a due Army HQ roster', () => {
+        const reliefBriefing = (state: GameState, nearId: string) => {
+            const chain = ['op:relief:deep', 'op:relief:rear', 'op:relief:a', 'op:relief:front'];
+            const adjacency = new Map<string, string[]>();
+            for (let index = 0; index < chain.length - 1; index++) {
+                adjacency.set(chain[index]!, [...(adjacency.get(chain[index]!) ?? []), chain[index + 1]!]);
+                adjacency.set(chain[index + 1]!, [...(adjacency.get(chain[index + 1]!) ?? []), chain[index]!]);
+            }
+            const donor = (id: string, location: string) => ({
+                ...makeFormation(id, 'arbih_3rd_corps', { faction: 'RBiH' as FactionId, location_osid: location }),
+                home_osid: location,
+                posture: 'defend',
+            });
+            const sector = (sectorId: string, frontOsid: string, rear: string[]) => ({
+                sector_id: sectorId,
+                corps_id: 'arbih_3rd_corps',
+                faction: 'RBiH',
+                edge_ids: [`${frontOsid}__enemy`],
+                length_edges: 1,
+                territory_osids: [frontOsid],
+                assigned_brigade_ids: [],
+                reserve_brigade_ids: [],
+                rear_brigade_ids: rear,
+                sub_segments: [{
+                    sub_segment_id: `${sectorId}:sub`,
+                    edge_ids: [`${frontOsid}__enemy`],
+                    friendly_osids: [frontOsid],
+                    enemy_osids: [`${frontOsid}:enemy`],
+                    primary_brigade_ids: [],
+                    length_edges: 1,
+                }],
+                density: 0,
+                threat_ratio: 2,
+                defensive_power: 0,
+                sector_stance: 'defend',
+                stance_source: 'bot',
+            });
+            return {
+                corps_id: 'arbih_3rd_corps',
+                faction: 'RBiH',
+                turn: state.meta.turn,
+                sectors: [
+                    sector('sector:relief:donor', 'op:relief:rear', [nearId, 'relief_unreserved_far']),
+                    sector('sector:relief:empty', 'op:relief:front', []),
+                ],
+                brigades: [donor(nearId, 'op:relief:rear'), donor('relief_unreserved_far', 'op:relief:deep')],
+                state_ref: state,
+                must_hold_osids: [],
+                spatial: {
+                    adjacency,
+                    friendlyOsidsByFaction: new Map([['RBiH', new Set(chain)]]),
+                    componentsByFaction: new Map(),
+                },
+            } as any;
+        };
+
+        it('takes a farther free donor instead of a Farz 95 roster brigade while Farz is due', () => {
+            const farz = _TRIGGERED_OPS.find((def) => def.name === 'Operation Farz 95')!;
+            const rostered = farz.axes[0]!.brigades[0]!;
+            const state = prepareFarzState(178);
+            setArbihThirdCorpsActiveBrigades(state, 23);
+            assert.equal(corpsHasDueArmyHqReservation(state, 'arbih_3rd_corps', 178), true);
+
+            const result = computeEmptySectorReliefReassignments(reliefBriefing(state, rostered));
+            assert.deepEqual(result.map((r) => r.brigade_id), ['relief_unreserved_far']);
+        });
+
+        it('takes the roster brigade again once the reservation has lapsed (t181)', () => {
+            const farz = _TRIGGERED_OPS.find((def) => def.name === 'Operation Farz 95')!;
+            const rostered = farz.axes[0]!.brigades[0]!;
+            const state = prepareFarzState(181);
+            setArbihThirdCorpsActiveBrigades(state, 23);
+            assert.equal(corpsHasDueArmyHqReservation(state, 'arbih_3rd_corps', 181), false);
+
+            const result = computeEmptySectorReliefReassignments(reliefBriefing(state, rostered));
+            assert.deepEqual(result.map((r) => r.brigade_id), [rostered]);
         });
     });
 
