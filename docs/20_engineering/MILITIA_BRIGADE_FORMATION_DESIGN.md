@@ -139,17 +139,15 @@ Paramilitary formations (`kind: 'paramilitary'`) are a separate formation kind f
 | PARAMILITARY_MARCH_TURNS | 0 | Instant capture (rear pockets already surrounded) |
 | PARAMILITARY_FADE_WEEK | 20 | Cutoff week (war professionalizes) |
 | PARAMILITARY_MAX_REAR_DEPLOYMENTS_PER_FACTION_TURN | 2 | Rear-pocket deployment cap per faction and turn |
-| OFFENSIVE_PARA_MAX_DEPLOYMENTS_PER_FACTION_TURN | 2 | Offensive deployment cap per faction and turn |
 | PARAMILITARY_MAX_DEPLOYMENTS_PER_MUNICIPALITY_TURN | 1 | Combined deployment cap per municipality and turn |
 | PARAMILITARY_REAR_MIN_ORGANIZATIONAL_PENETRATION | 25 | Rear-pocket attacker penetration floor |
-| OFFENSIVE_PARA_MIN_ORGANIZATIONAL_PENETRATION | 60 | Offensive attacker penetration floor |
 | PARAMILITARY_CASUALTY_RATE | 0.08 | Military casualty fraction per sweep |
 | PARAMILITARY_CIVILIAN_CASUALTY_RATE | 0.02 | Civilian casualty fraction (war crimes) |
 | PARAMILITARY_COHESION | 20 | Very low — irregular forces |
 | PARAMILITARY_INITIAL_MORALE | 80 | Starting morale |
 | PARAMILITARY_TARGET_AVG_POPULATION | 5000 | Avg civilian pop at target OSID |
 
-**Player agency:** `paramilitary_policy` ('ask'/'always_allow'/'always_deny') + per-request decisions. Bot factions auto-approve. `paramilitary_deployment_count` tracks cumulative deployments.
+**Player agency:** `paramilitary_policy` ('ask'/'always_allow'/'always_deny') + per-request decisions at Full Control. At Assisted, Delegated and Observer the staff follows the player's standing order (only Always allow sends sweeps; for RBiH and RS nothing before the side's policy card has applied an answer; a side with no card (HRHB) follows the bot's historical default until the player has a paramilitary decision of their own on record, owner rule 2026-11-22, `followsNoCardHistoricalDefault`), and bot factions follow their policy card's decided answer, else its historical default; `ask` with no human asking sends none (§6 D1 stage 2, `resolveNonManualParamilitaryPolicy` in `paramilitary_policy.ts`; SENSITIVE_HISTORY_DESIGN_GATE.md §3). `paramilitary_deployment_count` tracks cumulative deployments.
 
 **Truth writes:** Captures emit `control_events` with `mechanism: 'paramilitary'`. Civilian killings update the faction casualty ledger, displacement event log/aggregates, and target municipality `displacement_state.lost_population` in the same resolution.
 

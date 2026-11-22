@@ -94,9 +94,11 @@ describe('Paramilitary review modal — i18n Car 3 (EN keys)', () => {
         expect(en['paramilitaryReview.allowPacket']).toBe('Allow packet');
         expect(en['paramilitaryReview.alwaysDeny']).toBe('Always deny');
         expect(en['paramilitaryReview.alwaysAllow']).toBe('Always allow');
-        // §6 design M (M-a), §4 copy panel 2026-11-19: the per-act sentence joins the hint; the cap sentence is
-        // its own key, shown only for RBiH and RS (pinned with the BCS in tests/ui/s6_modal_cost_copy.test.ts).
-        expect(en['paramilitaryReview.policyHint']).toBe('Use a standing order if you want future paramilitary packets resolved the same way. It applies only at Full Control: at Assisted, Delegated or Observer your staff decides rear-area sweeps without it. Each sweep that takes its target counts against your side, however it was sent.');
+        // §6 D1 stage 2 (signed by the SHDG §4 panel, 2026-11-18): the staff follows the standing order at every command level.
+        // §6 design M (M-a), §4 copy panel 2026-11-19: the per-act sentence joins the hint (appended on D1's merge onto main,
+        // PENDING §4 PANEL); the cap sentence is its own key, shown only for RBiH and RS (pinned with the BCS in
+        // tests/ui/s6_modal_cost_copy.test.ts).
+        expect(en['paramilitaryReview.policyHint']).toBe('Use a standing order if you want future paramilitary packets resolved the same way. Your staff follows it at every command level: at Assisted, Delegated or Observer, Always allow sends sweeps without asking you, and each one counts against your side; Always deny, or no standing order, sends none. Each sweep that takes its target counts against your side, however it was sent.');
         expect(en['paramilitaryReview.close']).toBe('Close');
         expect(en['paramilitaryReview.submit']).toBe('Submit Decisions');
         expect(en['paramilitaryReview.submitting']).toBe('Submitting...');
