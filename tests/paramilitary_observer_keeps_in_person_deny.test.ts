@@ -14,6 +14,10 @@
  * waited, and Observer was switched on before the human answered it). The modal step is the
  * `resolve-paramilitary-requests` IPC body: write the standing order, mark each request, then
  * `resolvePlayerParamilitaryDecisions`. The live case runs the desktop campaign path.
+ *
+ * Round 4a (b), 2026-11-22: the RS card fires at t1 (after the goals card, no longer enabled by its answer), so the legacy
+ * in-person Always deny now meets the card in the same week: the fire-time case fires it at t1, the drain case fires it at t1 at
+ * Full Control and drains it at t2, and the live card waits on the manual desk from t1.
  */
 
 import { describe, expect, it } from 'vitest';
@@ -127,8 +131,8 @@ function restoreLegacyRequest(state: GameState): void {
 
 /**
  * At Full Control, t1: the human picks Always deny in the modal on the request an older build left
- * (the T3 gate holds a new one), then answers the strategic-goals card in person, which enables the RS
- * policy card for t2.
+ * (the T3 gate holds a new one), then answers the strategic-goals card in person. Since round 4a (b)
+ * that answer no longer enables the RS policy card: the card fires at t1 on its own.
  */
 function inPersonDenyBeforeTheCard(): GameState {
     const state = rsHumanState();
@@ -149,7 +153,7 @@ function inPersonDenyBeforeTheCard(): GameState {
         requires_player_response: true,
     } as any);
     resolveEventDecisionCore(state, RS_GOALS_ID, 'all_six');
-    expect(state.military.enabled_event_ids).toContain(RS_CARD_ID);
+    expect(state.military.enabled_event_ids ?? []).not.toContain(RS_CARD_ID);
     expect(state.military.event_flags?.rs_strategic_goals).toBe('all_six');
     return state;
 }
@@ -163,10 +167,10 @@ const noRng = () => 0;
 describe('§6 D1 stage 2 A1: Observer\'s automatic card answer keeps the human\'s in-person Always deny', () => {
     it('fire-time: the card fires at Observer and is answered automatically; the order stays Always deny and the gate denies', () => {
         const state = inPersonDenyBeforeTheCard();
-        state.meta.turn = 2;
+        expect(state.meta.turn).toBe(1);
         state.meta.autonomy_level = 3;
 
-        evaluateEvents(state, noRng, 2, [RS_CARD] as EventDefinition[]);
+        evaluateEvents(state, noRng, 1, [RS_CARD] as EventDefinition[]);
         // The card did fire and Observer answered it automatically with the in-person order (F1-B).
         expect(cardDecision(state)).toMatchObject({ response_id: 'always_deny', decision_source: 'bot_ai_default', faction: 'RS' });
 
@@ -177,14 +181,14 @@ describe('§6 D1 stage 2 A1: Observer\'s automatic card answer keeps the human\'
 
     it('drain: the card fired at Full Control and waited; Observer drains it; the order stays Always deny and the gate denies', () => {
         const state = inPersonDenyBeforeTheCard();
-        state.meta.turn = 2;
-        evaluateEvents(state, noRng, 2, [RS_CARD] as EventDefinition[]);
+        expect(state.meta.turn).toBe(1);
+        evaluateEvents(state, noRng, 1, [RS_CARD] as EventDefinition[]);
         expect((state.military.pending_event_decisions ?? []).map((pending) => pending.event_id)).toEqual([RS_CARD_ID]);
         expect(cardDecision(state)).toBeUndefined();
 
-        state.meta.turn = 3;
+        state.meta.turn = 2;
         state.meta.autonomy_level = 3;
-        evaluateEvents(state, noRng, 3, [RS_CARD] as EventDefinition[]);
+        evaluateEvents(state, noRng, 2, [RS_CARD] as EventDefinition[]);
         expect(state.military.pending_event_decisions ?? []).toEqual([]);
         expect(cardDecision(state)).toMatchObject({ response_id: 'always_deny', decision_source: 'bot_ai_default', faction: 'RS' });
 
@@ -205,15 +209,14 @@ describe('§6 D1 stage 2 A1: Observer\'s automatic card answer keeps the human\'
             requires_player_response: true,
         } as any);
         resolveEventDecisionCore(state, RS_GOALS_ID, 'all_six');
-        state.meta.turn = 2;
         state.meta.autonomy_level = 3;
-        evaluateEvents(state, noRng, 2, [RS_CARD] as EventDefinition[]);
+        evaluateEvents(state, noRng, 1, [RS_CARD] as EventDefinition[]);
         expect(cardDecision(state)).toMatchObject({ response_id: 'always_allow', decision_source: 'bot_ai_default' });
         expect(state.paramilitary_policy).toBe('always_allow');
         expect(rsOutcome(state)).toEqual([1, 0]);
     });
 
-    it('live desktop path: modal Always deny at t1 (on an older build\'s request), goals answered in person, Observer; the card fires at t2 and no RS sweep follows', async () => {
+    it('live desktop path: the card fires at t1 and waits on the manual desk; modal Always deny at t1 (on an older build\'s request), goals answered in person, Observer; the card is drained at t2 with the Always deny and no RS sweep follows', async () => {
         const opening = (await startNewCampaign(process.cwd(), 'RS', 'apr_1992', 'historical')).state;
         opening.meta.autonomy_level = 0;
         expect(opening.paramilitary_policy).toBe('ask');
@@ -222,11 +225,17 @@ describe('§6 D1 stage 2 A1: Observer\'s automatic card answer keeps the human\'
         expect(t1.state.meta.turn).toBe(1);
         // §6 T3: no request reaches the manual RS player before the RS card applies.
         expect((t1.state.pending_paramilitary_requests ?? []).filter((request) => request.faction === 'RS')).toEqual([]);
+        // Round 4a (b): the card fired at t1 and waits, unanswered, on the manual desk; nothing was sent in the side's name.
+        expect(t1.state.military.event_last_fired_turn?.[RS_CARD_ID]).toBe(1);
+        expect((t1.state.military.pending_event_decisions ?? []).map((pending) => pending.event_id)).toContain(RS_CARD_ID);
+        expect(cardDecision(t1.state)).toBeUndefined();
+        expect((t1.state.political.control_events ?? [])
+            .filter((event) => event.mechanism === 'paramilitary' && event.to === 'RS')).toEqual([]);
         restoreLegacyRequest(t1.state);
 
         modalAlwaysDeny(t1.state);
         const answered = resolveDesktopEventDecision(t1.state, RS_GOALS_ID, 'all_six', process.cwd());
-        expect(answered.military.enabled_event_ids).toContain(RS_CARD_ID);
+        expect(answered.military.enabled_event_ids ?? []).not.toContain(RS_CARD_ID);
         answered.meta.autonomy_level = 3;
 
         const t2 = await advanceTurn(answered, process.cwd());

@@ -121,44 +121,52 @@ describe('§6 D1 stage 2 live: staff follow the standing order', () => {
         expect(currentCondemnationFlags(refuseState, 'RBiH')).not.toContain('authorized_cleansing_condemnation');
     }, 400_000);
 
-    it('RS at Observer from the start: no sweep at t1, the order is still unanswered', async () => {
+    // Round 4a (b), 2026-11-22: the RS card fires at t1 (after the goals card, not gated on it; it was t2, enabled by the goals
+    // answer). At Observer its automatic answer applies at t1, in the event phase, before paramilitary-detect, so the side's t1
+    // sweeps go out under an answered order. A1 still holds: before the card applies (birth, t0) nothing has been sent and the
+    // order is unanswered; nothing is sent at t1 without the card's row.
+    it('RS at Observer from the start: nothing before the card; the card is answered automatically at t1, and every t1 sweep is sent under it, charged', async () => {
         const opening = (await startNewCampaign(process.cwd(), 'RS', 'apr_1992', 'historical')).state;
         opening.meta.autonomy_level = 3;
         expect(opening.paramilitary_policy).toBe('ask');
+        expect(paramilitaryCaptures(opening, 'RS')).toEqual([]);
+        expect(paramilitaryFormations(opening, 'RS')).toEqual([]);
+        expect((opening.military.event_decision_log ?? []).some((entry) => entry.event_id === RS_CARD)).toBe(false);
         const t1 = await advanceTurn(opening, process.cwd());
         expect(t1.error).toBeUndefined();
         expect(t1.state.meta.turn).toBe(1);
-        expect(t1.state.paramilitary_policy).toBe('ask');
-        expect(paramilitaryCaptures(t1.state, 'RS')).toEqual([]);
-        expect(paramilitaryFormations(t1.state, 'RS')).toEqual([]);
+        const decision = (t1.state.military.event_decision_log ?? []).find((entry) => entry.event_id === RS_CARD);
+        expect(decision).toMatchObject({ response_id: 'always_allow', decision_source: 'bot_ai_default', faction: 'RS', turn: 1 });
+        expect(t1.state.paramilitary_policy).toBe('always_allow');
+        const swept = paramilitaryCaptures(t1.state, 'RS', 1);
+        expect(swept.length).toBeGreaterThan(0);
+        expect(t1.state.military.negotiation?.capital?.RS?.war_crimes_events_emergent ?? 0).toBe(swept.length);
     }, 120_000);
 
-    it('RS at Observer: no sweep at t1; the card\'s automatic historical answer at t2 writes Always allow, and the side sweeps from then on, charged', async () => {
-        // The strategic-goals card is answered in person, so the policy card is enabled; then Observer.
+    it('RS at Observer, goals answered in person at birth: the card\'s automatic historical answer at t1 writes Always allow, and the side sweeps from t1, charged', async () => {
+        // The strategic-goals card is answered in person (it no longer enables the policy card); then Observer.
         const opening = resolveDesktopEventDecision(
             (await startNewCampaign(process.cwd(), 'RS', 'apr_1992', 'historical')).state,
             'rs_strategic_goals',
             'all_six',
             process.cwd(),
         );
+        expect(opening.military.enabled_event_ids ?? []).not.toContain(RS_CARD);
         opening.meta.autonomy_level = 3;
         expect(opening.paramilitary_policy).toBe('ask');
+        expect(paramilitaryCaptures(opening, 'RS')).toEqual([]);
+        expect(paramilitaryFormations(opening, 'RS')).toEqual([]);
+
         const t1 = await advanceTurn(opening, process.cwd());
         expect(t1.error).toBeUndefined();
         expect(t1.state.meta.turn).toBe(1);
-        expect(paramilitaryCaptures(t1.state, 'RS', 1)).toEqual([]);
-        expect(paramilitaryFormations(t1.state, 'RS')).toEqual([]);
-
-        const t2 = await advanceTurn(t1.state, process.cwd());
-        expect(t2.error).toBeUndefined();
-        expect(t2.state.meta.turn).toBe(2);
-        const decision = (t2.state.military.event_decision_log ?? []).find((entry) => entry.event_id === RS_CARD);
-        expect(decision).toMatchObject({ response_id: 'always_allow', faction: 'RS' });
-        expect(t2.state.paramilitary_policy).toBe('always_allow');
+        const decision = (t1.state.military.event_decision_log ?? []).find((entry) => entry.event_id === RS_CARD);
+        expect(decision).toMatchObject({ response_id: 'always_allow', faction: 'RS', turn: 1 });
+        expect(t1.state.paramilitary_policy).toBe('always_allow');
         // Acts are charged: whatever the side's forces sweep under the automatically answered order counts against RS.
-        const swept = paramilitaryCaptures(t2.state, 'RS', 2);
+        const swept = paramilitaryCaptures(t1.state, 'RS', 1);
         expect(swept.length).toBeGreaterThan(0);
-        expect(t2.state.military.negotiation?.capital?.RS?.war_crimes_events_emergent ?? 0).toBe(swept.length);
+        expect(t1.state.military.negotiation?.capital?.RS?.war_crimes_events_emergent ?? 0).toBe(swept.length);
     }, 180_000);
 
     it('an Observer -> Delegated toggle sends no sweep before the card is answered', async () => {
@@ -169,14 +177,22 @@ describe('§6 D1 stage 2 live: staff follow the standing order', () => {
             process.cwd(),
         );
         opening.meta.autonomy_level = 3;
+        // The toggle comes before the card fires: since round 4a (b) the card fires at t1, so the human leaves Observer at
+        // birth (an Observer t1 would answer it automatically, as the tests above pin).
+        opening.meta.autonomy_level = 2;
         const t1 = await advanceTurn(opening, process.cwd());
         expect(t1.error).toBeUndefined();
+        expect(t1.state.meta.turn).toBe(1);
+        // The RS card fired at t1 and waits for the human; until it is answered, the staff send none.
+        expect(t1.state.military.event_last_fired_turn?.[RS_CARD]).toBe(1);
+        expect((t1.state.military.pending_event_decisions ?? []).map((decision) => decision.event_id)).toContain(RS_CARD);
+        expect((t1.state.military.event_decision_log ?? []).some((entry) => entry.event_id === RS_CARD)).toBe(false);
+        expect(t1.state.paramilitary_policy).toBe('ask');
         expect(paramilitaryCaptures(t1.state, 'RS')).toEqual([]);
-        t1.state.meta.autonomy_level = 2;
+        expect(paramilitaryFormations(t1.state, 'RS')).toEqual([]);
         const t2 = await advanceTurn(t1.state, process.cwd());
         expect(t2.error).toBeUndefined();
         expect(t2.state.meta.turn).toBe(2);
-        // The RS card fired at t2 and waits for the human; until it is answered, the staff send none.
         expect((t2.state.military.pending_event_decisions ?? []).map((decision) => decision.event_id)).toContain(RS_CARD);
         expect((t2.state.military.event_decision_log ?? []).some((entry) => entry.event_id === RS_CARD)).toBe(false);
         expect(t2.state.paramilitary_policy).toBe('ask');

@@ -64,8 +64,12 @@ const CARD: Record<Side, EventDefinition> = {
     RS: CATALOG.find((def) => def.id === CARD_ID.RS)!,
     RBiH: CATALOG.find((def) => def.id === CARD_ID.RBiH)!,
 };
-/** The first turn each card's window opens (war_1992.json: RS t2-8, RBiH t3-9). */
-const FIRE_TURN: Record<Side, number> = { RS: 2, RBiH: 3 };
+/**
+ * The first turn each card's window opens (war_1992.json: RS t1-8, RBiH t3-9). Round 4a (b), 2026-11-22: the RS card fires at
+ * t1, after the goals card and not gated on it (it was t2-8, enabled by the goals answer), so an RS order given in person on a
+ * legacy t1 request now meets the card in the same week.
+ */
+const FIRE_TURN: Record<Side, number> = { RS: 1, RBiH: 3 };
 const RS_GOALS_ID = 'rs_strategic_goals';
 const RS_GOALS = CATALOG.find((def) => def.id === RS_GOALS_ID)!;
 
@@ -158,8 +162,10 @@ function humanState(side: Side): GameState {
 }
 
 /**
- * Enable the side's policy card. RS: the strategic-goals card answered in person (as in the live campaign). RBiH: the identity
- * card's answer written directly, a synthetic state (engine Q3: a legacy save, a faction switch or the harness reach it).
+ * Bring the side's policy card into reach. RS: the strategic-goals card answered in person (as in the live campaign); since round
+ * 4a (b) the RS card needs no enabling (no `requires_enabled`, no goals flag), so the goals answer must NOT enable it (no false
+ * "goals opened it" row). RBiH: the identity card's answer written directly, a synthetic state (engine Q3: a legacy save, a
+ * faction switch or the harness reach it), which enables the RBiH card.
  */
 function enableCard(state: GameState, side: Side): void {
     if (side === 'RS') {
@@ -173,10 +179,13 @@ function enableCard(state: GameState, side: Side): void {
             requires_player_response: true,
         } as any);
         resolveEventDecisionCore(state, RS_GOALS_ID, 'all_six');
-    } else {
-        state.military.event_flags = { ...(state.military.event_flags ?? {}), rbih_state_identity: 'civic' };
-        state.military.enabled_event_ids = [...(state.military.enabled_event_ids ?? []), CARD_ID.RBiH].sort();
+        expect(state.military.event_flags?.rs_strategic_goals).toBe('all_six');
+        expect(state.military.enabled_event_ids ?? []).not.toContain(CARD_ID.RS);
+        expect(CARD.RS.requires_enabled).toBeUndefined();
+        return;
     }
+    state.military.event_flags = { ...(state.military.event_flags ?? {}), rbih_state_identity: 'civic' };
+    state.military.enabled_event_ids = [...(state.military.enabled_event_ids ?? []), CARD_ID.RBiH].sort();
     expect(state.military.enabled_event_ids).toContain(CARD_ID[side]);
 }
 

@@ -219,13 +219,13 @@ describe('desktop calibration comparison provenance', () => {
   });
 
   it('answers a decision fired mid-turn inside the pause before combat, as the bot does', () => {
-    // RS's paramilitary-policy decision fires during turn 2. The player branch answers it in
-    // the pause right after evaluate-events (stage 'paused_turn', turn = the turn being run).
-    // §6 D1 stage 2 (ruling A1/A2, 2026-11-18): nothing is sent in a human's name before the
-    // human answers, so at production autonomy the player branch sends no RS sweep at turn 1,
-    // while headless RS sweeps its t1 pair under the card's historical default. That lost pair
-    // is the recorded cost of the authorship rule: the player branch then sweeps the same pairs
-    // one turn late, and nothing else differs (the attack flips are identical).
+    // RS's paramilitary-policy decision fires during turn 1 (§6 D1 stage 2 round 4a (b), 2026-11-22:
+    // right after the goals card, in both modes; it fired at t2 when the goals answer enabled it).
+    // The player branch answers it in the pause right after evaluate-events (stage 'paused_turn',
+    // turn = the turn being run), before paramilitary-detect. Ruling A1/A2 holds: nothing is sent in
+    // a human's name before the card's answer applies, and that answer now applies at t1, so the
+    // player branch sweeps exactly headless's t1 pair on the same turn and nothing differs (the
+    // recorded one-turn lag of the earlier build is gone).
     const result = runComparison([
       '--turns', '3',
       '--faction', 'RS',
@@ -240,7 +240,7 @@ describe('desktop calibration comparison provenance', () => {
     const paused = output.decision_transcript.filter((row: { stage?: string }) => row.stage === 'paused_turn');
     expect(paused).toEqual([
       {
-        turn: 2,
+        turn: 1,
         family: 'event',
         id: 'rs_paramilitary_policy_1992',
         decision: 'bot_equivalent',
@@ -252,17 +252,17 @@ describe('desktop calibration comparison provenance', () => {
     type SideRow = { attack_flips_applied: number; paramilitary_capture_targets_by_faction: Record<string, string[]> };
     const turns = output.turns as Array<{ turn: number; player: SideRow; headless: SideRow; control_delta_player_minus_headless: Record<string, number> }>;
     expect(turns.map((row) => row.turn)).toEqual([1, 2, 3]);
-    expect(turns[0]!.player.paramilitary_capture_targets_by_faction.RS ?? []).toEqual([]);
     expect(turns[0]!.headless.paramilitary_capture_targets_by_faction.RS).toHaveLength(2);
-    for (let index = 1; index < turns.length; index++) {
-      expect(turns[index]!.player.paramilitary_capture_targets_by_faction.RS)
-        .toEqual(turns[index - 1]!.headless.paramilitary_capture_targets_by_faction.RS);
-    }
+    expect(turns[0]!.player.paramilitary_capture_targets_by_faction.RS)
+      .toEqual(turns[0]!.headless.paramilitary_capture_targets_by_faction.RS);
     for (const row of turns) {
+      expect(row.player.paramilitary_capture_targets_by_faction.RS ?? [])
+        .toEqual(row.headless.paramilitary_capture_targets_by_faction.RS ?? []);
       expect(row.player.attack_flips_applied).toBe(row.headless.attack_flips_applied);
       const delta = row.control_delta_player_minus_headless;
-      expect(delta.RS).toBe(-2);
-      expect((delta.RS ?? 0) + (delta.RBiH ?? 0) + (delta.HRHB ?? 0)).toBe(0);
+      expect(delta.RS ?? 0).toBe(0);
+      expect(delta.RBiH ?? 0).toBe(0);
+      expect(delta.HRHB ?? 0).toBe(0);
     }
   }, 180_000);
 

@@ -100,7 +100,10 @@ describe('T1: no opening card fires at birth', () => {
 
         const old = answer(asPreTBirthSave(state), RS_GOALS, 'all_six');
         expect(old.military.event_flags?.rs_strategic_goals).toBe('all_six');
-        expect(old.military.enabled_event_ids).toContain('rs_paramilitary_policy_1992');
+        // The old save applies at once: the answer's runtime enables are written now. Since round 4a (b), 2026-11-22, the
+        // RS policy card is not among them (it fires at t1 on its own); the May 1993 VOPP-rejection card still is.
+        expect(old.military.enabled_event_ids).toContain('rs_assembly_rejects_voplan_1993');
+        expect(old.military.enabled_event_ids).not.toContain('rs_paramilitary_policy_1992');
     });
 });
 

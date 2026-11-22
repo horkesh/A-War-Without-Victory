@@ -79,7 +79,7 @@ function hrhbPocket(meta: Partial<GameState['meta']>, turn = 5): GameState {
     } as GameState;
 }
 
-function human(level: number): Partial<GameState['meta']> {
+function human(level: 0 | 1 | 2 | 3): Partial<GameState['meta']> {
     return { player_faction: 'HRHB', autonomy_level: level, headless_scenario_auto_control: false };
 }
 

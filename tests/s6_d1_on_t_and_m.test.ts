@@ -28,8 +28,16 @@ const CATALOG = loadEventDefinitions(0);
 type Side = 'RBiH' | 'RS';
 const CARD: Record<Side, string> = { RBiH: 'rbih_paramilitary_policy_1992', RS: 'rs_paramilitary_policy_1992' };
 const FLAG: Record<Side, string> = { RBiH: 'rbih_paramilitary_policy', RS: 'rs_paramilitary_policy' };
-/** The turn each card applies: RBiH's filed answer at t4 (§6 T), the RS card answered when it fires at t2. */
-const APPLY_TURN: Record<Side, number> = { RBiH: 4, RS: 2 };
+/**
+ * The turn each card applies: RBiH's filed answer at t4 (§6 T), the RS card answered when it fires at t1 (round 4a (b),
+ * 2026-11-22: right after the goals card, no longer enabled by it; it fired at t2).
+ */
+const APPLY_TURN: Record<Side, number> = { RBiH: 4, RS: 1 };
+/**
+ * The turns the detect gate is run before the card applies. RBiH: t1-t3. RS: t1 itself, with the card not yet applied (the
+ * card applies in evaluate-events and the gate runs after it on the same turn; run before it, the gate must send nothing).
+ */
+const PRE_APPLY_TURNS: Record<Side, number[]> = { RBiH: [1, 2, 3], RS: [1] };
 const HOLDER: Record<Side, FactionId> = { RBiH: 'RS', RS: 'RBiH' };
 const TARGET = 'op:testmun:pocket';
 const RING = ['op:testmun:ring_a', 'op:testmun:ring_b', 'op:testmun:ring_c'];
@@ -127,12 +135,13 @@ function detect(state: GameState, side: Side): [number, number] {
 describe('D1 after T and M: no sweep at autonomy 1-3 before the player\'s own policy card applies', () => {
     for (const side of ['RBiH', 'RS'] as const) {
         for (const autonomy of [1, 2, 3]) {
-            it(`${side} at autonomy ${autonomy}: an Always allow on record (${side === 'RBiH' ? 'filed at t0' : 'the card enabled, not fired'}, and an older build's modal order) sends nothing until the card applies at t${APPLY_TURN[side]}`, () => {
+            it(`${side} at autonomy ${autonomy}: an Always allow on record (${side === 'RBiH' ? 'filed at t0' : 'the card not yet fired'}, and an older build's modal order) sends nothing until the card applies at t${APPLY_TURN[side]}`, () => {
                 const state = humanState(side, autonomy, 1);
                 if (side === 'RBiH') fileAnswer(state, side, 'always_allow');
-                else state.military.enabled_event_ids.push(CARD.RS); // the goals answer applied; the card fires at t2
+                // RS: nothing to enable since round 4a (b); the card fires at t1 on its own and has not fired yet.
                 legacyModalAllow(state, side);
-                for (let turn = 1; turn < APPLY_TURN[side]; turn += 1) {
+                expect(PRE_APPLY_TURNS[side].length).toBeGreaterThan(0);
+                for (const turn of PRE_APPLY_TURNS[side]) {
                     state.meta.turn = turn;
                     expect(hasParamilitaryPolicyCardApplied(state, side), `t${turn}`).toBe(false);
                     expect(resolveNonManualParamilitaryPolicy(state, side, CATALOG), `t${turn}`).toBe('always_deny');
@@ -160,10 +169,10 @@ describe('D1 after T and M: no sweep at autonomy 1-3 before the player\'s own po
 describe('D1 after T: a filed answer the card has not applied is no answer (T\'s shared accessor)', () => {
     it('another side\'s filed, unapplied answer is not a human decision on record: an RS human at Observer follows its own automatic card answer', () => {
         // Engine state after a faction switch: the player filed the RBiH card at t0 as RBiH, then took RS. The RBiH card has not
-        // fired. RS is at Observer; its card fired at t2 and was answered automatically (Always allow, the historical default).
+        // fired. RS is at Observer; its card fired at t1 and was answered automatically (Always allow, the historical default).
         const state = humanState('RS', 3, 2);
         fileAnswer(state, 'RBiH', 'always_deny');
-        applyCard(state, 'RS', 'always_allow', 'bot_ai_default', 2);
+        applyCard(state, 'RS', 'always_allow', 'bot_ai_default', 1);
         expect(hasParamilitaryPolicyCardApplied(state, 'RBiH')).toBe(false);
         expect(resolveNonManualParamilitaryPolicy(state, 'RS', CATALOG)).toBe('always_allow');
         expect(detect(state, 'RS')).toEqual([1, 0]);
@@ -175,7 +184,7 @@ describe('D1 after T: a filed answer the card has not applied is no answer (T\'s
         state.military.fired_event_ids.push(CARD.RBiH);
         state.military.event_fire_counts[CARD.RBiH] = 1;
         state.military.event_flags[FLAG.RBiH] = 'always_deny';
-        applyCard(state, 'RS', 'always_allow', 'bot_ai_default', 2);
+        applyCard(state, 'RS', 'always_allow', 'bot_ai_default', 1);
         expect(hasParamilitaryPolicyCardApplied(state, 'RBiH')).toBe(true);
         expect(resolveNonManualParamilitaryPolicy(state, 'RS', CATALOG)).toBe('always_deny');
         expect(detect(state, 'RS')).toEqual([0, 0]);
@@ -202,8 +211,8 @@ describe('D1 after M: F1-B reads the order in force through the cap', () => {
     });
 
     it('control: an in-person Always deny is within any cap, so F1-B still answers the RS card with it', () => {
-        const state = humanState('RS', 3, 2);
-        state.military.enabled_event_ids.push(CARD.RS);
+        // Round 4a (b): the RS card fires at t1 with nothing to enable it, so the in-person order meets it that week.
+        const state = humanState('RS', 3, 1);
         state.paramilitary_policy = 'always_deny';
         state.paramilitary_decision_history = [
             { id: 'paramilitary:1:op:elsewhere:x', turn: 1, target_osid: 'op:elsewhere:x', faction: 'RS', strength: 150, decision: 'deny' },

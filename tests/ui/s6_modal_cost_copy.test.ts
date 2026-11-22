@@ -19,7 +19,9 @@ const bcs = bcsMessages as Record<string, string>;
  * `paramilitaryReview.policyHint` and `eventDecision.paramilitaryPolicyRule`: since §6 D1 stage 2 merged onto main, each is D1's
  * signed text (§4 panel, 2026-11-18; it replaced the "only at Full Control" rule this panel's strings were written against) with
  * M's signed sentences appended verbatim. The combined strings are PENDING §4 PANEL; tests/ui/staff_sweep_disclosure_copy.test.ts
- * pins the same strings.
+ * pins the same strings. Round 4a (b), 2026-11-22 (§4 panel, EN and BCS): in the rule line, D1's "sends nothing before this order
+ * is answered" and M's "no paramilitary request ... before your answer takes effect" became one sentence, "Until an answer to this
+ * order takes effect, ...", because the RS card now fires at t1 and can be answered automatically.
  */
 const SIGNED: Record<string, { en: string; bcs: string }> = {
     'paramilitaryReview.policyHint': {
@@ -39,8 +41,8 @@ const SIGNED: Record<string, { en: string; bcs: string }> = {
         bcs: 'Opcija Uvijek dozvoli nije dostupna: paravojna politika vaše strane ne može se olabaviti.',
     },
     'eventDecision.paramilitaryPolicyRule': {
-        en: 'Your staff follows this order at every command level. If you allow deployment, rear-area sweeps are sent without asking you, and each one counts against your side. If you refuse it, none are sent. If you choose to review each deployment, each request comes to you at Full Control; at Assisted, Delegated or Observer no request comes to you, so none are sent. Your staff sends nothing before this order is answered. Your answer holds at every level, Observer included. At Observer, if you have not given a standing order, this order is answered automatically with the historical policy, and your side\'s forces act under it. At Assisted, corps operations still wait for your approval; this order does not cover them. No paramilitary request comes to you before your answer takes effect. Once given, your answer cannot be loosened.',
-        bcs: 'Štab slijedi ovu naredbu na svakom nivou komandovanja. Ako dozvolite raspoređivanje, paravojne akcije u pozadini šalju se bez pitanja, a svaka takva akcija pada na teret vaše strane. Ako ga odbijete, ne šalje se nijedna. Ako odaberete da pregledate svako raspoređivanje, na nivou Pune kontrole svaki zahtjev dolazi vama; na nivoima Asistirano, Delegirano i Posmatrač zahtjev vam ne stiže, pa se ne šalje nijedna. Prije odgovora na ovu naredbu štab ne šalje ništa. Vaš odgovor vrijedi na svakom nivou, i na nivou Posmatrač. Na nivou Posmatrač, ako niste izdali stalnu naredbu, na ovu naredbu se automatski odgovara historijskom politikom, a snage vaše strane djeluju po njoj. Na nivou Asistirano operacije korpusa i dalje čekaju vašu saglasnost; ova naredba ih ne obuhvata. Nijedan paravojni zahtjev ne stiže vam prije nego što vaš odgovor stupi na snagu. Jednom dat, odgovor se više ne može olabaviti.',
+        en: 'Your staff follows this order at every command level. If you allow deployment, rear-area sweeps are sent without asking you, and each one counts against your side. If you refuse it, none are sent. If you choose to review each deployment, each request comes to you at Full Control; at Assisted, Delegated or Observer no request comes to you, so none are sent. Until an answer to this order takes effect, your staff sends nothing and no paramilitary request comes to you. Your answer holds at every level, Observer included. At Observer, if you have not given a standing order, this order is answered automatically with the historical policy, and your side\'s forces act under it. At Assisted, corps operations still wait for your approval; this order does not cover them. Once given, your answer cannot be loosened.',
+        bcs: 'Štab slijedi ovu naredbu na svakom nivou komandovanja. Ako dozvolite raspoređivanje, paravojne akcije u pozadini šalju se bez pitanja, a svaka takva akcija pada na teret vaše strane. Ako ga odbijete, ne šalje se nijedna. Ako odaberete da pregledate svako raspoređivanje, na nivou Pune kontrole svaki zahtjev dolazi vama; na nivoima Asistirano, Delegirano i Posmatrač zahtjev vam ne stiže, pa se ne šalje nijedna. Dok odgovor na ovu naredbu ne stupi na snagu, štab ne šalje ništa i nijedan paravojni zahtjev vam ne stiže. Vaš odgovor vrijedi na svakom nivou, i na nivou Posmatrač. Na nivou Posmatrač, ako niste izdali stalnu naredbu, na ovu naredbu se automatski odgovara historijskom politikom, a snage vaše strane djeluju po njoj. Na nivou Asistirano operacije korpusa i dalje čekaju vašu saglasnost; ova naredba ih ne obuhvata. Jednom dat, odgovor se više ne može olabaviti.',
     },
 };
 
@@ -73,5 +75,8 @@ describe('§6 M-a copy (signed §4 panel)', () => {
         }
         // The rule box's M sentence too.
         expect(en['eventDecision.paramilitaryPolicyRule']).toMatch(/Once given, your answer cannot be loosened\.$/);
+        // The narrative seat's guard (round 4a (b)): "an answer", never "your answer", takes effect (Observer can answer the card).
+        expect(en['eventDecision.paramilitaryPolicyRule']).not.toMatch(/your answer to this order takes effect/i);
+        expect(bcs['eventDecision.paramilitaryPolicyRule']).not.toMatch(/Dok vaš odgovor/);
     });
 });

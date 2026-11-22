@@ -170,10 +170,13 @@ describe('T3 manual paramilitary gate (released only by the applied card answer)
         expect(detect(state).pending_player_requests).toBe(1);
     });
 
-    it('manual_gate_rs_holds_before_card_enabled', () => {
-        // The goals card is left pending, so the RS card is never enabled: the old gate let t1 requests through.
+    it('manual_gate_rs_holds_before_card_applies', () => {
+        // Round 4a (b), 2026-11-22 (was manual_gate_rs_holds_before_card_enabled): the RS card fires at t1 on its own, after
+        // the goals card, and is never enabled by it. Run before the card has fired or applied, the gate holds at t1 (the old
+        // gate let t1 requests through).
         const state = pocketState('RS', 1);
         expect(state.military.enabled_event_ids).not.toContain(RS_POLICY);
+        expect(state.military.fired_event_ids).not.toContain(RS_POLICY);
         const report = detect(state);
         expect(report.pending_player_requests).toBe(0);
         expect(ownRequests(state, 'RS')).toHaveLength(0);
@@ -194,12 +197,13 @@ describe('T3 manual paramilitary gate (released only by the applied card answer)
     });
 
     it('manual_gate_fired_pending_card_holds_past_window', () => {
-        // The RS card fired at t2 and was left pending (no receipt). Past its turn_max (8) the gate must
-        // still hold: releasing would let the player approve acts and then answer Refuse for credit.
+        // The RS card fired at t1 (round 4a (b); it fired at t2 before) and was left pending (no receipt). Past its
+        // turn_max (8) the gate must still hold: releasing would let the player approve acts and then answer Refuse for
+        // credit. `enabledRecorded` covers an older save whose goals answer still recorded the card as enabled.
         const turnMax = EVENT_CATALOG.find((def) => def.id === RS_POLICY)!.trigger.turn_max!;
         for (const enabledRecorded of [true, false]) {
             const state = pocketState('RS', turnMax + 2);
-            fireCard(state, 'RS', 2);
+            fireCard(state, 'RS', 1);
             if (enabledRecorded) state.military.enabled_event_ids.push(RS_POLICY);
             state.pending_paramilitary_requests = [staleRequest('RS', 'allow')];
             const report = detect(state);
@@ -244,11 +248,12 @@ describe('T3 manual paramilitary gate (released only by the applied card answer)
     });
 
     it('a skipped card keeps the hold, and the held requests are deleted, never replayed', () => {
-        // RS card fired at t2 and skipped in the pause; answered (and applied) only at t5.
-        const state = pocketState('RS', 2);
-        fireCard(state, 'RS', 2);
-        state.military.enabled_event_ids.push(RS_POLICY);
-        for (const turn of [2, 3, 4]) {
+        // RS card fired at t1 (round 4a (b); it fired at t2, enabled by goals, before) and skipped in the pause;
+        // answered (and applied) only at t5. Nothing enables it any more.
+        const state = pocketState('RS', 1);
+        fireCard(state, 'RS', 1);
+        expect(state.military.enabled_event_ids).not.toContain(RS_POLICY);
+        for (const turn of [1, 2, 3, 4]) {
             state.meta.turn = turn;
             state.pending_paramilitary_requests = [
                 { ...staleRequest('RS', 'allow'), target_osid: `op:held:t${turn}` },

@@ -10,6 +10,9 @@
  *   the card is answered automatically, and E1 keeps the in-person order. The receipt must not credit that order to "the
  *   historical policy" (6d/6g). The saved basis cannot tell a kept modal Always allow from per-request answers followed by the
  *   automatic write (both file `allow` records), so the honest cause is A3's neutral line.
+ *
+ * Round 4a (b), 2026-11-22: the RS card fires at t1, after the goals card and no longer enabled by its answer (it was t2, enabled
+ * by goals), so each card path below fires the card at t1.
  */
 
 import { describe, expect, it } from 'vitest';
@@ -140,7 +143,7 @@ function modalAlwaysAllow(state: GameState): void {
     resolvePlayerParamilitaryDecisions(state);
 }
 
-/** The strategic-goals card answered in person, which enables the RS policy card for the next turn. */
+/** The strategic-goals card answered in person. Since round 4a (b) it no longer enables the RS card, which fires at t1 on its own. */
 function answerGoalsInPerson(state: GameState): void {
     state.military.fired_event_ids.push(RS_GOALS_ID);
     state.military.pending_event_decisions!.push({
@@ -152,7 +155,7 @@ function answerGoalsInPerson(state: GameState): void {
         requires_player_response: true,
     } as any);
     resolveEventDecisionCore(state, RS_GOALS_ID, 'all_six');
-    expect(state.military.enabled_event_ids).toContain(RS_CARD_ID);
+    expect(state.military.enabled_event_ids ?? []).not.toContain(RS_CARD_ID);
 }
 
 function cardDecision(state: GameState) {
@@ -198,9 +201,9 @@ describe('§6 D1 stage 2: receipt causes on the panel\'s engine paths', () => {
     it('6a row: a Full Control sweep under the card\'s Always allow answered in person never reaches the cause-less receipt', () => {
         const state = rsHumanState();
         answerGoalsInPerson(state);
-        // t2, Full Control: the card fires and waits; the human answers it in person.
-        state.meta.turn = 2;
-        evaluateEvents(state, noRng, 2, [RS_CARD] as EventDefinition[]);
+        // t1, Full Control: the card fires and waits; the human answers it in person.
+        expect(state.meta.turn).toBe(1);
+        evaluateEvents(state, noRng, 1, [RS_CARD] as EventDefinition[]);
         expect((state.military.pending_event_decisions ?? []).map((pending) => pending.event_id)).toEqual([RS_CARD_ID]);
         resolveEventDecisionCore(state, RS_CARD_ID, 'always_allow');
         expect(cardDecision(state)).toMatchObject({ response_id: 'always_allow', decision_source: 'player', faction: 'RS' });
@@ -222,13 +225,14 @@ describe('§6 D1 stage 2: receipt causes on the panel\'s engine paths', () => {
         restoreLegacyRequest(state);
         modalAlwaysAllow(state);
         answerGoalsInPerson(state);
-        // t2: the human is at Observer; the card fires and is answered automatically with the historical default.
-        state.meta.turn = 2;
+        // Still t1: the human is at Observer; the card fires and is answered automatically with the historical default.
         state.meta.autonomy_level = 3;
-        evaluateEvents(state, noRng, 2, [RS_CARD] as EventDefinition[]);
+        evaluateEvents(state, noRng, 1, [RS_CARD] as EventDefinition[]);
         expect(cardDecision(state)).toMatchObject({ response_id: 'always_allow', decision_source: 'bot_ai_default', faction: 'RS' });
-        // E1 keeps the in-person order (the same value here); the staff sends the second pocket's sweep under it.
+        // E1 keeps the in-person order (the same value here). At the next detect (t2: t1's detect already ran, before the
+        // legacy request was answered) the staff sends the second pocket's sweep under it.
         expect(state.paramilitary_policy).toBe('always_allow');
+        state.meta.turn = 2;
         expect(detectAndMarch(state)).toEqual([1, 0]);
         marchToOutcome(state);
 
@@ -242,9 +246,8 @@ describe('§6 D1 stage 2: receipt causes on the panel\'s engine paths', () => {
     it('C1 control: with no in-person order, the automatic answer is the cause (6d/6g)', () => {
         const state = rsHumanState();
         answerGoalsInPerson(state);
-        state.meta.turn = 2;
         state.meta.autonomy_level = 3;
-        evaluateEvents(state, noRng, 2, [RS_CARD] as EventDefinition[]);
+        evaluateEvents(state, noRng, 1, [RS_CARD] as EventDefinition[]);
         expect(cardDecision(state)).toMatchObject({ response_id: 'always_allow', decision_source: 'bot_ai_default', faction: 'RS' });
         expect(state.paramilitary_policy).toBe('always_allow');
         expect(detectAndMarch(state)).toEqual([1, 0]);
