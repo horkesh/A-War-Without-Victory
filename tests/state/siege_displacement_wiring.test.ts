@@ -75,8 +75,11 @@ function world(opts: { linked: boolean; supplied: boolean; splitPocket?: boolean
         meta: { turn: opts.turn ?? 10, seed: 'siege', phase: 'war' },
         factions: ['HRHB', 'RBiH', 'RS'].map((id) => ({
             id,
-            supply_sources: id === 'RBiH' && opts.supplied ? ['S_home'] : [],
-            areasOfResponsibility: [],
+            // 'op:home:e' too: the legacy-edges path (updateDisplacement without operational inputs) reads
+            // supply sources as settlement ids, so A5's supplied main-body destination exists on both paths.
+            supply_sources: id === 'RBiH' && opts.supplied ? ['S_home', 'op:home:e'] : [],
+            // The legacy path's supply BFS walks the faction's AoR.
+            areasOfResponsibility: Object.keys(controllers).filter((sid) => controllers[sid] === id).sort(),
         })),
         military: {
             formations: {},
@@ -156,7 +159,8 @@ describe('update-displacement war step reads the campaign front (DA1)', () => {
 
 describe('one pass per municipality (binding condition: no per-pool triple processing)', () => {
     it('a besieged, unsupplied municipality with three pools is displaced once per turn', () => {
-        const w = world({ linked: true, supplied: false });
+        // A5: leavers need a supplied main-body destination, so the pocket is cut off from a supplied home.
+        const w = world({ linked: false, supplied: true });
         let report = updateDisplacement(w.state, w.settlements, w.edges, w.census);
         for (let t = 11; t <= 12; t++) {
             w.state.meta.turn = t;
@@ -181,8 +185,12 @@ describe('the siege counter lives in GameState (survives a save round trip)', ()
         const restored = JSON.parse(JSON.stringify(w.state)) as GameState;
         restored.meta.turn = 12;
         const report = updateDisplacement(restored, w.settlements, w.edges, w.census);
-        expect(report.by_municipality.map((r) => r.mun_id)).toEqual(['pocket']);
-        expect(causersWithHarm(restored)).toEqual(['RS']);
+        // The trigger fires on the third turn. A5: the whole side is unsupplied here, so no settlement is a
+        // supplied main-body destination and the leavers stay; the turn report names them (red-team M1).
+        expect(report.trapped?.filter((r) => r.mun_id === 'pocket').map((r) => r.faction_id)).toEqual(['RBiH']);
+        expect(report.trapped?.find((r) => r.mun_id === 'pocket')?.wanted).toBeGreaterThan(0);
+        expect(report.by_municipality).toEqual([]);
+        expect(causersWithHarm(restored)).toEqual([]);
     });
 
     it('clears the counter once the municipality is supplied again', async () => {
@@ -210,7 +218,8 @@ describe('pockets only (DA1 P5)', () => {
 
 describe('sourced rate (DA1 P3)', () => {
     it('an encircled, unsupplied pocket takes the larger rate, never the sum', () => {
-        const w = world({ linked: false, supplied: false });
+        // The pocket is cut off (unsupplied); home is supplied, so A5 lets the leavers go there.
+        const w = world({ linked: false, supplied: true });
         let report = updateDisplacement(w.state, w.settlements, w.edges, w.census);
         for (let t = 11; t <= 12; t++) {
             w.state.meta.turn = t;
@@ -261,7 +270,11 @@ function custom(controllers: Record<string, string>, edges: EdgeRecord[], poolKe
     const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 10, seed: 'siege', phase: 'war' },
-        factions: ['HRHB', 'RBiH', 'RS'].map((id) => ({ id, supply_sources: id === 'RBiH' ? ['S_home'] : [], areasOfResponsibility: [] })),
+        factions: ['HRHB', 'RBiH', 'RS'].map((id) => ({
+            id,
+            supply_sources: id === 'RBiH' ? ['S_home', 'op:home:e'] : [],
+            areasOfResponsibility: Object.keys(controllers).filter((sid) => controllers[sid] === id).sort(),
+        })),
         military: {
             formations: {}, front_segments: {}, front_pressure: {},
             militia_pools: Object.fromEntries(poolKeys.map((k) => {

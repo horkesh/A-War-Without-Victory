@@ -234,7 +234,11 @@ function getOrInitDisplacementState(
  * Route one people's displaced to municipalities their own side holds, with capacity.
  * Order: the takeover writer's route for this origin, people and causer
  * (`getBilateralRoutingOrder`), then the remaining held municipalities in id order.
- * Whatever finds no capacity is returned unrouted (the caller books it as lost).
+ * Whatever finds no capacity is returned unrouted (the caller leaves it in the pocket).
+ *
+ * A5 (SD7, broader bright-line panel 2026-11-22): only municipalities in `allowed` qualify, those where the
+ * side holds a settlement that this turn is supply-reachable AND in the side's main body
+ * (`buildSiegeDestinationsBySide`). A besieged pocket with its own supply source is never a destination.
  */
 function routeDisplacedPopulation(
     fromMunId: MunicipalityId,
@@ -242,14 +246,15 @@ function routeDisplacedPopulation(
     amount: number,
     displacementState: Record<MunicipalityId, DisplacementState>,
     munControl: Map<MunicipalityId, Set<FactionId>>,
-    causer: FactionId
+    causer: FactionId,
+    allowed: ReadonlySet<MunicipalityId>
 ): DisplacementRoutingRecord[] {
     const routing: DisplacementRoutingRecord[] = [];
     let remaining = amount;
 
     const friendly = new Set<MunicipalityId>();
     for (const [targetMunId, factions] of munControl) {
-        if (targetMunId !== fromMunId && factions.has(people)) friendly.add(targetMunId);
+        if (targetMunId !== fromMunId && factions.has(people) && allowed.has(targetMunId)) friendly.add(targetMunId);
     }
     const preferred = (causer === UNKNOWN_CAUSER_BUCKET
         ? getBilateralRoutingOrder(fromMunId, people)
@@ -311,6 +316,49 @@ export interface DisplacementRoutingRecord {
 export interface DisplacementStepReport {
     by_municipality: DisplacementRecord[];
     routing: DisplacementRoutingRecord[];
+    /**
+     * A5 (red-team M1): per pocket and side, this turn's siege leavers (`wanted`), how many found a
+     * destination (`routed`) and how many could not leave (`trapped`). A per-turn STOCK: the same people are
+     * trapped again next week, so it must never be summed across turns. Turn report only, never GameState,
+     * pools or integrity; no player surface reads it yet (registered follow-up). Absent when empty.
+     */
+    trapped?: DisplacementTrappedRecord[];
+}
+
+/** One pocket-side row of the A5 trapped stock (see `DisplacementStepReport.trapped`). */
+export interface DisplacementTrappedRecord {
+    mun_id: MunicipalityId;
+    faction_id: FactionId;
+    wanted: number;
+    routed: number;
+    trapped: number;
+}
+
+/**
+ * A5 (SD7): per side, the municipalities a siege leaver may go to: those where the side holds a settlement
+ * that this turn is supply-reachable for it AND lies in its main territorial body. Membership-only sets.
+ */
+function buildSiegeDestinationsBySide(
+    settlements: Map<string, SettlementRecord>,
+    bodies: ReadonlyMap<FactionId, TerritorialBodies>,
+    suppliedByFaction: ReadonlyMap<string, ReadonlySet<string>>
+): Map<FactionId, Set<MunicipalityId>> {
+    const out = new Map<FactionId, Set<MunicipalityId>>();
+    for (const side of CANONICAL_FACTIONS) {
+        const allowed = new Set<MunicipalityId>();
+        const body = bodies.get(side);
+        const reachable = suppliedByFaction.get(side);
+        if (body && body.main >= 0 && reachable) {
+            for (const [sid, b] of body.bodyOf) {
+                if (b !== body.main || !reachable.has(sid)) continue;
+                const rec = settlements.get(sid);
+                const mun = (rec?.mun1990_id ?? rec?.mun_code) as MunicipalityId | undefined;
+                if (mun) allowed.add(mun);
+            }
+        }
+        out.set(side, allowed);
+    }
+    return out;
 }
 
 /**
@@ -666,7 +714,9 @@ export function updateDisplacement(
 
     const records: DisplacementRecord[] = [];
     const routingRecords: DisplacementRoutingRecord[] = [];
+    const trappedRecords: DisplacementTrappedRecord[] = [];
     const defaultOriginalPopulation = 10000;
+    const siegeDestinations = buildSiegeDestinationsBySide(settlements, bodies, inputs.suppliedByFaction);
 
     // DA1 P6 (panel round 1, Red-team): the pocket share is measured against the side's
     // settlement count at turn 0, so conquering most of a side cannot turn its pockets into
@@ -770,8 +820,13 @@ export function updateDisplacement(
             // flight abroad, never the killed): Sarajevo convoy and tunnel leavers often went abroad;
             // Orašje's Sava crossing led to Croatia.
             const displacementState = state.displacement.displacement_state;
-            const routing = routeDisplacedPopulation(munId, side, wanted, displacementState, munControl, dominantCauser);
+            const routing = routeDisplacedPopulation(
+                munId, side, wanted, displacementState, munControl, dominantCauser,
+                siegeDestinations.get(side) ?? new Set<MunicipalityId>()
+            );
             const displacementAmount = routing.reduce((s, r) => s + r.amount, 0);
+            // A5 (red-team M1): record who could not leave, before the no-route continue.
+            trappedRecords.push({ mun_id: munId, faction_id: side, wanted, routed: displacementAmount, trapped: wanted - displacementAmount });
             if (displacementAmount <= 0) continue;
 
             const beforeOut = dispState.displaced_out;
@@ -846,7 +901,10 @@ export function updateDisplacement(
     // Enforce recruitment ceilings after all displacement updates
     enforceRecruitmentCeilings(state);
 
-    return { by_municipality: records, routing: routingRecords };
+    trappedRecords.sort((a, b) => strictCompare(a.mun_id, b.mun_id) || strictCompare(a.faction_id, b.faction_id));
+    return trappedRecords.length > 0
+        ? { by_municipality: records, routing: routingRecords, trapped: trappedRecords }
+        : { by_municipality: records, routing: routingRecords };
 }
 
 /**
