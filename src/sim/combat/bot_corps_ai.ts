@@ -68,7 +68,6 @@ export {
     getCorpsSubordinates,
     averagePersonnelFraction,
     averageCohesion,
-    countHealthyBrigades,
     sortByPersonnelDesc,
     getCorpsHomeMun,
     computeSectorThreat,
