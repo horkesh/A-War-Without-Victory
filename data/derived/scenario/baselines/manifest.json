@@ -29,7 +29,7 @@
         "formation_delta.json": "9d62add79da6c6f20ab883ced10cbee6b15b5faea03a29de2761bb766005dd47",
         "run_summary.json": "00e5794414e165aefb39b9a2608c434cfc738eb8d0cbfc99555425c081993bcc",
         "watched_operations.json": "aa2a75006848782614b530e9da56126583ceca1e5aa3a1cb6fd6ce3ddc547f22",
-        "weekly_report.jsonl": "fe39c908217fd1dd26ceeb8116257695187c3fbf494aa51b840564f5c3426dd1"
+        "weekly_report.jsonl": "cbb7657e04ac5835c738635d441955815194c26644dd08b358a640ae44bd9c24"
       },
       "id": "apr1992_188w",
       "scenario_path": "data/scenarios/apr1992_definitive_188w.json",

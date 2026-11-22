@@ -120,6 +120,12 @@ import {
     type CombatCausalityInvalidationReason,
     type CombatCausalitySummary
 } from './combat_causality.js';
+import {
+    joinEndRulesIntoAars,
+    snapshotOperationEndRulePriors,
+    type OperationEndRulePrior,
+    type OperationEndRuleReceipt,
+} from './operation_end_rule.js';
 import { buildOsidAdjacency } from '../sim/combat/osid_adjacency.js';
 import {
     loadRequiredHistoricalOob,
@@ -2844,6 +2850,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         const attackResolutionWeekly: AttackResolutionWeekRollup[] = [];
         const combatCausalityWeekly: Array<WeeklyCombatCausalitySummary & { week_index: number; turn: number }> = [];
         let combatCausalitySummary: CombatCausalitySummary | null = null;
+        // End-rule receipt rider (REPORT-ONLY, never GameState): last week's operation views, and
+        // each operation's end-rule receipt from its recovery-entry week, joined into
+        // operation_aars.json at write time.
+        let endRulePriors: Map<string, OperationEndRulePrior> = new Map();
+        const endRuleReceipts = new Map<string, OperationEndRuleReceipt>();
         const controlChangeAttributionWeekly: Array<WeeklyControlChangeAttributionSummary & { week_index: number; turn: number }> = [];
         let controlChangeAttributionSummary: ControlChangeAttributionSummary | null = null;
         const takeoverDisplacementSummary = {
@@ -3032,8 +3043,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 const operationDiagnostics = buildOperationCombatDiagnostics(
                     state,
                     turnReport.bot_order_diagnostics,
-                    turnReport.attack_resolution_osid
+                    turnReport.attack_resolution_osid,
+                    { priors: endRulePriors, sink: endRuleReceipts }
                 );
+                endRulePriors = snapshotOperationEndRulePriors(state);
                 operationDiagnosticsForReport = operationDiagnostics;
                 const weeklyCombatCausality = buildCombatCausalitySummary(
                     operationDiagnostics,
@@ -3990,7 +4003,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         });
 
         // Operation AARs artifact
-        const operationAars = state.operation_history ?? [];
+        // End-rule receipt rider: the label is joined onto copies; operation_history is sim state.
+        const operationAars = joinEndRulesIntoAars(state.operation_history ?? [], endRuleReceipts);
         const operationAarsPath = join(outDir, 'operation_aars.json');
         await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', async () => {
             await ensureRunOutputDir(outDir);

@@ -1,6 +1,11 @@
 import type { AttackResolutionOsidReport } from '../sim/combat/attack_resolution_osid.js';
 import type { AxisLaunchReadinessDetail, AxisOrderGenerationDetail, CorpsOperation, FactionId, FormationId, FormationState, GameState } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
+import {
+    deriveOperationEndRule,
+    type OperationEndRulePrior,
+    type OperationEndRuleReceipt,
+} from './operation_end_rule.js';
 import { isVlasicCohaExceptionOperation } from '../sim/combat/coha_operation_exception.js';
 import { isCorpsBoundByOct1995Ceasefire } from '../sim/combat/oct1995_ceasefire.js';
 import type { LaunchOrderConfirmationReport } from '../sim/combat/sector_offensive.js';
@@ -93,6 +98,19 @@ export interface OperationCombatDiagnostic {
     planning_grace_week?: true;
     /** P3 rider: zero-order launches demoted so far (`CorpsOperation.launch_demotion_count`). */
     launch_demotion_count?: number;
+    /**
+     * End-rule receipt rider, REPORT-ONLY: the never-ending-op silence streak on an execution
+     * week (`CorpsOperation.silent_execution_turn_streak`, deleted when the op enters recovery).
+     * Absent when 0.
+     */
+    silent_execution_turn_streak?: number;
+    /**
+     * End-rule receipt rider, REPORT-ONLY: on the week the operation entered recovery, the
+     * specific exit rule behind its coarse `recovery_reason` (operation_end_rule.ts).
+     */
+    end_rule?: string;
+    /** Per-axis end rules on the recovery-entry week, keyed by axis_id. */
+    end_rule_axes?: Record<string, string>;
 }
 
 export type OperationIdleExecutionWeek = 'all_stationary' | 'masked_by_march';
@@ -279,7 +297,13 @@ export function createBotOrderDiagnosticsSnapshot(
 export function buildOperationCombatDiagnostics(
     state: GameState,
     orderSnapshot: BotOrderDiagnosticsSnapshot | undefined,
-    osidResolution: AttackResolutionOsidReport | undefined
+    osidResolution: AttackResolutionOsidReport | undefined,
+    endRules?: {
+        /** Previous week's operation views (snapshotOperationEndRulePriors). */
+        priors?: ReadonlyMap<string, OperationEndRulePrior>;
+        /** Filled with each recovery-entry receipt, keyed by operation id; first write wins. */
+        sink?: Map<string, OperationEndRuleReceipt>;
+    }
 ): OperationCombatDiagnostic[] {
     const suppressedAttackOrders = new Set(
         (osidResolution?.suppressed_attack_orders ?? [])
@@ -511,6 +535,27 @@ export function buildOperationCombatDiagnostics(
                 && operation.phase === 'planning'
                 && currentTurn - operation.phase_started_turn > planningDuration;
             const launchDemotionCount = operation.launch_demotion_count ?? 0;
+            const silentExecutionStreak = operation.phase === 'execution'
+                ? (operation.silent_execution_turn_streak ?? 0)
+                : 0;
+            // End-rule receipt rider (report-only): name the rule on the recovery-entry week.
+            let endRule: OperationEndRuleReceipt | undefined;
+            if (enteredRecoveryThisTurn) {
+                const sectors = state.military.corps_front_sectors;
+                endRule = deriveOperationEndRule(operation, {
+                    turn: currentTurn,
+                    prior: endRules?.priors?.get(operationId),
+                    sector_missing: typeof operation.sector_id === 'string'
+                        && sectors !== undefined
+                        && sectors[operation.sector_id] === undefined,
+                    inactive_axis_ids: (operation.axes ?? [])
+                        .filter((axis) => !axis.assigned_brigades
+                            .some((brigadeId) => getFormationById(state, brigadeId)?.status === 'active'))
+                        .map((axis) => axis.axis_id)
+                        .sort(strictCompare),
+                });
+                if (endRules?.sink && !endRules.sink.has(operationId)) endRules.sink.set(operationId, endRule);
+            }
 
             diagnostics.push({
                 corps_id: corpsId,
@@ -544,6 +589,9 @@ export function buildOperationCombatDiagnostics(
                 ...(pausedWeek ? { lifecycle_paused_week: true as const } : {}),
                 ...(planningGraceWeek ? { planning_grace_week: true as const } : {}),
                 ...(launchDemotionCount > 0 ? { launch_demotion_count: launchDemotionCount } : {}),
+                ...(silentExecutionStreak > 0 ? { silent_execution_turn_streak: silentExecutionStreak } : {}),
+                ...(endRule !== undefined ? { end_rule: endRule.end_rule } : {}),
+                ...(endRule?.end_rule_axes !== undefined ? { end_rule_axes: endRule.end_rule_axes } : {}),
             });
         } // end for-of active_operations
     }
