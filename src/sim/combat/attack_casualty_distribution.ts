@@ -62,8 +62,10 @@ export function computeFinalCasualties(params: {
     bombardmentMult: number;
     attackerCount: number;
     powerRatio: number;
+    /** PROBE_FAILED_ATTACKER_LOSS_MULT for a failed probe, else 1 (the default). Multiplied last. */
+    failedProbeAttackerLossMult?: number;
 }): { finalAttackerCas: number; finalDefenderCas: number } {
-    const baseAttackerCas = params.personnelAttacker * BASE_ATTACKER_LOSS_RATE * (OUTCOME_ATTACKER_MOD[params.outcome] ?? 1) * params.lastStandCasMult * params.militiaOnlyMult * params.attCasMult * params.defensiveFireMult;
+    const baseAttackerCas = params.personnelAttacker * BASE_ATTACKER_LOSS_RATE * (OUTCOME_ATTACKER_MOD[params.outcome] ?? 1) * params.lastStandCasMult * params.militiaOnlyMult * params.attCasMult * params.defensiveFireMult * (params.failedProbeAttackerLossMult ?? 1);
     const baseDefenderCas = params.personnelDefender * BASE_DEFENDER_LOSS_RATE * (OUTCOME_DEFENDER_MOD[params.outcome] ?? 1) * params.lastStandCasMult * params.bombardmentMult * params.defCasMult;
     const finalAttackerCas = Math.min(params.personnelAttacker - MIN_COMBAT_PERSONNEL, Math.max(0, Math.round(baseAttackerCas)));
     const finalDefenderCas = Math.min(params.personnelDefender, Math.max(0, Math.round(
