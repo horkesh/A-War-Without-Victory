@@ -77,7 +77,7 @@ describe('§6 round 4s: the no-card disclosure and receipt', () => {
         expect(panel).toMatch(/t\(levelDescriptionKey\(level, playerFaction\)\)/);
         expect(panel).not.toMatch(/'HRHB'/);
         const modal = withoutComments(readFileSync('src/ui/map/components/ParamilitaryReviewModal.tsx', 'utf8'));
-        expect(modal).toMatch(/policyCap === null \? 'paramilitaryReview\.policyHintNoCard' : 'paramilitaryReview\.policyHint'/);
+        expect(modal).toMatch(/policyCap === null \? t\('paramilitaryReview\.policyHintNoCard'\) : t\('paramilitaryReview\.policyHint'\)/);
         const ledger = withoutComments(readFileSync('src/ui/map/data/decisionConsequenceLedger.ts', 'utf8'));
         expect(ledger).toMatch(/'historical_default_staff'\s*\?\s*'HistoricalDefault'/);
     });
