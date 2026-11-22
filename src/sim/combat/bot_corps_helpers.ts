@@ -57,14 +57,6 @@ export function assessCorpsSupplyHealth(
  *  Checks both state.formations (for corps with kind==='corps') AND
  *  state.corps_command keys (for corps that only exist as references
  *  from brigade corps_id — common when corps formations aren't loaded).
- *
- *  ACCEPTED AS FINAL (orchestrator, 2026-11-22): corps home for stance rules is the
- *  brigade centre of mass. Corps load as `corps_asset`, so step 1 (kind==='corps') finds
- *  none and step 2 takes the mode of the brigades' locations, never the corps' own `mun:`
- *  tag. Cost: the ARBiH 3rd Corps central-Bosnia stance rule does not fire in weeks 67
- *  and 93-98. The own-tag fix missed the battles bar (record: branch
- *  `claude/corps-home-own-tag`, tag `archive/corps-home-own-tag`, abd30b153). Do not change
- *  this without a measured pair.
  */
 export function getFactionCorps(state: GameState, faction: FactionId): FormationState[] {
     const formations = state.military.formations ?? {};
