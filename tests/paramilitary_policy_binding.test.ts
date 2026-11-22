@@ -170,6 +170,9 @@ function expected(faction: Faction, controller: Controller, order: Order): [numb
         return [0, 1];
     }
     // Assisted, Delegated, Observer: the human's standing order binds; nothing but Always allow sends a sweep.
+    // Round 4s (owner rule 2026-11-22): a side with no card (HRHB) and no own record follows the bot's historical
+    // default (allow); `applyOrder` files an HRHB record for every other order, so those rows keep the standing order.
+    if (order === 'unanswered' && !PARAMILITARY_POLICY_CARD_ID_BY_FACTION[faction]) return [1, 0];
     return order === 'always_allow' ? [1, 0] : [0, 0];
 }
 
@@ -304,7 +307,7 @@ describe('§6 D1 stage 2: the standing policy binds every non-manual paramilitar
         }
     });
 
-    it('Observer: a modal Always deny stays binding, and an HRHB human with no order sends none', () => {
+    it('Observer: a modal Always deny stays binding, and an HRHB human with no decision on record follows the historical default', () => {
         const rs = pocketState('RS', metaFor('RS', 0));
         applyOrder(rs, 'RS', 0, 'always_allow');
         rs.pending_paramilitary_requests = [{ target_osid: 'op:other:q', faction: 'RS', strength: 150, mode: 'rear_pocket' }];
@@ -318,7 +321,9 @@ describe('§6 D1 stage 2: the standing policy binds every non-manual paramilitar
 
         const hrhb = pocketState('HRHB', metaFor('HRHB', 3));
         applyOrder(hrhb, 'HRHB', 3, 'unanswered');
-        expect(attackerOutcome(hrhb, 'HRHB')).toEqual([0, 0]);
+        // Round 4s (owner rule 2026-11-22): no card and no own record, so the staff apply the bot's historical
+        // default (before this ruling: none). An in-person HRHB order still decides (s6_nocard_staff_default).
+        expect(attackerOutcome(hrhb, 'HRHB')).toEqual([1, 0]);
     });
 
     describe('catalog and data guards', () => {

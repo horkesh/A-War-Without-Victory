@@ -165,11 +165,40 @@ export function resolveNonManualParamilitaryPolicy(
     catalog: readonly EventDefinition[] | undefined,
 ): NonManualParamilitaryDecision {
     if (isHumanControlledFaction(state, faction)) {
+        if (followsNoCardHistoricalDefault(state, faction)) {
+            // Owner rule 2026-11-22 (§6 round 4s H1 + P1): a side with no policy card has no pending decision,
+            // so until the player decides for it, its staff apply the bot's historical default.
+            return botParamilitaryPolicy(state, faction, catalog);
+        }
         // A1: the human's current standing order decides at Assisted, Delegated and Observer;
         // unanswered or `ask` sends none.
         return humanStandingParamilitaryOrder(state, faction) === 'always_allow' ? 'always_allow' : 'always_deny';
     }
+    return botParamilitaryPolicy(state, faction, catalog);
+}
 
+/**
+ * Whether a human side's staff apply the bot's historical default (§6 D1 stage 2 round 4s, under the owner rule
+ * of 2026-11-22: staff playing a human faction apply the headless default; the player's own decision refuses or
+ * changes it). True only when the side has no registered policy card (keyed on the registry, never on a faction
+ * name, so a card authored later moves that side to A1 by itself) AND no paramilitary decision of the player's for
+ * it is on record at all. Ruling P1 (G1, fail closed): any own record ends the default for good, even one that a
+ * newer decision for another side outranks; `humanStandingParamilitaryOrder` then decides, unchanged. Every record
+ * in `paramilitary_decision_history` is the human's own act (its only writer is the manual player's
+ * `resolvePlayerParamilitaryDecisions`). The migration default `ask` with no record is not a decision.
+ */
+export function followsNoCardHistoricalDefault(state: GameState, faction: FactionId): boolean {
+    if (PARAMILITARY_POLICY_CARD_ID_BY_FACTION[faction] !== undefined) return false;
+    const history = Array.isArray(state.paramilitary_decision_history) ? state.paramilitary_decision_history : [];
+    return !history.some((record) => record?.faction === faction);
+}
+
+/** The bot's order: the decided card flag, else the card's historical default read from the event data. */
+function botParamilitaryPolicy(
+    state: GameState,
+    faction: FactionId,
+    catalog: readonly EventDefinition[] | undefined,
+): NonManualParamilitaryDecision {
     const decided = state.military?.event_flags?.[paramilitaryPolicyFlagKey(faction)];
     if (decided !== undefined) {
         // §2: `ask` with no human asking denies; anything that is not an order fails closed.

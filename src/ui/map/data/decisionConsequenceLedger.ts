@@ -876,7 +876,9 @@ export function buildDecisionConsequenceLedger(
         ? 'AutomaticOrder'
         : unrequested.cause === 'neutral'
           ? 'Neutral'
-          : '';
+          : unrequested.cause === 'historical_default_staff'
+            ? 'HistoricalDefault'
+            : '';
     const detailKey = `decisionConsequences.detail.paramilitary.${suffix}${causeSuffix}` as MessageKey;
     records.push({
       id: `paramilitary-staff:${unrequested.id}`,

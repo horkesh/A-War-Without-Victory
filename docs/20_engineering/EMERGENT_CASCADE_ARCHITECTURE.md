@@ -17,7 +17,7 @@ Every player choice feeds forward through mechanical systems, generates narrativ
 
 ## The Cascade: How a Single Decision Echoes Through Every System
 
-### Example: RS Player allows paramilitaries in Zvornik (w2)
+### Example: RS Player allows paramilitaries in Zvornik (w1)
 
 ```
 PLAYER CHOICE
@@ -73,7 +73,7 @@ DAYTON ENDGAME (existing negotiation system)
   └─ Dayton verdict: "You won the land. You lost everything else."
 ```
 
-### The Opposite Path: RS Player denies paramilitaries (w2)
+### The Opposite Path: RS Player denies paramilitaries (w1)
 
 ```
 PLAYER CHOICE

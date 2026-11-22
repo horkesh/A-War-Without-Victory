@@ -11,9 +11,9 @@
 ### Week 1–2 (April 6–19, 1992)
 
 **Events:**
+- **31 March – 4 April (before the war's t0):** **Bijeljina** — Serb TO and Arkan's Serbian Volunteer Guard take the town (takeover 1-2 April; Serb control by 4 April) [BB1 printed p.135 (KB p.171); Krajišnik TJ paras. 297-303]
 - **6 April:** Independence recognized; Serb barricades in Sarajevo; shots fired at civilian demonstrators near Vrace hill [BB1 p.441 footnote: some date siege from 5 April]
-- **8–10 April:** Bijeljina — Arkan's Tigers seize city [GK]
-- **9–10 April:** **Zvornik falls** — "capture of Zvornik on 9-10 April" by Bosnian Serb TO with JNA support (BB1 p.187)
+- **8–10 April:** **Zvornik falls** — Arkan's ultimatum on 8 April; volunteers, TO, police and the JNA attack the next morning and hold the town on 9 April [BB1 printed p.137 (KB p.173); Krajišnik TJ para. 362]; BB1 printed p.151 (KB p.187) gives "9-10 April"
 - **Mid-April:** **Foča falls** — "Serbs captured Foca in April" (BB1 p.187)
 - **Mid-April:** **Višegrad falls** to JNA/VRS [GK; BB1 p.187 confirms Drina valley fighting]
 - **16 April:** Bihać established as one of seven territorial districts (okrug) under Bosnian TD Staff (BB1 p.184)

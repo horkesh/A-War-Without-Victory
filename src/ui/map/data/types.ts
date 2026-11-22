@@ -732,7 +732,7 @@ export interface ParamilitaryUnrequestedView {
      * Absent: the saved basis shows no Always allow (Always deny, Review, unanswered, or no card), which no stage-2 rule sweeps
      * under, so the save comes from the stage-1 rule and the receipt keeps the stage-1 cause.
      */
-    cause?: 'standing_order' | 'standing_order_automatic' | 'neutral';
+    cause?: 'standing_order' | 'standing_order_automatic' | 'neutral' | 'historical_default_staff';
 }
 
 export interface OfficerDecisionRecordView {
