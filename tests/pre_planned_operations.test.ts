@@ -897,7 +897,7 @@ describe('pre-planned operations', () => {
         assert.equal(zvezda.prestage_from, 79);
         assert.equal(zvezda.execution_attack_power_mult, 3);
         assert.equal(zvezda.minimum_viable_participants, 2);
-        assert.equal(zvezda.minimum_assembled_participants, 3);
+        assert.equal(zvezda.minimum_assembled_participants, 2);
         assert.equal(zvezda.planning_duration, 10);
         assert.ok(roster.includes('rs_1st_guards_motorized'));
         assert.ok(roster.includes('rs_65th_protection_motorized_regiment'));
@@ -1081,6 +1081,95 @@ describe('pre-planned operations', () => {
             ),
             positionsBefore,
         );
+    });
+
+    it('lets a Foča-only Zvezda (Pracha already cleared the northern axes) meet its own assembly floor', () => {
+        // Main-run shape at t93: Pracha River has taken every Goražde and Višegrad
+        // objective, so those axes drop as no_hostile_objectives and only the Foča
+        // axis is built. Birač is in authored prestage transit and is not admitted;
+        // Milići and Zvornik stand at mazlina (Foča municipality, adjacent to the
+        // objective). The staging cell izbisno is enemy-held, as on main.
+        const state = makeMinimalState();
+        state.meta.turn = 93;
+        delete state.meta.player_faction;
+        const command = state.military.corps_command!.vrs_drina!;
+        command.active_operations = [];
+        command.queued_operations = ['Operation Zvezda 94'];
+
+        const varosiste = 'op:rogatica:varosiste_2';
+        const brcigovo = 'op:rogatica:brcigovo';
+        const staraGora = 'op:rogatica:stara_gora';
+        const izbisno = 'op:foca:izbisno';
+        const mazlina = 'op:foca:mazlina';
+        const donjeZesce = 'op:foca:donje_zesce';
+        for (const [osid, controller] of [
+            [varosiste, 'RS'],
+            ['op:rogatica:rogatica_2', 'RS'],
+            [staraGora, 'RS'],
+            [mazlina, 'RS'],
+            [izbisno, 'RBiH'],
+            [brcigovo, 'RS'],
+            ['op:gorazde:sopotnica', 'RS'],
+            ['op:gorazde:slatina_2', 'RS'],
+            ['op:gorazde:ustipraca_2', 'RS'],
+            ['op:gorazde:kolovarice', 'RBiH'],
+            ['op:visegrad:medjedja_2', 'RS'],
+            ['op:visegrad:drinsko', 'RS'],
+            [donjeZesce, 'RBiH'],
+        ] as const) {
+            state.political.political_controllers![osid] = controller;
+        }
+
+        for (const brigadeId of [
+            'rs_65th_protection_motorized_regiment',
+            'rs_5th_podrinje',
+            'rs_1st_guards_motorized',
+        ]) {
+            state.military.formations![brigadeId]!.location_osid = varosiste;
+        }
+        for (const brigadeId of ['rs_1st_bratunac', 'rs_1st_podrinje', 'rs_visegrad_brigade']) {
+            state.military.formations![brigadeId]!.location_osid = staraGora;
+        }
+        state.military.formations!.rs_1st_milii!.location_osid = mazlina;
+        state.military.formations!.rs_1st_milii!.personnel = 2000;
+        state.military.formations!.rs_1st_zvornik!.location_osid = mazlina;
+        state.military.formations!.rs_1st_zvornik!.personnel = 818;
+        state.military.formations!.rs_1st_birac!.location_osid = mazlina;
+        state.military.brigade_movement_state = {
+            rs_1st_birac: {
+                status: 'in_transit', owner: 'authored_preplanned', stance: 'column',
+                destination_sids: [izbisno], path: [], turns_remaining: 1,
+            },
+        } as any;
+
+        const adjacency = new Map<string, string[]>([
+            [varosiste, ['op:gorazde:sopotnica', 'op:gorazde:ustipraca_2', brcigovo]],
+            ['op:gorazde:sopotnica', [varosiste, 'op:gorazde:slatina_2', brcigovo]],
+            ['op:gorazde:slatina_2', ['op:gorazde:sopotnica']],
+            ['op:gorazde:ustipraca_2', [varosiste]],
+            [brcigovo, [varosiste, 'op:gorazde:sopotnica']],
+            [staraGora, ['op:visegrad:medjedja_2', 'op:visegrad:drinsko']],
+            ['op:visegrad:medjedja_2', [staraGora, 'op:visegrad:drinsko']],
+            ['op:visegrad:drinsko', [staraGora, 'op:visegrad:medjedja_2']],
+            [mazlina, [donjeZesce, izbisno]],
+            [izbisno, [mazlina, donjeZesce]],
+            [donjeZesce, [mazlina, izbisno]],
+        ]);
+
+        assert.equal(
+            injectQueuedOperation(state, 'vrs_drina', adjacency as Map<any, any>),
+            true,
+        );
+
+        const operation = command.active_operations.find((active) => active.name === 'Operation Zvezda 94');
+        assert.ok(operation);
+        assert.deepEqual(operation!.axes?.map((axis) => axis.axis_id), ['foca_southern_flank']);
+        const southernFlank = operation!.axes![0]!;
+        assert.deepEqual(southernFlank.objectives, [donjeZesce]);
+        assert.deepEqual([...southernFlank.assigned_brigades].sort(), ['rs_1st_milii', 'rs_1st_zvornik']);
+        assert.deepEqual([...operation!.participating_brigades].sort(), ['rs_1st_milii', 'rs_1st_zvornik']);
+        assert.ok(!operation!.participating_brigades.includes('rs_1st_birac'));
+        assert.equal(hasMinimumAssembledParticipants(state, operation!), true);
     });
 
     it('does not reserve a distant head operation roster against new commander operations', () => {

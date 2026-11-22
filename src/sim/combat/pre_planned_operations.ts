@@ -408,9 +408,10 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
-        // Operation Zvezda 94 — VRS Drina Corps spring 1994 offensive on Goražde safe area.
-        // Historically: Drina Corps tactical groups pressed from the east and south, reaching
-        // outskirts of Goražde town (BB2 p.289). Fires after Op Pracha River (w41) completes
+        // Operation Zvezda 94 — VRS spring 1994 offensive on Goražde safe area.
+        // Historically: the Drina Corps ran the northern (Rogatica-Jabuka) and eastern
+        // (Prača-Kopači) axes; a Herzegovina Corps OG ran the main south-eastern thrust
+        // (BB2 Annex 49, print pp. 459-463). Fires after Op Pracha River (w41) completes
         // and frees brigades. Planning authority opens at w93 so the columns can
         // assemble before the late-March offensive and the w104 April checkpoint.
         //
@@ -435,11 +436,18 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         // Main Staff artillery, engineering, and command concentration. This
         // modifies combat power only; every objective still requires a battle.
         execution_attack_power_mult: 3,
-        // The two Main Staff assault formations are the irreducible attack
-        // group. Local Drina Corps formations join when the live front and
-        // route state permit, but their absence must not cancel the offensive.
+        // Two formations are the irreducible attack group. When the Goražde
+        // axes are built, that is the two Main Staff assault formations; local
+        // Drina Corps formations join when the live front and route state
+        // permit, but their absence must not cancel the offensive. The assembly
+        // floor matches minimum_viable_participants. The earlier floor of 3
+        // dated from the five-formation Goražde design (d8a980bac); the Foča
+        // axis was added later (e0398a166) and the floor was not resized.
+        // When Pracha River has already cleared the Goražde/Višegrad axes, only
+        // the Foča axis is built, with local Drina brigades (1st Milići,
+        // 1st Zvornik) and no Main Staff formation.
         minimum_viable_participants: 2,
-        minimum_assembled_participants: 3,
+        minimum_assembled_participants: 2,
         // The formations pre-stage before the Drina command slot opens; the
         // preparation budget lets both converging columns assemble.
         planning_duration: 10,
@@ -503,6 +511,9 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
             {
                 axis_id: 'foca_southern_flank',
                 name: 'Foča Southern Flank',
+                // Model allocation, not history: BB2 Annex 49 (print pp. 459-463)
+                // has the Herzegovina Corps run the southern thrust and names
+                // none of these Drina brigades.
                 brigades: [
                     'rs_1st_birac',
                     'rs_1st_zvornik',
