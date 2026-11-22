@@ -153,8 +153,7 @@ describe('pre-first-Advance RBiH paramilitary policy', () => {
       flags: { rbih_paramilitary_policy: 'always_allow', rbih_paramilitary_authorized: true },
       dimensions: { international_standing: -25, internal_cohesion: 0, negotiating_leverage: -15 },
       recruitment: [{ faction: 'RBiH', pool_multiplier: 0.95, expires_turn: 52 }],
-      // paramilitary_rear_clearance shift retired 2026-11-22 (its token matched no municipality).
-      priority: [],
+      priority: [{ faction: 'RBiH', add_objectives: ['paramilitary_rear_clearance'], expires_turn: 104 }],
     },
   ])('old lane (pre-T save): applies the complete canonical $responseId response exactly once', async ({
     responseId,

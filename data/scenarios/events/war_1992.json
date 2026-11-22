@@ -982,7 +982,16 @@
         "historical_marker": "historical_default",
         "label": "Always allow paramilitary deployment",
         "description": "Standing authorization. Arkan, the White Eagles, the Yellow Wasps, and the MUP Special Police deploy on local request without per-mission review. Each approved sweep records civilian casualties and increments the war-crimes counter; the international monitors will see the pattern.",
-        "effects": [],
+        "effects": [
+          {
+            "kind": "bot_priority_shift",
+            "faction": "RS",
+            "add_objectives": [
+              "paramilitary_rear_clearance"
+            ],
+            "duration_turns": 104
+          }
+        ],
         "sets_flags": {
           "rs_paramilitary_policy": "always_allow",
           "rs_paramilitary_authorized": true
@@ -1067,6 +1076,14 @@
         "label": "Always deny paramilitary deployment",
         "description": "The volunteer formations are refused entry to the order of battle. Rear-area operations fall to regular VRS units and MUP regulars. The hardline base is alienated; the international monitors note the absence of the pattern they expect to find.",
         "effects": [
+          {
+            "kind": "bot_priority_shift",
+            "faction": "RS",
+            "remove_objectives": [
+              "paramilitary_rear_clearance"
+            ],
+            "duration_turns": 104
+          },
           {
             "kind": "recruitment_modifier",
             "faction": "RS",
@@ -2226,6 +2243,14 @@
         "label": "Authorize paramilitary standing orders",
         "description": "Standing authorization. The Patriotic League cadres, the Sarajevo-area independent brigades, the volunteer detachments — all operate on local commander authority without per-mission political review. This breaks with the documented Sarajevo posture. International monitors will read the pattern against Pale and Mostar; the ICTY paper trail will record the policy in its own terms. Each approved sweep records civilian casualties and increments the war-crimes counter through the existing engine surface.",
         "effects": [
+          {
+            "kind": "bot_priority_shift",
+            "faction": "RBiH",
+            "add_objectives": [
+              "paramilitary_rear_clearance"
+            ],
+            "duration_turns": 104
+          },
           {
             "kind": "recruitment_modifier",
             "faction": "RBiH",
