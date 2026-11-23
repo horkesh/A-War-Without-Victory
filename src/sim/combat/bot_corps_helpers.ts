@@ -99,6 +99,14 @@ export function getFactionCorps(state: GameState, faction: FactionId): Formation
             for (const [mun, count] of [...munCounts.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
                 if (count > maxCount) { maxCount = count; homeMun = mun; }
             }
+            // The corps' own home tag wins. The OOB loader gives loaded corps
+            // kind 'corps_asset' (legacy fixtures use 'corps'); the brigade-location
+            // mode above is only the fallback for corps without an own mun: tag.
+            const own = formations[cid];
+            if (own && (own.kind === 'corps_asset' || own.kind === 'corps')) {
+                const ownMun = getCorpsHomeMun(own);
+                if (ownMun) homeMun = ownMun;
+            }
 
             const tags: string[] = [];
             if (homeMun) tags.push(`mun:${homeMun}`);

@@ -59,8 +59,10 @@ describe('event taxonomy diagnostic report', () => {
         expect([...new Set(rows.map((row) => row.file))]).toEqual([...CATALOG_FILES]);
         expect(rows.map((row) => `${row.file_index}:${row.catalog_index}:${row.id}`).slice(0, 3)).toEqual([
             '0:1:foca_1992',
+            // §6 D1 stage 2 round 4a (b): the RS policy card's turn_min is now 1, so this report (turn_min, then id; the
+            // engine orders by priority, which puts goals first) lists it beside the goals card.
+            '0:3:rs_paramilitary_policy_1992',
             '0:0:rs_strategic_goals',
-            '0:2:zvornik_takeover_1992',
         ]);
     });
 
@@ -140,6 +142,9 @@ describe('event taxonomy diagnostic report', () => {
             ['belgrade_embargo_rs_1994', 2],
         ]));
         expect(report.rows.flatMap((row) => row.future_consequence_opens_events)).toEqual([
+            // §6 D1 stage 2 round 4a (b): the RS policy card (turn_min 1) now precedes the goals card in this report's order,
+            // so its restraint consequence comes first; and no goals option claims to open the policy card any more.
+            'csq_paramilitary_authorization_refused',
             'belgrade_embargo_rs_1994',
             'deliberate_force_rs_compliance_1995',
             'holbrooke_us_belgrade_channel_1995',
@@ -150,7 +155,6 @@ describe('event taxonomy diagnostic report', () => {
             'rs_contact_group_response_1994',
             'rs_dayton_acceptance_1995',
             'rs_owen_stoltenberg_response_1993',
-            'rs_paramilitary_policy_1992',
             'rs_washington_rejection_1994',
             'un_hostage_crisis_1995',
             'abdic_apwb_declared_1993',
@@ -173,7 +177,6 @@ describe('event taxonomy diagnostic report', () => {
             'rbih_washington_agreement_1994',
             'srebrenica_demilitarization_1993',
             'vance_owen_plan_1993',
-            'csq_paramilitary_authorization_refused',
             'csq_federation_early_1994',
             'csq_hvo_central_bosnia_offensive_1993',
             'csq_joint_offensive_1994',

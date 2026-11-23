@@ -19,7 +19,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { GlassPanel } from './GlassPanel';
 import { Z } from '../../shared/zIndex';
 import { OfficerDossierPanel } from './OfficerDossierPanel';
-import { playerFactionMatch } from '../data/playerFactionMatch';
+import { isCanonicalPlayerFaction, playerFactionMatch } from '../data/playerFactionMatch';
+import { PARAMILITARY_POLICY_CARD_BY_FACTION } from '../../../sim/events/paramilitary_policy_card';
 import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
 import { toTitleCase } from '../utils/formatters';
 import { t, type MessageKey } from '../i18n';
@@ -107,6 +108,23 @@ const LEVEL_DESC_KEYS: Record<number, MessageKey> = {
     2: 'autonomy.level.delegated.desc',
     3: 'autonomy.level.observer.desc',
 };
+
+/**
+ * §6 D1 stage 2 round 4s (owner rule 2026-11-22; §4 copy panel, unanimous): a side with no paramilitary policy card
+ * (keyed on the card registry, never a faction name) has no decision to answer, so at levels 1-3 its staff follow the
+ * historical default until the player decides at Full Control. Those levels get their no-card description.
+ */
+const LEVEL_DESC_KEYS_NO_CARD: Record<number, MessageKey> = {
+    0: 'autonomy.level.fullControl.desc',
+    1: 'autonomy.level.assisted.descNoCard',
+    2: 'autonomy.level.delegated.descNoCard',
+    3: 'autonomy.level.observer.descNoCard',
+};
+
+export function levelDescriptionKey(level: number, playerFaction: string | null | undefined): MessageKey {
+    const noCard = isCanonicalPlayerFaction(playerFaction) && !PARAMILITARY_POLICY_CARD_BY_FACTION[playerFaction];
+    return (noCard ? LEVEL_DESC_KEYS_NO_CARD : LEVEL_DESC_KEYS)[level];
+}
 
 // Phase 2 slice 1: commander go/no-go → assessment label key (typed, no cast).
 const ASSESSMENT_LABEL_KEYS: Record<'launch' | 'postpone' | 'abort', MessageKey> = {
@@ -439,7 +457,7 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
                                         </div>
                                     </div>
                                     <div className="text-[13px] text-[#a9a398] mt-1 ml-3.5 leading-relaxed">
-                                        {t(LEVEL_DESC_KEYS[level])}
+                                        {t(levelDescriptionKey(level, playerFaction))}
                                     </div>
                                 </button>
                             );

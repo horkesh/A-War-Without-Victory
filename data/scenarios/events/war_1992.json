@@ -87,7 +87,6 @@
           "rs_contact_group_response_1994",
           "rs_dayton_acceptance_1995",
           "rs_owen_stoltenberg_response_1993",
-          "rs_paramilitary_policy_1992",
           "rs_washington_rejection_1994",
           "un_hostage_crisis_1995"
         ],
@@ -111,9 +110,9 @@
           },
           {
             "id": "all_six_paramilitary_policy",
-            "label": "Paramilitary policy decision opens",
-            "timing": "next_turn",
-            "certainty": "guaranteed",
+            "label": "Later RS political decisions open (1993-1995)",
+            "timing": "future",
+            "certainty": "conditional",
             "opens_events": [
               "belgrade_embargo_rs_1994",
               "deliberate_force_rs_compliance_1995",
@@ -125,7 +124,6 @@
               "rs_contact_group_response_1994",
               "rs_dayton_acceptance_1995",
               "rs_owen_stoltenberg_response_1993",
-              "rs_paramilitary_policy_1992",
               "rs_washington_rejection_1994",
               "un_hostage_crisis_1995"
             ],
@@ -136,7 +134,7 @@
               "aggression_modifier.RS",
               "morale_change.RS"
             ],
-            "explanation": "Adopting all six goals records rs_strategic_goals as all_six and makes the paramilitary-policy decision available — the historical RS leadership posture flows from this platform choice. The VOPP-rejection decision (May 1993) and the Belgrade embargo response (August 1994) are also reachable from this platform: the Six Strategic Goals foreclose Vance-Owen's ten-province scheme (Karadžić IT-95-5/18-T para. 57 for the Six Goals and paras 359-375 for the Vance-Owen plan; the earlier cite §§3471-3475 is SDS ideology and impunity, not Vance-Owen; the \"ten-province\" label is only a gloss at n.1166) and lock the RS leadership onto the rejectionist line that triggers Belgrade's August 1994 embargo (Karadžić IT-95-5/18-T paras 396-401 for the Contact Group plan and its rejection, and para. 3295 for the Drina blockade; the judgment gives neither a 4 August 1994 date nor a Bijeljina session; the earlier cite §§4263-4310 is Markale II of 28 August 1995; UNSCR 943). The same maximalist platform also locks RS posture toward NATO coercion in September 1995 (Deliberate Force compliance decision, Karadžić IT-95-5/18-T paras 423, 425-428, 3614, 4297-4301, 4338-4340, 4884 (events only: Markale II of 28 August 1995, the NATO strikes from 30 August, the 14 September agreement between Karadžić and Holbrooke; the causal link is design inference; the earlier cite §§4940-4982 are Srebrenica passages)) and the October 1995 Holbrooke-Belgrade channel posture decision (historian check 2026-11-15: paragraph not verified for the Holbrooke-Belgrade channel claim, the Karadžić judgment has no passage on it; the Patriarch Paper delegation is paras 424 and 431; the earlier cite §§4985-5020 are convoy and Srebrenica passages; Holbrooke ch. 8 not verified). The May 1995 UN hostage-crisis response decision is also reachable: maximum-tempo Sarajevo-axis fires draw NATO air strikes near Pale on 25-26 May 1995, and the VRS retaliation seizes 377 UN peacekeepers (Karadžić IT-95-5/18-T Count 11 paras 5852-5993 (the judgment records approximately 347 UN personnel detained by 29 May, para. 5863, and \"more than 300\", n.20390; it has neither the figure 377 nor \"more than 30 facilities\"; the earlier range §§5810-5876 opens with Srebrenica); Mladić IT-09-92-T Count 6 §§5169-5215 (the earlier cite: Mladić §§5169-5215 is cumulative convictions and sentencing, not hostage-taking; hostage-taking is Count 11, not Count 6 (Mladić Vol. III ¶¶3213-3226, facts ¶¶2216-2317), and both judgments give about 347 UN personnel held, not 377 (Mladić ¶2218, Karadžić ¶5863)); UNSCR 998)."
+            "explanation": "Adopting all six goals records rs_strategic_goals as all_six. The VOPP-rejection decision (May 1993) and the Belgrade embargo response (August 1994) are reachable from this platform: the Six Strategic Goals foreclose Vance-Owen's ten-province scheme (Karadžić IT-95-5/18-T para. 57 for the Six Goals and paras 359-375 for the Vance-Owen plan; the earlier cite §§3471-3475 is SDS ideology and impunity, not Vance-Owen; the \"ten-province\" label is only a gloss at n.1166) and lock the RS leadership onto the rejectionist line that triggers Belgrade's August 1994 embargo (Karadžić IT-95-5/18-T paras 396-401 for the Contact Group plan and its rejection, and para. 3295 for the Drina blockade; the judgment gives neither a 4 August 1994 date nor a Bijeljina session; the earlier cite §§4263-4310 is Markale II of 28 August 1995; UNSCR 943). The same maximalist platform also locks RS posture toward NATO coercion in September 1995 (Deliberate Force compliance decision, Karadžić IT-95-5/18-T paras 423, 425-428, 3614, 4297-4301, 4338-4340, 4884 (events only: Markale II of 28 August 1995, the NATO strikes from 30 August, the 14 September agreement between Karadžić and Holbrooke; the causal link is design inference; the earlier cite §§4940-4982 are Srebrenica passages)) and the October 1995 Holbrooke-Belgrade channel posture decision (historian check 2026-11-15: paragraph not verified for the Holbrooke-Belgrade channel claim, the Karadžić judgment has no passage on it; the Patriarch Paper delegation is paras 424 and 431; the earlier cite §§4985-5020 are convoy and Srebrenica passages; Holbrooke ch. 8 not verified). The May 1995 UN hostage-crisis response decision is also reachable: maximum-tempo Sarajevo-axis fires draw NATO air strikes near Pale on 25-26 May 1995, and the VRS retaliation takes about 350 UN personnel hostage (Karadžić IT-95-5/18-T Count 11 paras 5852-5993 (the judgment records approximately 347 UN personnel detained by 29 May, para. 5863, and \"more than 300\", n.20390; it has neither the figure 377 nor \"more than 30 facilities\"; the earlier range §§5810-5876 opens with Srebrenica); Mladić IT-09-92-T Count 11, Vol. III ¶¶3213-3226 (the earlier cite: Mladić §§5169-5215 is cumulative convictions and sentencing, not hostage-taking; hostage-taking is Count 11, not Count 6 (Mladić Vol. III ¶¶3213-3226, facts ¶¶2216-2317), and both judgments give about 347 UN personnel held, not 377 (Mladić ¶2218, Karadžić ¶5863)); UNSCR 998)."
           },
           {
             "id": "all_six_to_un_hostage_crisis",
@@ -150,7 +148,7 @@
               "rs_strategic_goals"
             ],
             "material_effect_refs": [],
-            "explanation": "The all-six platform sustains the Sarajevo-axis siege fires and Drina-corridor operations that draw NATO air strikes near Pale on 25-26 May 1995. The VRS retaliation seizes 377 UN peacekeepers across more than 30 facilities (Karadžić IT-95-5/18-T Count 11 paras 5852-5993 (the judgment records approximately 347 UN personnel detained by 29 May, para. 5863, and \"more than 300\", n.20390; it has neither the figure 377 nor \"more than 30 facilities\"; the earlier range §§5810-5876 opens with Srebrenica); Mladić IT-09-92-T Count 6 §§5169-5215 (the earlier cite: Mladić §§5169-5215 is cumulative convictions and sentencing, not hostage-taking; hostage-taking is Count 11, not Count 6 (Mladić Vol. III ¶¶3213-3226, facts ¶¶2216-2317), and both judgments give about 347 UN personnel held, not 377 (Mladić ¶2218, Karadžić ¶5863))). The Pale leadership then faces the response-to-existing-state decision recorded by UNSCR 998 (16 June 1995) and UN S/1995/444 (30 May 1995). Per v1.3 packet §3.6 named-row carve-out, the decision is admissible because the hostages are already in state at fire-time; no response option authorizes new hostage-taking."
+            "explanation": "The all-six platform sustains the Sarajevo-axis siege fires and Drina-corridor operations that draw NATO air strikes near Pale on 25-26 May 1995. The VRS retaliation takes about 350 UN personnel hostage (Karadžić IT-95-5/18-T Count 11 paras 5852-5993 (the judgment records approximately 347 UN personnel detained by 29 May, para. 5863, and \"more than 300\", n.20390; it has neither the figure 377 nor \"more than 30 facilities\"; the earlier range §§5810-5876 opens with Srebrenica); Mladić IT-09-92-T Count 11, Vol. III ¶¶3213-3226 (the earlier cite: Mladić §§5169-5215 is cumulative convictions and sentencing, not hostage-taking; hostage-taking is Count 11, not Count 6 (Mladić Vol. III ¶¶3213-3226, facts ¶¶2216-2317), and both judgments give about 347 UN personnel held, not 377 (Mladić ¶2218, Karadžić ¶5863))). The Pale leadership then faces the response-to-existing-state decision recorded by UNSCR 998 (16 June 1995) and UN S/1995/444 (30 May 1995). Per v1.3 packet §3.6 named-row carve-out, the decision is admissible because the hostages are already in state at fire-time; no response option authorizes new hostage-taking."
           },
           {
             "id": "all_six_to_vopp_rejection",
@@ -354,16 +352,15 @@
           "rs_contact_group_response_1994",
           "rs_dayton_acceptance_1995",
           "rs_owen_stoltenberg_response_1993",
-          "rs_paramilitary_policy_1992",
           "rs_washington_rejection_1994",
           "un_hostage_crisis_1995"
         ],
         "future_consequences": [
           {
             "id": "selective_paramilitary_policy",
-            "label": "Paramilitary policy decision opens",
-            "timing": "next_turn",
-            "certainty": "guaranteed",
+            "label": "Later RS political decisions open (1993-1995)",
+            "timing": "future",
+            "certainty": "conditional",
             "opens_events": [
               "belgrade_embargo_rs_1994",
               "deliberate_force_rs_compliance_1995",
@@ -375,7 +372,6 @@
               "rs_contact_group_response_1994",
               "rs_dayton_acceptance_1995",
               "rs_owen_stoltenberg_response_1993",
-              "rs_paramilitary_policy_1992",
               "rs_washington_rejection_1994",
               "un_hostage_crisis_1995"
             ],
@@ -385,7 +381,7 @@
             "material_effect_refs": [
               "morale_change.RS"
             ],
-            "explanation": "A selective platform still requires a paramilitary-policy stance for the rear-area pocket-cleanup question; the modal opens with a narrower posture context. The May 1993 VOPP-rejection decision is also reachable: even a selective platform retains the Drina-corridor and Sarajevo-division axes that VOPP would foreclose (UN S/25221 ten-province scheme). The August 1994 Belgrade embargo decision is reachable as well: the selective platform's retained Drina-corridor claim is still incompatible with the Contact Group 51/49 framework that Belgrade's embargo enforces (Karadžić IT-95-5/18-T; UNSCR 943). The September 1995 Deliberate Force compliance decision is also reachable: the retained Sarajevo-division axis sustains the siege fires that draw NATO air response (Karadžić IT-95-5/18-T). The October 1995 Holbrooke-Belgrade channel posture decision is reachable on the same retained Sarajevo-axis pressure path (Karadžić IT-95-5/18-T; Holbrooke ch. 8). The May 1995 UN hostage-crisis response decision is also reachable: the retained Sarajevo-division axis sustains the siege fires that draw NATO air strikes near Pale and the VRS retaliation that seizes 377 UN peacekeepers (Karadžić IT-95-5/18-T Count 11; Mladić IT-09-92-T Count 6; UNSCR 998)."
+            "explanation": "The May 1993 VOPP-rejection decision is reachable: even a selective platform retains the Drina-corridor and Sarajevo-division axes that VOPP would foreclose (UN S/25221 ten-province scheme). The August 1994 Belgrade embargo decision is reachable as well: the selective platform's retained Drina-corridor claim is still incompatible with the Contact Group 51/49 framework that Belgrade's embargo enforces (Karadžić IT-95-5/18-T; UNSCR 943). The September 1995 Deliberate Force compliance decision is also reachable: the retained Sarajevo-division axis sustains the siege fires that draw NATO air response (Karadžić IT-95-5/18-T). The October 1995 Holbrooke-Belgrade channel posture decision is reachable on the same retained Sarajevo-axis pressure path (Karadžić IT-95-5/18-T; Holbrooke ch. 8). The May 1995 UN hostage-crisis response decision is also reachable: the retained Sarajevo-division axis sustains the siege fires that draw NATO air strikes near Pale and the VRS retaliation that takes about 350 UN personnel hostage (Karadžić IT-95-5/18-T Count 11; Mladić IT-09-92-T Count 11; UNSCR 998)."
           },
           {
             "id": "selective_to_un_hostage_crisis",
@@ -399,7 +395,7 @@
               "rs_strategic_goals"
             ],
             "material_effect_refs": [],
-            "explanation": "The selective platform retains enough of the Sarajevo-division axis to sustain the siege fires that draw NATO air strikes near Pale on 25-26 May 1995. The VRS retaliation seizes 377 UN peacekeepers across more than 30 facilities (Karadžić IT-95-5/18-T Count 11 paras 5852-5993 (the judgment records approximately 347 UN personnel detained by 29 May, para. 5863, and \"more than 300\", n.20390; it has neither the figure 377 nor \"more than 30 facilities\"; the earlier range §§5810-5876 opens with Srebrenica); Mladić IT-09-92-T Count 6 §§5169-5215 (the earlier cite: Mladić §§5169-5215 is cumulative convictions and sentencing, not hostage-taking; hostage-taking is Count 11, not Count 6 (Mladić Vol. III ¶¶3213-3226, facts ¶¶2216-2317), and both judgments give about 347 UN personnel held, not 377 (Mladić ¶2218, Karadžić ¶5863))). The Pale leadership then faces the response-to-existing-state decision recorded by UNSCR 998 (16 June 1995) and UN S/1995/444 (30 May 1995). Per v1.3 packet §3.6 named-row carve-out, the decision is admissible because the hostages are already in state at fire-time; no response option authorizes new hostage-taking. Selective intensity narrows but does not eliminate the NATO-coercion exposure that drives the crisis."
+            "explanation": "The selective platform retains enough of the Sarajevo-division axis to sustain the siege fires that draw NATO air strikes near Pale on 25-26 May 1995. The VRS retaliation takes about 350 UN personnel hostage (Karadžić IT-95-5/18-T Count 11 paras 5852-5993 (the judgment records approximately 347 UN personnel detained by 29 May, para. 5863, and \"more than 300\", n.20390; it has neither the figure 377 nor \"more than 30 facilities\"; the earlier range §§5810-5876 opens with Srebrenica); Mladić IT-09-92-T Count 11, Vol. III ¶¶3213-3226 (the earlier cite: Mladić §§5169-5215 is cumulative convictions and sentencing, not hostage-taking; hostage-taking is Count 11, not Count 6 (Mladić Vol. III ¶¶3213-3226, facts ¶¶2216-2317), and both judgments give about 347 UN personnel held, not 377 (Mladić ¶2218, Karadžić ¶5863))). The Pale leadership then faces the response-to-existing-state decision recorded by UNSCR 998 (16 June 1995) and UN S/1995/444 (30 May 1995). Per v1.3 packet §3.6 named-row carve-out, the decision is admissible because the hostages are already in state at fire-time; no response option authorizes new hostage-taking. Selective intensity narrows but does not eliminate the NATO-coercion exposure that drives the crisis."
           },
           {
             "id": "selective_to_vopp_rejection",
@@ -609,16 +605,15 @@
           "rs_contact_group_response_1994",
           "rs_dayton_acceptance_1995",
           "rs_owen_stoltenberg_response_1993",
-          "rs_paramilitary_policy_1992",
           "rs_washington_rejection_1994",
           "un_hostage_crisis_1995"
         ],
         "future_consequences": [
           {
             "id": "aggressive_paramilitary_policy",
-            "label": "Paramilitary policy decision opens",
-            "timing": "next_turn",
-            "certainty": "guaranteed",
+            "label": "Later RS political decisions open (1993-1995)",
+            "timing": "future",
+            "certainty": "conditional",
             "opens_events": [
               "belgrade_embargo_rs_1994",
               "deliberate_force_rs_compliance_1995",
@@ -630,7 +625,6 @@
               "rs_contact_group_response_1994",
               "rs_dayton_acceptance_1995",
               "rs_owen_stoltenberg_response_1993",
-              "rs_paramilitary_policy_1992",
               "rs_washington_rejection_1994",
               "un_hostage_crisis_1995"
             ],
@@ -640,7 +634,7 @@
             "material_effect_refs": [
               "aggression_modifier.RS"
             ],
-            "explanation": "Maximum-tempo platform compresses the implementation timeline; the paramilitary-policy decision opens with the most aggressive posture context. The May 1993 VOPP-rejection decision is also reachable: a maximum-force platform is by definition incompatible with the Vance-Owen ten-province demilitarized scheme (UN S/25221). The August 1994 Belgrade embargo decision is likewise reachable: maximum-force is incompatible with the Contact Group 51/49 framework, and the Assembly's rejection triggers Belgrade's embargo (Karadžić IT-95-5/18-T; UNSCR 943). The September 1995 Deliberate Force compliance decision is also reachable a fortiori: maximum-intensity Sarajevo siege fires accelerate the path to the Markale II shelling pattern that draws NATO air response (Mladić IT-09-92-T; Karadžić IT-95-5/18-T). The October 1995 Holbrooke-Belgrade channel decision is reachable from the same maximum-intensity pressure path that drives Milošević to demand the Patriarch Paper delegation (Karadžić IT-95-5/18-T; Holbrooke ch. 8). The May 1995 UN hostage-crisis response decision is reachable a fortiori: maximum-intensity Sarajevo-axis fires accelerate NATO air strikes near Pale on 25-26 May 1995, and the VRS retaliation seizes 377 UN peacekeepers (Karadžić IT-95-5/18-T Count 11; Mladić IT-09-92-T Count 6; UNSCR 998)."
+            "explanation": "A maximum-tempo platform compresses the implementation timeline. The May 1993 VOPP-rejection decision is reachable: a maximum-force platform is by definition incompatible with the Vance-Owen ten-province demilitarized scheme (UN S/25221). The August 1994 Belgrade embargo decision is likewise reachable: maximum-force is incompatible with the Contact Group 51/49 framework, and the Assembly's rejection triggers Belgrade's embargo (Karadžić IT-95-5/18-T; UNSCR 943). The September 1995 Deliberate Force compliance decision is also reachable a fortiori: maximum-intensity Sarajevo siege fires accelerate the path to the Markale II shelling pattern that draws NATO air response (Mladić IT-09-92-T; Karadžić IT-95-5/18-T). The October 1995 Holbrooke-Belgrade channel decision is reachable from the same maximum-intensity pressure path that drives Milošević to demand the Patriarch Paper delegation (Karadžić IT-95-5/18-T; Holbrooke ch. 8). The May 1995 UN hostage-crisis response decision is reachable a fortiori: maximum-intensity Sarajevo-axis fires accelerate NATO air strikes near Pale on 25-26 May 1995, and the VRS retaliation takes about 350 UN personnel hostage (Karadžić IT-95-5/18-T Count 11; Mladić IT-09-92-T Count 11; UNSCR 998)."
           },
           {
             "id": "aggressive_to_un_hostage_crisis",
@@ -654,7 +648,7 @@
               "rs_strategic_goals"
             ],
             "material_effect_refs": [],
-            "explanation": "The maximum-force platform drives Sarajevo-division and Drina-corridor operations at maximum intensity, accelerating the path to NATO air strikes near Pale on 25-26 May 1995. The VRS retaliation seizes 377 UN peacekeepers across more than 30 facilities (Karadžić IT-95-5/18-T Count 11 paras 5852-5993 (the judgment records approximately 347 UN personnel detained by 29 May, para. 5863, and \"more than 300\", n.20390; it has neither the figure 377 nor \"more than 30 facilities\"; the earlier range §§5810-5876 opens with Srebrenica); Mladić IT-09-92-T Count 6 §§5169-5215 (the earlier cite: Mladić §§5169-5215 is cumulative convictions and sentencing, not hostage-taking; hostage-taking is Count 11, not Count 6 (Mladić Vol. III ¶¶3213-3226, facts ¶¶2216-2317), and both judgments give about 347 UN personnel held, not 377 (Mladić ¶2218, Karadžić ¶5863))). The Pale leadership then faces the response-to-existing-state decision recorded by UNSCR 998 (16 June 1995) and UN S/1995/444 (30 May 1995). Per v1.3 packet §3.6 named-row carve-out, the decision is admissible because the hostages are already in state at fire-time; no response option authorizes new hostage-taking. The counterfactual maintain-hostages cost floor scales with platform intensity — patron-confidence collapse and NATO-escalation pressure peak on this path."
+            "explanation": "The maximum-force platform drives Sarajevo-division and Drina-corridor operations at maximum intensity, accelerating the path to NATO air strikes near Pale on 25-26 May 1995. The VRS retaliation takes about 350 UN personnel hostage (Karadžić IT-95-5/18-T Count 11 paras 5852-5993 (the judgment records approximately 347 UN personnel detained by 29 May, para. 5863, and \"more than 300\", n.20390; it has neither the figure 377 nor \"more than 30 facilities\"; the earlier range §§5810-5876 opens with Srebrenica); Mladić IT-09-92-T Count 11, Vol. III ¶¶3213-3226 (the earlier cite: Mladić §§5169-5215 is cumulative convictions and sentencing, not hostage-taking; hostage-taking is Count 11, not Count 6 (Mladić Vol. III ¶¶3213-3226, facts ¶¶2216-2317), and both judgments give about 347 UN personnel held, not 377 (Mladić ¶2218, Karadžić ¶5863))). The Pale leadership then faces the response-to-existing-state decision recorded by UNSCR 998 (16 June 1995) and UN S/1995/444 (30 May 1995). Per v1.3 packet §3.6 named-row carve-out, the decision is admissible because the hostages are already in state at fire-time; no response option authorizes new hostage-taking. The counterfactual maintain-hostages cost floor scales with platform intensity — patron-confidence collapse and NATO-escalation pressure peak on this path."
           },
           {
             "id": "aggressive_to_vopp_rejection",
@@ -929,51 +923,31 @@
   {
     "id": "rs_paramilitary_policy_1992",
     "title": "Paramilitary Authorization Policy",
-    "narrative": "The Ministry of Interior has drafted a deployment protocol for the volunteer formations operating alongside the regular army. Arkan's Tigers, the White Eagles, the Yellow Wasps, the Red Berets — names known to the Crisis Staffs in Banja Luka and Prijedor, names that travel ahead of the columns into the villages. The pattern is documented: rear-area pocket cleanup, civilian columns moved off the land, detention sites established in the wake. The political files require a posture. Authorize on standing orders, review each deployment, or refuse the formations entry to the order of battle.",
+    "narrative": "Volunteer formations from Serbia are already in the field beside the local Serb police and Territorial Defence. In Bijeljina the Serbian Volunteer Guard took the town with the local SDS. At Zvornik its commander, Arkan, warned the town's Muslims to expect the fate of Bijeljina; the next morning the volunteers, the Territorial Defence, the police and the JNA attacked together. Arkan's Tigers, the White Eagles, the Yellow Wasps: names that travel ahead of the columns into the villages. The pattern is documented: killings in the towns, civilians driven from their homes, detention sites set up in the wake. Pale must set its posture toward these formations. Allow them on standing orders, ask per deployment, or refuse the formations entry to the order of battle.",
     "category": "command",
     "family": "rs_paramilitary_policy",
     "source_tier": "icty_icj_un",
     "emergence_class": "compound",
+    "priority": 101,
     "trigger": {
-      "turn_min": 2,
+      "turn_min": 1,
       "turn_max": 8,
-      "phase": "war",
-      "condition": {
-        "type": "or",
-        "conditions": [
-          {
-            "type": "flag_equals",
-            "flag": "rs_strategic_goals",
-            "value": "all_six"
-          },
-          {
-            "type": "flag_equals",
-            "flag": "rs_strategic_goals",
-            "value": "selective"
-          },
-          {
-            "type": "flag_equals",
-            "flag": "rs_strategic_goals",
-            "value": "aggressive"
-          }
-        ]
-      }
+      "phase": "war"
     },
-    "requires_enabled": true,
     "once": true,
     "effect": {
       "kind": "narrative",
-      "text": "The Presidency records a paramilitary deployment policy."
+      "text": "Pale records a standing order on paramilitary deployment."
     },
     "requires_player_response": true,
     "responding_faction": "RS",
     "bot_response_logic": "historical",
     "historical_default_response_id": "always_allow",
-    "source_note": "ICTY Karadžić, Stakić, Brđanin, Tadić, Krajišnik, and Šešelj findings document the political leadership's tolerance of paramilitary methods. UN reports record the pattern contemporaneously. The historical RS posture was de-facto tolerance.",
-    "staff_assessment": "Standing authorization mirrors documented RS leadership posture. Per-deployment review introduces command friction; refusal forecloses paramilitary operations ordered in person and shifts the rear-area burden onto regular formations.",
+    "source_note": "The Krajišnik judgment finds that local SDS Crisis Staffs invited and assisted volunteer formations from Serbia in Bijeljina, Brčko and Zvornik, and that on 4 April 1992 Biljana Plavšić publicly thanked Arkan in Bijeljina. The Karadžić judgment records the crimes in both towns. The Stanišić and Simatović appeal judgment convicts two senior officials of Serbia's State Security Service for crimes in the takeovers of Bijeljina and Zvornik. Balkan Battlegrounds records both takeovers, Bijeljina from 31 March to 4 April 1992 and Zvornik on 8-9 April 1992; Arkan's Serbian Volunteer Guard, a force from Serbia linked to its state security and not a Bosnian Serb army or police unit, took a leading part. The Stakić, Brđanin and Tadić judgments record the same pattern in the Krajina from late April. UN reports record the pattern. The historical RS posture was de facto tolerance and endorsement.",
+    "staff_assessment": "A standing order mirrors the documented RS leadership posture. Per-deployment review introduces command friction; refusal forecloses paramilitary operations entirely and shifts the rear-area burden onto regular formations.",
     "trigger_evidence": [
-      "The Six Strategic Goals platform has been recorded; rear-area operations follow.",
-      "Crisis Staffs in Banja Luka and Prijedor are already coordinating with volunteer formations."
+      "Bijeljina has fallen to the local SDS and the Serbian Volunteer Guard; Crisis Staffs in Semberija and Podrinje are working with volunteer formations from Serbia.",
+      "At Zvornik, on the Drina, volunteers, Territorial Defence, police and the JNA have attacked together."
     ],
     "response_options": [
       {
@@ -981,7 +955,7 @@
         "branch_tag": "rs_paramilitary_allow",
         "historical_marker": "historical_default",
         "label": "Always allow paramilitary deployment",
-        "description": "Standing authorization. Arkan, the White Eagles, the Yellow Wasps, and the MUP Special Police deploy on local request without per-mission review. Each approved sweep records civilian casualties and increments the war-crimes counter; the international monitors will see the pattern.",
+        "description": "A standing order. Arkan's Tigers, the White Eagles, the Yellow Wasps and the MUP Special Police deploy at local request, with no review of each mission. Each sweep records civilian casualties and adds to the war-crimes record; the international monitors will see the pattern.",
         "effects": [
           {
             "kind": "bot_priority_shift",
@@ -1027,7 +1001,7 @@
         "branch_tag": "rs_paramilitary_ask",
         "historical_marker": "counterfactual",
         "label": "Ask per deployment",
-        "description": "Each proposed sweep arrives in the Presidency files with a casualty projection. The Crisis Staffs lose blanket authority; the political center retains the decision. Operational tempo slows; the international monitors note the reviews.",
+        "description": "Each proposed sweep comes to Pale with a casualty projection. The Crisis Staffs lose blanket authority; the political center retains the decision. Operational tempo slows; the international monitors note the reviews.",
         "effects": [
           {
             "kind": "recruitment_modifier",
@@ -1074,7 +1048,7 @@
         "branch_tag": "rs_paramilitary_deny",
         "historical_marker": "counterfactual",
         "label": "Always deny paramilitary deployment",
-        "description": "The volunteer formations are refused entry to the order of battle. Rear-area operations fall to regular VRS units and MUP regulars. The hardline base is alienated; the international monitors note the absence of the pattern they expect to find.",
+        "description": "The volunteer formations are refused entry to the order of battle. Rear-area operations fall to regular Serb units and MUP regulars. The hardline base is alienated; the international monitors note the absence of the pattern they expect to find.",
         "effects": [
           {
             "kind": "bot_priority_shift",
@@ -1163,7 +1137,35 @@
         }
       }
     },
-    "historical_source": "ICTY Karadžić Trial Judgment (IT-95-5/18-T, 24 March 2016) paras. 2470-2509, 3469-3475, 3505-3524. ICTY Stakić Trial Judgment (IT-97-24-T, 31 July 2003) paras. 88-98, 490-518. ICTY Brđanin Trial Judgment (IT-99-36-T, 1 September 2004) paras. 108-123, 1051-1149. ICTY Tadić Trial Judgment (IT-94-1-T, 7 May 1997). ICTY Krajišnik Trial Judgment (IT-00-39-T, 27 September 2006) paras. 856-891. ICTY Šešelj Appeal Judgment (IT-03-67-A, 11 April 2018). UN A/54/549 para. 35. UN S/1994/674 (Commission of Experts Final Report, Annex III.A — Special Forces).",
+    "localizations": {
+      "en": {
+        "notifications_to_other_factions": {
+          "always_allow": {
+            "RBiH": {
+              "headline": "Pale puts volunteer formations on standing orders",
+              "body": "Pale lets the volunteer formations operate alongside regular Serb units on standing orders. Sarajevo reads the order as a continuation of the rear-area pattern seen since Bijeljina."
+            },
+            "HRHB": {
+              "headline": "Pale formalizes paramilitary tolerance",
+              "body": "Pale confirms that volunteer formations still deploy at local request. HVO staff note that the order hardens the rear-area pattern across the Krajina and Drina."
+            }
+          },
+          "ask": {
+            "HRHB": {
+              "headline": "RS introduces paramilitary review process",
+              "body": "Pale routes each volunteer deployment through political review; HVO staff assess slower rear-area tempo without a clear break in the pattern."
+            }
+          },
+          "always_deny": {
+            "HRHB": {
+              "headline": "RS denies paramilitary formations entry",
+              "body": "Pale shuts the volunteer formations out of the order of battle. HVO staff note the absence of the documented rear-area pattern; regular Serb units carry the load."
+            }
+          }
+        }
+      }
+    },
+    "historical_source": "ICTY Karadžić Trial Judgment (IT-95-5/18-T, 24 March 2016) paras. 617-679 (Bijeljina), 1254-1274 and 1296-1365 (Zvornik), 3505-3524. ICTY Krajišnik Trial Judgment (IT-00-39-T, 27 September 2006) paras. 213-215, 297-309, 359-374. IRMCT Stanišić and Simatović Appeal Judgement (MICT-15-96-A, 31 May 2023). ICTY Stakić Trial Judgment (IT-97-24-T, 31 July 2003). ICTY Brđanin Trial Judgment (IT-99-36-T, 1 September 2004). ICTY Tadić Trial Judgment (IT-94-1-T, 7 May 1997). UN A/54/549 (15 November 1999) para. 18. UN S/1994/674/Add.2, Annex III.A (Special Forces). Balkan Battlegrounds, Vol. I (CIA, 2002), pp. 135, 137-138.",
     "source": "Paramilitary policy is the canon-bound player-authorized war-crime surface per Sensitive History Design Gate v0.9.0 §3. Option set bounded to always_allow / ask / always_deny — no expansion permitted."
   },
   {
@@ -2335,8 +2337,32 @@
         }
       }
     },
-    "historical_source": "ICTY Hadzihasanovic and Kubura Trial Judgment (IT-01-47-T, 15 March 2006) — ARBiH 3rd Corps and 7th Muslim Brigade command-responsibility findings establishing the existence and reach of ARBiH chain of command. ICTY Oric Trial and Appeal Judgments (IT-03-68, 30 June 2006 / 3 July 2008) — Srebrenica enclave ARBiH commander; ultimate acquittal on command responsibility in the comparative discipline frame. ICTY Karadzic Trial Judgment (IT-95-5/18-T, 24 March 2016) — comparative narrative on Sarajevo state institutions and chain of command. ICTY Stakic (IT-97-24, 31 July 2003) and Brdjanin (IT-99-36, 1 September 2004) — RS comparator findings on paramilitary tolerance as policy. UN A/54/549 (Secretary-General's report on Srebrenica, 15 November 1999) §35 (the earlier cite: UN A/54/549 ¶35 is the Srebrenica enclave before the safe-area resolutions, not the ARBiH chain of command; paragraph not verified for this claim) — Sarajevo posture and chain-of-command institutional context. UN S/1994/674 (Commission of Experts Final Report, 27 May 1994) Annex III.A — Special Forces comprehensive paramilitary inventory across all three factions.",
-    "source": "Paramilitary policy is the canon-bound player-authorized war-crime surface per Sensitive History Design Gate v0.9.0 §3. Option set bounded to always_allow / ask / always_deny — no expansion permitted. RBiH historical default = always_deny per documented ARBiH chain-of-command discipline (UN A/54/549 §35 (the earlier cite: UN A/54/549 ¶35 is the Srebrenica enclave before the safe-area resolutions, not the ARBiH chain of command; paragraph not verified for this claim); Hadzihasanovic/Kubura IT-01-47). The always_allow counterfactual carries a steep international-standing floor per Gate §3 #5 (no atrocity-efficiency surface). war_crimes_events increments are produced by the existing paramilitary_sweep engine path on each capture, not by this decision event."
+    "localizations": {
+      "en": {
+        "notifications_to_other_factions": {
+          "always_deny": {
+            "HRHB": {
+              "headline": "RBiH formalizes integration-only paramilitary line",
+              "body": "Sarajevo records refusal of the parallel paramilitary track; irregulars must integrate into ARBiH regiments or stand down. HVO staff note the contrast with their own practice and weigh the alliance implications."
+            }
+          },
+          "ask": {
+            "HRHB": {
+              "headline": "RBiH routes paramilitary requests through political review",
+              "body": "Sarajevo routes each volunteer deployment through Presidency files with a casualty projection. HVO staff assess slower ARBiH rear-area tempo without a clear repositioning of the integration line."
+            }
+          },
+          "always_allow": {
+            "HRHB": {
+              "headline": "RBiH formalizes paramilitary tolerance",
+              "body": "Sarajevo authorizes irregular formations on standing orders. HVO staff note the order departs from the documented ARBiH integration line; international standing will compress quickly as the pattern emerges."
+            }
+          }
+        }
+      }
+    },
+    "historical_source": "ICTY Hadzihasanovic and Kubura Trial Judgment (IT-01-47-T, 15 March 2006) — ARBiH 3rd Corps and 7th Muslim Brigade command-responsibility findings establishing the existence and reach of ARBiH chain of command. ICTY Oric Trial and Appeal Judgments (IT-03-68, 30 June 2006 / 3 July 2008) — Srebrenica enclave ARBiH commander; ultimate acquittal on command responsibility in the comparative discipline frame. ICTY Karadzic Trial Judgment (IT-95-5/18-T, 24 March 2016) — comparative narrative on Sarajevo state institutions and chain of command. ICTY Stakic (IT-97-24, 31 July 2003) and Brdjanin (IT-99-36, 1 September 2004) — RS comparator findings on paramilitary tolerance as policy. UN A/54/549 (Secretary-General's report on Srebrenica, 15 November 1999) para. 17 (the ARBiH, officially established on 15 April 1992, was made up from the start of territorial defence units, police forces, paramilitary forces and criminal elements). UN S/1994/674 (Commission of Experts Final Report, 27 May 1994) Annex III.A — Special Forces comprehensive paramilitary inventory across all three factions.",
+    "source": "Paramilitary policy is the canon-bound player-authorized war-crime surface per Sensitive History Design Gate v0.9.0 §3. Option set bounded to always_allow / ask / always_deny — no expansion permitted. RBiH historical default = always_deny because Sarajevo took irregular formations into the ARBiH rather than keep a separate paramilitary track (UN A/54/549 para. 17; Balkan Battlegrounds Vol. I pp. 186-187, Operation Trebević-1 of 26 October 1993 against the 9th and 10th Mountain Brigades; Hadžihasanović and Kubura IT-01-47-T). The always_allow counterfactual carries a steep international-standing floor per Gate §3 #5 (no atrocity-efficiency surface). war_crimes_events increments are produced by the existing paramilitary_sweep engine path on each capture, not by this decision event."
   },
   {
     "id": "hrhb_political_goal",

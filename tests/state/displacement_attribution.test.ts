@@ -120,6 +120,14 @@ function encircledPocketFixture() {
         'op:home:e': 'RBiH', 'op:home:f': 'RBiH', 'op:home:g': 'RBiH',
     };
     const state = stateWith(controllers);
+    // A5 (SD7): a siege leaver goes only to a municipality where the side holds a supply-reachable
+    // settlement in its main body. The home body carries RBiH's supply source, so `home` is that
+    // destination; without one the pocket's people are trapped (pinned below).
+    (state as unknown as { factions: unknown[] }).factions = ['HRHB', 'RBiH', 'RS'].map((id) => ({
+        id,
+        supply_sources: id === 'RBiH' ? ['op:home:e'] : [],
+        areasOfResponsibility: Object.keys(controllers).filter((sid) => controllers[sid as keyof typeof controllers] === id),
+    }));
     (state.military as unknown as Record<string, unknown>).front_segments = {
         'op:pocket:a__op:ring:c': { edge_id: 'op:pocket:a__op:ring:c', active: true },
     };
@@ -164,6 +172,16 @@ describe('updateDisplacement pressure path (SC1 end to end)', () => {
         expect(Object.keys(agg.RS ?? {})).toEqual(['RBiH']);
         expect(agg.RS?.RBiH?.refugees_created).toBe(Math.floor(6000 * ENCIRCLEMENT_DISPLACEMENT_FRACTION));
         expect(state.displacement.civilian_casualties?.RBiH?.killed ?? 0).toBe(0);
+    });
+
+    it('A5: with no supplied main-body destination the pocket\'s people are trapped, booked nowhere, and reported', () => {
+        const { state, settlements, edges, census } = encircledPocketFixture();
+        for (const f of state.factions as unknown as Array<{ supply_sources: string[] }>) f.supply_sources = [];
+        const report = updateDisplacement(state, settlements, edges, census);
+        expect(state.displacement.displacement_humanitarian_aggregates ?? {}).toEqual({});
+        expect(state.displacement.civilian_casualties?.RBiH?.killed ?? 0).toBe(0);
+        const wanted = Math.floor(6000 * ENCIRCLEMENT_DISPLACEMENT_FRACTION);
+        expect(report.trapped).toEqual([{ mun_id: 'pocket', faction_id: 'RBiH', wanted, routed: 0, trapped: wanted }]);
     });
 });
 

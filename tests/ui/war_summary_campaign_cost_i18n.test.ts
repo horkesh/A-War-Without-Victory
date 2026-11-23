@@ -308,7 +308,7 @@ describe('War Summary campaign cost localization', () => {
         render(createElement(WarSummaryContent, { focusSection: 'overview' }));
 
         expect(screen.getByText('Killed:').parentElement?.textContent).toContain('1,211,000');
-        expect(screen.getByText('Fled abroad:').parentElement?.textContent).toContain('1.2M');
+        expect(screen.getByText('Fled abroad when displaced:').parentElement?.textContent).toContain('1.2M');
     });
 
     it('renders four accessible RBiH strategic objectives with canonical owner links', () => {

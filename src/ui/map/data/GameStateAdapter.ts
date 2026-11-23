@@ -40,6 +40,7 @@ import type {
     OperationView, RepositionOrderView, RecruitmentView,
     StanceHoldView, StanceMatterReceiptView, StanceMatterView,
     ArmyClashView, ArmyClashReceiptView,
+    ParamilitaryUnrequestedView,
 } from './types';
 import { proposalBackingCost } from '../utils/commandAuthority';
 import {
@@ -60,10 +61,11 @@ import { hideWithdrawnEmptySyntheticJnaCommands } from './syntheticJnaCommandVis
 import { getMunicipalitySupportLabel } from '../../../sim/combat/municipality_support.js';
 import { splitKiaWiaMia } from '../../../sim/combat/attack_casualty_distribution.js';
 import { strictCompare } from '../../../state/validateGameState.js';
+import { PARAMILITARY_POLICY_CARD_ID_BY_FACTION } from '../../../sim/events/paramilitary_policy_flag.js';
 import { countHeldOgsByCorps } from '../utils/heldOg.js';
 import { computeFullVerdict } from '../../../sim/negotiation/scoring.js';
 import { DIMENSION_WEIGHTS } from '../../../sim/events/strategic_dimensions.js';
-import { ANSWER_AHEAD_EVENT_IDS } from '../../../sim/events/answer_ahead_of_firing.js';
+import { ANSWER_AHEAD_EVENT_IDS, decisionAppliedTurn } from '../../../sim/events/answer_ahead_of_firing.js';
 import { paramilitaryStandingOrderCap, readParamilitaryStandingOrder } from '../../../sim/events/paramilitary_policy_card.js';
 import type { GameVerdict } from '../../../state/negotiation_types.js';
 import { buildCostLedger } from '../../../sim/endgame/cost_ledger.js';
@@ -4503,9 +4505,62 @@ function deriveParamilitaryDecisionHistory(
 }
 
 /**
- * Paramilitary sweeps the player's side carried out with no request to the player (staff at Assisted command or above, or a
- * standing order to allow). A sweep the player decided has a decision record with the same turn and target and is not listed here.
- * Read-only: derived from the paramilitary formation each sweep created.
+ * The cause an unrequested-sweep receipt names, from the saved basis at the sweep's turn (§6 D1 stage 2, round-2 amendment A3).
+ * No new state field: the side's policy-card answer (`event_decision_log`) and its filed paramilitary decisions
+ * (`paramilitary_decision_history`) are enough. Under stage 2 a sweep is sent in the side's name without a request only under
+ * the standing order Always allow. The card's response ids equal the orders they write (pinned by
+ * tests/paramilitary_receipt_cause.test.ts). A card answer counts only once its card has APPLIED it by the sweep's turn
+ * (`decisionAppliedTurn`, §6 D1 stage 2 round 4 R3): an answer filed ahead (RBiH at t0, applied at t4) never names the cause of
+ * an earlier sweep. A side with no policy card in the registry and no paramilitary decision of the player's filed for it up to
+ * the sweep's turn gets `historical_default_staff` (round 4s P2, owner rule 2026-11-22: its staff followed the bot's historical
+ * default; true on older saves too, where such staff swept as the bot did). Otherwise returns undefined when the basis shows no
+ * Always allow: no stage-2 rule sweeps under that, so the save comes from the stage-1 rule and the receipt keeps the stage-1 cause.
+ */
+function deriveParamilitaryReceiptCause(
+    state: any,
+    faction: string,
+    turn: number,
+): ParamilitaryUnrequestedView['cause'] {
+    const cardId = (PARAMILITARY_POLICY_CARD_ID_BY_FACTION as Readonly<Record<string, string | undefined>>)[faction];
+    let answer: { turn: number; responseId: string; inPerson: boolean } | null = null;
+    if (cardId) {
+        for (const entry of Array.isArray(state.military?.event_decision_log) ? state.military.event_decision_log : []) {
+            if (!entry || entry.event_id !== cardId) continue;
+            const answeredTurn = Number(entry.turn);
+            if (!Number.isFinite(answeredTurn) || answeredTurn > turn) continue;
+            // Round 4 R3: an answer counts only once its card has APPLIED it, by the sweep's turn. The filed turn still bounds
+            // the "filed after the answer" check below, which keeps that check as wide as before (neutral is always true).
+            const appliedTurn = decisionAppliedTurn(state, { event_id: String(entry.event_id), turn: answeredTurn });
+            if (appliedTurn === null || appliedTurn > turn) continue;
+            if (answer && answeredTurn < answer.turn) continue;
+            answer = { turn: answeredTurn, responseId: String(entry.response_id), inPerson: entry.decision_source === 'player' };
+        }
+    }
+    // A decision this side filed after the card answer: the review modal may have changed the order there. Condition C1 (§4
+    // copy panel, 2026-11-18): an automatic answer never replaces an Always allow or Always deny the human gave in person in the
+    // review modal (A1, `hasInPersonParamilitaryStandingOrder`), and the saved basis cannot tell such a kept order from
+    // per-request answers followed by the automatic write (both file records). So under an automatic answer any decision this
+    // side filed up to the sweep, before the answer included, makes the cause neutral: the receipt never credits the human's own
+    // order to the historical policy.
+    const filedFrom = answer && !answer.inPerson ? Number.NEGATIVE_INFINITY : answer?.turn ?? Number.NEGATIVE_INFINITY;
+    const filedOnBasis = (Array.isArray(state.paramilitary_decision_history) ? state.paramilitary_decision_history : [])
+        .some((record: any) => record
+            && record.faction === faction
+            && Number(record.turn) > filedFrom
+            && Number(record.turn) <= turn);
+    if (filedOnBasis) return 'neutral';
+    // Round 4s P2: no card and no own record up to the sweep turn (filedFrom is -Infinity without a card answer), so the
+    // staff followed the bot's historical default. Keyed on the registry, never on a faction name.
+    if (!cardId) return 'historical_default_staff';
+    if (answer?.responseId === 'always_allow') return answer.inPerson ? 'standing_order' : 'standing_order_automatic';
+    return undefined;
+}
+
+/**
+ * Paramilitary sweeps the player's side carried out with no request to the player (under the standing order Always allow, at any
+ * command level; a pre-stage-2 save also holds staff sweeps sent under any order). A sweep the player decided has a decision
+ * record with the same turn and target and is not listed here.
+ * Read-only: derived from the paramilitary formation each sweep created; its cause from the saved basis at its turn.
  */
 function deriveParamilitaryUnrequested(
     state: any,
@@ -4538,7 +4593,15 @@ function deriveParamilitaryUnrequested(
             !candidate.used && candidate.osid === target && candidate.turn >= Number(turn) && candidate.turn <= Number(turn) + 2
         ));
         if (capture) capture.used = true;
-        sweeps.push({ id: String(formation.id ?? id), turn: Number(turn), target_osid: target, faction: String(formation.faction), captured: Boolean(capture) });
+        const cause = deriveParamilitaryReceiptCause(state, String(formation.faction), Number(turn));
+        sweeps.push({
+            id: String(formation.id ?? id),
+            turn: Number(turn),
+            target_osid: target,
+            faction: String(formation.faction),
+            captured: Boolean(capture),
+            ...(cause ? { cause } : {}),
+        });
     }
     sweeps.sort((a, b) => (a.turn !== b.turn ? b.turn - a.turn : strictCompare(a.id, b.id)));
     return sweeps.length > 0 ? sweeps : undefined;

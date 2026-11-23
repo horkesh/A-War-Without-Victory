@@ -180,9 +180,11 @@ test('startNewCampaign queues the selected faction foundational decision at camp
     const allFoundationalIds = cases.map((entry) => entry.eventId);
     const gatedFollowUpIds = [
         'rbih_paramilitary_policy_1992',
-        'rs_paramilitary_policy_1992',
         'hrhb_1992_graz_cooperation_collapse',
     ];
+    // §6 D1 stage 2 round 4a (b), 2026-11-22: the RS policy card is no longer gated behind the goals answer; it fires at
+    // t1 in its own window (after the goals card), so at birth it is neither queued nor fired, and nothing enables it.
+    const firstWeekCardIds = ['rs_paramilitary_policy_1992'];
 
     for (const { faction, eventId, atBirth } of cases) {
         const { state } = await startNewCampaign(process.cwd(), faction, 'apr_1992');
@@ -226,6 +228,17 @@ test('startNewCampaign queues the selected faction foundational decision at camp
             assert.ok(
                 !state.military.fired_event_ids.includes(followUpId),
                 `${followUpId} should not be fired at campaign birth`,
+            );
+        }
+        for (const cardId of firstWeekCardIds) {
+            assert.ok(
+                !pending.some((decision) => decision.event_id === cardId),
+                `${cardId} fires at t1, never at campaign birth`,
+            );
+            assert.ok(!state.military.fired_event_ids.includes(cardId), `${cardId} should not be fired at campaign birth`);
+            assert.ok(
+                !(state.military.enabled_event_ids ?? []).includes(cardId),
+                `${cardId} is not enabled by anything at campaign birth`,
             );
         }
 

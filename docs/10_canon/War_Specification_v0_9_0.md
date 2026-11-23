@@ -13,7 +13,7 @@
 
 1. **Fronts are active**: Opposing control at OSID boundaries produces front segments; brigade location is **location_osid** only (no Areas of Responsibility).
 2. **Supply pressure and exhaustion dominate**: Overextension and isolation increase supply pressure; static fronts and supply pressure drive irreversible exhaustion (Engine Invariants §4, §6, §8).
-3. **Command friction degrades intent**: Exhaustion and front length reduce effective command coherence; friction may scale War-phase effects but never flips control or authority (Systems Manual §8).
+3. **Command friction degrades intent**: Exhaustion reduces effective command coherence (front length is not modelled: the front-edge friction term was always zero and was removed, retired 2026-11-22, dead code; hash unchanged); friction may scale War-phase effects but never flips control or authority (Systems Manual §8).
 4. **No total victory**: Front descriptors and War logic do not produce decisive territorial or victory outcomes; war trends toward stalemate or collapse.
 
 **War start is referendum-gated:** CANON.md War Start Rule (Phase D0.4a) — War begins only when the mandatory EC-coerced RBiH independence referendum has been held and current_turn == referendum_turn + 4.

@@ -255,8 +255,8 @@ export const EVENT_EFFECT_BCS: Readonly<Record<string, EventEffectBcsEntry>> = {
         bcs: "Glavni štab formira 7. korpus u Travniku pod komandom Alagića. Zapadne brigade 3. korpusa prelaze u njegov sastav.",
     },
     "gorazde_crisis_1994#0": {
-        en: "The VRS attacks the Goražde safe area. Limited NATO strikes fail to stop the offensive, exposing the fragility of safe area protection.",
-        bcs: "VRS napada zaštićenu zonu Goražde. Ograničeni udari NATO-a ne zaustavljaju ofanzivu, što otkriva krhkost zaštite u zaštićenim zonama.",
+        en: "The VRS attacks the Goražde safe area. NATO air strikes at the UN's request do not end the crisis, and the Bosnian Serb forces detain UN personnel.",
+        bcs: "VRS napada zaštićenu zonu Goražde. Udari NATO-a na zahtjev UN-a ne okončavaju krizu, a snage bosanskih Srba zadržavaju pripadnike UN-a.",
     },
     // §6 E3a2: a no-choice presentation card since the peace-plan chain, so its line now shows.
     "contact_group_plan_1994#0": {

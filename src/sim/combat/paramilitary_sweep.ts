@@ -1,17 +1,18 @@
 /**
  * Paramilitary sweep system.
  *
- * Two modes:
- * 1. Rear pocket cleanup (existing): Small units that capture isolated enemy pockets
- *    completely surrounded by friendly territory. Active weeks 0-20.
- * 2. Offensive sweep (v0.6.5): Larger paramilitary groups (Arkan's Tigers, White Eagles)
- *    that sweep hostile-controlled OSIDs adjacent to friendly territory.
- *    Municipality-scoped, time-limited (weeks 0-12). War crimes wired.
+ * Rear pocket cleanup: small units that capture isolated enemy pockets completely surrounded
+ * by friendly territory. Active weeks 0-20. War crimes wired.
+ *
+ * The offensive mode (v0.6.5) has no detector: it was never called by a turn phase and was
+ * retired in §6 D1 stage 2. Only its read side remains, so an old save's `offensive`
+ * paramilitary or request still advances and resolves.
  *
  * Casualties inflicted and suffered count toward faction totals.
- * Offensive faction eligibility and per-turn caps are explicit.
  *
- * Player choice: bot factions auto-approve; player gets batch decision panel.
+ * Player choice: a manual (autonomy 0) player gets the batch decision panel under `ask`; every
+ * other faction (bots, and a human's staff at Assisted to Observer) passes the one policy gate in
+ * `detectParamilitaryTargets` (paramilitary_policy.ts, §6 D1 stage 2).
  *
  * Deterministic: sorted iteration, no randomness, no timestamps.
  */
@@ -45,10 +46,7 @@ import {
     OFFENSIVE_PARA_UNIT_SIZE,
     OFFENSIVE_PARA_FADE_WEEK,
     OFFENSIVE_PARA_MARCH_TURNS,
-    OFFENSIVE_PARA_MAX_DEPLOYMENTS_PER_FACTION_TURN,
-    OFFENSIVE_PARA_MIN_ORGANIZATIONAL_PENETRATION,
     OFFENSIVE_PARA_CIVILIAN_CASUALTY_RATE,
-    OFFENSIVE_PARA_MUNICIPALITY_SCOPE,
 } from '../../state/formation_constants.js';
 import { analyzeFactionGraph } from './osid_graph_analysis.js';
 import { buildOsidAdjacency } from './osid_adjacency.js';
@@ -60,15 +58,16 @@ import type { EdgeRecord } from '../../map/settlements.js';
 // Casualty split routed through the B1 casualty-realism V2 gate. Flag-OFF returns the
 // shipped main-path split (KIA 0.22 / WIA 0.74 / MIA 0.04), byte-identical to before.
 import { getMainCasualtySplit } from './casualty_realism_v2_gate.js';
-import { selectStaffControlledFactions } from '../bot/staff_control.js';
+import { selectManualPlayerFaction } from '../bot/staff_control.js';
+import { resolveNonManualParamilitaryPolicy } from './paramilitary_policy.js';
 import {
     PARAMILITARY_POLICY_CARD_BY_FACTION,
     hasParamilitaryPolicyCardApplied,
     readParamilitaryStandingOrder,
 } from '../events/paramilitary_policy_card.js';
+import type { EventDefinition } from '../events/event_types.js';
 /** Casualty multiplier when paramilitary retreats from defended OSID (heavy losses). */
 const DEFENDED_RETREAT_CASUALTY_MULT = 3;
-const OFFENSIVE_PARAMILITARY_FACTIONS = new Set<FactionId>(['HRHB', 'RS']);
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
@@ -110,12 +109,12 @@ function paramilitaryRequestGateHolds(state: GameState, playerFaction: FactionId
     return !hasParamilitaryPolicyCardApplied(state, playerFaction);
 }
 
-/** The player the request gate binds: a manual (autonomy 0) player only; null for staff control and headless. */
+/**
+ * The player the request gate binds: a manual (autonomy 0) player only; null for staff control and headless.
+ * It is the player of `detectParamilitaryTargets`' manual path (`selectManualPlayerFaction`, §6 D1 stage 2).
+ */
 function selectRequestGatePlayer(state: GameState): FactionId | null {
-    const rawPlayerFaction = state.meta?.player_faction ?? null;
-    return rawPlayerFaction != null && selectStaffControlledFactions(state).includes(rawPlayerFaction)
-        ? null
-        : rawPlayerFaction;
+    return selectManualPlayerFaction(state);
 }
 
 /**
@@ -438,21 +437,29 @@ function splitCasualties(total: number): { killed: number; wounded: number; miss
 
 /**
  * Detect rear enemy pockets for all factions and generate paramilitary requests.
- * Bot factions auto-approve. Player faction populates pending_paramilitary_requests.
+ * A manual (autonomy 0) player's faction follows its standing order request by request and
+ * populates pending_paramilitary_requests under `ask`. Every other faction (a bot, or a human's
+ * staff at Assisted, Delegated or Observer) sends sweeps only when
+ * `resolveNonManualParamilitaryPolicy` allows it (§6 D1 stage 2).
+ *
+ * `eventDefinitions` is the turn's event catalog: an undecided bot reads its card's historical
+ * default from it. Production passes it on every turn (scenario runner, desktop); `undefined`
+ * keeps the pre-binding allow for undecided bots only and exists for synthetic unit tests.
  *
  * Call once per turn, after partition-corps-front-sectors.
  */
 export function detectParamilitaryTargets(
     state: GameState,
     edges: EdgeRecord[],
-    reverseMap: OperationalToCanonicalReverseMap
+    reverseMap: OperationalToCanonicalReverseMap,
+    eventDefinitions: readonly EventDefinition[] | undefined,
 ): ParamilitarySweepReport {
     const report = emptyReport();
     const turn = state.meta?.turn ?? 0;
-    // Owner calibration directive 2026-11-05: live play must reproduce the calibrated
-    // headless (no-player) result. At autonomy >= 1 the player's staff runs rear-pocket
-    // consolidation exactly as bot staff do (no pending window, no per-request gate). Only a
-    // manual (autonomy 0) player keeps the request/policy path. Headless has no player: inert.
+    // Only a manual (autonomy 0) player keeps the request/policy path below, behind the §6 T3
+    // request gate. At autonomy >= 1 the player's staff and every bot go through the one policy
+    // gate in the faction loop (§6 D1 stage 2, which replaced the 2026-11-05 "staff run
+    // consolidation like bots" rule). Headless has no player: every faction is a bot.
     const playerFaction = selectRequestGatePlayer(state);
     const requestGateHolds = paramilitaryRequestGateHolds(state, playerFaction);
     if (requestGateHolds && playerFaction) {
@@ -483,6 +490,16 @@ export function detectParamilitaryTargets(
 
     for (const faction of factions) {
         if (faction === playerFaction && requestGateHolds) continue;
+        // §6 D1 stage 2: the one gate in front of every non-manual spawn. A bot follows its
+        // decided card flag, else the card's historical default; a human's staff follow the
+        // human's current standing order (unanswered or `ask` sends none). Deny skips every
+        // candidate, so skipping the faction here is the same as skipping each one.
+        if (
+            faction !== playerFaction
+            && resolveNonManualParamilitaryPolicy(state, faction, eventDefinitions) !== 'always_allow'
+        ) {
+            continue;
+        }
         // LANE-NIGHTSHIFT-ANALYZE-FACTION-GRAPH-DEDUPE bisect (2026-05-05): this call site
         // MUST stay on legacy `analyzeFactionGraph`. Routing it through `analyzeFactionGraphCached`
         // produced reproducible 40w hash drift (`51dca710b9db7d37` cached vs baseline
@@ -574,7 +591,7 @@ export function detectParamilitaryTargets(
                 continue;
             }
 
-            // Bot faction: auto-approve
+            // Non-manual faction (bot, or a human's staff): the policy gate above already allowed it.
             spawnParamilitary(state, faction, candidate.osid, turn, spawnIndex, report);
             spawnIndex++;
             deploymentsThisTurn++;
@@ -697,184 +714,16 @@ function recordParamilitaryCostAnnotation(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Core: Detect offensive paramilitary targets (Drina valley ethnic cleansing)
+// Offensive paramilitary detection: retired (§6 D1 stage 2, 2026-11-18)
 // ═══════════════════════════════════════════════════════════════════════════
-
-/**
- * Detect hostile-controlled OSIDs adjacent to friendly territory for offensive paramilitary sweep.
- * Unlike rear pocket detection (all neighbors friendly), offensive mode targets OSIDs with
- * at least one friendly neighbor — the spearhead pushes into enemy territory.
- *
- * Municipality-scoped for bot factions (prevents ahistorical sweep).
- * Player factions are NOT scope-restricted (consequences follow).
- *
- * Call once per turn, after paramilitary-detect.
- */
-export function detectOffensiveParamilitaryTargets(
-    state: GameState,
-    edges: EdgeRecord[],
-    reverseMap: OperationalToCanonicalReverseMap
-): ParamilitarySweepReport {
-    const report = emptyReport();
-    const turn = state.meta?.turn ?? 0;
-    const playerFaction = state.meta?.player_faction ?? null;
-    const requestGateHolds = paramilitaryRequestGateHolds(state, playerFaction);
-    if (requestGateHolds && playerFaction) {
-        removePrematurePlayerParamilitaryRequests(state, playerFaction);
-    } else {
-        resolveStandingPolicyPendingParamilitaryRequests(state, playerFaction);
-    }
-    if (turn > OFFENSIVE_PARA_FADE_WEEK) return report;
-
-    const adjacency = buildOsidAdjacency(edges);
-    const factions = (state.factions ?? []).map(f => f.id).sort(strictCompare);
-    const defendedOsids = buildDefendedOsids(state);
-
-    // Existing paramilitary targets — avoid duplicates (shared with rear pocket)
-    const existingTargets = new Set<string>();
-    const formations = state.military.formations ?? {};
-    for (const fid of Object.keys(formations).sort(strictCompare)) {
-        const f = formations[fid];
-        if (f?.kind === 'paramilitary' && f.paramilitary_target) {
-            existingTargets.add(`${f.faction}:${f.paramilitary_target}`);
-        }
-    }
-    for (const req of state.pending_paramilitary_requests ?? []) {
-        existingTargets.add(`${req.faction}:${req.target_osid}`);
-    }
-
-    // Build enclave OSID exclusion set — includes both explicit osid_list and prefix-matched OSIDs
-    const enclaveOsids = new Set<string>();
-    const allOsids = new Set<string>();
-    for (const e of edges) {
-        allOsids.add(e.a);
-        allOsids.add(e.b);
-    }
-    for (const enclave of ENCLAVE_DEFINITIONS) {
-        if (enclave.osid_list) {
-            for (const osid of enclave.osid_list) enclaveOsids.add(osid);
-        }
-        if (enclave.osid_prefixes) {
-            for (const osid of allOsids) {
-                if (osidBelongsToEnclave(osid, enclave)) enclaveOsids.add(osid);
-            }
-        }
-    }
-
-    const sortedOsids = [...allOsids].sort(strictCompare);
-    const defenderFactionMap = buildDefenderFactionMap(state);
-    const regularForceClaimedTargets = buildRegularForceClaimedTargets(state);
-
-    for (const faction of factions) {
-        if (!OFFENSIVE_PARAMILITARY_FACTIONS.has(faction)) continue;
-        if (faction === playerFaction && requestGateHolds) continue;
-
-        const isPlayer = faction === playerFaction;
-        const scopeMuns = isPlayer ? null : (OFFENSIVE_PARA_MUNICIPALITY_SCOPE[faction] ?? null);
-        let spawnIndex = 0;
-        const issuedTargets = collectParamilitaryIssuedTargets(state, faction, turn, 'offensive');
-        const allModeIssuedTargets = collectParamilitaryIssuedTargets(state, faction, turn);
-        for (const target of allModeIssuedTargets) existingTargets.add(`${faction}:${target}`);
-        let deploymentsThisTurn = issuedTargets.size;
-        const municipalityDeploymentCounts = new Map<string, number>();
-        for (const target of allModeIssuedTargets) {
-            const municipalityId = municipalityIdFromOsid(target);
-            municipalityDeploymentCounts.set(
-                municipalityId,
-                (municipalityDeploymentCounts.get(municipalityId) ?? 0) + 1,
-            );
-        }
-
-        const candidates: RankedParamilitaryTarget[] = [];
-        for (const osid of sortedOsids) {
-            const controller = getPoliticalControllerOSID(state, osid, reverseMap);
-            // Must be hostile-controlled (not our faction)
-            if (controller === faction || controller === null) continue;
-            if (isRbihHrhbCombatBlocked(state, faction, controller)) continue;
-            if (regularForceClaimedTargets.has(osid)) continue;
-
-            if (enclaveOsids.has(osid)) continue;
-
-            // Municipality scope check for bot factions
-            const mun = osid.split(':')[1] ?? '';
-            if (scopeMuns && !scopeMuns.includes(mun)) continue;
-
-            // Must have at least one friendly adjacent neighbor
-            const neighbors = adjacency.get(osid);
-            if (!neighbors) continue;
-            let hasFriendlyNeighbor = false;
-            for (const n of neighbors) {
-                if (getPoliticalControllerOSID(state, n, reverseMap) === faction) {
-                    hasFriendlyNeighbor = true;
-                    break;
-                }
-            }
-            if (!hasFriendlyNeighbor) continue;
-
-            // Adjacent defender projection — paramilitaries avoid areas near organized military
-            if (isDefendedAgainst(defendedOsids, state, osid, faction)) continue;
-            if (controller && hasAdjacentDefender(osid, controller, adjacency, defenderFactionMap)) continue;
-
-            // Dedup
-            if (existingTargets.has(`${faction}:${osid}`)) continue;
-            const candidate = buildRankedParamilitaryTarget(
-                state,
-                faction,
-                controller,
-                osid,
-                OFFENSIVE_PARA_MIN_ORGANIZATIONAL_PENETRATION,
-                adjacency,
-                reverseMap,
-            );
-            if (candidate) candidates.push(candidate);
-        }
-
-        candidates.sort(compareRankedParamilitaryTargets);
-        for (const candidate of candidates) {
-            if (deploymentsThisTurn >= OFFENSIVE_PARA_MAX_DEPLOYMENTS_PER_FACTION_TURN) break;
-            const deploymentsInMunicipality = municipalityDeploymentCounts.get(candidate.municipalityId) ?? 0;
-            if (deploymentsInMunicipality >= PARAMILITARY_MAX_DEPLOYMENTS_PER_MUNICIPALITY_TURN) continue;
-            const osid = candidate.osid;
-
-            // Player faction: respect paramilitary policy, read through the §6 M-a cap
-            if (isPlayer) {
-                const policy = readParamilitaryStandingOrder(state, faction);
-                if (policy === 'always_deny') continue;
-                if (policy === 'always_allow') {
-                    spawnParamilitary(state, faction, osid, turn, spawnIndex, report, 'offensive');
-                    spawnIndex++;
-                    deploymentsThisTurn++;
-                    existingTargets.add(`${faction}:${osid}`);
-                    municipalityDeploymentCounts.set(candidate.municipalityId, deploymentsInMunicipality + 1);
-                    continue;
-                }
-                // 'ask' — add to pending
-                const requests = state.pending_paramilitary_requests ??= [];
-                requests.push({
-                    target_osid: osid,
-                    faction,
-                    strength: OFFENSIVE_PARA_UNIT_SIZE,
-                    estimated_civilian_risk: estimateParamilitaryCivilianRisk('offensive'),
-                    mode: 'offensive',
-                });
-                report.pending_player_requests++;
-                deploymentsThisTurn++;
-                existingTargets.add(`${faction}:${osid}`);
-                municipalityDeploymentCounts.set(candidate.municipalityId, deploymentsInMunicipality + 1);
-                continue;
-            }
-
-            // Bot faction: auto-approve
-            spawnParamilitary(state, faction, osid, turn, spawnIndex, report, 'offensive');
-            spawnIndex++;
-            deploymentsThisTurn++;
-            existingTargets.add(`${faction}:${osid}`);
-            municipalityDeploymentCounts.set(candidate.municipalityId, deploymentsInMunicipality + 1);
-        }
-    }
-
-    return report;
-}
+//
+// `detectOffensiveParamilitaryTargets` had no production call site (no turn phase called it) and
+// read the raw `player_faction`, the staff-bypass bug class. It was deleted together with its
+// detector-only constants; the retirement commit is byte-identical, which proves the code was dead.
+// The read side stays so old saves still advance and resolve an `offensive` paramilitary:
+// `spawnParamilitary`'s mode, the offensive branch of `advanceParamilitaries`, the offensive fade
+// in `resolvePlayerParamilitaryDecisions`, `paramilitary_mode` and the `opara_` filter.
+// tests/paramilitary_spawn_guard.test.ts fails if any phase calls an offensive spawner again.
 
 // recordWarCrime lives in src/state/war_crimes_record.ts (RF-5B): the minority
 // expulsion policy in displacement_takeover.ts records through the same writer.

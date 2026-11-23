@@ -1499,11 +1499,16 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
                 axis_id: 'krug_gorazde_jabuka',
                 name: 'KRUG: Goražde Jabuka',
                 brigades: ['arbih_801st_light', 'arbih_802nd_light', 'arbih_831st_drina_lineage'],
-                // Owner-authorized calibration assumption, unadopted: append the
-                // graph-adjacent Glamoc pocket as an ordinary follow-on. This is not
-                // a sourced historical capture or a guaranteed outcome; roster,
-                // timing, attack strength, damage, retreat, and manual gates are
-                // unchanged.
+                // Glamoč (`op:gorazde:glamoc`) is this operation's owner-authorized
+                // calibration-assumption objective: the graph-adjacent pocket appended as
+                // an ordinary follow-on. Since §6 D1 stage 2 (2026-11-18) it is the cell's
+                // sole route in the model, because the rear-pocket sweep that used to take
+                // the cell at t20 no longer runs under RBiH's refusal. Its attribution to
+                // KRUG is unproven and its date unverified. It is never presented as
+                // historical, and no text may say KRUG took Glamoč. The calibration pass
+                // adopts it with a source, or accepts the -1 at all four checkpoints.
+                // Not a sourced capture and not a guaranteed outcome; roster, timing,
+                // attack strength, damage, retreat and manual gates are unchanged.
                 objectives: ['op:gorazde:sopotnica', 'op:gorazde:glamoc'],
                 // Coarse local model anchor, not a claim about the precise march route.
                 staging_osid: 'op:gorazde:osjecani_2',

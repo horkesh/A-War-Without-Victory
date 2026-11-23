@@ -60,7 +60,6 @@ import type {
 import { strictCompare } from '../../state/validateGameState.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { resolveActiveEmbargoPhase, EMBARGO_PHASE_CAPS } from '../../state/embargo.js';
-import { pickOperationName } from './operation_names.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { ControlSide } from '../../state/political_control_types.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
@@ -71,7 +70,7 @@ import { applyOperationExperience, gradeStarsToOutcome, checkDefeatism } from '.
 import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
 import { isEastHerzegovinaPair, isGrazAccordsActive, shouldGrazBlockAttack } from '../local_truces.js';
 import { isFriendlyFaction as isFriendlyFactionCtrl, isRbihHrhbCombatBlocked } from '../early_war/alliance_update.js';
-import { isBrigadeEligibleForOperationObjectives, isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
+import { isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
 import { tickPreparation, hasUnresolvedProbe, autoResolveProbe, formTgsAtReadyTransition, formTgForAxis, settleLinkedPreparationProbeOnRecovery } from './operation_preparation.js';
 import {
     emitCorpsExhaustionRecord,
@@ -122,9 +121,7 @@ import {
     allAxesTerminal,
     assignBrigadeRoles,
     computeMultiAxisPlanningDuration,
-    computePlanningDuration,
     PLANNING_INVALIDATION_GRACE_TURNS,
-    createSingleAxis,
     getAllAxisBrigades,
     getAllAxisObjectives,
     getCurrentLaunchObjectives,
@@ -145,13 +142,10 @@ import {
     areParticipantsReadyForExecution,
     buildOsidAdjacencyFromFrontEdges,
     collectObjectiveApproachOsids,
-    evaluateLaunchFeasibility,
     evaluateOpeningAttackReadiness,
     getEquipmentOffensivePriority,
     getMomentumAggressionBonus,
     getMomentumMinOutcome,
-    hasEligibleAttackersForLaunch,
-    isStagingCorridorSafe,
     resolveEquipmentClass,
     shouldStallAxisForRecentCatastrophicObjective,
 } from './sector_offensive_launch_helpers.js';
@@ -197,15 +191,6 @@ const MIN_BRIGADES_FOR_OFFENSIVE = 2;
  * from overextension (BB1 p.422).
  */
 const EMBARGO_OFFENSIVE_GATE_CAP_THRESHOLD = 0.7;
-
-/** Independent of `supply_reserves_enabled` — reads only the embargo phase,
- *  never touches general_supply_reserve, siege counters, or enclave resilience. */
-function isFactionOffensiveGatedByEmbargo(state: GameState, faction: FactionId): boolean {
-    if (!state.meta?.embargo_offensive_gate_enabled) return false;
-    const phase = resolveActiveEmbargoPhase(state);
-    const cap = EMBARGO_PHASE_CAPS[phase]?.[faction]?.general ?? 1.0;
-    return cap < EMBARGO_OFFENSIVE_GATE_CAP_THRESHOLD;
-}
 
 /** Maximum objectives per offensive (absolute cap). */
 const MAX_OBJECTIVES_CAP = 6;
@@ -759,24 +744,6 @@ export function getTargetOsidIntelConfidenceForCorps(
     }
 
     return bestConfidence;
-}
-
-function sortTargetsByOsidIntelConfidence(
-    state: GameState,
-    corpsId: FormationId,
-    targets: readonly string[],
-): string[] {
-    const originalIndex = new Map<string, number>();
-    targets.forEach((target, index) => originalIndex.set(target, index));
-    return [...targets].sort((a, b) => {
-        const confidenceDelta =
-            (getTargetOsidIntelConfidenceForCorps(state, corpsId, b) ?? 0)
-            - (getTargetOsidIntelConfidenceForCorps(state, corpsId, a) ?? 0);
-        if (Math.abs(confidenceDelta) > 1e-9) return confidenceDelta > 0 ? 1 : -1;
-        const indexDelta = (originalIndex.get(a) ?? 0) - (originalIndex.get(b) ?? 0);
-        if (indexDelta !== 0) return indexDelta;
-        return strictCompare(a, b);
-    });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2822,292 +2789,6 @@ function updateLegacyFlatResults(
     if ((op.failure_count ?? 0) >= MAX_TOTAL_FAILURES) {
         beginRecovery(op, turn, getNoAttemptRecoveryReason(op), state);
     }
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Evaluate & launch sector offensives
-// ═══════════════════════════════════════════════════════════════════════════
-
-/**
- * Evaluate whether a corps should launch a sector offensive from a given sector.
- * Called from bot_corps_ai.ts during directive generation.
- *
- * Requirements:
- * - Corps stance is offensive or balanced
- * - No active operation for this corps
- * - >= MIN_BRIGADES_FOR_OFFENSIVE brigades in sector
- * - Supply readiness is recorded on the operation but does not block launch
- * - >= 2 enemy OSIDs adjacent to sector
- *
- * Returns the operation to launch, or null.
- */
-export function evaluateCorpsOffensiveLaunch(
-    state: GameState,
-    corpsId: FormationId,
-    faction: FactionId,
-    corpsBrigadeIds: FormationId[],
-    corpsEnemyOsids: string[],
-    offensiveTargets: string[],
-    supplyByOsid?: SupplyStateByOsidReport | null,
-    minAttackOutcome?: CorpsOperation['min_attack_outcome'],
-    primarySectorId?: string,
-    osidAdjacency?: Map<string, readonly string[]>,
-    terrainMultByOsid?: Record<string, number>,
-): CorpsOperation | null {
-    const turn = state.meta?.turn ?? 0;
-    const formations = state.military.formations ?? {};
-
-    // Embargo-driven offensive-eligibility gate. Independent of the retired
-    // supply-reserve economy: while the faction's embargo cap is below
-    // threshold, it cannot open a NEW offensive corps operation this turn.
-    // Existing operations already in flight are untouched.
-    if (isFactionOffensiveGatedByEmbargo(state, faction)) return null;
-
-    // Exclude brigades at critical supply from offensive operations.
-    // Siege-isolated units lack ammunition, fuel, and rations to sustain attacks.
-    // They can defend in place but cannot be committed to offensive operations.
-    // Historical: Goražde/Srebrenica/Bihać enclave brigades were chronically supply-starved;
-    // launching multi-week offensives from a besieged enclave is not historically plausible.
-    if (supplyByOsid) {
-        const fac = supplyByOsid.factions?.find(f => f.faction_id === faction);
-        if (fac?.by_osid) {
-            const osidState = new Map(fac.by_osid.map(e => [e.osid, e.state] as const));
-            corpsBrigadeIds = corpsBrigadeIds.filter(bid => {
-                const b = formations[bid];
-                if (!b) return true;
-                const st = b.location_osid ? (osidState.get(b.location_osid) ?? 'adequate') : 'adequate';
-                return st !== 'critical';
-            });
-        }
-    }
-
-    // Must have enough brigades
-    if (corpsBrigadeIds.length < MIN_BRIGADES_FOR_OFFENSIVE) return null;
-
-    // Must have at least one brigade that can actually attack (active, not disrupted, personnel >= 400)
-    if (!hasEligibleAttackersForLaunch(formations, corpsBrigadeIds)) return null;
-
-    // Must have at least one enemy target adjacent to corps front
-    if (corpsEnemyOsids.length < 1) return null;
-
-    // Record supply readiness for diagnostics and downstream brigade-level attack gating.
-    // Launch itself is allowed even under poor sector-wide supply so the force can stage and
-    // reposition toward the next objective. Individual brigades still remain supply-gated when
-    // bot_brigade_ai_osid decides whether an attack order is actually eligible.
-    const supplyReadiness = 1.0; // reserve-based readiness retired 2026-11-17 (Fable consult 6)
-
-    // Select objectives: offensive targets that are in this corps' enemy OSIDs,
-    // filtered to a contiguous chain from the corps' friendly front.
-    // Each objective must be OSID-adjacent (via war_front_edges_osid) to either
-    // a friendly OSID or a previously accepted objective. Prevents operations
-    // from targeting disconnected enemy OSIDs.
-    const corpsTargetSet = new Set(corpsEnemyOsids);
-    const candidateTargets = sortTargetsByOsidIntelConfidence(
-        state,
-        corpsId,
-        offensiveTargets.filter(t => corpsTargetSet.has(t)),
-    );
-
-    // Use caller's adjacency if provided; otherwise build from front edges.
-    // Caller (bot_corps_directives) already builds adjacency once per turn.
-    const osidAdj: Map<string, readonly string[]> = osidAdjacency ?? buildOsidAdjacencyFromFrontEdges(state);
-
-    // Seed: ALL corps friendly front OSIDs (not just one sector).
-    // Corps-level operations can target any enemy OSID adjacent to the corps' front,
-    // regardless of which sector it belongs to.
-    const allSectors = state.military.corps_front_sectors ?? {};
-    const reachable = new Set<string>();
-    for (const sec of Object.values(allSectors)) {
-        if (sec.corps_id !== corpsId) continue;
-        for (const ss of sec.sub_segments) {
-            for (const fo of ss.friendly_osids) reachable.add(fo);
-        }
-    }
-
-    // Greedy chain: accept objectives adjacent to the reachable set, expand.
-    // Objective count scales with force size: 1 per 2 brigades, capped at 6.
-    // A 3-brigade op gets 1-2 objectives; a 12-brigade corps offensive gets 6.
-    const maxObjectives = Math.min(MAX_OBJECTIVES_CAP, Math.max(1, Math.floor(corpsBrigadeIds.length * OBJECTIVES_PER_BRIGADE)));
-    const objectives: string[] = [];
-    let changed = true;
-    while (changed && objectives.length < maxObjectives) {
-        changed = false;
-        for (const t of candidateTargets) {
-            if (objectives.length >= maxObjectives) break;
-            if (reachable.has(t)) continue; // already accepted
-            const neighbors = osidAdj.get(t);
-            if (!neighbors) continue;
-            let adjacent = false;
-            for (const n of neighbors) {
-                if (reachable.has(n)) { adjacent = true; break; }
-            }
-            if (adjacent) {
-                objectives.push(t);
-                reachable.add(t);
-                changed = true;
-            }
-        }
-    }
-
-    // Need at least 1 objective for a sector offensive
-    if (objectives.length < 1) return null;
-
-    // ── Feasibility gate ─────────────────────────────────────────────────
-    // Reject operations where the attacker pool cannot achieve even costly_victory
-    // against ANY proposed objective. Prevents zombie ops that permanently block
-    // the corps slot because brigades refuse to execute hopeless attacks.
-    const initialFeasibility = evaluateLaunchFeasibility(
-        state,
-        corpsBrigadeIds,
-        objectives,
-        faction,
-        supplyByOsid,
-        terrainMultByOsid,
-    );
-    if (!initialFeasibility.feasible) {
-        const corpsName = formations[corpsId]?.name ?? corpsId;
-        console.warn(`[feasibility] ${corpsName}: rejected op — ${initialFeasibility.blocker ?? 'launch_infeasible'} (${objectives.length} objectives, ${corpsBrigadeIds.length} brigades, ratio ${initialFeasibility.ratio.toFixed(3)})`);
-        return null;
-    }
-
-    // Enclave brigade filter: enclave-tagged brigades cannot participate in operations
-    // targeting OSIDs outside their enclave. Organically implements the "corridor-widening only"
-    // constraint — besieged units can raid adjacent VRS positions or expand their perimeter,
-    // but cannot march through a supply corridor to attack towns 20km away.
-    // This prevents Goražde brigades marching through northern Foča to attack Foča objectives.
-    // Predicate extracted 2026-08-26 to `isBrigadeEligibleForOperationObjectives` so that EVERY
-    // operation-creation site asks the same question. It used to live only here, and the commander
-    // pipeline — a different creation site — never asked it. See the function's header.
-    corpsBrigadeIds = corpsBrigadeIds.filter(bid =>
-        isBrigadeEligibleForOperationObjectives(formations[bid], objectives));
-    if (corpsBrigadeIds.length < MIN_BRIGADES_FOR_OFFENSIVE) return null;
-
-    const planningDuration = computePlanningDuration(objectives.length);
-    const name = pickOperationName(corpsId, turn, faction, state);
-
-    // Sort by equipment priority (mechanized/motorized first) before reserve slicing.
-    // Best offensive assets become participants; weakest held back as reserves.
-    const sortedByPriority = [...corpsBrigadeIds].sort((a, b) => {
-        const fa = formations[a];
-        const fb = formations[b];
-        const pa = getEquipmentOffensivePriority(fa ? resolveEquipmentClass(fa) : undefined);
-        const pb = getEquipmentOffensivePriority(fb ? resolveEquipmentClass(fb) : undefined);
-        if (pa !== pb) return pb - pa; // Higher priority first
-        return strictCompare(a, b); // Deterministic tiebreak
-    });
-    // Reserve: 15% of force, but no reserve for small ops (≤3 brigades — every unit needed)
-    const reserveCount = sortedByPriority.length <= 3 ? 0 : Math.max(1, Math.floor(sortedByPriority.length * 0.15));
-    const participating = sortedByPriority
-        .slice(0, sortedByPriority.length - reserveCount)
-        .slice(0, MAX_PARTICIPATING_BRIGADES);
-    if (participating.length < MIN_BRIGADES_FOR_OFFENSIVE) return null;
-    if (!hasEligibleAttackersForLaunch(formations, participating)) return null;
-    const trimmedFeasibility = evaluateLaunchFeasibility(
-        state,
-        participating,
-        objectives,
-        faction,
-        supplyByOsid,
-        terrainMultByOsid,
-    );
-    if (!trimmedFeasibility.feasible) {
-        const corpsName = formations[corpsId]?.name ?? corpsId;
-        console.warn(`[feasibility] ${corpsName}: rejected op after participant trim - ${trimmedFeasibility.blocker ?? 'launch_infeasible'} (${objectives.length} objectives, ${participating.length} participating brigades, ratio ${trimmedFeasibility.ratio.toFixed(3)})`);
-        return null;
-    }
-
-    // Pick staging OSID: nearest corps friendly OSID to first objective.
-    // Falls back to first friendly OSID in corps territory (deterministic, sorted).
-    // FIX 3: Reject staging OSIDs behind a single-OSID chokepoint (corridor width = 1).
-    //
-    // Build friendly set and main body for corridor width check.
-    // Main body = OSIDs where participating brigades are located (the force's center of mass).
-    // Friendly set = all territory OSIDs from the corps' sectors.
-    const corpsMainBody = new Set<string>();
-    for (const bid of participating) {
-        const b = formations[bid];
-        if (b?.location_osid) corpsMainBody.add(b.location_osid);
-    }
-    const corpsFriendlySet = new Set<string>(reachable);
-    for (const sec of Object.values(allSectors)) {
-        if (sec.corps_id !== corpsId) continue;
-        for (const osid of sec.territory_osids) corpsFriendlySet.add(osid);
-    }
-
-    let stagingOsid: string | undefined;
-    const firstObj = objectives[0];
-    if (firstObj) {
-        // Check OSID adjacency for nearest friendly to first objective
-        const neighbors = osidAdj.get(firstObj);
-        if (neighbors) {
-            // Sort for determinism, pick first reachable neighbor
-            const sortedNeighbors = [...neighbors].sort(strictCompare);
-            for (const n of sortedNeighbors) {
-                if (!reachable.has(n)) continue;
-                // FIX 3: corridor width check — reject if single chokepoint
-                if (!isStagingCorridorSafe(n, corpsMainBody, corpsFriendlySet, osidAdj)) continue;
-                stagingOsid = n;
-                break;
-            }
-        }
-    }
-    if (!stagingOsid) {
-        // Fallback: first friendly OSID in corps territory (deterministic)
-        const sorted = [...reachable].sort(strictCompare);
-        for (const candidate of sorted) {
-            if (isStagingCorridorSafe(candidate, corpsMainBody, corpsFriendlySet, osidAdj)) {
-                stagingOsid = candidate;
-                break;
-            }
-        }
-        // Ultimate fallback: if all candidates have chokepoints, use first anyway
-        // (better to stage somewhere than to cancel the entire operation)
-        if (!stagingOsid) stagingOsid = sorted[0];
-    }
-
-    const sortedParticipating = participating.sort(strictCompare);
-
-    return {
-        name,
-        type: 'sector_attack',
-        phase: 'planning',
-        started_turn: turn,
-        phase_started_turn: turn,
-        participating_brigades: sortedParticipating,
-        sector_id: primarySectorId,
-        axes: [createSingleAxis(sortedParticipating, objectives, stagingOsid, formations)],
-        objectives,
-        current_objective_index: 0,
-        planning_duration: planningDuration,
-        supply_readiness: supplyReadiness,
-        momentum: 0,
-        failure_count: 0,
-        consecutive_failures_on_current: 0,
-        attack_attempt_count: 0,
-        objective_capture_count: 0,
-        movement_only_execution_turns: 0,
-        idle_execution_turn_streak: 0,
-        ...(stagingOsid && { staging_osid: stagingOsid }),
-        ...(minAttackOutcome && { min_attack_outcome: minAttackOutcome }),
-    };
-}
-
-/** @deprecated Use evaluateCorpsOffensiveLaunch — this alias maps the old sector-scoped signature. */
-export function evaluateSectorOffensiveLaunch(
-    state: GameState,
-    corpsId: FormationId,
-    sectorId: string,
-    faction: FactionId,
-    sectorBrigadeIds: FormationId[],
-    sectorEnemyOsids: string[],
-    offensiveTargets: string[],
-    supplyByOsid?: SupplyStateByOsidReport | null,
-    minAttackOutcome?: CorpsOperation['min_attack_outcome']
-): CorpsOperation | null {
-    return evaluateCorpsOffensiveLaunch(
-        state, corpsId, faction, sectorBrigadeIds, sectorEnemyOsids,
-        offensiveTargets, supplyByOsid, minAttackOutcome, sectorId
-    );
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -1335,9 +1335,15 @@
     "id": "gorazde_crisis_1994",
     "image": "event_enclave_valley_town.webp",
     "title": "Goražde Crisis",
-    "narrative": "The VRS launches a major offensive against the Goražde safe area, overrunning UN observation posts and pushing into the outskirts of the town. Limited NATO air strikes prove insufficient to halt the advance. The crisis exposes the hollow nature of safe area protection and the mismatch between UN mandates and military reality.",
+    "narrative": "The VRS attacks the Goražde safe area. On 10 and 11 April NATO aircraft strike VRS targets around the town at the UN's request, and the Bosnian Serb forces answer by detaining UN personnel. The UNPROFOR commander holds that an attack on the lines around a safe area is not an attack on the safe area itself, and seeks a ceasefire through talks. The crisis shows the gap between UN mandates and military reality.",
+    "localizations": {
+      "bcs": {
+        "title": "Kriza u Goraždu",
+        "narrative": "VRS napada zaštićenu zonu Goražde. Avioni NATO-a 10. i 11. aprila, na zahtjev UN-a, gađaju ciljeve VRS-a oko grada, a snage bosanskih Srba zauzvrat zadržavaju pripadnike UN-a. Komandant UNPROFOR-a smatra da napad na linije oko zaštićene zone nije napad na samu zonu i prekid vatre traži pregovorima. Kriza pokazuje jaz između mandata UN-a i vojne stvarnosti."
+      }
+    },
     "category": "military",
-    "historical_source": "UN Report on Srebrenica (A/54/549, 1999), Goražde context; ICTY Karadžić Trial Judgment (IT-95-5/18-T), Goražde findings",
+    "historical_source": "UN A/54/549 (Report of the Secretary-General, The fall of Srebrenica, 15 November 1999) paras. 132-137. ICTY Karadžić Trial Judgment (IT-95-5/18-T, 24 March 2016) paras. 391-394. Balkan Battlegrounds, Vol. II (CIA, 2003), pp. 459-461.",
     "source_tier": "icty_icj_un",
     "source_note": "The listed adjudicative and institutional sources bound the chronology, actors, and findings described. The essay is original synthesis and does not extend individual liability, command responsibility, or institutional findings beyond the cited record.",
     "trigger": {
@@ -1354,7 +1360,7 @@
     "effects": [
       {
         "kind": "narrative",
-        "text": "The VRS attacks the Goražde safe area. Limited NATO strikes fail to stop the offensive, exposing the fragility of safe area protection."
+        "text": "The VRS attacks the Goražde safe area. NATO air strikes at the UN's request do not end the crisis, and the Bosnian Serb forces detain UN personnel."
       }
     ]
   },
