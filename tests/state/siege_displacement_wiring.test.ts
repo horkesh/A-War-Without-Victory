@@ -409,8 +409,25 @@ describe('panel round 1 (DA1 P6)', () => {
         const census = { pocket: { total: 10000, bosniak: 10000, serb: 0, croat: 0, other: 0 } } as MunicipalityPopulation1991Map;
         const w = custom(controllers, edges, ['pocket:RBiH'], census, initial);
         const report = updateDisplacement(w.state, w.settlements, w.edges, census);
-        expect(report.by_municipality.find((r) => r.mun_id === 'pocket')?.reason).toContain('encircled');
-        expect(w.state.displacement.displacement_state.far?.displaced_in_by_faction?.RBiH ?? 0).toBeGreaterThan(0);
+        // A5 (SD7) governs the destination (orchestrator ruling 2026-11-23): the pocket IS the side's main
+        // body, so no supplied main-body municipality is left to go to; 'far' is cut off and never qualifies.
+        // (a) The encirclement fires on the largest body. This is the first turn, so the 3-turn siege trigger
+        // cannot be what fired; every leaver is trapped.
+        expect(report.trapped).toHaveLength(1);
+        const row = report.trapped![0];
+        expect(row).toMatchObject({ mun_id: 'pocket', faction_id: 'RBiH', routed: 0 });
+        expect(row.wanted).toBeGreaterThan(0);
+        expect(row.trapped).toBe(row.wanted);
+        // (b) Nothing is booked for those people: no departure record or route, no Ledger figure.
+        expect(report.by_municipality.filter((r) => r.mun_id === 'pocket')).toEqual([]);
+        expect(report.routing).toEqual([]);
+        expect(w.state.displacement.displacement_humanitarian_aggregates ?? {}).toEqual({});
+        expect(w.state.displacement.civilian_casualties?.RBiH?.killed ?? 0).toBe(0);
+        expect(w.state.displacement.displacement_state.pocket?.displaced_out ?? 0).toBe(0);
+        expect(w.state.displacement.displacement_state.pocket?.lost_population ?? 0).toBe(0);
+        // (c) The cut-off settlement receives nobody.
+        expect(w.state.displacement.displacement_state.far?.displaced_in_by_faction?.RBiH ?? 0).toBe(0);
+        expect(w.state.displacement.displacement_state.far?.displaced_in ?? 0).toBe(0);
     });
 
     it('A7 (SD11): a largest body above 15% of the turn-0 count is a split, not a siege, even under pressure', () => {
