@@ -207,7 +207,11 @@ import type { Osid } from '../combat/osid_adjacency.js';
 import { enforceGuardsEnclaveBoundary, generateArmyReserveRequests, evaluateArmyReserveAssignments, tickEliteLoans } from '../combat/army_reserve_system.js';
 import { buildHomeDistanceCache } from '../combat/home_distance.js';
 import { computeSectorCombatRatings } from '../combat/sector_combat_rating.js';
-import { detectParamilitaryTargets, advanceParamilitaries } from '../combat/paramilitary_sweep.js';
+import {
+    detectParamilitaryTargets,
+    advanceParamilitaries,
+    removeNonManualPlayerParamilitaryRequests,
+} from '../combat/paramilitary_sweep.js';
 import { updateStrandedBrigadeLifecycle } from '../combat/stranded_brigade_lifecycle.js';
 import {
     PARAMILITARY_FADE_WEEK,
@@ -2275,6 +2279,10 @@ export const warPhases: NamedPhase[] = [
                 meta.autonomy_level = meta.autonomy_level_pending;
                 meta.autonomy_level_pending = undefined;
             }
+            // §6 mechanics item 4: a side that is no longer manual has no paramilitary request left on the desk.
+            // Its undecided requests are deleted without history in the advance that raises the level; detect
+            // already ran this turn, so the staff default takes those targets next turn.
+            removeNonManualPlayerParamilitaryRequests(context.state);
             meta.autonomy_overrides = undefined;
             // Expire ordinary unanswered proposals with an explicit negative
             // disposition before GC. Keeping the disposition for the current turn
