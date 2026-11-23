@@ -14,8 +14,8 @@
 - **31 March – 4 April (before the war's t0):** **Bijeljina** — Serb TO and Arkan's Serbian Volunteer Guard take the town (takeover 1-2 April; Serb control by 4 April) [BB1 printed p.135 (KB p.171); Krajišnik TJ paras. 297-303]
 - **6 April:** Independence recognized; Serb barricades in Sarajevo; shots fired at civilian demonstrators near Vrace hill [BB1 p.441 footnote: some date siege from 5 April]
 - **8–10 April:** **Zvornik falls** — Arkan's ultimatum on 8 April; volunteers, TO, police and the JNA attack the next morning and hold the town on 9 April [BB1 printed p.137 (KB p.173); Krajišnik TJ para. 362]; BB1 printed p.151 (KB p.187) gives "9-10 April"
-- **Mid-April:** **Foča falls** — "Serbs captured Foca in April" (BB1 p.187)
-- **Mid-April:** **Višegrad falls** to JNA/VRS [GK; BB1 p.187 confirms Drina valley fighting]
+- **Mid-April:** **Foča falls** — "Serbs captured Foca in April" (BB1 printed p.151 (KB p.187))
+- **Mid-April:** **Višegrad falls** to JNA/VRS [GK; BB1 printed p.151 (KB p.187) confirms Drina valley fighting]
 - **16 April:** Bihać established as one of seven territorial districts (okrug) under Bosnian TD Staff (BB1 p.184)
 - **17 April:** **Donji Vakuf town taken by the Serb SJB** — "The Serb SJB of Donji Vakuf was set up on 17 April 1992 and took control of the entire town the same day"; the municipality is renamed *Srbobran* (ICTY Stanišić & Župljanin TJ Vol I ¶238; Krajišnik TJ ¶438 — note both rest on the **same** SJB Srbobran report to the Banja Luka CSB of 4 October 1993, P1799 / P758.F, and are not independent). An institutional takeover, not a battle. The town then serves as the VRS springboard for the southern axis of Vrbas 92 (BB2 printed p.330: "from the direction of Serb-held Donji Vakuf (Srbobran)")
 - **April:** Kupres battle [map reference BB1 TOC]

@@ -36,8 +36,12 @@ const REVIEWED_IDENTITY_FNV64 = '80be52532990ff34';
 // Re-pinned 2026-11-16 for RF-PM1 (was 11239 / 3aa51be73b2cdda0), conditions of the RF-PM1 §6 panel (engine and red-team seats):
 // `always_deny` no longer previews the RS-only `csq_paramilitary_authorization_refused` (opens_events emptied) and the `ask`
 // explanation no longer names that internal id. Options, effects, flags and dimension shifts are byte-identical.
-const REVIEWED_POLICY_CANONICAL_LENGTH = 11091;
-const REVIEWED_POLICY_FNV64 = '57f0d7f927df002c';
+// Re-pinned 2026-11-23 (was 11091 / 57f0d7f927df002c) by the §4 card-copy panel (historian and narrative seats, three rounds):
+// the hidden `historical_source` and `source` replace the A/54/549 §35 cite with para. 17, and a display-only
+// `localizations.en.notifications_to_other_factions` block names "HVO staff" (was "Mostar staff") in the three HRHB rows; the
+// persisted notification pairs are unchanged. Strings only; trigger, options, effects, flags and dimension shifts are byte-identical.
+const REVIEWED_POLICY_CANONICAL_LENGTH = 12021;
+const REVIEWED_POLICY_FNV64 = '550dec7d0eec4c6b';
 
 /**
  * The two preview values RF-PM1 corrected, as a decision saved before the change carries them. Exactly these old values are

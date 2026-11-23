@@ -177,7 +177,7 @@
     "id": "un_hostage_crisis_1995",
     "authored_by_choice": false,
     "title": "UN Hostages Chained to VRS Targets",
-    "narrative": "The VRS response to NATO air strikes near Pale is swift and calculated. Within hours, 377 UN peacekeepers are seized across Bosnian Serb territory. Some are chained to bridges and military installations as human shields against further bombing. The images -- blue-helmeted soldiers handcuffed to ammunition bunkers -- are broadcast worldwide. NATO's air campaign stops. UNPROFOR is paralyzed. The tactic works in the short term. But in the corridors of Washington, London, and Paris, the humiliation is hardening resolve. The rules of engagement are about to change.",
+    "narrative": "The VRS response to NATO air strikes near Pale is swift and calculated. Within hours the VRS starts taking UN personnel hostage; by 29 May it holds about 350. Some are chained to potential targets as human shields against further bombing. The images -- blue-helmeted soldiers handcuffed to ammunition bunkers -- are broadcast worldwide. NATO's air campaign stops. UNPROFOR is paralyzed. The tactic works in the short term. But in the corridors of Washington, London, and Paris, the humiliation is hardening resolve. The rules of engagement are about to change.",
     "source_note": "Per Sensitive History Design Gate §3 + v1.3 packet §3.6 named-row carve-out: `un_hostage_crisis_1995 → maintain_hostages` is a response-to-existing-state crisis (377 UN peacekeepers already seized per UNSCR 998), not authorization of new hostage-taking. The `paramilitary_policy` field remains the canon-bound player-authorized war-crime surface; no other response-option path authorizes new sensitive acts.",
     "category": "diplomatic",
     "family": "rs_hostage_response",
@@ -231,7 +231,7 @@
     },
     "effect": {
       "kind": "narrative",
-      "text": "377 UN peacekeepers are taken hostage by the VRS. Images of soldiers chained to military targets as human shields shock the world."
+      "text": "About 350 UN personnel are taken hostage by the VRS. Images of soldiers chained to military targets as human shields shock the world."
     },
     "effects": [
       {
@@ -330,7 +330,7 @@
     "sets_flags": {
       "un_hostage_crisis_occurred": true
     },
-    "historical_source": "ICTY Karadžić Trial Judgment (IT-95-5/18-T, 24 March 2016) Count 11 (Taking of Hostages). ICTY Karadžić Appeal Judgment (IT-95-5/18-A, 20 March 2019). ICTY Mladić Trial Judgment (IT-09-92-T, 22 November 2017) Count 6. UN Security Council Resolution 998 (16 June 1995). UN Secretary-General Report S/1995/444 (30 May 1995). UN General Assembly A/54/549 (Srebrenica fall report context). Balkan Battlegrounds Vol. II (operational chronology, 25 May - 18 June 1995)."
+    "historical_source": "ICTY Karadžić Trial Judgment (IT-95-5/18-T, 24 March 2016) Count 11 (Taking of Hostages). ICTY Karadžić Appeal Judgment (IT-95-5/18-A, 20 March 2019). ICTY Mladić Trial Judgment (IT-09-92-T, 22 November 2017) Count 11. UN Security Council Resolution 998 (16 June 1995). UN Secretary-General Report S/1995/444 (30 May 1995). UN General Assembly A/54/549 (Srebrenica fall report context). Balkan Battlegrounds Vol. II (operational chronology, 25 May - 18 June 1995)."
   },
   {
     "id": "srebrenica_falls_1995",

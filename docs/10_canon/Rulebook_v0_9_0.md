@@ -1,6 +1,7 @@
 # A War Without Victory -- Rulebook v0.9.0
 
 **Last Updated:** 2026-05-05
+**Amended:** 2026-11-23 (§4 card-copy panel, historian and narrative-designer seats, three rounds, unanimous; wording only, no mechanic change): the RS line under "Foundational decisions" no longer calls the Six Strategic Goals a "cleansing policy". It now reads "the reach of the war aims and the scope of offensive operations (the paramilitary standing order is a separate decision)": the goals are war aims (Karadžić TJ IT-95-5/18-T para. 57, adopted 12 May 1992), and the paramilitary posture is the separate `rs_paramilitary_policy_1992` card. Recorded in SENSITIVE_HISTORY_DESIGN_GATE.md §6 ("§4 card-copy panel" record). Nothing renumbered.
 **Amended:** 2026-11-16 (BC06 sitting of the game-designer and historian seats, orchestrator ruling; wording only, no mechanic change): the "Recurring decisions" paragraph in the event-system section now says which events escalate and that the address to the nation and the decoration of a unit are renewable but static. Nothing renumbered. Amended again 2026-11-16 (G1, game-designer and canon seats): the same paragraph records that all four leadership gestures open at week 84, their events' first trigger week, for the human President as for bots.
 
 One game turn equals one week.
@@ -571,7 +572,7 @@ The event system presents the player with political and strategic decisions thro
 - Shifts **strategic dimensions** (6 per faction: military_credibility, territorial_legitimacy, international_standing, patron_confidence, internal_cohesion, negotiating_leverage)
 
 **Foundational decisions** (w1-7) define faction identity:
-- RS: Six Strategic Goals — scope of offensive operations, cleansing policy
+- RS: Six Strategic Goals — the reach of the war aims and the scope of offensive operations (the paramilitary standing order is a separate decision)
 - RBiH: State identity — multi-ethnic recruitment, international standing
 - HRHB: Political goal — alliance with ARBiH, relationship with Zagreb
 
