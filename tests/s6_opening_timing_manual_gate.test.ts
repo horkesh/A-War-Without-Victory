@@ -15,8 +15,8 @@ import { describe, expect, it } from 'vitest';
 import type { FactionId, FactionState, GameState } from '../src/state/game_state.js';
 import { initializeCasualtyLedger } from '../src/state/casualty_ledger.js';
 import { resolveParamilitaryReviewRequests } from '../src/desktop/paramilitary_review_ipc.js';
+import * as sweepModule from '../src/sim/combat/paramilitary_sweep.js';
 import {
-    detectOffensiveParamilitaryTargets,
     detectParamilitaryTargets,
     isPlayerParamilitaryRequestGateHolding,
 } from '../src/sim/combat/paramilitary_sweep.js';
@@ -126,8 +126,9 @@ function staleRequest(faction: FactionId, decision?: 'allow' | 'deny') {
     };
 }
 
+/** Synthetic: no event catalog (§6 D1 stage 2's `undefined`, unit tests only); the pocket's only attacker is the player. */
 function detect(state: GameState) {
-    return detectParamilitaryTargets(state, edges(), reverseMap());
+    return detectParamilitaryTargets(state, edges(), reverseMap(), undefined);
 }
 
 function ownRequests(state: GameState, faction: FactionId) {
@@ -169,10 +170,13 @@ describe('T3 manual paramilitary gate (released only by the applied card answer)
         expect(detect(state).pending_player_requests).toBe(1);
     });
 
-    it('manual_gate_rs_holds_before_card_enabled', () => {
-        // The goals card is left pending, so the RS card is never enabled: the old gate let t1 requests through.
+    it('manual_gate_rs_holds_before_card_applies', () => {
+        // Round 4a (b), 2026-11-22 (was manual_gate_rs_holds_before_card_enabled): the RS card fires at t1 on its own, after
+        // the goals card, and is never enabled by it. Run before the card has fired or applied, the gate holds at t1 (the old
+        // gate let t1 requests through).
         const state = pocketState('RS', 1);
         expect(state.military.enabled_event_ids).not.toContain(RS_POLICY);
+        expect(state.military.fired_event_ids).not.toContain(RS_POLICY);
         const report = detect(state);
         expect(report.pending_player_requests).toBe(0);
         expect(ownRequests(state, 'RS')).toHaveLength(0);
@@ -193,12 +197,13 @@ describe('T3 manual paramilitary gate (released only by the applied card answer)
     });
 
     it('manual_gate_fired_pending_card_holds_past_window', () => {
-        // The RS card fired at t2 and was left pending (no receipt). Past its turn_max (8) the gate must
-        // still hold: releasing would let the player approve acts and then answer Refuse for credit.
+        // The RS card fired at t1 (round 4a (b); it fired at t2 before) and was left pending (no receipt). Past its
+        // turn_max (8) the gate must still hold: releasing would let the player approve acts and then answer Refuse for
+        // credit. `enabledRecorded` covers an older save whose goals answer still recorded the card as enabled.
         const turnMax = EVENT_CATALOG.find((def) => def.id === RS_POLICY)!.trigger.turn_max!;
         for (const enabledRecorded of [true, false]) {
             const state = pocketState('RS', turnMax + 2);
-            fireCard(state, 'RS', 2);
+            fireCard(state, 'RS', 1);
             if (enabledRecorded) state.military.enabled_event_ids.push(RS_POLICY);
             state.pending_paramilitary_requests = [staleRequest('RS', 'allow')];
             const report = detect(state);
@@ -243,11 +248,12 @@ describe('T3 manual paramilitary gate (released only by the applied card answer)
     });
 
     it('a skipped card keeps the hold, and the held requests are deleted, never replayed', () => {
-        // RS card fired at t2 and skipped in the pause; answered (and applied) only at t5.
-        const state = pocketState('RS', 2);
-        fireCard(state, 'RS', 2);
-        state.military.enabled_event_ids.push(RS_POLICY);
-        for (const turn of [2, 3, 4]) {
+        // RS card fired at t1 (round 4a (b); it fired at t2, enabled by goals, before) and skipped in the pause;
+        // answered (and applied) only at t5. Nothing enables it any more.
+        const state = pocketState('RS', 1);
+        fireCard(state, 'RS', 1);
+        expect(state.military.enabled_event_ids).not.toContain(RS_POLICY);
+        for (const turn of [1, 2, 3, 4]) {
             state.meta.turn = turn;
             state.pending_paramilitary_requests = [
                 { ...staleRequest('RS', 'allow'), target_osid: `op:held:t${turn}` },
@@ -290,6 +296,9 @@ describe('T3 manual paramilitary gate (released only by the applied card answer)
         expect(isPlayerParamilitaryRequestGateHolding(hrhb)).toBe(false);
         expect(detect(hrhb).pending_player_requests).toBe(1);
 
+        // Staff control is never held by this gate. Since §6 D1 stage 2 merged onto T, the staff instead follow the
+        // human's standing order (`resolveNonManualParamilitaryPolicy`): with no answer applied they send no sweep,
+        // which closes the staff-sweep hole T's §6 record left open "until D1 lands".
         for (const autonomy of [1, 2, 3]) {
             for (const faction of ['RBiH', 'RS'] as const) {
                 const staff = pocketState(faction, 3, autonomy);
@@ -297,7 +306,7 @@ describe('T3 manual paramilitary gate (released only by the applied card answer)
                 const report = detect(staff);
                 expect(report.pending_player_requests, `${faction} a${autonomy}`).toBe(0);
                 expect(report.spawned.filter((spawn) => spawn.faction === faction).map((spawn) => spawn.target_osid), `${faction} a${autonomy}`)
-                    .toEqual([TARGET]);
+                    .toEqual([]);
             }
         }
 
@@ -306,23 +315,23 @@ describe('T3 manual paramilitary gate (released only by the applied card answer)
         expect(detect(headless).spawned.filter((spawn) => spawn.faction === 'RS').map((spawn) => spawn.target_osid)).toEqual([TARGET]);
     });
 
-    it.each([1, 2])('offensive path: an RS player at autonomy %i gets no request and sends no sweep before the card applies (historian row 6)', (autonomy) => {
-        // detectOffensiveParamilitaryTargets gates on the raw player faction, so the hold also binds an RS player
-        // at Assisted (1) and Delegated (2) there. Card enabled (the goals answer applied) but not yet applied.
+    it.each([1, 2])('historian row 6 after D1: an RS player at autonomy %i sends no sweep before the card applies; the offensive path no longer exists', (autonomy) => {
+        // T pinned this on `detectOffensiveParamilitaryTargets`. §6 D1 stage 2 (§3, signed unanimously) retired that
+        // detector: it had no production caller (tests/paramilitary_spawn_guard.test.ts pins that no phase calls an
+        // offensive spawner). The one spawner left is rear-pocket detection, where the RS staff follow the standing order.
+        expect('detectOffensiveParamilitaryTargets' in sweepModule).toBe(false);
         const state = pocketState('RS', 3, autonomy);
         state.military.enabled_event_ids.push(RS_POLICY);
-        state.pending_paramilitary_requests = [{ ...staleRequest('RS'), mode: 'offensive' as const }];
-        const held = detectOffensiveParamilitaryTargets(state, edges(), reverseMap());
+        const held = detect(state);
         expect(held.pending_player_requests).toBe(0);
         expect(held.spawned.filter((spawn) => spawn.faction === 'RS')).toHaveLength(0);
         expect(ownRequests(state, 'RS')).toHaveLength(0);
 
-        // Once the card has applied with Review (ask), the offensive candidate comes to the player as a request.
+        // The card applied with Review (ask): at Assisted or Delegated no request comes to the player, so none is sent.
         applyCard(state, 'RS', 'ask', 2);
-        const released = detectOffensiveParamilitaryTargets(state, edges(), reverseMap());
-        expect(released.pending_player_requests).toBe(1);
-        expect(ownRequests(state, 'RS').map((request) => [request.target_osid, request.mode])).toEqual([[TARGET, 'offensive']]);
-        expect(released.spawned.filter((spawn) => spawn.faction === 'RS')).toHaveLength(0);
+        const underReview = detect(state);
+        expect(underReview.pending_player_requests).toBe(0);
+        expect(underReview.spawned.filter((spawn) => spawn.faction === 'RS')).toHaveLength(0);
     });
 
     it('registers exactly the RBiH and RS cards, each pinned to the catalog flag its every option sets', () => {

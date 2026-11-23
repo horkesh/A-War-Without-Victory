@@ -412,25 +412,18 @@ export const VRS_EQUIPMENT_DECAY_RATE = 0.005;
 /** Floor: VRS equipment never degrades below this fraction. */
 export const VRS_EQUIPMENT_DECAY_FLOOR = 0.60;
 
-// --- Offensive paramilitary sweep (Drina valley ethnic cleansing, April-August 1992) ---
+// --- Offensive paramilitary sweep: read side only (old saves) ---
+// The offensive detector was never called by a turn phase and was retired in §6 D1 stage 2,
+// with its detector-only constants (per-turn cap, penetration floor, municipality scope). These
+// four remain because an old save's `offensive` paramilitary or request still advances and resolves.
 /** Offensive paramilitary unit size (personnel). Larger than rear pocket — organized paramilitary groups (Arkan's Tigers, White Eagles). */
 export const OFFENSIVE_PARA_UNIT_SIZE = 600;
-/** Week after which offensive paramilitaries stop spawning (historical: concentrated April-August 1992). */
+/** Week after which an offensive request is no longer deployed (historical: concentrated April-August 1992). */
 export const OFFENSIVE_PARA_FADE_WEEK = 12;
 /** Turns to reach target. 1 = arrive next turn (advancing alongside regulars). */
 export const OFFENSIVE_PARA_MARCH_TURNS = 1;
-/** Per-faction per-turn cap for offensive paramilitary deployments. */
-export const OFFENSIVE_PARA_MAX_DEPLOYMENTS_PER_FACTION_TURN = 2;
-/** Offensive sweeps require the maximum formula-backed local paramilitary organization. */
-export const OFFENSIVE_PARA_MIN_ORGANIZATIONAL_PENETRATION = 60;
 /** Civilian casualty rate for offensive sweeps — higher than rear pocket (systematic ethnic cleansing). */
 export const OFFENSIVE_PARA_CIVILIAN_CASUALTY_RATE = 0.05;
-/** Municipality scope restriction for bot factions — prevents ahistorical sweep outside known AOs. */
-export const OFFENSIVE_PARA_MUNICIPALITY_SCOPE: Record<string, string[]> = {
-    RS: ['zvornik', 'bratunac', 'vlasenica', 'srebrenica', 'rogatica', 'visegrad', 'foca', 'cajnice', 'rudo', 'gorazde',
-         'sanski_most', 'kljuc', 'prijedor', 'bosanski_novi', 'bosanski_petrovac', 'kotor_varos'],
-    HRHB: ['stolac', 'capljina', 'prozor'],
-};
 
 // --- Paramilitary rear pocket cleanup ---
 /** Base paramilitary unit size (personnel). Small autonomous units. */

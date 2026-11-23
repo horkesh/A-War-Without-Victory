@@ -1,5 +1,5 @@
 /**
- * Tests for paramilitary sweep system (rear pocket cleanup + offensive sweep).
+ * Tests for paramilitary sweep system (rear pocket cleanup; the offensive read side for old saves).
  */
 
 import { describe, it, expect } from 'vitest';
@@ -9,15 +9,17 @@ import {
     detectParamilitaryTargets,
     advanceParamilitaries,
     resolvePlayerParamilitaryDecisions,
-    detectOffensiveParamilitaryTargets
 } from '../src/sim/combat/paramilitary_sweep.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
 import type { OperationalToCanonicalReverseMap } from '../src/data/operational_data.js';
 import {
     isEligibleForReinforcement,
-    OFFENSIVE_PARA_MAX_DEPLOYMENTS_PER_FACTION_TURN,
     PARAMILITARY_MAX_REAR_DEPLOYMENTS_PER_FACTION_TURN,
 } from '../src/state/formation_constants.js';
+import { loadEventDefinitions } from '../src/sim/events/event_loader.js';
+
+/** The real event catalog (start week 0), for tests that exercise the bot's historical default. */
+const EVENT_CATALOG = loadEventDefinitions(0);
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Test helpers
@@ -143,7 +145,7 @@ describe('paramilitary_sweep', () => {
   } as any,
 });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
 
             // RS should detect op:d as the strongest eligible pocket and spawn paramilitary.
             const rsSpawns = report.spawned.filter(s => s.faction === 'RS');
@@ -179,22 +181,23 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
 
             expect(report.spawned.some((spawn) =>
                 spawn.faction === 'RBiH' && spawn.target_osid === target,
             )).toBe(false);
         });
 
-        it('still permits rear-pocket consolidation inside the defined enclave boundary', () => {
+        // §6 D1 stage 2 rewrite: the stage-1 version pinned an RBiH bot sweep of Obadi, the artefact
+        // itself. The enclave-boundary rule is kept under an explicit Always allow; the RBiH historical
+        // default (Refuse, read from the card) sends none.
+        function obadiPocketState(rbihFlag?: 'always_allow'): GameState {
             const target = 'op:srebrenica:obadi';
             const neighbors = [
                 'op:srebrenica:srebrenica_2',
                 'op:srebrenica:donji_potocari_2',
                 'op:srebrenica:ljeskovik_2',
             ];
-            const edges = makeEdges(neighbors.map((neighbor) => [neighbor, target]));
-            const reverseMap = makeReverseMap([target, ...neighbors]);
             const controllers = Object.fromEntries([
                 [target, 'RS'],
                 ...neighbors.map((neighbor) => [neighbor, 'RBiH']),
@@ -212,12 +215,39 @@ describe('paramilitary_sweep', () => {
                     },
                 } as any,
             });
+            if (rbihFlag) state.military.event_flags = { rbih_paramilitary_policy: rbihFlag };
+            return state;
+        }
+        const obadiEdges = makeEdges([
+            'op:srebrenica:srebrenica_2',
+            'op:srebrenica:donji_potocari_2',
+            'op:srebrenica:ljeskovik_2',
+        ].map((neighbor) => [neighbor, 'op:srebrenica:obadi']));
+        const obadiReverseMap = makeReverseMap([
+            'op:srebrenica:obadi',
+            'op:srebrenica:srebrenica_2',
+            'op:srebrenica:donji_potocari_2',
+            'op:srebrenica:ljeskovik_2',
+        ]);
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+        it('still permits rear-pocket consolidation inside the defined enclave boundary under an explicit Always allow', () => {
+            const state = obadiPocketState('always_allow');
+            const report = detectParamilitaryTargets(
+                state, obadiEdges, obadiReverseMap, EVENT_CATALOG,
+            );
 
             expect(report.spawned.some((spawn) =>
-                spawn.faction === 'RBiH' && spawn.target_osid === target,
+                spawn.faction === 'RBiH' && spawn.target_osid === 'op:srebrenica:obadi',
             )).toBe(true);
+        });
+
+        it('the RBiH historical default (Refuse, from the card) sends no sweep into Obadi', () => {
+            const state = obadiPocketState();
+            const report = detectParamilitaryTargets(
+                state, obadiEdges, obadiReverseMap, EVENT_CATALOG,
+            );
+
+            expect(report.spawned.filter((spawn) => spawn.faction === 'RBiH')).toEqual([]);
         });
 
         it('does not spawn paramilitaries after week 20', () => {
@@ -230,7 +260,7 @@ describe('paramilitary_sweep', () => {
   } as any,
 });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
             expect(report.spawned).toHaveLength(0);
             expect(report.pending_player_requests).toBe(0);
         });
@@ -246,7 +276,7 @@ describe('paramilitary_sweep', () => {
   } as any,
 }));
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
 
             // RS is player faction with 'ask' policy — pocket op:d becomes a pending request
             expect(report.spawned.filter(s => s.faction === 'RS')).toHaveLength(0);
@@ -268,19 +298,19 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const beforePolicy = detectParamilitaryTargets(state, edges, reverseMap);
+            const beforePolicy = detectParamilitaryTargets(state, edges, reverseMap, undefined);
 
             expect(beforePolicy.pending_player_requests).toBe(0);
             expect(state.pending_paramilitary_requests ?? []).toHaveLength(0);
 
             // §6 design T3: a receipt with the card unfired (an answer filed ahead) does not release.
             state.military.event_decision_log = [{ event_id: 'rs_paramilitary_policy_1992', response_id: 'ask' }] as any;
-            const filedOnly = detectParamilitaryTargets(state, edges, reverseMap);
+            const filedOnly = detectParamilitaryTargets(state, edges, reverseMap, undefined);
             expect(filedOnly.pending_player_requests).toBe(0);
 
             state.military.event_decision_log = [];
             withAppliedPolicyCard(state, 'ask');
-            const afterPolicy = detectParamilitaryTargets(state, edges, reverseMap);
+            const afterPolicy = detectParamilitaryTargets(state, edges, reverseMap, undefined);
 
             expect(afterPolicy.pending_player_requests).toBe(1);
             expect(state.pending_paramilitary_requests).toHaveLength(1);
@@ -297,7 +327,7 @@ describe('paramilitary_sweep', () => {
   } as any,
 }));
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
             expect(report.pending_player_requests).toBe(0);
             expect(report.spawned.filter(s => s.faction === 'RS')).toHaveLength(0);
         });
@@ -320,7 +350,7 @@ describe('paramilitary_sweep', () => {
   } as any,
 });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
             // Defended pocket should not generate a spawn
             expect(report.spawned.filter(s => s.target_osid === 'op:d')).toHaveLength(0);
         });
@@ -338,7 +368,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
 
             expect(report.spawned.filter((spawn) => spawn.faction === 'RBiH')).toHaveLength(0);
             expect(report.pending_player_requests).toBe(0);
@@ -367,7 +397,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
             expect(report.spawned.filter(s => s.target_osid === 'op:d')).toHaveLength(0);
             expect(report.pending_player_requests).toBe(0);
         });
@@ -401,7 +431,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
             expect(report.spawned.filter(s => s.faction === 'RS')).toHaveLength(0);
             expect(report.pending_player_requests).toBe(0);
         });
@@ -424,7 +454,7 @@ describe('paramilitary_sweep', () => {
   } as any,
 });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
             // op:d already targeted — should not spawn another
             expect(report.spawned.filter(s => s.target_osid === 'op:d')).toHaveLength(0);
         });
@@ -441,7 +471,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
 
             expect(report.spawned.filter((spawn) => spawn.faction === 'RS')).toHaveLength(
                 PARAMILITARY_MAX_REAR_DEPLOYMENTS_PER_FACTION_TURN
@@ -469,7 +499,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
             const rsTargets = report.spawned
                 .filter((spawn) => spawn.faction === 'RS')
                 .map((spawn) => spawn.target_osid);
@@ -506,7 +536,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const rsTargets = detectParamilitaryTargets(state, edges, reverseMap).spawned
+            const rsTargets = detectParamilitaryTargets(state, edges, reverseMap, undefined).spawned
                 .filter((spawn) => spawn.faction === 'RS')
                 .map((spawn) => spawn.target_osid);
 
@@ -545,7 +575,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const rsTargets = detectParamilitaryTargets(state, edges, reverseMap).spawned
+            const rsTargets = detectParamilitaryTargets(state, edges, reverseMap, undefined).spawned
                 .filter((spawn) => spawn.faction === 'RS')
                 .map((spawn) => spawn.target_osid);
 
@@ -585,7 +615,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const rsTargets = detectParamilitaryTargets(state, edges, reverseMap).spawned
+            const rsTargets = detectParamilitaryTargets(state, edges, reverseMap, undefined).spawned
                 .filter((spawn) => spawn.faction === 'RS')
                 .map((spawn) => spawn.target_osid);
 
@@ -616,8 +646,8 @@ describe('paramilitary_sweep', () => {
                 } as any,
             }));
 
-            const first = detectParamilitaryTargets(state, edges, reverseMap);
-            const second = detectParamilitaryTargets(state, edges, reverseMap);
+            const first = detectParamilitaryTargets(state, edges, reverseMap, undefined);
+            const second = detectParamilitaryTargets(state, edges, reverseMap, undefined);
 
             expect(first.pending_player_requests).toBe(PARAMILITARY_MAX_REAR_DEPLOYMENTS_PER_FACTION_TURN);
             expect(second.pending_player_requests).toBe(0);
@@ -658,7 +688,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
 
             expect(report.spawned.filter((spawn) => spawn.faction === 'RS').map((spawn) => spawn.target_osid))
                 .toEqual(['op:operation:target']);
@@ -693,7 +723,7 @@ describe('paramilitary_sweep', () => {
             });
             withAppliedPolicyCard(state, 'ask');
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
 
             expect(report.pending_player_requests).toBe(0);
             expect(state.pending_paramilitary_requests ?? []).toHaveLength(0);
@@ -728,7 +758,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            const report = detectParamilitaryTargets(state, edges, reverseMap, undefined);
 
             expect(state.military.formations?.[existing.id]?.paramilitary_target).toBe('op:existing:target');
             expect(report.spawned).toContainEqual(expect.objectContaining({
@@ -985,7 +1015,7 @@ describe('paramilitary_sweep', () => {
                 ],
             }));
 
-            detectParamilitaryTargets(state, [], new Map());
+            detectParamilitaryTargets(state, [], new Map(), undefined);
 
             expect(state.pending_paramilitary_requests).toHaveLength(0);
             expect(state.paramilitary_decision_history).toEqual([
@@ -1009,7 +1039,7 @@ describe('paramilitary_sweep', () => {
                 ],
             }));
 
-            detectParamilitaryTargets(state, [], new Map());
+            detectParamilitaryTargets(state, [], new Map(), undefined);
 
             expect(state.pending_paramilitary_requests).toHaveLength(0);
             expect(state.paramilitary_decision_history?.[0]?.decision).toBe('deny');
@@ -1121,335 +1151,10 @@ describe('paramilitary_sweep', () => {
     });
 
     // ═══════════════════════════════════════════════════════════════════════
-    // Offensive paramilitary sweep tests (v0.6.5)
+    // Offensive paramilitary read side (v0.6.5). The detector was never called by a turn
+    // phase and was retired in §6 D1 stage 2 with its detector tests; an old save's
+    // offensive paramilitary still advances and resolves, so these stay.
     // ═══════════════════════════════════════════════════════════════════════
-
-    describe('detectOffensiveParamilitaryTargets', () => {
-        it('selects hostile OSID with friendly neighbor in scope municipality', () => {
-            // RS controls op:zvornik:a, RBiH controls op:zvornik:b — adjacent
-            const edges = makeEdges([
-                ['op:zvornik:a', 'op:zvornik:b'],
-                ['op:zvornik:a', 'op:zvornik:c'],
-            ]);
-            const reverseMap = makeReverseMap(['op:zvornik:a', 'op:zvornik:b', 'op:zvornik:c']);
-            const state = makeBaseState({
-                meta: { turn: 3, phase: 'war', schema_version: 1, seed: 'test' } as GameState['meta'],
-                political: {
-                    political_controllers: {
-                        'op:zvornik:a': 'RS',
-                        'op:zvornik:b': 'RBiH',
-                        'op:zvornik:c': 'RS',
-                    },
-                } as any,
-            });
-
-            const report = detectOffensiveParamilitaryTargets(state, edges, reverseMap);
-            // RS should detect op:zvornik:b as an offensive target (in scope, hostile, with friendly support).
-            const rsSpawns = report.spawned.filter(s => s.faction === 'RS');
-            expect(rsSpawns.map((spawn) => spawn.target_osid)).toContain('op:zvornik:b');
-            // RBiH is explicitly ineligible for offensive paramilitary deployments.
-            const rbihSpawns = report.spawned.filter(s => s.faction === 'RBiH');
-            expect(rbihSpawns).toHaveLength(0);
-        });
-
-        it('does not generate an offensive deployment against an exactly defended OSID', () => {
-            const edges = makeEdges([['op:zvornik:a', 'op:zvornik:b']]);
-            const reverseMap = makeReverseMap(['op:zvornik:a', 'op:zvornik:b']);
-            const state = makeBaseState({
-                meta: { turn: 3, phase: 'war', schema_version: 1, seed: 'test' } as GameState['meta'],
-                military: {
-                    formations: {
-                        rbih_local_defense: {
-                            id: 'rbih_local_defense',
-                            faction: 'RBiH',
-                            name: 'Local Defense',
-                            created_turn: 0,
-                            status: 'active',
-                            assignment: null,
-                            kind: 'brigade',
-                            location_osid: 'op:zvornik:b',
-                            personnel: 300,
-                        } as FormationState,
-                    },
-                } as any,
-                political: {
-                    political_controllers: {
-                        'op:zvornik:a': 'RS',
-                        'op:zvornik:b': 'RBiH',
-                    },
-                } as any,
-            });
-
-            const report = detectOffensiveParamilitaryTargets(state, edges, reverseMap);
-
-            expect(report.spawned).toHaveLength(0);
-            expect(report.pending_player_requests).toBe(0);
-        });
-
-        it('does not generate offensive deployments against an allied faction', () => {
-            const edges = makeEdges([['op:stolac:a', 'op:stolac:b']]);
-            const reverseMap = makeReverseMap(['op:stolac:a', 'op:stolac:b']);
-            const state = makeBaseState({
-                meta: { turn: 3, phase: 'war', schema_version: 1, seed: 'test' } as GameState['meta'],
-                factions: [{ id: 'HRHB' } as FactionState],
-                political: {
-                    war_alliance_rbih_hrhb: 0.75,
-                    political_controllers: {
-                        'op:stolac:a': 'HRHB',
-                        'op:stolac:b': 'RBiH',
-                    },
-                } as any,
-            });
-
-            const report = detectOffensiveParamilitaryTargets(state, edges, reverseMap);
-
-            expect(report.spawned).toHaveLength(0);
-            expect(report.pending_player_requests).toBe(0);
-        });
-
-        it('does not offer the player an offensive request against an exactly defended OSID', () => {
-            const edges = makeEdges([['op:zvornik:a', 'op:zvornik:b']]);
-            const reverseMap = makeReverseMap(['op:zvornik:a', 'op:zvornik:b']);
-            const state = withAppliedPolicyCard(makeBaseState({
-                meta: {
-                    turn: 3,
-                    phase: 'war',
-                    schema_version: 1,
-                    seed: 'test',
-                    player_faction: 'RS',
-                } as GameState['meta'],
-                military: {
-                    formations: {
-                        rbih_local_defense: {
-                            id: 'rbih_local_defense',
-                            faction: 'RBiH',
-                            name: 'Local Defense',
-                            created_turn: 0,
-                            status: 'active',
-                            assignment: null,
-                            kind: 'brigade',
-                            location_osid: 'op:zvornik:b',
-                            personnel: 300,
-                        } as FormationState,
-                    },
-                } as any,
-                political: {
-                    political_controllers: {
-                        'op:zvornik:a': 'RS',
-                        'op:zvornik:b': 'RBiH',
-                    },
-                } as any,
-            }));
-
-            const report = detectOffensiveParamilitaryTargets(state, edges, reverseMap);
-
-            expect(report.spawned).toHaveLength(0);
-            expect(report.pending_player_requests).toBe(0);
-            expect(state.pending_paramilitary_requests ?? []).toHaveLength(0);
-        });
-
-        it('ignores hostile OSID with NO friendly neighbor', () => {
-            // RBiH controls op:zvornik:b, surrounded only by other RBiH OSIDs
-            const edges = makeEdges([
-                ['op:zvornik:a', 'op:zvornik:c'],
-                ['op:zvornik:b', 'op:zvornik:d'],
-            ]);
-            const reverseMap = makeReverseMap(['op:zvornik:a', 'op:zvornik:b', 'op:zvornik:c', 'op:zvornik:d']);
-            const state = makeBaseState({
-                meta: { turn: 3, phase: 'war', schema_version: 1, seed: 'test' } as GameState['meta'],
-                political: {
-                    political_controllers: {
-                        'op:zvornik:a': 'RS',
-                        'op:zvornik:b': 'RBiH',
-                        'op:zvornik:c': 'RS',
-                        'op:zvornik:d': 'RBiH',
-                    },
-                } as any,
-            });
-
-            const report = detectOffensiveParamilitaryTargets(state, edges, reverseMap);
-            // op:zvornik:b has no RS neighbor (only adjacent to op:zvornik:d which is RBiH)
-            const rsTargetingB = report.spawned.filter(s => s.faction === 'RS' && s.target_osid === 'op:zvornik:b');
-            expect(rsTargetingB).toHaveLength(0);
-        });
-
-        it('ignores OSID outside municipality scope for bot faction', () => {
-            // RS is bot, op:sarajevo:a is hostile but not in RS scope
-            const edges = makeEdges([
-                ['op:sarajevo:a', 'op:sarajevo:b'],
-            ]);
-            const reverseMap = makeReverseMap(['op:sarajevo:a', 'op:sarajevo:b']);
-            const state = makeBaseState({
-                meta: { turn: 3, phase: 'war', schema_version: 1, seed: 'test' } as GameState['meta'],
-                political: {
-                    political_controllers: {
-                        'op:sarajevo:a': 'RBiH',
-                        'op:sarajevo:b': 'RS',
-                    },
-                } as any,
-            });
-
-            const report = detectOffensiveParamilitaryTargets(state, edges, reverseMap);
-            const rsSpawns = report.spawned.filter(s => s.faction === 'RS');
-            expect(rsSpawns).toHaveLength(0);
-        });
-
-        it('ignores targets after OFFENSIVE_PARA_FADE_WEEK', () => {
-            const edges = makeEdges([['op:zvornik:a', 'op:zvornik:b']]);
-            const reverseMap = makeReverseMap(['op:zvornik:a', 'op:zvornik:b']);
-            const state = makeBaseState({
-                meta: { turn: 15, phase: 'war', schema_version: 1, seed: 'test' } as GameState['meta'],
-                political: {
-                    political_controllers: {
-                        'op:zvornik:a': 'RS',
-                        'op:zvornik:b': 'RBiH',
-                    },
-                } as any,
-            });
-
-            const report = detectOffensiveParamilitaryTargets(state, edges, reverseMap);
-            expect(report.spawned).toHaveLength(0);
-        });
-
-        it('does not duplicate targets already being swept', () => {
-            const edges = makeEdges([['op:zvornik:a', 'op:zvornik:b']]);
-            const reverseMap = makeReverseMap(['op:zvornik:a', 'op:zvornik:b']);
-            const state = makeBaseState({
-                meta: { turn: 3, phase: 'war', schema_version: 1, seed: 'test' } as GameState['meta'],
-                military: {
-                    formations: {
-                        'opara_rs_t2_0': {
-                            id: 'opara_rs_t2_0', faction: 'RS', name: 'Para', created_turn: 2,
-                            status: 'active', assignment: null, kind: 'paramilitary',
-                            paramilitary_target: 'op:zvornik:b', paramilitary_eta: 1,
-                            paramilitary_mode: 'offensive', personnel: 600,
-                        } as FormationState,
-                    },
-                } as any,
-                political: {
-                    political_controllers: {
-                        'op:zvornik:a': 'RS',
-                        'op:zvornik:b': 'RBiH',
-                    },
-                } as any,
-            });
-
-            const report = detectOffensiveParamilitaryTargets(state, edges, reverseMap);
-            expect(report.spawned.filter(s => s.target_osid === 'op:zvornik:b')).toHaveLength(0);
-        });
-
-        it('RBiH is not an eligible offensive paramilitary faction', () => {
-            const edges = makeEdges([['op:zvornik:a', 'op:zvornik:b']]);
-            const reverseMap = makeReverseMap(['op:zvornik:a', 'op:zvornik:b']);
-            const state = makeBaseState({
-                meta: { turn: 3, phase: 'war', schema_version: 1, seed: 'test' } as GameState['meta'],
-                political: {
-                    political_controllers: {
-                        'op:zvornik:a': 'RBiH',
-                        'op:zvornik:b': 'RS',
-                    },
-                } as any,
-            });
-
-            const report = detectOffensiveParamilitaryTargets(state, edges, reverseMap);
-            const rbihSpawns = report.spawned.filter(s => s.faction === 'RBiH');
-            expect(rbihSpawns).toHaveLength(0);
-        });
-
-        it('caps offensive bot deployments per faction per turn', () => {
-            const targets = ['op:zvornik:target', 'op:bratunac:target', 'op:vlasenica:target'];
-            const { edges, reverseMap } = makeHubAndTargets('op:hub:rs', targets);
-            const state = makeBaseState({
-                meta: { turn: 5, phase: 'war', schema_version: 1, seed: 'test' } as GameState['meta'],
-                political: {
-                    political_controllers: Object.fromEntries([
-                        ['op:hub:rs', 'RS'],
-                        ...targets.map((target) => [target, 'RBiH'] as const),
-                    ]),
-                } as any,
-            });
-
-            const report = detectOffensiveParamilitaryTargets(state, edges, reverseMap);
-
-            expect(report.spawned.filter((spawn) => spawn.faction === 'RS')).toHaveLength(
-                OFFENSIVE_PARA_MAX_DEPLOYMENTS_PER_FACTION_TURN
-            );
-        });
-
-        it('marks player offensive requests as offensive so the review modal is truthful', () => {
-            const targets = ['op:zvornik:target', 'op:bratunac:target', 'op:vlasenica:target'];
-            const { edges, reverseMap } = makeHubAndTargets('op:hub:rs', targets);
-            const state = withAppliedPolicyCard(makeBaseState({
-                meta: { turn: 5, phase: 'war', schema_version: 1, seed: 'test', player_faction: 'RS' } as GameState['meta'],
-                political: {
-                    political_controllers: Object.fromEntries([
-                        ['op:hub:rs', 'RS'],
-                        ...targets.map((target) => [target, 'RBiH'] as const),
-                    ]),
-                } as any,
-            }));
-
-            const report = detectOffensiveParamilitaryTargets(state, edges, reverseMap);
-
-            expect(report.pending_player_requests).toBeGreaterThan(0);
-            expect(state.pending_paramilitary_requests).toHaveLength(report.pending_player_requests);
-            expect(state.pending_paramilitary_requests?.every((request) => request.mode === 'offensive')).toBe(true);
-        });
-
-        it('defers offensive player requests while the enabled paramilitary policy decision is unresolved', () => {
-            const targets = Array.from({ length: 4 }, (_, i) => `op:zvornik:t${i}`);
-            const { edges, reverseMap } = makeHubAndTargets('op:zvornik:hub', targets);
-            const state = makeBaseState({
-                meta: { turn: 1, phase: 'war', schema_version: 1, seed: 'test', player_faction: 'RS' } as GameState['meta'],
-                military: {
-                    enabled_event_ids: ['rs_paramilitary_policy_1992'],
-                } as any,
-                political: {
-                    political_controllers: Object.fromEntries([
-                        ['op:zvornik:hub', 'RS'],
-                        ...targets.map((target) => [target, 'RBiH'] as const),
-                    ]),
-                } as any,
-            });
-
-            const report = detectOffensiveParamilitaryTargets(state, edges, reverseMap);
-
-            expect(report.pending_player_requests).toBe(0);
-            expect(state.pending_paramilitary_requests ?? []).toHaveLength(0);
-        });
-
-        it('consumes stale pending player requests before offensive sweep when a standing policy is active', () => {
-            const state = withAppliedPolicyCard(makeBaseState({
-                paramilitary_policy: 'always_deny',
-                meta: { turn: 6, phase: 'war', schema_version: 1, seed: 'test', player_faction: 'RS' } as GameState['meta'],
-                pending_paramilitary_requests: [
-                    {
-                        target_osid: 'op:zvornik:stale',
-                        faction: 'RS',
-                        strength: 600,
-                        estimated_civilian_risk: 35,
-                        mode: 'offensive',
-                    },
-                ],
-            }));
-
-            detectOffensiveParamilitaryTargets(state, [], new Map());
-
-            expect(state.pending_paramilitary_requests).toHaveLength(0);
-            expect(state.paramilitary_decision_history).toEqual([
-                {
-                    id: 'paramilitary:6:op:zvornik:stale',
-                    turn: 6,
-                    target_osid: 'op:zvornik:stale',
-                    faction: 'RS',
-                    strength: 600,
-                    decision: 'deny',
-                    estimated_civilian_risk: 35,
-                    mode: 'offensive',
-                },
-            ]);
-        });
-    });
 
     describe('advanceParamilitaries — offensive mode', () => {
         it('captures undefended OSID and triggers displacement + war crime', () => {
@@ -1655,130 +1360,6 @@ describe('paramilitary_sweep', () => {
                 origin_osid: 'op:zvornik:b',
                 killed: 250,
             }));
-        });
-    });
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // Adjacent-defender projection (n1328 Sapna-Teočak corridor fix)
-    // ═══════════════════════════════════════════════════════════════════════
-
-    describe('adjacent-defender projection', () => {
-        it('skips offensive target when same-controller brigade is at adjacent OSID', () => {
-            // rastosnica_2 (RBiH, EMPTY) adjacent to sapna (RBiH, 246th brigade)
-            // RS controls kozluk_2 adjacent to rastosnica_2
-            const edges = makeEdges([
-                ['op:zvornik:rastosnica_2', 'op:zvornik:sapna'],
-                ['op:zvornik:rastosnica_2', 'op:zvornik:kozluk_2'],
-                ['op:zvornik:sapna', 'op:zvornik:kozluk_2'],
-            ]);
-            const reverseMap = makeReverseMap([
-                'op:zvornik:rastosnica_2', 'op:zvornik:sapna', 'op:zvornik:kozluk_2',
-            ]);
-            const state = makeBaseState({
-                meta: { turn: 2, phase: 'war', schema_version: 1, seed: 'test' } as GameState['meta'],
-                military: {
-                    formations: {
-                        'arbih_246th': {
-                            id: 'arbih_246th', faction: 'RBiH', name: '246th',
-                            created_turn: 0, status: 'active', assignment: null,
-                            kind: 'brigade', location_osid: 'op:zvornik:sapna',
-                            personnel: 600,
-                        } as FormationState,
-                    },
-                } as any,
-                political: {
-                    political_controllers: {
-                        'op:zvornik:rastosnica_2': 'RBiH',
-                        'op:zvornik:sapna': 'RBiH',
-                        'op:zvornik:kozluk_2': 'RS',
-                    },
-                } as any,
-            });
-
-            const report = detectOffensiveParamilitaryTargets(state, edges, reverseMap);
-
-            // rastosnica_2 has a same-controller brigade at adjacent sapna → not targeted
-            const targeting_rast = report.spawned.filter(s =>
-                s.faction === 'RS' && s.target_osid === 'op:zvornik:rastosnica_2');
-            expect(targeting_rast).toHaveLength(0);
-        });
-
-        it('DOES target when adjacent brigade is from the attacker faction', () => {
-            // rastosnica_2 (RBiH, EMPTY) adjacent to kozluk_2 (RS, RS brigade)
-            // The RS brigade at kozluk_2 should NOT prevent RS from sweeping rastosnica_2
-            const edges = makeEdges([
-                ['op:zvornik:rastosnica_2', 'op:zvornik:kozluk_2'],
-            ]);
-            const reverseMap = makeReverseMap([
-                'op:zvornik:rastosnica_2', 'op:zvornik:kozluk_2',
-            ]);
-            const state = makeBaseState({
-                meta: { turn: 2, phase: 'war', schema_version: 1, seed: 'test' } as GameState['meta'],
-                military: {
-                    formations: {
-                        'rs_1st_zvornik': {
-                            id: 'rs_1st_zvornik', faction: 'RS', name: '1st Zvornik',
-                            created_turn: 0, status: 'active', assignment: null,
-                            kind: 'brigade', location_osid: 'op:zvornik:kozluk_2',
-                            personnel: 2000,
-                        } as FormationState,
-                    },
-                } as any,
-                political: {
-                    political_controllers: {
-                        'op:zvornik:rastosnica_2': 'RBiH',
-                        'op:zvornik:kozluk_2': 'RS',
-                    },
-                } as any,
-            });
-
-            const report = detectOffensiveParamilitaryTargets(state, edges, reverseMap);
-
-            // RS brigade at kozluk_2 is attacker-faction, not defender, so it does not block the sweep.
-            expect(report.spawned).toContainEqual(expect.objectContaining({
-                faction: 'RS',
-                target_osid: 'op:zvornik:rastosnica_2',
-            }));
-        });
-
-        it('skips offensive target when enclave brigade is at adjacent OSID', () => {
-            // sapna (RBiH, EMPTY) adjacent to teocak (RBiH, 255th Slavna 2500 pers)
-            // RS controls kozluk_2 adjacent to sapna
-            const edges = makeEdges([
-                ['op:zvornik:sapna', 'op:ugljevik:teocak_krstac_2'],
-                ['op:zvornik:sapna', 'op:zvornik:kozluk_2'],
-                ['op:ugljevik:teocak_krstac_2', 'op:zvornik:kozluk_2'],
-            ]);
-            const reverseMap = makeReverseMap([
-                'op:zvornik:sapna', 'op:ugljevik:teocak_krstac_2', 'op:zvornik:kozluk_2',
-            ]);
-            const state = makeBaseState({
-                meta: { turn: 2, phase: 'war', schema_version: 1, seed: 'test' } as GameState['meta'],
-                military: {
-                    formations: {
-                        'arbih_255th': {
-                            id: 'arbih_255th', faction: 'RBiH', name: '255th Slavna',
-                            created_turn: 0, status: 'active', assignment: null,
-                            kind: 'brigade', location_osid: 'op:ugljevik:teocak_krstac_2',
-                            personnel: 2500,
-                        } as FormationState,
-                    },
-                } as any,
-                political: {
-                    political_controllers: {
-                        'op:zvornik:sapna': 'RBiH',
-                        'op:ugljevik:teocak_krstac_2': 'RBiH',
-                        'op:zvornik:kozluk_2': 'RS',
-                    },
-                } as any,
-            });
-
-            const report = detectOffensiveParamilitaryTargets(state, edges, reverseMap);
-
-            // sapna has 255th at adjacent teocak → not targeted
-            const targeting_sapna = report.spawned.filter(s =>
-                s.faction === 'RS' && s.target_osid === 'op:zvornik:sapna');
-            expect(targeting_sapna).toHaveLength(0);
         });
     });
 });

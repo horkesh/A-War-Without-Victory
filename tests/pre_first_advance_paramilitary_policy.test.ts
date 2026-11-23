@@ -440,7 +440,9 @@ describe('pre-first-Advance RBiH paramilitary policy', () => {
     expect((allow.military.negotiation?.capital?.RBiH?.war_crimes_events_emergent ?? 0)).toBe(2);
   }, 120_000);
 
-  it('runs rear-pocket consolidation like bot staff at production autonomy, whatever the policy answer', async () => {
+  // §6 D1 stage 2 (2026-11-18, A1) inverts the stage-1 pin: at production autonomy the staff
+  // follow the human's standing order, so a Refuse sends no rear-pocket sweep.
+  it('binds staff at production autonomy to the standing order: Refuse sends no rear-pocket sweep', async () => {
     const pending = await pendingPolicyState();
     expect(pending.meta.autonomy_level).toBeGreaterThanOrEqual(1);
     const resolved = resolveDesktopEventDecision(pending, POLICY_EVENT_ID, 'always_deny', process.cwd());
@@ -450,6 +452,6 @@ describe('pre-first-Advance RBiH paramilitary policy', () => {
     expect((advanced.state.political.control_events ?? [])
       .filter((event) => event.mechanism === 'paramilitary' && event.to === 'RBiH')
       .map((event) => event.settlement_id)
-      .sort()).toEqual(EXPECTED_TARGETS);
+      .sort()).toEqual([]);
   }, 120_000);
 });

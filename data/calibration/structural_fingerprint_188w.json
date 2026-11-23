@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "fingerprint": "8afe6ae5263890b9",
+  "fingerprint": "8f132d17cbb0f47c",
   "fields": {
     "schema_version": 2,
     "scenario_id": "apr1992_definitive_188w",
@@ -8,8 +8,8 @@
     "final_turn": 40,
     "control_counts": {
       "HRHB": 86,
-      "RBiH": 262,
-      "RS": 364
+      "RBiH": 263,
+      "RS": 363
     },
     "control_flips": [
       {
@@ -151,16 +151,16 @@
         "to": "RS"
       },
       {
+        "settlement_id": "op:bratunac:jezestica_2",
+        "municipality_id": "bratunac",
+        "from": "RS",
+        "to": "RBiH"
+      },
+      {
         "settlement_id": "op:bratunac:zapolje_2",
         "municipality_id": "bratunac",
         "from": "RBiH",
         "to": "RS"
-      },
-      {
-        "settlement_id": "op:brcko:bukvik_gornji_2",
-        "municipality_id": "brcko",
-        "from": "RS",
-        "to": "RBiH"
       },
       {
         "settlement_id": "op:brcko:krepsic",
@@ -171,12 +171,6 @@
       {
         "settlement_id": "op:brcko:skakava_donja",
         "municipality_id": "brcko",
-        "from": "RBiH",
-        "to": "RS"
-      },
-      {
-        "settlement_id": "op:breza:podgora",
-        "municipality_id": "breza",
         "from": "RBiH",
         "to": "RS"
       },
@@ -365,12 +359,6 @@
         "municipality_id": "kakanj",
         "from": "RS",
         "to": "RBiH"
-      },
-      {
-        "settlement_id": "op:kalesija:seher_2",
-        "municipality_id": "kalesija",
-        "from": "RBiH",
-        "to": "RS"
       },
       {
         "settlement_id": "op:kalinovik:golubici_2",
@@ -563,12 +551,6 @@
         "municipality_id": "skender_vakuf",
         "from": "HRHB",
         "to": "RS"
-      },
-      {
-        "settlement_id": "op:srebrenica:obadi",
-        "municipality_id": "srebrenica",
-        "from": "RS",
-        "to": "RBiH"
       },
       {
         "settlement_id": "op:stolac:pjesivac_kula_2",

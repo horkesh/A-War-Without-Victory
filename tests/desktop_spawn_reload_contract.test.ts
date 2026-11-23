@@ -16,6 +16,8 @@ import {serializeRuntimeGameState} from '../src/state/serializeGameState.js';
 // lost/added-defined-value checks stayed active (no defined value lost or added; next-turn state
 // and report equal after fresh-process reload). Only undefined-valued keys differ.
 const ALLOWED_JSON_OMISSION_PATHS=new Set<string>([
+  // 2026-11-22, §6 D1 stage 2 round 4a fix (b): the RS policy card's shift row is now created at t1 (re-derived the same way).
+  "/military/bot_priority_shifts/0/remove_objectives",
   "/military/corps_command/jna_herzegovina_command/active_operations/0/recovery_reason",
   "/military/corps_command/vrs_1st_krajina/active_operations/0/recovery_reason",
   "/military/corps_command/vrs_drina/active_operations/0/recovery_reason",
