@@ -23,9 +23,9 @@
  * that build's pre-card Always allow no order in force. So the RBiH mismatch is now clamped (Observer takes the historical
  * Refuse; pinned below), and RS's in-person Always deny, within any cap, is the remaining mismatched case.
  *
- * Registered, not changed here: the Observer drain sends no notifications and applies no runtime causality (engine Q3 point
- * 3). Neither policy card's options carry runtime causality, so B does not depend on it; the drain cases pin that no
- * notification at all is sent, in particular no false one.
+ * Since 2026-11-23 the Observer drain applies its answer through the shared applier (`applyChosenEventResponse`), so it sends
+ * the card's notifications and applies runtime causality like the fire-time answer (formerly registered as engine Q3 point 3;
+ * tests/s6_observer_drain_causality.test.ts). The drain cases now pin that the notifications sent name the true order.
  */
 
 import { describe, expect, it } from 'vitest';
@@ -325,7 +325,8 @@ function expectRecordOf(
         const moved = dimension(state, shift.faction as Side, shift.dimension) - before(shift.faction as Side, shift.dimension);
         expect(moved, shift.dimension).toBe(shift.delta);
     }
-    expect(cardNotifications(state, side)).toEqual(entry === 'fire time' ? authoredNotifications(side, responseId) : []);
+    // Both entry points notify the other sides (the drain too, since the shared applier of 2026-11-23).
+    expect(cardNotifications(state, side)).toEqual(authoredNotifications(side, responseId));
 }
 
 describe('§6 D1 stage 2 F1-B: Observer answers the card with the order the player gave in person', () => {
@@ -349,16 +350,12 @@ describe('§6 D1 stage 2 F1-B: Observer answers the card with the order the play
             expect(state.military.bot_priority_shifts).toEqual([
                 expect.objectContaining({ faction: 'RS', remove_objectives: ['paramilitary_rear_clearance'] }),
             ]);
-            if (entry === 'fire time') {
-                // The other sides are told the true order: a refusal, never "authorizes".
-                expect(cardNotifications(state, 'RS').map(([target, response]) => [target, response])).toEqual([
-                    ['HRHB', 'always_deny'],
-                    ['RBiH', 'always_deny'],
-                ]);
-            } else {
-                // Registered drain asymmetry: no notification at all, so no false one.
-                expect(cardNotifications(state, 'RS')).toEqual([]);
-            }
+            // The other sides are told the true order at both entry points: a refusal, never "authorizes"
+            // (the drain's former no-notification asymmetry closed by the shared applier, 2026-11-23).
+            expect(cardNotifications(state, 'RS').map(([target, response]) => [target, response])).toEqual([
+                ['HRHB', 'always_deny'],
+                ['RBiH', 'always_deny'],
+            ]);
             // The order in force is still the in-person Always deny, and the gate sends nothing.
             expect(state.paramilitary_policy).toBe('always_deny');
             expect(resolveNonManualParamilitaryPolicy(state, 'RS', CATALOG)).toBe('always_deny');
@@ -443,15 +440,10 @@ describe('§6 D1 stage 2 F1-B: price equality with an in-person answer (game-des
 
                 expect(cardEntries(automatic, side).map((e) => e.decision_source)).toEqual(['bot_ai_default']);
                 expect(cardEntries(inPerson, side).map((e) => e.decision_source)).toEqual(['player']);
-                if (entry === 'fire time') {
-                    // Effects, flags, shifts, the standing order, the log and the notifications: only the decision source differs.
-                    expect(withoutDecisionSource(automatic)).toEqual(withoutDecisionSource(inPerson));
-                } else {
-                    // The drain sends no notifications (registered, pre-existing); everything else is equal.
-                    expect(cardNotifications(automatic, side)).toEqual([]);
-                    expect(cardNotifications(inPerson, side)).toEqual(authoredNotifications(side, order));
-                    expect(withoutDecisionSource(automatic, true)).toEqual(withoutDecisionSource(inPerson, true));
-                }
+                // Effects, flags, shifts, the standing order, the log and the notifications: only the decision source
+                // differs, at both entry points (the drain's notifications since the shared applier, 2026-11-23).
+                expect(cardNotifications(automatic, side)).toEqual(authoredNotifications(side, order));
+                expect(withoutDecisionSource(automatic)).toEqual(withoutDecisionSource(inPerson));
             });
         }
     }

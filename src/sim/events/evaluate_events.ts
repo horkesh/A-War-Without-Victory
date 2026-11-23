@@ -8,12 +8,19 @@
 
 import type { GameState, FactionId, CausalityLogEntry } from '../../state/game_state.js';
 import { applyEventEffects } from './apply_effects.js';
-import type { EventDefinition, DimensionShift, EventResponseOption, FiredEvent, PendingEventDecision, Rng } from './event_types.js';
+import type {
+    EventDefinition,
+    DimensionShift,
+    EventNotificationTextByResponse,
+    EventResponseOption,
+    FiredEvent,
+    PendingEventDecision,
+    Rng,
+} from './event_types.js';
 import { triggerMatches } from './event_types.js';
 import { isEventReady } from './pressure_system.js';
 import { pickBotResponseV1 } from './bot_response.js';
 import {
-    applyAIDefaultResponse,
     hasAuthoredAIDefaultResponse,
     selectAIDefaultResponse,
     selectInPersonParamilitaryOrderResponse,
@@ -435,6 +442,53 @@ export function applyResponseRuntimeCausality(
     }
 }
 
+/** One chosen answer to a decision event, as `applyChosenEventResponse` applies it. */
+export interface ChosenEventResponse {
+    eventId: string;
+    chosen: EventResponseOption;
+    /** The decision-log provenance, or null when the answer is already in the log (filed ahead of firing). */
+    decisionSource: 'bot_political' | 'bot_v1' | 'bot_ai_default' | 'player' | null;
+    /** The answering side: the log row's faction and the notifications' source. Null sends no notifications. */
+    faction: FactionId | null;
+    turn: number;
+    /** Who chose the answer, for the player paramilitary mirror in `applyDefinitionFlags`. */
+    answeredBy: 'in_person' | 'automatic';
+    notifications: EventNotificationTextByResponse | undefined;
+    /** Decoration cards only (the in-person path validates it). */
+    targetFormationId?: string;
+}
+
+/**
+ * THE one applier of a chosen decision answer, used by every entry point: the in-person answer
+ * (resolve_decision_core.ts), the answer filed ahead of firing, the fire-time bot / Observer answer,
+ * and the Observer pending-decision drain. Order, unchanged from the paths it replaced: effects, flags,
+ * dimension shifts, the decision-log row (when not already filed), response-level runtime causality,
+ * then the notifications to the other factions.
+ *
+ * Callers choose `chosen` BEFORE calling (F1-B read before write): nothing here selects.
+ * Before this helper the drain stopped after the log row and dropped the causality and notifications
+ * (§6 Observer drain, 2026-11-23; tests/s6_observer_drain_causality.test.ts).
+ */
+export function applyChosenEventResponse(state: GameState, answer: ChosenEventResponse): void {
+    const { eventId, chosen, decisionSource, faction, turn } = answer;
+    applyEventEffects(state, chosen.effects ?? [], answer.targetFormationId);
+    applyDefinitionFlags(state, chosen.sets_flags, answer.answeredBy);
+    applyDefinitionDimensionShifts(state, chosen.dimension_shifts);
+    if (decisionSource !== null) {
+        recordEventDecision(state, eventId, chosen.id, decisionSource, faction, turn);
+    }
+    applyResponseRuntimeCausality(state, eventId, chosen.id, chosen, turn);
+    if (faction !== null) {
+        emitEventNotifications(
+            state,
+            { event_id: eventId, notifications_to_other_factions: answer.notifications },
+            chosen.id,
+            faction,
+            turn,
+        );
+    }
+}
+
 /** Default moderate commander profile for bot response selection. */
 const DEFAULT_BOT_COMMANDER = { aggressiveness: 3, competence: 3 };
 
@@ -737,15 +791,18 @@ export function evaluateEvents(
             }
             // F1-B: the player's own policy card takes the option of an order given in person,
             // chosen here before any part of the answer is applied (read before write).
-            const auto = applyAIDefaultResponse(state, def, selectInPersonParamilitaryOrderResponse(state, def));
-            recordEventDecision(
-                state,
-                def.id,
-                auto.id,
-                'bot_ai_default',
-                pending.faction ?? playerFaction ?? null,
-                currentTurn,
-            );
+            const chosen = selectInPersonParamilitaryOrderResponse(state, def) ?? selectAIDefaultResponse(def);
+            // The same applier as every other path, so the drained answer also writes its runtime
+            // causality and its notifications (they were dropped here before 2026-11-23).
+            applyChosenEventResponse(state, {
+                eventId: def.id,
+                chosen,
+                decisionSource: 'bot_ai_default',
+                faction: pending.faction ?? playerFaction ?? null,
+                turn: currentTurn,
+                answeredBy: 'automatic',
+                notifications: def.notifications_to_other_factions,
+            });
         }
         state.military.pending_event_decisions = stillPending;
     }
@@ -917,19 +974,15 @@ export function evaluateEvents(
                 // Advance) and it was filed then. Apply it now, where and as a bot's answer is applied
                 // below; the decision is already in the log. It is checked before Observer's automatic
                 // answer, so a filed answer wins at Observer too.
-                applyEventEffects(state, answeredAhead.effects ?? []);
-                applyDefinitionFlags(state, answeredAhead.sets_flags);
-                applyDefinitionDimensionShifts(state, answeredAhead.dimension_shifts);
-                applyResponseRuntimeCausality(state, def.id, answeredAhead.id, answeredAhead, currentTurn);
-                if (respondingFaction !== null) {
-                    emitEventNotifications(
-                        state,
-                        { event_id: def.id, notifications_to_other_factions: def.notifications_to_other_factions },
-                        answeredAhead.id,
-                        respondingFaction,
-                        currentTurn,
-                    );
-                }
+                applyChosenEventResponse(state, {
+                    eventId: def.id,
+                    chosen: answeredAhead,
+                    decisionSource: null,
+                    faction: respondingFaction,
+                    turn: currentTurn,
+                    answeredBy: 'in_person',
+                    notifications: def.notifications_to_other_factions,
+                });
             } else if (mustShowPlayer && birthCardPending) {
                 // Unanswered birth card: it stays pending and resolves normally when answered.
             } else if (mustShowPlayer) {
@@ -983,23 +1036,18 @@ export function evaluateEvents(
                 const { chosen, decisionSource } = inPersonOrder
                     ? { chosen: inPersonOrder, decisionSource: 'bot_ai_default' as const }
                     : selectBotEventResponse(state, def, respondingFaction, observerAutoResolves);
-                applyEventEffects(state, chosen.effects ?? []);
-                applyDefinitionFlags(state, chosen.sets_flags, 'automatic');
-                applyDefinitionDimensionShifts(state, chosen.dimension_shifts);
-                recordEventDecision(state, def.id, chosen.id, decisionSource, respondingFaction, currentTurn);
-                // Phase B Sub-slice B3: bot path response-level runtime causality
-                // (packet §3.3, §3.5). Mirror of player path in resolve_decision.ts
-                // — both paths produce identical deltas for the same choice.
-                applyResponseRuntimeCausality(state, def.id, chosen.id, chosen, currentTurn);
-                if (respondingFaction !== null) {
-                    emitEventNotifications(
-                        state,
-                        { event_id: def.id, notifications_to_other_factions: def.notifications_to_other_factions },
-                        chosen.id,
-                        respondingFaction,
-                        currentTurn,
-                    );
-                }
+                // Phase B Sub-slice B3: the bot path applies response-level runtime causality and
+                // notifications through the same applier as the player path (packet §3.3, §3.5), so
+                // both produce identical deltas for the same choice.
+                applyChosenEventResponse(state, {
+                    eventId: def.id,
+                    chosen,
+                    decisionSource,
+                    faction: respondingFaction,
+                    turn: currentTurn,
+                    answeredBy: 'automatic',
+                    notifications: def.notifications_to_other_factions,
+                });
                 if (isPlayerRespondent && openingFirstFiring && state.military.pending_event_decisions) {
                     // Observer resolved an opening event whose birth card was never answered:
                     // drop that card, the decision is now made.

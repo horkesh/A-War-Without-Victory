@@ -6,14 +6,7 @@
  */
 
 import type { GameState } from '../../state/game_state.js';
-import { applyEventEffects } from './apply_effects.js';
-import {
-    applyDefinitionDimensionShifts,
-    applyDefinitionFlags,
-    applyResponseRuntimeCausality,
-    recordEventDecision,
-} from './evaluate_events.js';
-import { emitEventNotifications } from './emit_notifications.js';
+import { applyChosenEventResponse, recordEventDecision } from './evaluate_events.js';
 import { isAnswerAheadOfFiringDecision } from './answer_ahead_of_firing.js';
 
 const DECORATION_FACTION_BY_SUFFIX = {
@@ -82,31 +75,18 @@ export function resolveEventDecisionCore(state: GameState, eventId: string, resp
     }
 
     const targetFormationId = validateDecorationTarget(state, eventId, decision.faction, chosen);
-    applyEventEffects(state, chosen.effects ?? [], targetFormationId);
-    applyDefinitionFlags(state, chosen.sets_flags);
-    applyDefinitionDimensionShifts(state, chosen.dimension_shifts);
-
-    const decisionTurn = state.meta.turn ?? decision.turn_fired;
-    recordEventDecision(
-        state,
+    // The shared applier (evaluate_events.ts): effects, flags, shifts, the log row, runtime
+    // causality and notifications, in the same order as the bot, Observer and drain paths.
+    applyChosenEventResponse(state, {
         eventId,
-        chosen.id,
-        'player',
-        decision.faction,
-        decisionTurn,
-    );
-    applyResponseRuntimeCausality(state, eventId, chosen.id, chosen, decisionTurn);
-
-    emitEventNotifications(
-        state,
-        {
-            event_id: decision.event_id,
-            notifications_to_other_factions: decision.notifications_to_other_factions,
-        },
-        chosen.id,
-        decision.faction,
-        state.meta.turn ?? decision.turn_fired,
-    );
+        chosen,
+        decisionSource: 'player',
+        faction: decision.faction,
+        turn: state.meta.turn ?? decision.turn_fired,
+        answeredBy: 'in_person',
+        notifications: decision.notifications_to_other_factions,
+        targetFormationId,
+    });
 
     pending.splice(idx, 1);
 }
