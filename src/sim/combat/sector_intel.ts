@@ -473,11 +473,17 @@ export function stableSectorKey(sector: CorpsFrontSector): string {
  *
  * This runs right after the partition and moves each record to its sector's new id on both sides,
  * matching on the stable keys the records already carry (the same match `deriveSectorIntel` makes).
- * Nothing else changes: no confidence, age or contact count is touched, and the stable keys stay,
- * so the end-of-turn derivation produces the same map it would have. Only mid-turn readers see a
- * difference: the right sector's intel instead of a stranger's.
- * - A record whose enemy sector no longer exists cannot be placed and is dropped. The end-of-turn
- *   derivation drops it too (its carry-forward finds no current sector for it).
+ * No confidence, age or contact count is touched. Mid-turn readers get the right sector's intel
+ * instead of a stranger's.
+ * - SE9 v2 (2026-11-24): a key that no longer exists exactly (a lower edge joined the sector when
+ *   the front moved) resolves to the same corps's current sector that still holds the key's edge.
+ *   The record follows its ground and takes the current stable keys, so the end-of-turn derivation
+ *   carries it on instead of restarting the sector at the faction floor. Measured on C2: Farz's own
+ *   Ozren record, 1.00 at t179, read 0.00 at t180 and climbed 0.02 a week, so the op never passed
+ *   its intel gate. A moved record never displaces an exact one; between moved records for one
+ *   pair, the higher confidence wins.
+ * - A record whose own or enemy edge is held by no sector of that corps cannot be placed and is
+ *   dropped.
  * - Legacy records with no stable keys (pre-2026-08-26 saves) keep the old positional lookup.
  */
 export function rekeySectorIntelToCurrentSectors(state: GameState): void {
@@ -485,15 +491,34 @@ export function rekeySectorIntelToCurrentSectors(state: GameState): void {
     const prevIntel = state.military.sector_intel;
     if (!sectors || !prevIntel) return;
 
+    const sortedSectorIds = Object.keys(sectors).sort(strictCompare);
     const currentIdByStable = new Map<string, string>();
-    for (const sectorId of Object.keys(sectors).sort(strictCompare)) {
-        currentIdByStable.set(stableSectorKey(sectors[sectorId]!), sectorId);
+    // Ground lookup (SE9 v2, 2026-11-24): corps|edge -> the first current sector (strictCompare) of
+    // that corps holding the edge. A stable key is corps|lowest edge id, so when the front moves and
+    // a lower edge joins a sector, its key changes although it is the same ground.
+    const currentIdByCorpsEdge = new Map<string, string>();
+    for (const sectorId of sortedSectorIds) {
+        const sector = sectors[sectorId]!;
+        currentIdByStable.set(stableSectorKey(sector), sectorId);
+        for (const edgeId of sector.edge_ids) {
+            const corpsEdge = `${sector.corps_id}|${edgeId}`;
+            if (!currentIdByCorpsEdge.has(corpsEdge)) currentIdByCorpsEdge.set(corpsEdge, sectorId);
+        }
     }
+    const resolve = (stableKey: string): { id: string; exact: boolean } | undefined => {
+        const exactId = currentIdByStable.get(stableKey);
+        if (exactId !== undefined) return { id: exactId, exact: true };
+        const movedId = currentIdByCorpsEdge.get(stableKey); // a stable key is corps|edge
+        return movedId === undefined ? undefined : { id: movedId, exact: false };
+    };
 
     const nextIntel: Record<string, SectorIntelRecord[]> = {};
     const place = (sectorId: string, rec: SectorIntelRecord): void => {
         (nextIntel[sectorId] ??= []).push(rec);
     };
+    const pairKey = (ownId: string, enemyId: string): string => `${ownId}\u0000${enemyId}`;
+    const exactPairs = new Set<string>();
+    const moved = new Map<string, { ownId: string; rec: SectorIntelRecord }>();
     for (const key of Object.keys(prevIntel).sort(strictCompare)) {
         for (const rec of prevIntel[key] ?? []) {
             if (rec.own_stable_key === undefined || rec.enemy_stable_key === undefined) {
@@ -501,11 +526,37 @@ export function rekeySectorIntelToCurrentSectors(state: GameState): void {
                 if (sectors[key]) place(key, rec);
                 continue;
             }
-            const ownId = currentIdByStable.get(rec.own_stable_key);
-            const enemyId = currentIdByStable.get(rec.enemy_stable_key);
-            if (ownId === undefined || enemyId === undefined) continue;
-            place(ownId, enemyId === rec.enemy_sector_id ? rec : { ...rec, enemy_sector_id: enemyId });
+            const own = resolve(rec.own_stable_key);
+            const enemy = resolve(rec.enemy_stable_key);
+            if (own === undefined || enemy === undefined) continue;
+            if (own.exact && enemy.exact) {
+                exactPairs.add(pairKey(own.id, enemy.id));
+                place(own.id, enemy.id === rec.enemy_sector_id ? rec : { ...rec, enemy_sector_id: enemy.id });
+                continue;
+            }
+            // Moved with its ground: new ids and the current stable keys, so the stable-key readers
+            // (the preparation gate, the end-of-turn carry-forward) find it. Confidence, age and
+            // contact count are unchanged.
+            const pk = pairKey(own.id, enemy.id);
+            const held = moved.get(pk);
+            if (held !== undefined && held.rec.confidence >= rec.confidence) continue;
+            moved.set(pk, {
+                ownId: own.id,
+                rec: {
+                    ...rec,
+                    enemy_sector_id: enemy.id,
+                    own_stable_key: stableSectorKey(sectors[own.id]!),
+                    enemy_stable_key: stableSectorKey(sectors[enemy.id]!),
+                },
+            });
         }
+    }
+    // A moved record never displaces one whose keys matched exactly; between moved records for the
+    // same pair, the higher confidence wins (ties: the first in sorted source order).
+    for (const pk of [...moved.keys()].sort(strictCompare)) {
+        if (exactPairs.has(pk)) continue;
+        const { ownId, rec } = moved.get(pk)!;
+        place(ownId, rec);
     }
     for (const sectorId of Object.keys(nextIntel)) {
         nextIntel[sectorId]!.sort((a, b) => strictCompare(a.enemy_sector_id, b.enemy_sector_id));
