@@ -119,8 +119,8 @@ export function generateCorpsStanceOrders(
 
         // Decision matrix
         // Reorganize only when BOTH cohesion and personnel are critically low.
-        // Low personnel alone doesn't trigger reorganize — many brigades have
-        // designed strengths well below MAX_BRIGADE_PERSONNEL (e.g. light infantry 1000/3000).
+        // Personnel is read against each brigade's designed strength (RF-STRENGTH 2026-11-15), so
+        // reorganize means a corps at half its own establishment with cohesion collapsed.
         if (avgCoh < COHESION_REORGANIZE_THRESHOLD && avgPers < PERSONNEL_REORGANIZE_THRESHOLD) {
             stance = 'reorganize';
         } else if (sectorThreat > THREAT_DEFENSIVE_THRESHOLD) {

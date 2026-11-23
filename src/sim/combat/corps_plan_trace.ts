@@ -20,6 +20,15 @@ import { COHESION_HEALTHY_THRESHOLD, PERSONNEL_HEALTHY_THRESHOLD } from './bot_c
 import { countHealthyBrigades, getCorpsSubordinates, getFactionCorps } from './bot_corps_helpers.js';
 import { emitCorpsPlanRecord, isReasonCodeTopicEnabled } from './reason_code_debug.js';
 
+/** Healthy by the fixed 3,000 cap (the pre-RF-STRENGTH yardstick), kept for comparison. */
+function countHealthyByCap(brigades: readonly FormationState[]): number {
+    let count = 0;
+    for (const b of brigades) {
+        if ((b.personnel ?? 0) / MAX_BRIGADE_PERSONNEL >= PERSONNEL_HEALTHY_THRESHOLD && (b.cohesion ?? 60) >= COHESION_HEALTHY_THRESHOLD) count++;
+    }
+    return count;
+}
+
 /** Healthy by designed strength: personnel at 70% of the brigade's own max_personnel, cohesion 50. */
 function countHealthyByDesignedStrength(brigades: readonly FormationState[]): number {
     let count = 0;
@@ -62,8 +71,9 @@ export function emitCorpsPlanTrace(
             tier_active_defense: tiers?.active_defense ?? null,
             tier_garrison: tiers?.garrison ?? null,
             brigades: subs.length,
-            healthy_by_cap: countHealthyBrigades(subs),
+            healthy_by_cap: countHealthyByCap(subs),
             healthy_by_designed: countHealthyByDesignedStrength(subs),
+            healthy_corps_count: countHealthyBrigades(subs),
         });
     }
 }
