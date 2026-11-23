@@ -47,7 +47,7 @@ The war pipeline rebuilds OSID adjacency data **15+ times per turn** from the sa
 | `attack_resolution_osid.ts` | `resolveAttackOrdersOsid`, `displaceFormationsInEnemyTerritory` | `resolve-attack-orders`, `displace-enemy-territory` |
 | `brigade_movement_orders.ts` | `applyBrigadeMovementOrders` | `apply-brigade-movement` |
 | `osid_column_movement.ts` | `processOsidColumnMovement` | `osid-column-movement` |
-| `paramilitary_sweep.ts` | `detectParamilitaryTargets`, `detectOffensiveParamilitaryTargets` | `paramilitary-detect`, `offensive-paramilitary-detect` |
+| `paramilitary_sweep.ts` | `detectParamilitaryTargets` (the offensive detector was retired in §6 D1 stage 2: it had no phase) | `paramilitary-detect` |
 | `rear_pocket_consolidation.ts` | `consolidateRearPockets` | `consolidate-rear-pockets` |
 | `brigade_home_return.ts` | `evaluateHomeReturn` | `return-displaced-brigades` |
 
@@ -304,7 +304,7 @@ These receive `edges` and build adjacency internally. Change to accept `SpatialC
 ### Phase 5: Paramilitary & Pockets (2 files)
 | File | Function |
 |---|---|
-| `paramilitary_sweep.ts` | `detectParamilitaryTargets` (2 calls), `detectOffensiveParamilitaryTargets` |
+| `paramilitary_sweep.ts` | `detectParamilitaryTargets` (2 calls) |
 | `rear_pocket_consolidation.ts` | `consolidateRearPockets` |
 
 ### Phase 6: Supply System (2 files, optional)

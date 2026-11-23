@@ -47,6 +47,7 @@ import { join } from 'node:path';
 
 import { runScenario } from '../src/scenario/scenario_runner.js';
 import { checkDataPrereqs } from '../src/data_prereq/check_data_prereqs.js';
+import { loadEventDefinitions } from '../src/sim/events/event_loader.js';
 import type { CausalityLogEntry, GameState } from '../src/state/game_state.js';
 
 const SCENARIO_52W = join(process.cwd(), 'data', 'scenarios', 'apr1992_definitive_52w.json');
@@ -178,6 +179,14 @@ describe('Phase D + Phase B causality runtime integration (apr1992_52w)', () => 
         // For each foundational, at least one target should have fired in 52w.
         // (52w covers May 1992 - April 1993; targets like
         // `rbih_minority_retention_1992` at turn ~22-28 are well within scope.)
+        //
+        // §6 D1 stage 2 round 4a (b), 2026-11-22: the RS paramilitary-policy card fires at t1 on its own and is no longer
+        // enabled by the goals answer; it was the goals chain's only 1992 target. Every remaining goals target opens in
+        // 1993-1995 (the earliest, the VOPP rejection, at t56), outside this 52w run. For that chain the test pins the honest
+        // shape instead: every enabled target's window opens after w52, none fired early, and each is still enabled (the gate
+        // the goals answer opened is held open, not closed) at w52.
+        const catalog = new Map(loadEventDefinitions(0).map((def) => [def.id, def]));
+        const enabledAtEnd = new Set(stateA.military.enabled_event_ids ?? []);
         for (const foundationalId of FOUNDATIONALS) {
             const targets = enabledTargetsByFoundational.get(foundationalId);
             expect(targets, `${foundationalId} should have at least one enabled target`).toBeDefined();
@@ -185,6 +194,15 @@ describe('Phase D + Phase B causality runtime integration (apr1992_52w)', () => 
                 `${foundationalId} expected to enable at least one downstream event id`).toBeGreaterThan(0);
 
             const firedTargets = [...targets!].filter((id) => firedIds.has(id));
+            if (foundationalId === 'rs_strategic_goals') {
+                expect([...targets!]).not.toContain('rs_paramilitary_policy_1992');
+                for (const id of targets!) {
+                    expect(catalog.get(id)?.trigger.turn_min ?? 0, `${id} opens after w52`).toBeGreaterThan(52);
+                    expect(enabledAtEnd.has(id), `${id} still enabled at w52`).toBe(true);
+                }
+                expect(firedTargets).toEqual([]);
+                continue;
+            }
             // 52w may not cover every authored downstream, but at least one
             // 1992-era target should fire (e.g. paramilitary_policy_1992,
             // minority_retention_1992, central_bosnia_defense_1993).

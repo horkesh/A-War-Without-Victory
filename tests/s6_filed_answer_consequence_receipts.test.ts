@@ -24,7 +24,10 @@ interface Case {
 
 const CASES: Case[] = [
     { faction: 'HRHB', eventId: 'hrhb_political_goal', responseId: 'croat_republic', appliedTurn: 4, consequenceId: 'hrhb_1992_graz_cooperation_collapse', consequenceTurn: 5 },
-    { faction: 'RS', eventId: 'rs_strategic_goals', responseId: 'all_six', appliedTurn: 1, consequenceId: 'rs_paramilitary_policy_1992', consequenceTurn: 2 },
+    // §6 D1 stage 2 round 4a (b), 2026-11-22: the RS policy card fires at t1 on its own and no goals answer opens it any more,
+    // so the RS filed-answer receipt is pinned on a card the goals answer really opens: the May 1993 VOPP-rejection decision
+    // (war_1993.json, window t56-58, requires_enabled).
+    { faction: 'RS', eventId: 'rs_strategic_goals', responseId: 'all_six', appliedTurn: 1, consequenceId: 'rs_assembly_rejects_voplan_1993', consequenceTurn: 56 },
     { faction: 'RBiH', eventId: 'rbih_state_identity', responseId: 'civic', appliedTurn: 3, consequenceId: 'rbih_paramilitary_policy_1992', consequenceTurn: 4 },
 ];
 

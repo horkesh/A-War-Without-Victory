@@ -1845,8 +1845,10 @@ export const warPhases: NamedPhase[] = [
             const od = getOperationalData(context);
             if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
 
+            // The catalog is required: an undecided bot reads its card's historical default
+            // from it (§6 D1 stage 2). Both entry points pass it (scenario runner, desktop).
             const report = detectParamilitaryTargets(
-                context.state, od.edges, od.opData.operationalToCanonical
+                context.state, od.edges, od.opData.operationalToCanonical, context.input.eventDefinitions,
             );
             if (report.spawned.length > 0 || report.pending_player_requests > 0) {
                 context.report.paramilitary_sweep = report;

@@ -393,6 +393,40 @@ describe('panel round 1 (DA1 P6)', () => {
         expect(causersWithHarm(w.state)).toEqual(['RS']);
     });
 
+    it('A7 (SD11): a side\'s largest remaining body at or under 15% of its turn-0 count can be encircled', () => {
+        // RBiH started with 18 settlements; RS now holds the home body. What is left is the two-settlement
+        // pocket (now RBiH's LARGEST body, 2/18 = 0.11) and one cut-off settlement elsewhere ('far').
+        const controllers: Record<string, string> = {
+            'op:pocket:a': 'RBiH', 'op:pocket:b': 'RBiH', 'op:ring:c': 'RS', 'op:ring:d': 'RS', 'op:far:z': 'RBiH',
+        };
+        const edges: EdgeRecord[] = [
+            { a: 'op:pocket:a', b: 'op:pocket:b' }, { a: 'op:pocket:a', b: 'op:ring:c' },
+            { a: 'op:pocket:b', b: 'op:ring:d' }, { a: 'op:ring:d', b: 'op:home:e' },
+        ];
+        homeBody(controllers, edges, 'RS');
+        const initial: Record<string, string> = { ...controllers };
+        for (const sid of Object.keys(initial)) if (sid.startsWith('op:home:')) initial[sid] = 'RBiH';
+        const census = { pocket: { total: 10000, bosniak: 10000, serb: 0, croat: 0, other: 0 } } as MunicipalityPopulation1991Map;
+        const w = custom(controllers, edges, ['pocket:RBiH'], census, initial);
+        const report = updateDisplacement(w.state, w.settlements, w.edges, census);
+        expect(report.by_municipality.find((r) => r.mun_id === 'pocket')?.reason).toContain('encircled');
+        expect(w.state.displacement.displacement_state.far?.displaced_in_by_faction?.RBiH ?? 0).toBeGreaterThan(0);
+    });
+
+    it('A7 (SD11): a largest body above 15% of the turn-0 count is a split, not a siege, even under pressure', () => {
+        const controllers: Record<string, string> = {
+            'op:pocket:a': 'RBiH', 'op:pocket:b': 'RBiH', 'op:ring:c': 'RS', 'op:ring:d': 'RS', 'op:far:z': 'RBiH',
+        };
+        const edges: EdgeRecord[] = [
+            { a: 'op:pocket:a', b: 'op:pocket:b' }, { a: 'op:pocket:a', b: 'op:ring:c' }, { a: 'op:pocket:b', b: 'op:ring:d' },
+        ];
+        // No turn-0 map: the share falls back to the side's current count (3), so the largest body (2) is 67%.
+        const census = { pocket: { total: 10000, bosniak: 10000, serb: 0, croat: 0, other: 0 } } as MunicipalityPopulation1991Map;
+        const w = custom(controllers, edges, ['pocket:RBiH'], census);
+        const report = updateDisplacement(w.state, w.settlements, w.edges, census);
+        expect(report.by_municipality.filter((r) => r.reason.includes('encircled'))).toEqual([]);
+    });
+
     it('the war step is deterministic within one process (Engine 9)', async () => {
         const a = world({ linked: false, supplied: false });
         const b = world({ linked: false, supplied: false });

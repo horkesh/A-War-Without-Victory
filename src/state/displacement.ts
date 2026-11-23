@@ -132,7 +132,8 @@ interface TerritorialBodies {
  * in id order). Bodies connect through the faction's own settlements and, while RBiH and
  * HRHB are not at war, through the ally's (as supply transit does).
  *
- * A municipality whose held settlements all lie outside the main body is encircled when
+ * A municipality whose held settlements all lie in a body holding at most POCKET_MAX_SHARE of the
+ * side's turn-0 settlements (the side's largest body included, A7) is encircled when
  * it is also under front pressure: Sarajevo, Goražde, Srebrenica, Žepa and the Bihać
  * pocket for RBiH; the Lašva valley pocket for HRHB once the Croat-Bosniak war starts.
  * (The old test, "the faction holds no other municipality", could never fire.)
@@ -751,10 +752,14 @@ export function updateDisplacement(
             const supplied = sideSids.some((sid) => reachable?.has(sid) === true);
             const body = bodies.get(side);
             const denominator = initialTotal.get(side) ?? body?.total ?? 0;
+            // A7 (SD11, broader bright-line panel 2026-11-22): no main-body exemption. The size test against
+            // the turn-0 count already excludes any real main body, and a side's last remaining body at or
+            // under 15% of its start (whichever is largest now) is a pocket like any other. Inert on today's
+            // hands-off runs (log-only probe: the largest body never falls below 39% of its turn-0 count).
             const encircled = underPressure && body !== undefined && body.main >= 0 &&
                 sideSids.every((sid) => {
                     const b = body.bodyOf.get(sid);
-                    return b !== undefined && b !== body.main && body.size[b] <= POCKET_MAX_SHARE * denominator;
+                    return b !== undefined && body.size[b] <= POCKET_MAX_SHARE * denominator;
                 });
 
             // Persisted per side, with the turn it was last counted: a change of holder or a
