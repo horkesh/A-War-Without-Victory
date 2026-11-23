@@ -8504,5 +8504,66 @@
       }
     },
     "historical_source": "ICTY, Prosecutor v. Karadžić, trial judgment (IT-95-5/18-T, 24 March 2016), paras 3284-3287 (Belgrade and Pale in autumn 1993: the meeting of 8 November 1993, where setting up Republika Srpska as a completely independent state was among the objectives discussed, and the December 1993 meeting at which Karadžić said the Bosnian Serbs held 75 percent of the territory). Balkan Battlegrounds, Vol. I, pp. 12-13 (chronology, autumn 1993)."
+  },
+  {
+    "id": "hrhb_minority_policy_1993",
+    "title": "Staff Orders for the Bosniak Population",
+    "narrative": "The war with the ARBiH has begun. In the ground the HVO holds in central Bosnia and Herzegovina, your side's historical default is the expulsion of the Bosniak population from 11 municipalities, in two waves over the coming months. Your staff will carry it out unless you order a halt now. The order can be given only now; it cannot be given later.\n\nModelled scale if no halt is ordered: about 24,000 people expelled, about 18% of the Bosniaks who lived in those municipalities before the war. About 700 of them are killed and about 6,300 are forced abroad. One war crime is recorded against your side, and international standing falls by about 10 points. This is an event of the simulated war.",
+    "category": "humanitarian",
+    "family": "hrhb_minority_policy",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
+    "trigger": {
+      "phase": "war",
+      "condition": {
+        "type": "rbih_hrhb_war_started",
+        "value": true
+      }
+    },
+    "once": true,
+    "requires_player_response": true,
+    "responding_faction": "HRHB",
+    "bot_response_logic": "historical",
+    "priority": 999,
+    "historical_default_response_id": "no_halt",
+    "effect": {
+      "kind": "narrative",
+      "text": "The HVO staff's orders for the Bosniak population in HVO-held ground are on record."
+    },
+    "staff_assessment": "If no halt is ordered, both waves run and the record is your side's. A halt stops both waves for the rest of the war. Its cost is modelled, not sourced: Zagreb's confidence in you falls by 10 points. Neither choice shows a gain.",
+    "trigger_evidence": [
+      "The HVO and the ARBiH are now at open war.",
+      "The HVO holds ground in central Bosnia and Herzegovina where Bosniaks still live."
+    ],
+    "historical_source": "ICTY Prlić et al. (IT-04-74-T, Trial Judgement, 29 May 2013; Appeal Judgement, 29 November 2017): a joint criminal enterprise of the HZ(R) H-B political and military leadership whose common purpose included the ethnic cleansing of the Muslim population. ICTY Kordić and Čerkez (IT-95-14/2-T, Trial Judgement, 26 February 2001), paras 511, 646 (Busovača, Vitez). Balkan Battlegrounds, Vol. I (CIA, 2002), on the 1993 Croat-Muslim war.",
+    "source_note": "Modelling note. The card stands for the policy the ICTY attributed to the HZ(R) H-B political and military leadership in 1993 (Prlić et al.; Kordić and Čerkez); its scope, shares and wave timing are the RF-5B historian table (POLICY_EXPULSION_SCOPE in src/state/displacement_takeover.ts). The numbers on the card are static estimates from that table and the measured headless run, checked by a bounds test. The player's only act is the halt; the card never offers an expulsion as a choice (SENSITIVE_HISTORY_DESIGN_GATE.md section 3; RB5 ruling 2026-11-23). The cost of the halt is modelled and unsourced: no ICTY finding sizes it. Future rows consuming this card must not author cleansing, forced displacement or any other sensitive act as a player choice.",
+    "response_options": [
+      {
+        "id": "no_halt",
+        "label": "Do not intervene: the expulsions proceed",
+        "description": "Your staff apply your side's historical default. About 24,000 people are expelled from 11 municipalities, and about 700 of them are killed. One war crime is recorded against your side, and international standing falls by about 10 points.",
+        "historical_marker": "historical_default",
+        "aggression_affinity": 0.5,
+        "risk_level": 0.5
+      },
+      {
+        "id": "order_halt",
+        "label": "Order a halt",
+        "description": "No wave runs in this war. Modelled, unsourced cost: Zagreb's confidence in you falls by 10 points. The order is final.",
+        "historical_marker": "counterfactual",
+        "aggression_affinity": -0.5,
+        "risk_level": 0.4,
+        "sets_flags": {
+          "hrhb_minority_policy_halted": true
+        },
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "patron_confidence",
+            "delta": -10
+          }
+        ]
+      }
+    ]
   }
 ]

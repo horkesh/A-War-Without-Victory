@@ -26,6 +26,15 @@ const CANON_ALLOWED_PARAMILITARY_CHOICES = new Map([
       ask: 'Ask per deployment',
     }),
   })],
+  // RB5 (broader bright-line panel 9/9, 2026-11-23): the HRHB halt card. Exact labels only; the
+  // player's only act is the halt, and the default label names what the staff do without one.
+  ['hrhb_minority_policy_1993', Object.freeze({
+    family: 'hrhb_minority_policy',
+    labels: Object.freeze({
+      no_halt: 'Do not intervene: the expulsions proceed',
+      order_halt: 'Order a halt',
+    }),
+  })],
 ]);
 
 const STANDALONE_REFUSED_PATTERNS = Object.freeze([
