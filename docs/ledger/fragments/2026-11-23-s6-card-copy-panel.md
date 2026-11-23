@@ -1,0 +1,13 @@
+## 2026-11-23 — §6 card-copy PR: Goražde card, 1992 paramilitary policy cards, goals and hostage cards, cite audits (copy only, hash-neutral)
+
+A §4 copy panel (historian + narrative designer, independent seats, unanimous after three rounds). Record row in `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md` §6; routed by the orchestrator (register rulings 6 and 8, 2026-11-22).
+
+**Change.**
+- `gorazde_crisis_1994`: the narrative no longer claims ground the map does not show ("into the outskirts of the town") or the unsourced "overrunning UN observation posts". It now names the NATO strikes of 10-11 April at UN request, the detention of UN personnel and the UNPROFOR commander's reading of the mandate (A/54/549 ¶¶132-137; Karadžić TJ ¶¶391-394; BB2 pp.459-461). The card gets a BCS twin, "Kriza u Goraždu", and leaves the BCS gap list. The effect line and source are aligned.
+- RS and RBiH 1992 paramilitary policy cards (t1 period labels): "regular Serb units" (not VRS, formed 12 May 1992); "Pale" (not the RS Presidency); "HVO staff" (not "Mostar staff"; the Main Staff sat at Grude only from 16 April). The cards no longer say "authorization" or "policy" where an order is meant. Notification text is changed only through `localizations.en` (display only), so no saved headline or body moves. The `REVIEWED_POLICY` code pin is re-pinned with a dated comment.
+- Hostage figures: "about 350 UN personnel" and Count 11 (Karadžić TJ ¶5863; Mladić TJ Vol. III ¶¶3213-3226), replacing "377" and "Count 6" on the goals rows and the UN hostage card.
+- Cites: Krajišnik TJ ¶¶4, 133 (was ¶¶856-891, the law section); A/54/549 ¶17 on the RBiH card (was ¶35); the unsupported A/54/549 cite deleted from the HVO camp card; HISTORICAL_TIMELINE_MASTER BB1 labelled "printed p.151 (KB p.187)".
+- Rule line (both 1992 cards): "If you keep each deployment for your own decision ..." fits both factions' buttons. "Historical response" replaces "historical policy" there, in the Observer autonomy text and in the two automatic-order receipts, EN and BCS.
+- Rulebook :574: "cleansing policy" removed; the line names the reach of the war aims and the scope of offensive operations, and says the paramilitary order is a separate card (Karadžić TJ ¶57). SHDG §3's receipt-cause wording follows the signed copy.
+
+**Measured.** No title, headline or body is edited in place. The 40w structural fingerprint `8f132d17cbb0f47c` matches. 188w final_state_hash historical `6d2659c4f82bb8d0`, emergent `7bc0f5c99247bf12`, identical to main (9bb9a5316); all eight pinned baseline artifacts match the manifest byte for byte. No re-pin.
