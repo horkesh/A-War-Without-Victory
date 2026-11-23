@@ -69,8 +69,12 @@ export function selectInPersonParamilitaryOrderResponse(
 }
 
 /**
- * Apply a decision's automatic answer: the authored historical default, or `override` when the caller already chose the
- * option (F1-B, the Observer drain: `selectInPersonParamilitaryOrderResponse`, chosen before anything is applied).
+ * Apply a decision's automatic answer's effects, flags and dimension shifts only: the authored historical default, or
+ * `override` when the caller already chose the option.
+ *
+ * NOT an engine path (2026-11-23): it writes no log row, no runtime causality and no notifications. Every engine entry
+ * point, the Observer drain included, applies a chosen answer through `applyChosenEventResponse` (evaluate_events.ts).
+ * Kept for the tests that exercise the default's effect payload in isolation.
  */
 export function applyAIDefaultResponse(
     state: GameState,
