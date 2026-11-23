@@ -97,16 +97,62 @@ function checkFarzObjectiveCaptures({ cells, at188, events, battleById, aars, co
     && e.mechanism === 'combat' && e.turn >= windowStart
     && (classifyCombatCapture(e, battleById.get(e.battle_id)).operation_ids ?? []).length > 0) || null;
 
+  // Historical mode, third path (orchestrator ruling 2026-11-22 on the lane B two-seat sitting,
+  // historian + operations-expert, the stricter set). Uragan 95 / Farz was one joint 2nd + 3rd Corps
+  // offensive in September 1995 (BB1 printed pp. 384-388): the 2nd Corps' Spreča push and the 3rd
+  // Corps' Ozren and Vozuća attacks ran side by side, and the owner ruling of 2026-09-29 lets either
+  // corps make an objective's final capture. A cell may therefore also be taken by ANOTHER 2nd or
+  // 3rd Corps operation of that offensive, when all of these hold:
+  //   - the capture is an operation-owned combat capture by an operation O of the 2nd or 3rd Corps;
+  //   - O started inside the window (t >= windowStart) and targeted this cell;
+  //   - the capture came no earlier than the earlier of the authored Farz and Uragan starts, and no
+  //     later than the authored Farz's end (Farz is still running);
+  //   - the authored Farz itself took at least one cell (checked over the rows below).
+  // A summer operation launched before the window, a capture before the joint launch, an incidental
+  // capture by an operation aimed elsewhere, the 1st Corps or any other corps, probes and sweeps
+  // never count. Early falls and the t188 holder are checked as for every path.
+  const opById = new Map();
+  for (const a of aars) if (a && a.operation_id) opById.set(a.operation_id, {
+    corps_id: a.corps_id, started_turn: a.started_turn, objectives_targeted: a.objectives_targeted || [] });
+  for (const { corps_id: corpsId, op } of liveOperations || []) {
+    if (!op || !Number.isFinite(op.started_turn)) continue;
+    const id = `${corpsId}:${op.name}:t${op.started_turn}`;
+    if (!opById.has(id)) opById.set(id, { corps_id: corpsId, started_turn: op.started_turn, objectives_targeted: op.objectives || [] });
+  }
+  const jointStart = aar && aar.started_turn >= windowStart
+    ? Math.min(aar.started_turn, partner ? partner.started_turn : Infinity)
+    : null;
+  const JOINT_CORPS = ['arbih_2nd_corps', 'arbih_3rd_corps'];
+  const jointOperationOf = (e, osid) => (classifyCombatCapture(e, battleById.get(e.battle_id)).operation_ids ?? [])
+    .find((id) => {
+      const op = opById.get(id);
+      return !!op && JOINT_CORPS.includes(op.corps_id) && op.started_turn >= windowStart
+        && op.objectives_targeted.includes(osid);
+    }) ?? null;
+  const jointOperationReceipt = (osid) => (jointStart == null ? null : events.find((e) => e.settlement_id === osid
+    && e.to === 'RBiH' && e.mechanism === 'combat'
+    && e.turn >= Math.max(windowStart, jointStart) && e.turn <= aar.ended_turn
+    && jointOperationOf(e, osid) !== null) || null);
+
   const emergent = mode === 'emergent';
-  const rows = cells.map(([name, osid]) => {
-    const earlyCaptures = early(osid);
+  const found = cells.map(([name, osid]) => {
     const own = !emergent && aar ? receipt(aar, ['arbih_2nd_corps', 'arbih_3rd_corps'], osid, true) : null;
     const viaPartner = !emergent && !own && aar ? receipt(partner, ['arbih_2nd_corps'], osid) : null;
+    const viaJoint = !emergent && !own && !viaPartner && aar ? jointOperationReceipt(osid) : null;
     const viaAny = emergent ? anyOperationReceipt(osid) : null;
-    const event = own || viaPartner || viaAny;
+    return { name, osid, own, viaPartner, viaJoint, viaAny };
+  });
+  // The third path needs the authored Farz to have taken at least one cell itself.
+  const farzTookACell = found.some((f) => !!f.own);
+  const rows = found.map(({ name, osid, own, viaPartner, viaJoint: joint, viaAny }) => {
+    const earlyCaptures = early(osid);
+    const viaJoint = farzTookACell ? joint : null;
+    const event = own || viaPartner || viaJoint || viaAny;
+    const jointOp = viaJoint ? jointOperationOf(viaJoint, osid) : null;
     return {
       name, osid, turn: event?.turn ?? null,
-      via: own ? 'farz' : viaPartner ? 'uragan' : viaAny ? 'operation' : null,
+      via: own ? 'farz' : viaPartner ? 'uragan' : viaJoint ? 'joint' : viaAny ? 'operation' : null,
+      ...(jointOp ? { operation_id: jointOp } : {}),
       early_captures: earlyCaptures.map((e) => ({ turn: e.turn,
         operation_ids: classifyCombatCapture(e, battleById.get(e.battle_id)).operation_ids ?? [] })),
       ok: !!event && earlyCaptures.length === 0 && at188[osid] === 'RBiH',
