@@ -11,4 +11,4 @@ Under the owner rule of 2026-11-22 (staff or the bot playing a human faction app
 
 **Tests.** New `tests/s6_observer_drain_causality.test.ts` (9; 7 failed before the fix). `tests/paramilitary_observer_in_person_order_f1b.test.ts`: 6 drain cases asserted "the drain sends no notifications" (the defect); they now expect the authored notifications, as at fire time.
 
-**Measured.** Headless is unchanged: neither the drain nor the Observer branch runs without `autonomy_level`/`player_faction`. 40w structural fingerprint `8f132d17cbb0f47c` matches main. 188w final_state_hash historical `6d2659c4f82bb8d0`, emergent `7bc0f5c99247bf12`, both identical to main (9bb9a5316). No re-pin.
+**Measured.** Headless is unchanged: neither the drain nor the Observer branch runs without `autonomy_level`/`player_faction`. 40w structural fingerprint `8f132d17cbb0f47c` matches main. 188w final_state_hash historical `9a2570d2e1c0f4d4`, emergent `4adaa322f8faa0a7`, both identical to main 2ce56f47d (first measured identical on 9bb9a5316 as well). No re-pin.
