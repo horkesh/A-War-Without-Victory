@@ -906,11 +906,10 @@ export function buildDecisionConsequenceLedger(
       ? variant
       : (minorityReceipt.automatic ? 'noWarCrimeAutomatic' : 'noWarCrimeInPerson');
     const titleKey = `decisionConsequences.title.minorityPolicy.${variant}` as MessageKey;
-    const outcomeKey = (minorityReceipt.municipalities === 1
-      ? 'decisionConsequences.outcome.minorityPolicy.one'
-      : 'decisionConsequences.outcome.minorityPolicy.other') as MessageKey;
-    const detailKey = `decisionConsequences.detail.minorityPolicy.${detailVariant}` as MessageKey;
-    const outcomeParams = { municipalities: minorityReceipt.municipalities };
+    const outcomeKey = 'decisionConsequences.outcome.minorityPolicy.chip' as MessageKey;
+    // The signed outcome sentence and detail sentence are one composed detail line (the outcome chip stays short).
+    const detailKey = `decisionConsequences.detail.minorityPolicyFull.${detailVariant}.${minorityReceipt.municipalities === 1 ? 'one' : 'other'}` as MessageKey;
+    const detailParams = { municipalities: minorityReceipt.municipalities };
     records.push({
       id: `minority-policy:${minorityReceipt.faction}`,
       turn: minorityReceipt.turn,
@@ -918,10 +917,10 @@ export function buildDecisionConsequenceLedger(
       family: t('decisionConsequences.family.minorityPolicy'),
       title: t(titleKey),
       titleToken: { key: titleKey },
-      outcome: t(outcomeKey, outcomeParams),
-      outcomeToken: { key: outcomeKey, params: outcomeParams },
-      detail: t(detailKey),
-      detailToken: { key: detailKey },
+      outcome: t(outcomeKey),
+      outcomeToken: { key: outcomeKey },
+      detail: t(detailKey, detailParams),
+      detailToken: { key: detailKey, params: detailParams },
       recordTarget: 'records',
     });
   }
