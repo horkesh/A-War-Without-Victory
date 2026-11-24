@@ -738,6 +738,23 @@ export interface ParamilitaryUnrequestedView {
     cause?: 'standing_order' | 'standing_order_automatic' | 'neutral' | 'historical_default_staff';
 }
 
+/**
+ * RB5 halt-card receipt: the human HRHB side's halt card was answered with the historical default (no halt ordered) and the
+ * policy expelled Bosniaks from the ground the HVO held. Derived read-only from the decision log, event flags and matured
+ * `policy_expulsion` timers; no saved field. States the number of municipalities, never a people count.
+ */
+export interface MinorityPolicyReceiptView {
+    faction: 'HRHB';
+    /** Turn of the card's answer. */
+    turn: number;
+    /** Distinct municipalities with a matured HRHB policy-expulsion timer. */
+    municipalities: number;
+    /** True when the answer was automatic (not given in person). */
+    automatic: boolean;
+    /** True when the policy's first wave was recorded as a war crime. */
+    warCrime: boolean;
+}
+
 export interface OfficerDecisionRecordView {
     id: string;
     turn: number;
@@ -1417,6 +1434,8 @@ export interface LoadedGameState {
     paramilitaryDecisionHistory?: ParamilitaryDecisionRecordView[];
     /** Paramilitary sweeps carried out for the player's side without a request to the player (staff or standing order). */
     paramilitaryUnrequested?: ParamilitaryUnrequestedView[];
+    /** RB5 halt-card receipt for a human HRHB side (display only). */
+    minorityPolicyReceipt?: MinorityPolicyReceiptView;
     /** Filed officer/personnel decisions for Records/Desk consequence trail. */
     officerDecisionHistory?: OfficerDecisionRecordView[];
     /** Read-only Army HQ opportunity ledger: proposal -> decision -> AAR outcome. */

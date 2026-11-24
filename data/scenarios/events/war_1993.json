@@ -8583,6 +8583,8 @@
           "HVO drži područja u srednjoj Bosni i Hercegovini na kojima Bošnjaci još žive."
         ],
         "source_note": "MKSJ, Prlić i drugi (IT-04-74), prvostepena presuda 2013. i žalbena presuda 2017: udruženi zločinački poduhvat političkog i vojnog rukovodstva HZ(R) H-B i zvaničnika Hrvatske, čija je zajednička svrha uključivala uklanjanje muslimanskog stanovništva prisilnim premještanjem i deportacijom. MKSJ, Kordić i Čerkez (IT-95-14/2), prvostepena presuda 2001., par. 646 (Vitez). Balkan Battlegrounds, sv. I i II (CIA, 2002). Brojke na ovoj kartici su modelirane procjene; cijena obustave je modelirana i bez izvora.",
+        "historical_source": "MKSJ, Prlić i drugi (IT-04-74-T), prvostepena presuda, 29. maj 2013., i žalbena presuda (IT-04-74-A), 29. novembar 2017.: udruženi zločinački poduhvat čiji su članovi bili političko i vojno rukovodstvo HZ(R) H-B i zvaničnici Hrvatske, čija je zajednička svrha uključivala trajno uklanjanje muslimanskog stanovništva prisilnim premještanjem i deportacijom. MKSJ, Kordić i Čerkez (IT-95-14/2-T), prvostepena presuda, 26. februar 2001., par. 646 (Vitez). Balkan Battlegrounds, sv. I i II (CIA, 2002).",
+        "source_tier": "icty_icj_un",
         "response_options": {
           "no_halt": {
             "label": "Ne intervenirati: protjerivanja se provode",

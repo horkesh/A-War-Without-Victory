@@ -78,6 +78,33 @@ describe('RB5: the halt card discloses B1 numbers inside recomputed bounds', () 
         expect(card.narrative).toContain(`${STATED.municipalities} municipalities`);
     });
 
+    test('the Bosnian copy states the same numbers (§4 copy panel, 2026-11-24)', () => {
+        const bcs = card.localizations.bcs;
+        expect(bcs.title.length).toBeGreaterThan(0);
+        expect(bcs.narrative).toContain(`oko ${STATED.people.toLocaleString('de-DE')} ljudi`);
+        expect(bcs.narrative).toContain(`${STATED.sharePct}%`);
+        expect(bcs.narrative).toContain(`Oko ${STATED.killed}`);
+        expect(bcs.narrative).toContain(`oko ${STATED.abroad.toLocaleString('de-DE')}`);
+        expect(bcs.narrative).toContain(`${STATED.municipalities} općina`);
+        expect(bcs.narrative).toContain(`za oko ${STATED.standingDrop} bodova`);
+        expect(bcs.response_options.no_halt.description).toContain(`oko ${STATED.people.toLocaleString('de-DE')} ljudi`);
+        expect(Object.keys(bcs.response_options).sort()).toEqual(['no_halt', 'order_halt']);
+    });
+
+    test('player-safe source lines: ICTY legal terms, no repo paths, no ruling or panel words (historian seat)', () => {
+        for (const line of [card.localizations.en.source_note, card.localizations.bcs.source_note] as string[]) {
+            expect(line).toMatch(/IT-04-74/);
+            expect(line).toMatch(/646/);
+            expect(line).not.toMatch(/511/);
+            expect(line).not.toMatch(/src\/|\.ts\b|\.md\b|ruling|panel|RF-5B|RB5|cleansing|čišćenj/i);
+        }
+        expect(card.localizations.en.source_note).toContain('forcible transfer and deportation');
+        expect(card.localizations.en.source_note).toContain('officials of Croatia');
+        expect(card.localizations.en.source_note).toContain('Vols. I and II');
+        // effect.text names no HVO command (ruling item 2: ICTY attributes the policy to the HZ(R) H-B leadership).
+        expect(card.effect.text).not.toMatch(/HVO/);
+    });
+
     test('one war crime moves the international standing base by the stated points', () => {
         const at = (warCrimes: number) => computeInternationalStandingBase(
             { military: { negotiation: { capital: { HRHB: { war_crimes_events: warCrimes } } } } },

@@ -74,6 +74,7 @@ export type DecisionConsequenceFamilyId =
   | 'dayton-settlement'
   | 'paramilitary-authorization'
   | 'paramilitary-receipt'
+  | 'minority-policy-receipt'
   | 'patron-relations'
   | 'officer-personnel'
   | 'stance-matter'
@@ -891,6 +892,36 @@ export function buildDecisionConsequenceLedger(
       outcomeToken: { key: outcomeKey },
       detail: t(detailKey, { place, faction }),
       detailToken: { key: detailKey, params: { place, faction } },
+      recordTarget: 'records',
+    });
+  }
+
+  // RB5 halt card: the human HRHB side answered the card with the historical default (no halt ordered) and the policy ran.
+  // Derived in GameStateAdapter `deriveMinorityPolicyReceipt`; it states the number of municipalities only. The wording lives in
+  // the message catalog (EN and BCS), never as a literal here. Booked to the player's own side; Records only, never Chronicle.
+  const minorityReceipt = state.minorityPolicyReceipt;
+  if (minorityReceipt && (!playerFaction || playerFactionMatch(minorityReceipt.faction, playerFaction))) {
+    const variant = minorityReceipt.automatic ? 'automatic' : 'inPerson';
+    const detailVariant = minorityReceipt.warCrime
+      ? variant
+      : (minorityReceipt.automatic ? 'noWarCrimeAutomatic' : 'noWarCrimeInPerson');
+    const titleKey = `decisionConsequences.title.minorityPolicy.${variant}` as MessageKey;
+    const outcomeKey = (minorityReceipt.municipalities === 1
+      ? 'decisionConsequences.outcome.minorityPolicy.one'
+      : 'decisionConsequences.outcome.minorityPolicy.other') as MessageKey;
+    const detailKey = `decisionConsequences.detail.minorityPolicy.${detailVariant}` as MessageKey;
+    const outcomeParams = { municipalities: minorityReceipt.municipalities };
+    records.push({
+      id: `minority-policy:${minorityReceipt.faction}`,
+      turn: minorityReceipt.turn,
+      familyId: 'minority-policy-receipt',
+      family: t('decisionConsequences.family.minorityPolicy'),
+      title: t(titleKey),
+      titleToken: { key: titleKey },
+      outcome: t(outcomeKey, outcomeParams),
+      outcomeToken: { key: outcomeKey, params: outcomeParams },
+      detail: t(detailKey),
+      detailToken: { key: detailKey },
       recordTarget: 'records',
     });
   }
