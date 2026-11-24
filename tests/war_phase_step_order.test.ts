@@ -20,6 +20,13 @@ describe('war-phase step ordering', () => {
         // Sectors must be partitioned before corps directives are generated
         assertBefore('partition-corps-front-sectors', 'generate-bot-corps-orders');
 
+        // SE9: sector intel is re-keyed to this turn's sector ids right after the partition,
+        // before any reader (the corps commanders, attack resolution) and before the end-of-turn derive.
+        assertBefore('partition-corps-front-sectors', 'rekey-sector-intel');
+        assertBefore('rekey-sector-intel', 'generate-bot-corps-orders');
+        assertBefore('rekey-sector-intel', 'resolve-attack-orders');
+        assertBefore('rekey-sector-intel', 'derive-sector-intel');
+
         // Corps directives must exist before brigade AI evaluates them
         assertBefore('generate-bot-corps-orders', 'generate-bot-brigade-orders');
 
@@ -328,7 +335,9 @@ describe('war-phase step ordering', () => {
         //        the Dayton menu and the turn boundary see the turn's plan, patron and capital writes.
         // -2 from retiring compute-supply-reserves and update-smuggling-routes (2026-11-17,
         //        Fable consult 6: the supply-reserve economy is not modelled in 1.0).
-        expect(stepNames.length).toBe(191);
+        // +1 from rekey-sector-intel (2026-11-15, SE9): directly after the partition; moves last
+        //        turn's sector intel to this turn's sector ids by stable key.
+        expect(stepNames.length).toBe(192);
         expect(stepNames).not.toContain('compute-supply-reserves');
         expect(stepNames).not.toContain('update-smuggling-routes');
         expect(stepNames).not.toContain('produce-political-directive');

@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "fingerprint": "8f132d17cbb0f47c",
+  "fingerprint": "449bbd5d5a7fc962",
   "fields": {
     "schema_version": 2,
     "scenario_id": "apr1992_definitive_188w",
@@ -8,8 +8,8 @@
     "final_turn": 40,
     "control_counts": {
       "HRHB": 86,
-      "RBiH": 263,
-      "RS": 363
+      "RBiH": 264,
+      "RS": 362
     },
     "control_flips": [
       {
@@ -538,12 +538,6 @@
         "settlement_id": "op:sanski_most:stari_majdan",
         "municipality_id": "sanski_most",
         "from": "HRHB",
-        "to": "RS"
-      },
-      {
-        "settlement_id": "op:sipovo:volari_2",
-        "municipality_id": "sipovo",
-        "from": "RBiH",
         "to": "RS"
       },
       {
