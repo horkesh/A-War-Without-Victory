@@ -836,7 +836,11 @@ describe('strict null inventory progress', () => {
             // (absent until a zero-order launch is demoted). No new type escape. 610 -> 612.
             // Never-ending-op exit (2026-11-22): CorpsOperation.silent_execution_turn_streak
             // (absent until an executing op issues a turn with no orders). No new type escape. 612 -> 613.
-            optional_fields_game_state: 613,
+            // §6 mechanics item 2 (2026-11-24): the paramilitary history row became a union. +3 optional
+            // markers that keep it discriminated: ParamilitaryRequestDecisionRecord.kind (`?: undefined`) and
+            // ParamilitaryStandingOrderRecord.target_osid / decision (`?: never`, never present). No persisted
+            // field is optional that was required before; headless writes no row. No new type escape. 613 -> 616.
+            optional_fields_game_state: 616,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
@@ -862,12 +866,14 @@ describe('strict null inventory progress', () => {
         // P3 mismatch rider: +2 sim (CorpsOperation.planning_phase_started_turn /
         // launch_demotion_count). 610 -> 612 / sim 372 -> 374.
         // Never-ending-op exit: +1 sim (CorpsOperation.silent_execution_turn_streak). 612 -> 613 / sim 374 -> 375.
-        expect(current.optional_field_domains.total).toBe(613);
+        // §6 item 2: +3 sim (classifyDomain matches the Paramilitary* interface names: ParamilitaryRequestDecisionRecord.kind,
+        // ParamilitaryStandingOrderRecord.target_osid / decision, the union's discriminating markers). 613 -> 616 / sim 375 -> 378.
+        expect(current.optional_field_domains.total).toBe(616);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 375,
+            sim: 378,
             state: 228,
             ui_adapter: 0,
             unknown: 0,

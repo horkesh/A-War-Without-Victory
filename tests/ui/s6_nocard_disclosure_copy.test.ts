@@ -16,8 +16,10 @@ import { withoutComments } from '../helpers/sourceComments';
 const en = enMessages as Record<string, string>;
 const bcs = bcsMessages as Record<string, string>;
 
-const P_EN = "No paramilitary policy decision comes up for your side. Until you decide yourself, your staff sends rear-area paramilitary sweeps without asking you, by your side's historical default, and each sweep that takes its target counts against your side. To refuse, take Full Control: each request then comes to you, and your decision there replaces the historical default at every command level. After that, your staff sends sweeps without asking you only under Always allow.";
-const P_BCS = 'Za vašu stranu ne dolazi nikakva odluka o paravojnoj politici. Dok sami ne odlučite, štab bez pitanja šalje paravojne akcije u pozadini po historijskoj zadanoj postavci vaše strane, a svaka akcija koja zauzme cilj pada na teret vaše strane. Da biste ih odbili, preuzmite Punu kontrolu: tada vam stiže svaki zahtjev, a vaša odluka tamo zamjenjuje historijsku zadanu postavku na svakom nivou komandovanja. Nakon toga štab bez pitanja šalje akcije samo uz Uvijek dozvoli.';
+// The middle sentence was reworded for §6 mechanics item 2 (the Full Control opener), signed by the §4 copy panel
+// (historian + narrative designer, unanimous), 2026-11-24.
+const P_EN = "No paramilitary policy decision comes up for your side. Until you decide yourself, your staff sends rear-area paramilitary sweeps without asking you, by your side's historical default, and each sweep that takes its target counts against your side. To refuse, take Full Control: there you can give a standing order at once, without waiting for a request, and each request comes to you. Your decision there replaces the historical default at every command level. After that, your staff sends sweeps without asking you only under Always allow.";
+const P_BCS = 'Za vašu stranu ne dolazi nikakva odluka o paravojnoj politici. Dok sami ne odlučite, štab bez pitanja šalje paravojne akcije u pozadini po historijskoj zadanoj postavci vaše strane, a svaka akcija koja zauzme cilj pada na teret vaše strane. Da biste ih odbili, preuzmite Punu kontrolu: tamo odmah možete dati stalnu naredbu, bez čekanja na zahtjev, a svaki zahtjev stiže vama. Vaša odluka tamo zamjenjuje historijsku zadanu postavku na svakom nivou komandovanja. Nakon toga štab bez pitanja šalje akcije samo uz Uvijek dozvoli.';
 
 const NO_CARD_KEYS = [
     'autonomy.level.assisted.descNoCard',
