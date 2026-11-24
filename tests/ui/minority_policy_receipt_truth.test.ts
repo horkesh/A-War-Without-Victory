@@ -1,11 +1,16 @@
 /**
  * RB5 halt-card receipt: shown only to a human-controlled HRHB whose halt card was answered `no_halt` (applied no later than the
- * act), with at least one municipality holding a matured HRHB policy-expulsion timer. It states M, never a people count. The real
- * adapter and ledger run on a saved-shape state; the signed EN and BCS strings are pinned word for word.
+ * act), with at least one municipality holding a matured HRHB policy-expulsion timer that still holds expelled people (a wave
+ * that displaced no one is not counted). It states M, never a people count. The real adapter and ledger run on a saved-shape
+ * state; the signed EN and BCS strings are pinned word for word.
  */
 
 import { describe, expect, it } from 'vitest';
 
+import type { SettlementRecord } from '../../src/map/settlements.js';
+import { processDisplacementTakeover } from '../../src/state/displacement_takeover.js';
+import { CURRENT_SCHEMA_VERSION, type GameState } from '../../src/state/game_state.js';
+import type { MunicipalityPopulation1991Map } from '../../src/state/population_share.js';
 import { initializeCasualtyLedger } from '../../src/state/casualty_ledger.js';
 import { createEmptyCapital } from '../../src/state/negotiation_types.js';
 import { parseGameState } from '../../src/ui/map/data/GameStateAdapter.js';
@@ -18,6 +23,7 @@ const TAIL_EN = 'This is an event of the simulated war, not a statement about wh
 const TAIL_BCS = 'Ovo je događaj simuliranog rata, a ne tvrdnja o tome šta se zaista desilo na tim mjestima.';
 
 const EN = {
+    chip: 'Carried out',
     titleInPerson: 'No halt ordered',
     titleAutomatic: 'No halt ordered (automatic answer)',
     outcomeMany: (m: number) => `Your side's historical default ran: Bosniaks were expelled from the ground the HVO held in ${m} municipalities.`,
@@ -28,6 +34,7 @@ const EN = {
     detailNoWarCrimeAutomatic: `Your staff answered automatically with your side's historical default, and no halt was ordered. A halt could be ordered only when the war with the ARBiH began, and only if you were playing below Observer level. ${TAIL_EN}`,
 };
 const BCS = {
+    chip: 'Provedeno',
     titleInPerson: 'Obustava nije naređena',
     titleAutomatic: 'Obustava nije naređena (automatski odgovor)',
     outcome: (m: number) => `Historijska zadana postavka vaše strane se provela: Bošnjaci su protjerani s područja koje je držao HVO. Broj općina: ${m}.`,
@@ -46,14 +53,21 @@ interface Opts {
     warCrime?: boolean;
     appliedTurn?: number;
     halted?: boolean;
+    /** Municipalities whose matured timers displaced no one (a zero-effect wave: `cumulative_displaced` 0). */
+    zeroEffectMunIds?: string[];
+    /** Raw timers taken from a real engine run instead of the synthetic ones. */
+    rawTimers?: Record<string, unknown>;
 }
 
-function timers(munIds: string[], maturedTurn: number | undefined) {
+function timers(munIds: string[], maturedTurn: number | undefined, zeroEffect: string[] = []) {
     const out: Record<string, unknown> = {};
     munIds.forEach((mun, i) => {
         // Two timers for the same municipality still count once.
-        out[`op:${mun}:${i}a`] = { mun_id: mun, from_faction: 'RBiH', to_faction: 'HRHB', started_turn: 40, cause: 'policy_expulsion', ...(maturedTurn !== undefined ? { matured_turn: maturedTurn } : {}) };
-        out[`op:${mun}:${i}b`] = { mun_id: mun, from_faction: 'RBiH', to_faction: 'HRHB', started_turn: 40, cause: 'policy_expulsion', ...(maturedTurn !== undefined ? { matured_turn: maturedTurn } : {}) };
+        const wave = maturedTurn !== undefined
+            ? { matured_turn: maturedTurn, cumulative_displaced: zeroEffect.includes(mun) ? 0 : 25 }
+            : {};
+        out[`op:${mun}:${i}a`] = { mun_id: mun, from_faction: 'RBiH', to_faction: 'HRHB', started_turn: 40, cause: 'policy_expulsion', ...wave };
+        out[`op:${mun}:${i}b`] = { mun_id: mun, from_faction: 'RBiH', to_faction: 'HRHB', started_turn: 40, cause: 'policy_expulsion', ...wave };
     });
     return out;
 }
@@ -77,7 +91,8 @@ function build(opts: Opts = {}) {
         political: { political_controllers: {}, municipalities: {} },
         displacement: {
             civilian_casualties: { RS: { killed: 0, fled_abroad: 0 }, RBiH: { killed: 0, fled_abroad: 0 }, HRHB: { killed: 0, fled_abroad: 0 } },
-            hostile_takeover_timers: timers(opts.munIds ?? ['mun_a', 'mun_b'], 'maturedTurn' in opts ? opts.maturedTurn : 44),
+            hostile_takeover_timers: opts.rawTimers
+                ?? timers(opts.munIds ?? ['mun_a', 'mun_b'], 'maturedTurn' in opts ? opts.maturedTurn : 44, opts.zeroEffectMunIds),
         },
     };
     const parsed = parseGameState(JSON.parse(JSON.stringify(raw)));
@@ -105,6 +120,14 @@ describe('RB5 halt-card receipt visibility', () => {
         expect(build({ munIds: [] }).ledger).toHaveLength(0);
         expect(build({ maturedTurn: undefined }).ledger).toHaveLength(0);
     });
+    it('a matured timer whose wave displaced no one is not counted (Codex #854 r4677761549)', () => {
+        // Every municipality zero-effect: no receipt at all.
+        expect(build({ zeroEffectMunIds: ['mun_a', 'mun_b'] }).ledger).toHaveLength(0);
+        // One real wave and one zero-effect municipality: M = 1, the singular string.
+        const mixed = build({ zeroEffectMunIds: ['mun_b'] });
+        expect(mixed.parsed.minorityPolicyReceipt?.municipalities).toBe(1);
+        expect(mixed.ledger[0]!.detail).toBe(`${EN.outcomeOne} ${EN.detailNoWarCrimeInPerson}`);
+    });
     it('an answer whose turn is after the applied turn is not credited', () => {
         expect(build({ row: { turn: 41, response_id: 'no_halt', decision_source: 'player' }, appliedTurn: 40 }).ledger).toHaveLength(0);
         expect(build({ row: { turn: 40, response_id: 'no_halt', decision_source: 'player' }, appliedTurn: 40 }).ledger).toHaveLength(1);
@@ -129,15 +152,17 @@ describe('RB5 halt-card receipt wording (signed copy, pinned)', () => {
             // Catalog strings through the record's tokens, in each language.
             const en = (field: 'title' | 'outcome' | 'detail') => resolveDecisionConsequenceCopy(record, field);
             expect(en('title')).toBe(c.titleEn);
-            expect(en('outcome')).toBe(EN.outcomeMany(2));
-            expect(en('detail')).toBe(c.detailEn);
+            // The outcome is the short chip; the signed outcome sentence leads the detail line, then the signed detail sentence.
+            expect(record.outcome).toBe('Carried out');
+            expect(en('outcome')).toBe(EN.chip);
+            expect(en('detail')).toBe(`${EN.outcomeMany(2)} ${c.detailEn}`);
             const tok = (field: 'titleToken' | 'outcomeToken' | 'detailToken') => record[field]!;
             const fill = (catalog: Record<string, string>, token: { key: string; params?: Record<string, string | number> }) => (
                 Object.entries(token.params ?? {}).reduce((text, [k, v]) => text.replace(`{${k}}`, String(v)), catalog[token.key] as string)
             );
             expect(fill(bcsMessages as any, tok('titleToken'))).toBe(c.titleBcs);
-            expect(fill(bcsMessages as any, tok('outcomeToken'))).toBe(BCS.outcome(2));
-            expect(fill(bcsMessages as any, tok('detailToken'))).toBe(c.detailBcs);
+            expect(fill(bcsMessages as any, tok('outcomeToken'))).toBe(BCS.chip);
+            expect(fill(bcsMessages as any, tok('detailToken'))).toBe(`${BCS.outcome(2)} ${c.detailBcs}`);
         });
     }
 
@@ -147,25 +172,27 @@ describe('RB5 halt-card receipt wording (signed copy, pinned)', () => {
     });
 
     it('war-crime variants only when the war-crime flag is true', () => {
-        expect(build({ warCrime: true }).ledger[0]!.detail).toBe(EN.detailInPerson);
-        expect(build({ warCrime: false }).ledger[0]!.detail).toBe(EN.detailNoWarCrimeInPerson);
+        expect(build({ warCrime: true }).ledger[0]!.detail).toBe(`${EN.outcomeMany(2)} ${EN.detailInPerson}`);
+        expect(build({ warCrime: false }).ledger[0]!.detail).toBe(`${EN.outcomeMany(2)} ${EN.detailNoWarCrimeInPerson}`);
         expect(build({ warCrime: false }).ledger[0]!.detail).not.toContain('counts against');
     });
 
     it('M counts distinct municipalities; M = 1 uses the singular EN string, BCS states M', () => {
         const three = build({ munIds: ['a', 'b', 'c'] });
         expect(three.parsed.minorityPolicyReceipt?.municipalities).toBe(3);
-        expect(three.ledger[0]!.outcome).toBe(EN.outcomeMany(3));
+        expect(three.ledger[0]!.outcome).toBe(EN.chip);
+        expect(three.ledger[0]!.detail).toBe(`${EN.outcomeMany(3)} ${EN.detailNoWarCrimeInPerson}`);
         const one = build({ munIds: ['a'] });
         expect(one.parsed.minorityPolicyReceipt?.municipalities).toBe(1);
-        expect(one.ledger[0]!.outcome).toBe(EN.outcomeOne);
-        expect(one.ledger[0]!.outcomeToken!.params).toEqual({ municipalities: 1 });
-        expect((bcsMessages as any)[one.ledger[0]!.outcomeToken!.key].replace('{municipalities}', '1')).toBe(BCS.outcome(1));
+        expect(one.ledger[0]!.outcome).toBe(EN.chip);
+        expect(one.ledger[0]!.detail).toBe(`${EN.outcomeOne} ${EN.detailNoWarCrimeInPerson}`);
+        expect(one.ledger[0]!.detailToken!.params).toEqual({ municipalities: 1 });
+        expect((bcsMessages as any)[one.ledger[0]!.detailToken!.key].replace('{municipalities}', '1')).toBe(`${BCS.outcome(1)} ${BCS.detailNoWarCrimeInPerson}`);
     });
 
     it('never shows a people count and avoids permission words, in either language', () => {
         const keys = Object.keys(enMessages).filter((key) => key.includes('minorityPolicy'));
-        expect(keys.length).toBe(9);
+        expect(keys.length).toBe(12);
         for (const key of keys) {
             expect((bcsMessages as any)[key], `${key} (bcs)`).toBeTypeOf('string');
             for (const text of [(enMessages as any)[key] as string, (bcsMessages as any)[key] as string]) {
@@ -173,5 +200,76 @@ describe('RB5 halt-card receipt wording (signed copy, pinned)', () => {
                 expect(text).not.toContain('{people}');
             }
         }
+    });
+});
+
+describe('RB5 halt-card receipt from a real engine run (zero-effect wave, Codex #854 r4677761549)', () => {
+    // A Croat-only Vitez OSID: the policy timer matures but its wave displaces no one. A Mostar OSID with Bosniaks: a real wave.
+    const pop1991: MunicipalityPopulation1991Map = {
+        vitez: { total: 1000, bosniak: 410, serb: 50, croat: 450, other: 90 },
+        mostar: { total: 1000, bosniak: 400, serb: 50, croat: 500, other: 50 },
+    };
+    const osid = (sid: string, total: number, bosniaks: number, croats: number) => ({
+        sid,
+        source_id: sid,
+        mun_code: sid.split(':')[1],
+        mun: sid.split(':')[1],
+        properties: { population_total: total, population_bosniaks: bosniaks, population_croats: croats, population_serbs: 0, population_others: 0 },
+    } as unknown as SettlementRecord);
+    const settlements = new Map<string, SettlementRecord>([
+        ['op:vitez:vitez', osid('op:vitez:vitez', 1000, 0, 1000)],
+        ['op:mostar:zapad', osid('op:mostar:zapad', 2000, 600, 1400)],
+    ]);
+
+    function engineRun(): GameState {
+        const state = {
+            schema_version: CURRENT_SCHEMA_VERSION,
+            meta: { turn: 50, seed: 'rb5-receipt', phase: 'war', war_start_turn: 0, rbih_hrhb_war_earliest_turn: 20, player_faction: 'HRHB', autonomy_level: 2, headless_scenario_auto_control: false },
+            factions: [],
+            military: {
+                formations: {},
+                militia_pools: {},
+                event_flags: {},
+                event_decision_log: [{ event_id: CARD, response_id: 'no_halt', faction: 'HRHB', turn: 50, decision_source: 'player' }],
+                war_front_edges_osid: [],
+                negotiation: { capital: {
+                    HRHB: { war_crimes_events: 0, war_crimes_events_emergent: 0 },
+                    RBiH: { war_crimes_events: 0, war_crimes_events_emergent: 0 },
+                    RS: { war_crimes_events: 0, war_crimes_events_emergent: 0 },
+                } },
+            },
+            political: {
+                war_alliance_rbih_hrhb: 0.05,
+                rbih_hrhb_state: { war_started_turn: 49 },
+                political_controllers: { 'op:vitez:vitez': 'HRHB', 'op:mostar:zapad': 'HRHB' },
+            },
+            displacement: {},
+        } as unknown as GameState;
+        for (let turn = 50; turn <= 80; turn++) {
+            state.meta.turn = turn;
+            processDisplacementTakeover(state, new Map(), { battles: [] } as any, pop1991, settlements);
+        }
+        return state;
+    }
+
+    it('the engine matures the Vitez timer with no one displaced; the receipt counts only Mostar', () => {
+        const state = engineRun();
+        const all = state.displacement.hostile_takeover_timers ?? {};
+        const vitez = all['op:vitez:vitez|RBiH'];
+        const mostar = all['op:mostar:zapad|RBiH'];
+        // The premise Codex reported: maturity without effect.
+        expect(vitez?.cause).toBe('policy_expulsion');
+        expect(vitez?.matured_turn).toBeTypeOf('number');
+        expect(vitez?.cumulative_displaced ?? 0).toBe(0);
+        expect((state.displacement.displacement_event_log ?? []).filter((e) => e.origin_osid === 'op:vitez:vitez')).toEqual([]);
+        expect(mostar?.matured_turn).toBeTypeOf('number');
+        expect(mostar?.cumulative_displaced ?? 0).toBeGreaterThan(0);
+
+        const applied = Number(state.military.event_flags.hrhb_minority_policy_applied_turn);
+        expect(applied).toBe(50);
+        const { parsed, ledger } = build({ rawTimers: all, row: { turn: 50, response_id: 'no_halt', decision_source: 'player' }, appliedTurn: applied });
+        expect(parsed.minorityPolicyReceipt?.municipalities).toBe(1);
+        expect(ledger).toHaveLength(1);
+        expect(ledger[0]!.detail).toBe(`${EN.outcomeOne} ${EN.detailNoWarCrimeInPerson}`);
     });
 });

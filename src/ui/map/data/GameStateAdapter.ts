@@ -4618,8 +4618,9 @@ function deriveParamilitaryUnrequested(
 /**
  * RB5 halt-card receipt (display only, no new state field). Shown only to a human-controlled HRHB when the halt card's answer
  * on record is the historical default (`no_halt`), applied by the turn the policy was seeded (`decisionAppliedTurn`: an answer
- * applied after the act is never credited), and at least one municipality holds a matured HRHB `policy_expulsion` timer. It
- * states M, the count of those municipalities, and never a people count.
+ * applied after the act is never credited), and at least one municipality holds a matured HRHB `policy_expulsion` timer that
+ * still holds expelled people (a zero-effect wave is not counted). It states M, the count of those municipalities, and never a
+ * people count.
  */
 function deriveMinorityPolicyReceipt(
     state: any,
@@ -4636,8 +4637,13 @@ function deriveMinorityPolicyReceipt(
     const timers = state.displacement?.hostile_takeover_timers;
     for (const key of Object.keys(timers && typeof timers === 'object' ? timers : {}).sort(strictCompare)) {
         const timer = timers[key];
+        // Maturity alone is no evidence: the engine marks a policy timer matured even when its wave displaced no one
+        // (`processDisplacementTakeover` sets `matured_turn` outside the `displacementAmount > 0` branch), e.g. on ground
+        // with no Bosniaks left. A timer that holds no expelled people (`cumulative_displaced` 0) is not counted; the RB9
+        // return rule deletes a timer once all its people are back, so a held count is the surviving trace of the wave.
         if (timer && timer.cause === 'policy_expulsion' && timer.to_faction === 'HRHB'
-            && timer.matured_turn !== undefined && typeof timer.mun_id === 'string') {
+            && timer.matured_turn !== undefined && typeof timer.mun_id === 'string'
+            && Number(timer.cumulative_displaced ?? 0) > 0) {
             munIds.add(timer.mun_id);
         }
     }
