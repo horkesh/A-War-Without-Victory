@@ -288,11 +288,14 @@ When per-municipality routing is exhausted or no route is defined:
 | DRINA_NORTH | srebrenica, kalesija, tuzla, kladanj |
 | DRINA_SOUTH | gorazde, centar_sarajevo, zenica |
 | DRINA_SEKOVICI | kladanj, olovo, tuzla |
-| SARAJEVO_RS_HELD | centar_sarajevo, visoko, zenica |
+| SARAJEVO_RS_HELD | centar_sarajevo, stari_grad_sarajevo, novo_sarajevo, novi_grad_sarajevo, hadzici, visoko, zenica |
 | CENTRAL_BOSNIA | travnik, zenica, kakanj, visoko |
 | HERZEGOVINA | jablanica, konjic, zenica, travnik |
 | HERCEG_EAST | gorazde, centar_sarajevo |
 | BIHAC_EDGE | bihac, cazin, velika_kladusa |
+
+
+Known limit (A8, 2026-11-24): both writers fill a route first-fit, each destination up to its cap, so arrivals concentrate in list order and a later-listed municipality receives only overflow. SARAJEVO_RS_HELD lists RBiH-held Novo Sarajevo before Novi Grad: with Novi Grad first, Novo Sarajevo received 0 arrivals over 188 weeks, a modelling artefact of list order. Novi Grad now receives later. DRINA_SOUTH and HERCEG_EAST name only centar_sarajevo in the city and are unchanged (an open limit).
 
 #### Croat Routes (15 sub-regions)
 
