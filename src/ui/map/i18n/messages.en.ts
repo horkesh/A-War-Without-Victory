@@ -4215,6 +4215,7 @@ export const enMessages = {
     'codex.record.pathNotTaken': 'Path not taken',
     'codex.record.divergenceContext': 'Campaign divergence',
     'codex.record.auditContext': 'Audit context',
+    'codex.record.campaignRecord': 'Campaign record',
     'codex.essayAvailableSingular': '1 essay available',
     'codex.essayAvailablePlural': '{count} essays available',
     'codex.ghost': 'Ghost',

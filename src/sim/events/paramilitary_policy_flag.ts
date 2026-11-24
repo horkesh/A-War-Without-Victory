@@ -6,12 +6,32 @@
  * all read it without an import cycle. The mirror's in-person check lives here for the same reason.
  */
 
-import type { FactionId, GameState } from '../../state/game_state.js';
+import type { FactionId } from '../../state/game_state.js';
 import {
     PARAMILITARY_POLICY_CARD_BY_FACTION,
+    appliedParamilitaryPolicyCardAnswer,
     hasParamilitaryPolicyCardApplied,
     readParamilitaryStandingOrder,
 } from './paramilitary_policy_card.js';
+import type { ParamilitaryPolicyOrder, ParamilitaryPolicyStateView } from './paramilitary_policy_card.js';
+
+/**
+ * The read shape of the in-person checks below (§6 item 3: structural, so the Codex's ghost view reads them with
+ * no cast). `GameState`, the player-visible projection and `GhostEntryStateView` all fit it.
+ */
+export interface InPersonParamilitaryStateView extends ParamilitaryPolicyStateView {
+    readonly paramilitary_decision_history?: ReadonlyArray<{ readonly faction?: string | null; readonly turn?: number } | null | undefined> | null;
+    readonly military?: {
+        readonly fired_event_ids?: readonly string[];
+        readonly event_fire_counts?: Readonly<Record<string, number | undefined>>;
+        readonly event_decision_log?: ReadonlyArray<{
+            readonly event_id: string;
+            readonly decision_source?: string;
+            readonly turn?: number;
+        }>;
+        readonly event_flags?: Readonly<Record<string, unknown>>;
+    } | null;
+}
 
 /** The three standing orders a policy card or the review modal can write. */
 export type ParamilitaryPolicy = 'always_allow' | 'always_deny' | 'ask';
@@ -60,7 +80,7 @@ export const PARAMILITARY_POLICY_CARD_ID_BY_FACTION: Readonly<Partial<Record<Fac
  * and another side's card answer counts as a human decision only once that card has applied
  * (`hasParamilitaryPolicyCardApplied`, T's shared accessor): a filed, unapplied answer is none.
  */
-export function hasInPersonParamilitaryStandingOrder(state: GameState, faction: FactionId): boolean {
+export function hasInPersonParamilitaryStandingOrder(state: InPersonParamilitaryStateView, faction: FactionId): boolean {
     const order = readParamilitaryStandingOrder(state, faction);
     if (order !== 'always_allow' && order !== 'always_deny') return false;
     const history = Array.isArray(state.paramilitary_decision_history) ? state.paramilitary_decision_history : [];
@@ -82,4 +102,32 @@ export function hasInPersonParamilitaryStandingOrder(state: GameState, faction: 
         if (appliedOtherCardIds.has(entry.event_id)) newestOther = Math.max(newestOther, Number(entry.turn));
     }
     return newestOwn >= newestOther;
+}
+
+/**
+ * The answer the side's policy card APPLIED, when the player gave it in person: the card has applied
+ * (`appliedParamilitaryPolicyCardAnswer`) and the newest decision-log row for the card is the player's
+ * (`decision_source === 'player'`; newest by turn, the later row on a tie: the log is append-only). Null when the
+ * card has not applied, the side has no card (HRHB), or the newest answer was automatic (Observer, the staff
+ * default, a bot): §6 item 3, an automatic answer is the side's historical default, not the player's decision.
+ */
+export function inPersonParamilitaryPolicyCardAnswer(
+    state: InPersonParamilitaryStateView,
+    faction: FactionId,
+): ParamilitaryPolicyOrder | null {
+    const applied = appliedParamilitaryPolicyCardAnswer(state, faction);
+    const card = PARAMILITARY_POLICY_CARD_BY_FACTION[faction];
+    if (applied === null || !card) return null;
+    let newestTurn = Number.NEGATIVE_INFINITY;
+    let newestSource: string | undefined;
+    for (const entry of state.military?.event_decision_log ?? []) {
+        if (entry?.event_id !== card.eventId) continue;
+        const turn = Number(entry.turn);
+        const comparable = Number.isFinite(turn) ? turn : Number.NEGATIVE_INFINITY;
+        if (comparable >= newestTurn) {
+            newestTurn = comparable;
+            newestSource = entry.decision_source;
+        }
+    }
+    return newestSource === 'player' ? applied : null;
 }

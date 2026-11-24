@@ -79,6 +79,7 @@ function ghostClassificationLabel(classification: GhostRecordClassification): st
     switch (classification) {
         case 'path_not_taken': return t('codex.record.pathNotTaken');
         case 'audit_context': return t('codex.record.auditContext');
+        case 'campaign_record': return t('codex.record.campaignRecord');
         case 'divergence_context':
         default: return t('codex.record.divergenceContext');
     }

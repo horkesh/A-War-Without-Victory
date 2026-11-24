@@ -46,7 +46,15 @@
 import { strictCompare } from '../../state/validateGameState.js';
 import { CANONICAL_FACTIONS } from '../../state/game_state.js';
 import { authoredWarCrimeIncidents, authoredWarCrimeIncidentTerms } from '../events/authored_war_crimes.js';
-import { readParamilitaryStandingOrder } from '../events/paramilitary_policy_card.js';
+import {
+    PARAMILITARY_POLICY_CARD_BY_FACTION,
+    paramilitaryPolicyCardHistoricalDefault,
+    readParamilitaryStandingOrder,
+} from '../events/paramilitary_policy_card.js';
+import {
+    hasInPersonParamilitaryStandingOrder,
+    inPersonParamilitaryPolicyCardAnswer,
+} from '../events/paramilitary_policy_flag.js';
 import type { GameState, FactionId } from '../../state/game_state.js';
 import {
     buildRealizedConsequenceReceipts,
@@ -99,7 +107,10 @@ export interface BuiltDynamicSection {
 /** A classified Campaign Codex record. Records live as standalone Markdown
  *  bodies under `data/codex/ghost_entries/` and surface only when their exact
  *  persisted-state predicate evaluates true. */
-export type GhostRecordClassification = 'path_not_taken' | 'divergence_context' | 'audit_context';
+export type GhostRecordClassification = 'path_not_taken' | 'divergence_context' | 'audit_context' | 'campaign_record';
+
+/** The context classifications (every one but `path_not_taken`, which alone carries missed-condition proof). */
+type ContextGhostClassification = Exclude<GhostRecordClassification, 'path_not_taken'>;
 
 interface BuiltGhostEntryBase {
     /** Stable ghost id matching the file basename under `data/codex/ghost_entries/`. */
@@ -125,7 +136,7 @@ export type BuiltGhostEntry =
         missed_condition_predicate: NamedClaimPredicate;
     })
     | (BuiltGhostEntryBase & {
-        classification: 'divergence_context' | 'audit_context';
+        classification: ContextGhostClassification;
         missed_condition_predicate?: never;
     });
 
@@ -181,6 +192,9 @@ export interface GhostEntryStateView {
     paramilitary_policy?: GameState['paramilitary_policy'];
     /** Running total of paramilitary deployments per faction (owner: paramilitary_sweep). */
     paramilitary_deployment_count?: Partial<Record<FactionId, number>>;
+    /** The side's own paramilitary decisions (request answers and standing orders); read only through
+     *  `hasInPersonParamilitaryStandingOrder` (§6 item 3). */
+    paramilitary_decision_history?: ReadonlyArray<{ readonly faction?: string | null; readonly turn?: number } | null | undefined> | null;
     military?: {
         event_flags?: Record<string, GhostEntryFlagValue>;
         event_fire_counts?: Record<string, number | undefined>;
@@ -268,6 +282,8 @@ interface GhostPredicateMatch {
     claim_operands: ClaimPredicateOperand[];
     missed_operands: ClaimPredicateOperand[];
     calendar_context: string[];
+    /** Per-match classification of a context entry, when it depends on the data (§6 item 3); else the registry's. */
+    classification?: ContextGhostClassification;
 }
 
 interface SelectedPlayerSubject {
@@ -467,10 +483,55 @@ function predAllianceHeld(state: GhostEntryStateView, currentTurn: number): Ghos
     return operands ? matchGhost(operands, [operands[1]!], currentTurn, 70) : null;
 }
 
+/**
+ * The side's OWN Always deny (§6 item 3, ruling operand (b), an OR): the player answered the side's policy card
+ * in person with Always deny, or the side has its own in-person standing order on record
+ * (`hasInPersonParamilitaryStandingOrder`: a review-modal Always deny or a Full Control standing order). An
+ * automatic answer (Observer, the staff default) is neither, so it never proves a refusal.
+ */
+function ownParamilitaryDenyOperand(
+    state: GhostEntryStateView,
+    faction: FactionId,
+): ClaimPredicateOperand | null {
+    const cardAnswer = inPersonParamilitaryPolicyCardAnswer(state, faction);
+    if (cardAnswer === 'always_deny') {
+        const eventId = PARAMILITARY_POLICY_CARD_BY_FACTION[faction]?.eventId ?? '';
+        return {
+            owner_path: 'state.military.event_decision_log',
+            operator: 'equals',
+            expected_value: 'player:always_deny',
+            observed_value: `player:${cardAnswer}`,
+            expression: `in_person_card_answer[${eventId}]=always_deny`,
+        };
+    }
+    if (hasInPersonParamilitaryStandingOrder(state, faction)) {
+        return {
+            owner_path: 'state.paramilitary_decision_history',
+            operator: 'equals',
+            expected_value: true,
+            observed_value: true,
+            expression: `in_person_standing_order[${faction}]=true`,
+        };
+    }
+    return null;
+}
+
+/**
+ * The label of a refusal (§4 panel, 2026-11-24, unanimous), keyed on the side's card DATA, never a faction name:
+ * "Campaign divergence" only when the side has a card whose historical default is present and is not Always deny
+ * (the refusal departs from history); otherwise "Campaign record", which claims nothing about history (a card whose
+ * default is Always deny, or no card at all: the no-card "allow" is an engine fallback, not a sourced default).
+ */
+function cleansingRefusedClassification(faction: FactionId): ContextGhostClassification {
+    const historicalDefault = paramilitaryPolicyCardHistoricalDefault(faction);
+    return historicalDefault !== null && historicalDefault !== 'always_deny' ? 'divergence_context' : 'campaign_record';
+}
+
 // — Ghost 2: cleansing_refused —
-//   paramilitary_policy === 'always_deny' for player faction full run AND no
-//   war-crime incident the faction authorized in play at turn ≥ 100 (§6 E3b:
-//   `authoredWarCrimeIncidents`, never the shared delta counter).
+//   The standing order in force is Always deny AND no war-crime incident the
+//   faction authorized in play (§6 E3b: `authoredWarCrimeIncidents`) AND zero
+//   paramilitary deployments for the run, staff sweeps included AND the deny is
+//   the side's own decision (§6 item 3), at turn ≥ 100.
 function predCleansingRefused(
     state: GhostEntryStateView,
     currentTurn: number,
@@ -478,8 +539,11 @@ function predCleansingRefused(
 ): GhostPredicateMatch | null {
     const policy = policyOperand(state, faction, 'always_deny');
     const cleanHands = authoredWarCrimesZeroOperands(state, faction);
-    if (!policy || !cleanHands) return null;
-    return matchGhost([policy, ...cleanHands], cleanHands, currentTurn, 100);
+    const noDeployments = paramilitaryDeploymentsZeroOperand(state, faction);
+    const ownDeny = ownParamilitaryDenyOperand(state, faction);
+    if (!policy || !cleanHands || !noDeployments || !ownDeny) return null;
+    const match = matchGhost([policy, ...cleanHands, noDeployments, ownDeny], cleanHands, currentTurn, 100);
+    return match ? { ...match, classification: cleansingRefusedClassification(faction) } : null;
 }
 
 // — Ghost 3: enclave_defended (AUDIT-ONLY) —
@@ -1276,7 +1340,7 @@ export function buildGhostEntries(state: GhostEntryStateView, currentTurn: numbe
                 missed_condition_predicate: missedCondition,
             });
         } else {
-            emitted.push({ ...common, classification: entry.classification });
+            emitted.push({ ...common, classification: match.classification ?? entry.classification });
         }
     }
 
