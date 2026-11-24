@@ -189,6 +189,7 @@ export function HumanitarianLedgerPanel({ state, open, onClose }: HumanitarianLe
                   {byPeople.rows.length > 0 && (
                     <SurfaceSection label={t('humanitarianLedger.section.byPeople')}>
                       <SurfacePanel>
+                        <p data-testid="humanitarian-ledger-fled-abroad-note" className="m-0 mb-3 text-[14px] italic leading-relaxed text-[#b9ad94]">{t('humanitarianLedger.note.fledAbroad')}</p>
                         <table className="w-full border-collapse">
                           <thead>
                             <tr className="border-b border-[#262b35]">
