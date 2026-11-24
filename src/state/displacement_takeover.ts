@@ -60,10 +60,12 @@ export const BILATERAL_HRHB_FLEE_ABROAD = 0.35;
 // The 1993 HVO expulsions of Bosniaks took place inside ground the HVO already held
 // (the Lašva valley, west Mostar, Stolac, Čapljina, Prozor; Prlić et al. TJ 2013, affirmed
 // on appeal 2017), so takeover displacement, which needs a control change, never saw them.
-// A bot-controlled faction whose historical policy was expulsion
-// (BOT_MINORITY_EXPULSION_POLICY: HRHB) seeds, once, when the open bilateral war has begun,
-// a timer for the other community in every OSID it holds inside the municipalities where
-// the record finds the policy applied (POLICY_EXPULSION_SCOPE). There is no player decision. Each timer fires one bounded wave and never drains further.
+// A faction whose historical policy was expulsion (BOT_MINORITY_EXPULSION_POLICY: HRHB) seeds,
+// once, when the open bilateral war has begun, a timer for the other community in every OSID it
+// holds inside the municipalities where the record finds the policy applied
+// (POLICY_EXPULSION_SCOPE). A bot applies it; a human-controlled faction's staff apply it as the
+// side's historical default once the halt card's decision is on record, and the player's own
+// halt order refuses it (RB5, owner rule 2026-11-22). Each timer fires one bounded wave and never drains further.
 // Control is never changed: an OSID the faction no longer holds is not seeded, and a
 // recapture before the wave clears the timer.
 export interface PolicyExpulsionScopeEntry {
@@ -108,16 +110,25 @@ export const POLICY_EXPULSION_SCOPE: Partial<Record<FactionId, Record<Municipali
 /** Wave B starts this many turns after the policy is applied (≈ mid-April → July 1993). */
 export const POLICY_WAVE_B_DELAY_TURNS = 12;
 /**
- * Historical minority policy of a BOT-controlled faction in the RBiH-HRHB war (§6 panel,
- * 2026-11-14: bot-only; SENSITIVE_HISTORY_DESIGN_GATE.md §3 keeps paramilitary_policy as the
- * only player-facing war-crime surface, and Ring 3 #5 lets bots act where the record
- * documents it). HRHB: the Prlić Trial Chamber found a joint criminal enterprise from
- * mid-January 1993 whose common purpose was domination by the Herceg-Bosna Croats through
- * the ethnic cleansing of the Muslim population (affirmed on appeal, 2017). RBiH: no ARBiH
- * joint criminal enterprise or expulsion policy was charged or found, so it has none.
- * A human-controlled faction never expels: no player decision exists.
+ * Historical minority policy of a faction in the RBiH-HRHB war (§6 panel 2026-11-14, then the
+ * broader bright-line panel 2026-11-23 under the owner rule of 2026-11-22: a bot applies it; a
+ * human side's staff apply it as the historical default; the player's only act is the halt card,
+ * offered once at the start of the war; Ring 3 #5 unchanged). HRHB: the Prlić Trial Chamber found
+ * a joint criminal enterprise from mid-January 1993 whose common purpose was domination by the
+ * Herceg-Bosna Croats through the ethnic cleansing of the Muslim population (affirmed on appeal,
+ * 2017). RBiH: no ARBiH joint criminal enterprise or expulsion policy was charged or found, so it
+ * has none.
  */
 export const BOT_MINORITY_EXPULSION_POLICY: Partial<Record<FactionId, true>> = { HRHB: true };
+/**
+ * RB5: the halt card per faction (data/scenarios/events/war_1993.json). It fires once, on the first
+ * turn after the open bilateral war begins, and is answerable only then; its historical default is
+ * MINORITY_POLICY_DEFAULT_RESPONSE_ID. The halt option is the sole writer of the halt flag.
+ */
+export const MINORITY_POLICY_CARD_ID_BY_FACTION: Partial<Record<FactionId, string>> = { HRHB: 'hrhb_minority_policy_1993' };
+export const MINORITY_POLICY_HALT_FLAG_BY_FACTION: Partial<Record<FactionId, string>> = { HRHB: 'hrhb_minority_policy_halted' };
+export const MINORITY_POLICY_DEFAULT_RESPONSE_ID = 'no_halt';
+export const MINORITY_POLICY_HALT_RESPONSE_ID = 'order_halt';
 /** Deterministic iteration order for the policy seed (strictCompare order of the pair). */
 const BILATERAL_POLICY_HOLDER_ORDER: readonly FactionId[] = ['HRHB', 'RBiH'];
 
@@ -136,12 +147,38 @@ function getPolicyExpulsionEntry(faction: FactionId, munId: MunicipalityId): Pol
 }
 
 /**
- * True when the faction follows an expulsion policy: it is bot-controlled (not the player's
- * faction) and BOT_MINORITY_EXPULSION_POLICY records one for it.
+ * The human's halt-card decision for the faction: 'none' while no decision is on record (the card
+ * has not fired, or it is unanswered), 'refused' when the player ordered a halt, 'default' when the
+ * historical default stands (answered in person, or by Observer's automatic answer). Fails closed:
+ * the halt flag, or any player row for the card other than the default (a malformed row included),
+ * is a refusal; an automatic (non-player) row is never one.
+ */
+function minorityPolicyCardDecision(state: GameState, faction: FactionId): 'none' | 'default' | 'refused' {
+    const cardId = MINORITY_POLICY_CARD_ID_BY_FACTION[faction];
+    const haltFlag = MINORITY_POLICY_HALT_FLAG_BY_FACTION[faction];
+    if (!cardId || !haltFlag) return 'none';
+    const flags = state.military?.event_flags ?? {};
+    if (flags[haltFlag] !== undefined && flags[haltFlag] !== false) return 'refused';
+    let onRecord = false;
+    for (const row of state.military?.event_decision_log ?? []) {
+        if (row?.event_id !== cardId) continue;
+        if (row.decision_source === 'player' && row.response_id !== MINORITY_POLICY_DEFAULT_RESPONSE_ID) return 'refused';
+        onRecord = true;
+    }
+    return onRecord ? 'default' : 'none';
+}
+
+/**
+ * True when the faction follows an expulsion policy: BOT_MINORITY_EXPULSION_POLICY records one,
+ * and either a bot holds the side (no player_faction, or the headless harness), or the side is
+ * human-controlled at any autonomy level, the halt card's decision is on record and the player did
+ * not order a halt. The human check is inlined: the state layer does not import sim/combat.
  */
 export function hasMinorityExpulsionPolicy(state: GameState, faction: FactionId): boolean {
-    if (state.meta.player_faction === faction) return false;
-    return BOT_MINORITY_EXPULSION_POLICY[faction] === true;
+    if (BOT_MINORITY_EXPULSION_POLICY[faction] !== true) return false;
+    const humanControlled = state.meta.player_faction === faction && state.meta.headless_scenario_auto_control !== true;
+    if (!humanControlled) return true;
+    return minorityPolicyCardDecision(state, faction) === 'default';
 }
 
 /** Krajina Bosniaks: ~55% ended abroad, largely via ICRC/UNHCR convoys to Croatia (Karlovac transit camp).
@@ -962,8 +999,9 @@ export function processDisplacementTakeover(
     // 0b) RF-5B: policy-driven bilateral seed. Step 0 runs on the first war turn of 1992,
     //     when RBiH and HRHB are allied, so it never seeds this pair. Once the open bilateral
     //     war has begun (rbih_hrhb_state.war_started_turn) and while the pair is at war, a
-    //     bot-controlled faction with an expulsion policy seeds (once per faction) the other
-    //     community in every OSID it holds inside its POLICY_EXPULSION_SCOPE municipalities.
+    //     faction with an expulsion policy (hasMinorityExpulsionPolicy: a bot, or a human side
+    //     whose halt-card decision is on record and is not a halt) seeds (once per faction) the
+    //     other community in every OSID it holds inside its POLICY_EXPULSION_SCOPE municipalities.
     //     Wave B timers start POLICY_WAVE_B_DELAY_TURNS later.
     const bilateralWarStarted = typeof state.political.rbih_hrhb_state?.war_started_turn === 'number';
     if (bilateralWarStarted) {

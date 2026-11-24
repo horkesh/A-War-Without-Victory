@@ -19,8 +19,8 @@
 > **Siege displacement lane (2026-11-14):** The continuous siege/encirclement path (§2.3) is now live
 > (it received legacy edges and never fired before), and flight abroad is set per people and region (§5).
 >
-> **RF-5B (2026-11-14):** A third trigger with no control change: the bot-only minority-expulsion policy
-> (§3.4). The HVO's 1993 expulsions of Bosniaks happened inside ground it already held, which the takeover
+> **RF-5B (2026-11-14; RB5 2026-11-24):** A third trigger with no control change: the minority-expulsion policy
+> (§3.4; a human HRHB can halt it once, by the RB5 card). The HVO's 1993 expulsions of Bosniaks happened inside ground it already held, which the takeover
 > trigger could not see.
 
 ## 1. Overview
@@ -121,7 +121,7 @@ Runs every turn. The war step (`update-displacement` in `war_phases.ts`) feeds i
 
 ### 3.1 Hostile Takeover (OSID-Based) — **PRIMARY TRIGGER**
 
-The primary displacement trigger since 2026-03-01: capture displacement flows through this path. The other live writers are the siege path (§3.3, live since 2026-11-14), paramilitary sweeps and the bot-only policy expulsion (§3.4, RF-5B). As of 2026-03-05, sustained displacement is active: initial wave = 70% of minority, sustained trickle = 3%/turn on remaining 30% until < 10 people remain.
+The primary displacement trigger since 2026-03-01: capture displacement flows through this path. The other live writers are the siege path (§3.3, live since 2026-11-14), paramilitary sweeps and the policy expulsion (§3.4, RF-5B; a human HRHB can halt it, RB5). As of 2026-03-05, sustained displacement is active: initial wave = 70% of minority, sustained trickle = 3%/turn on remaining 30% until < 10 people remain.
 
 **Two trigger sources:**
 
@@ -197,11 +197,11 @@ The consecutive-turn counter is saved state: `DisplacementState.unsupplied_press
 
 ---
 
-### 3.4 Policy Expulsion (RF-5B, bot-only)
+### 3.4 Policy Expulsion (RF-5B; human halt card RB5)
 
 Owner: `processDisplacementTakeover` step 0b (`src/state/displacement_takeover.ts`). §6 broader bright-line panel record: `SENSITIVE_HISTORY_DESIGN_GATE.md` §6 (RF-5B).
 
-- **Who:** a faction listed in `BOT_MINORITY_EXPULSION_POLICY` (HRHB only) **while bot-controlled** (`state.meta.player_faction !== faction`). A human-controlled faction never expels; there is no player decision. RBiH has no entry: no ARBiH joint criminal enterprise or expulsion policy was charged or found (Hadžihasanović and Kubura; Halilović). The HRHB entry follows the Prlić et al. joint-criminal-enterprise finding (TJ 2013, affirmed 2017).
+- **Who:** a faction listed in `BOT_MINORITY_EXPULSION_POLICY` (HRHB only) **while bot-controlled** (`state.meta.player_faction !== faction`, or `headless_scenario_auto_control`), or **human-controlled once the halt card's decision is on record and is not a halt** (RB5, 2026-11-24). The card `hrhb_minority_policy_1993` fires the turn after the war begins (before step 0b), answerable once; its historical default is no halt (at Observer it is answered automatically); `order_halt` sets `hrhb_minority_policy_halted` and costs `patron_confidence` −10 (modelled, unsourced). A human never offered the card (old saves, trigger miss) is not seeded (fail closed). The player can order a halt, never an expulsion. RBiH has no entry: no ARBiH joint criminal enterprise or expulsion policy was charged or found (Hadžihasanović and Kubura; Halilović). The HRHB entry follows the Prlić et al. joint-criminal-enterprise finding (TJ 2013, affirmed 2017).
 - **When:** once per faction, on the first turn on which `rbih_hrhb_state.war_started_turn` is set and the pair is at war (in the 188w campaign: t50). The applied turn is recorded in event flag `hrhb_minority_policy_applied_turn`.
 - **Where:** every OSID the faction then holds inside a `POLICY_EXPULSION_SCOPE` municipality. A timer `${osid}|RBiH` with `cause: 'policy_expulsion'` is seeded; wave B timers start `POLICY_WAVE_B_DELAY_TURNS` (12) later.
 

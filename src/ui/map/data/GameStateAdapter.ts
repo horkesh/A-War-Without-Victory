@@ -41,6 +41,7 @@ import type {
     StanceHoldView, StanceMatterReceiptView, StanceMatterView,
     ArmyClashView, ArmyClashReceiptView,
     ParamilitaryUnrequestedView,
+    MinorityPolicyReceiptView,
 } from './types';
 import { proposalBackingCost } from '../utils/commandAuthority';
 import {
@@ -67,6 +68,11 @@ import { computeFullVerdict } from '../../../sim/negotiation/scoring.js';
 import { DIMENSION_WEIGHTS } from '../../../sim/events/strategic_dimensions.js';
 import { ANSWER_AHEAD_EVENT_IDS, decisionAppliedTurn } from '../../../sim/events/answer_ahead_of_firing.js';
 import { paramilitaryStandingOrderCap, readParamilitaryStandingOrder } from '../../../sim/events/paramilitary_policy_card.js';
+import {
+    MINORITY_POLICY_CARD_ID_BY_FACTION,
+    MINORITY_POLICY_DEFAULT_RESPONSE_ID,
+    MINORITY_POLICY_HALT_FLAG_BY_FACTION,
+} from '../../../state/displacement_takeover.js';
 import type { GameVerdict } from '../../../state/negotiation_types.js';
 import { buildCostLedger } from '../../../sim/endgame/cost_ledger.js';
 import { compareToHistorical, endingBasisForState } from '../../../sim/endgame/endgame_comparison.js';
@@ -2828,6 +2834,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
     const peacePlanHistory = derivePeacePlanHistory(state, playerFaction);
     const paramilitaryDecisionHistory = deriveParamilitaryDecisionHistory(state, playerFaction);
     const paramilitaryUnrequested = deriveParamilitaryUnrequested(state, playerFaction);
+    const minorityPolicyReceipt = deriveMinorityPolicyReceipt(state, playerFaction);
     const officerDecisionHistory = deriveOfficerDecisionHistory(state, playerFaction);
     const armyReserveQueue = deriveArmyReserveQueue({
         pendingReserveRequests,
@@ -3003,6 +3010,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         peacePlanHistory,
         paramilitaryDecisionHistory,
         paramilitaryUnrequested,
+        minorityPolicyReceipt,
         officerDecisionHistory,
         pendingParamilitaryRequests,
         // §6 M-a: the order in force (never above the policy card's applied answer) and the cap, both through
@@ -4614,6 +4622,63 @@ function deriveParamilitaryUnrequested(
     }
     sweeps.sort((a, b) => (a.turn !== b.turn ? b.turn - a.turn : strictCompare(a.id, b.id)));
     return sweeps.length > 0 ? sweeps : undefined;
+}
+
+/**
+ * RB5 halt-card receipt (display only, no new state field). Shown only to a human-controlled HRHB when the halt card's answer
+ * on record is the historical default (`no_halt`), applied by the turn the policy was seeded (`decisionAppliedTurn`: an answer
+ * applied after the act is never credited), and at least one municipality holds a matured HRHB `policy_expulsion` timer that
+ * still holds expelled people (a zero-effect wave is not counted). It states M, the count of those municipalities, and never a
+ * people count.
+ */
+function deriveMinorityPolicyReceipt(
+    state: any,
+    playerFaction: string | null | undefined,
+): MinorityPolicyReceiptView | undefined {
+    if (playerFaction !== 'HRHB') return undefined;
+    if (state.meta?.player_faction !== 'HRHB' || state.meta?.headless_scenario_auto_control === true) return undefined;
+    const cardId = MINORITY_POLICY_CARD_ID_BY_FACTION.HRHB;
+    const haltFlag = MINORITY_POLICY_HALT_FLAG_BY_FACTION.HRHB;
+    if (!cardId || !haltFlag) return undefined;
+    const flags = state.military?.event_flags ?? {};
+    if (flags[haltFlag] !== undefined && flags[haltFlag] !== false) return undefined;
+    const munIds = new Set<string>();
+    const timers = state.displacement?.hostile_takeover_timers;
+    for (const key of Object.keys(timers && typeof timers === 'object' ? timers : {}).sort(strictCompare)) {
+        const timer = timers[key];
+        // Maturity alone is no evidence: the engine marks a policy timer matured even when its wave displaced no one
+        // (`processDisplacementTakeover` sets `matured_turn` outside the `displacementAmount > 0` branch), e.g. on ground
+        // with no Bosniaks left. A timer that holds no expelled people (`cumulative_displaced` 0) is not counted; the RB9
+        // return rule deletes a timer once all its people are back, so a held count is the surviving trace of the wave.
+        if (timer && timer.cause === 'policy_expulsion' && timer.to_faction === 'HRHB'
+            && timer.matured_turn !== undefined && typeof timer.mun_id === 'string'
+            && Number(timer.cumulative_displaced ?? 0) > 0) {
+            munIds.add(timer.mun_id);
+        }
+    }
+    if (munIds.size < 1) return undefined;
+    const appliedRaw = flags.hrhb_minority_policy_applied_turn;
+    const appliedFlagTurn = typeof appliedRaw === 'number' && Number.isFinite(appliedRaw) ? appliedRaw : null;
+    let row: { turn: number; automatic: boolean } | null = null;
+    for (const entry of Array.isArray(state.military?.event_decision_log) ? state.military.event_decision_log : []) {
+        if (!entry || entry.event_id !== cardId || entry.faction !== 'HRHB') continue;
+        if (entry.response_id !== MINORITY_POLICY_DEFAULT_RESPONSE_ID) continue;
+        const answeredTurn = Number(entry.turn);
+        if (!Number.isFinite(answeredTurn)) continue;
+        const appliedTurn = decisionAppliedTurn(state, { event_id: String(entry.event_id), turn: answeredTurn });
+        if (appliedTurn === null) continue;
+        if (appliedFlagTurn !== null && appliedTurn > appliedFlagTurn) continue;
+        row = { turn: answeredTurn, automatic: entry.decision_source !== 'player' };
+        break;
+    }
+    if (!row) return undefined;
+    return {
+        faction: 'HRHB',
+        turn: row.turn,
+        municipalities: munIds.size,
+        automatic: row.automatic,
+        warCrime: flags.hrhb_minority_policy_war_crime_recorded === true,
+    };
 }
 
 function deriveOfficerDecisionHistory(
