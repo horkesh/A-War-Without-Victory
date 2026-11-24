@@ -193,6 +193,8 @@ Two triggers, each checked per municipality and per side holding settlements the
 
 The larger of the two applies. Departures are booked to the pressing side with killed 0 and no flight abroad.
 
+**Siege outflow carry (batch A row A6, SD9, 2026-11-24).** The weekly outflow is computed in integer parts per million (`SIEGE_OUTFLOW_PPM_SCALE`): `total = heldPeople * ppm + carry`, `wanted = min(floor(total / 1e6), heldPeople)`, `carry = total % 1e6`, with `ppm = round(fraction * 1e6)` (1,000 at 0.1%). Before A6, `floor(heldPeople * 0.001)` was 0 every week for any pocket under 1,000 people, so Žepa (about 764 held) lost nobody in 107 weeks of encirclement. The carry lives in `DisplacementState.siege_outflow_carry_by_side` per side, always in [0, 1e6), absent when zero. It is updated right after `heldPeople` is known, before the `wanted <= 0` continue, and advances on the attempted outflow (`wanted`), not on the routed count, so trapped weeks build no debt and capacity opening later releases no burst. It is deleted when the side no longer holds settlements in the municipality (holder change, enclave fall), when neither trigger holds, and when nobody remains. Tests: `tests/state/siege_outflow_carry.test.ts`.
+
 The consecutive-turn counter is saved state: `DisplacementState.unsupplied_pressure_by_side` holds it per side, with the turn it was last counted. It replaces the old module-level cache (`pressureStateCache` and `resetDisplacementPressureCache()`), which is deleted, so the counter now survives save and load. `applyDisplacementFromFlips` and the `displacement-apply` step are also deleted; they were never reached.
 
 ---
@@ -286,11 +288,14 @@ When per-municipality routing is exhausted or no route is defined:
 | DRINA_NORTH | srebrenica, kalesija, tuzla, kladanj |
 | DRINA_SOUTH | gorazde, centar_sarajevo, zenica |
 | DRINA_SEKOVICI | kladanj, olovo, tuzla |
-| SARAJEVO_RS_HELD | centar_sarajevo, visoko, zenica |
+| SARAJEVO_RS_HELD | centar_sarajevo, stari_grad_sarajevo, novo_sarajevo, novi_grad_sarajevo, hadzici, visoko, zenica |
 | CENTRAL_BOSNIA | travnik, zenica, kakanj, visoko |
 | HERZEGOVINA | jablanica, konjic, zenica, travnik |
 | HERCEG_EAST | gorazde, centar_sarajevo |
 | BIHAC_EDGE | bihac, cazin, velika_kladusa |
+
+
+Known limit (A8, 2026-11-24): both writers fill a route first-fit, each destination up to its cap, so arrivals concentrate in list order and a later-listed municipality receives only overflow. SARAJEVO_RS_HELD lists RBiH-held Novo Sarajevo before Novi Grad: with Novi Grad first, Novo Sarajevo received 0 arrivals over 188 weeks, a modelling artefact of list order. Novi Grad now receives later. DRINA_SOUTH and HERCEG_EAST name only centar_sarajevo in the city and are unchanged (an open limit).
 
 #### Croat Routes (15 sub-regions)
 
@@ -520,6 +525,7 @@ interface DisplacementState {
     displaced_out_by_osid?: Record<string, number>;   // OSID-level origin tracking
     displaced_in_by_osid?: Record<string, number>;    // OSID-level destination tracking
     unsupplied_pressure_by_side?: Partial<Record<FactionId, { turns: number; last_turn: number }>>;  // siege counter per holding side, with the turn last counted
+    siege_outflow_carry_by_side?: Partial<Record<FactionId, number>>;  // A6: integer ppm siege-outflow remainder per holding side, in [0, 1e6), absent when zero
 }
 ```
 

@@ -89,7 +89,9 @@ const BOSNIAK_ROUTES: Record<string, readonly MunicipalityId[]> = {
     DRINA_ENCLAVE:      ['srebrenica', 'kladanj', 'tuzla'],  // Bratunac/Vlasenica → Srebrenica enclave
     DRINA_SOUTH:        ['gorazde', 'centar_sarajevo', 'zenica'],
     DRINA_SEKOVICI:     ['kladanj', 'olovo', 'tuzla'],
-    SARAJEVO_RS_HELD:   ['centar_sarajevo', 'stari_grad_sarajevo', 'novi_grad_sarajevo', 'novo_sarajevo', 'hadzici', 'visoko', 'zenica'],
+    // A8 (SD12, 2026-11-24): RBiH-held Novo Sarajevo before Novi Grad. Both writers fill first-fit, so with
+    // Novi Grad first Novo Sarajevo was never reached (0 arrivals over 188w, a list-order artefact).
+    SARAJEVO_RS_HELD:   ['centar_sarajevo', 'stari_grad_sarajevo', 'novo_sarajevo', 'novi_grad_sarajevo', 'hadzici', 'visoko', 'zenica'],
     CENTRAL_BOSNIA:     ['travnik', 'zenica', 'kakanj', 'visoko'],
     HERZEGOVINA:        ['jablanica', 'konjic', 'mostar', 'zenica', 'travnik'],
     HERCEG_EAST:        ['mostar', 'konjic', 'jablanica', 'gorazde', 'centar_sarajevo'],

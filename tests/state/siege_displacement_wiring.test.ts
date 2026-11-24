@@ -228,8 +228,16 @@ describe('sourced rate (DA1 P3)', () => {
         const rec = report.by_municipality.find((r) => r.mun_id === 'pocket')!;
         expect(rec.reason).toEqual(expect.arrayContaining(['encircled', 'unsupplied_pressure_3_turns']));
         // The pocket's 6,000 Bosniaks (holder's people) at the larger of the two rates.
+        // A6 (SD9, batch A round 2): the sub-person remainder carries as integer ppm. Held RBiH people
+        // are 6,000, 5,997 and 5,995 over the three weeks (census split of the remaining 10,000 /
+        // 9,994 / 9,989), so the outflow is 6 (carry 0), 5 (carry 997,000), then
+        // floor((5,995 x 1,000 + 997,000) / 1e6) = 6. Before A6 the third week rounded down to 5.
         const rate = Math.max(UNSUPPLIED_DISPLACEMENT_FRACTION, ENCIRCLEMENT_DISPLACEMENT_FRACTION);
-        expect(rec.displacement_this_turn).toBe(Math.floor((6000 - 2 * Math.floor(6000 * rate)) * rate));
+        const ppm = Math.round(rate * 1_000_000);
+        expect(rec.displacement_this_turn).toBe(Math.floor((5995 * ppm + 997_000) / 1_000_000));
+        expect(w.state.displacement.displacement_state.pocket.siege_outflow_carry_by_side?.RBiH).toBe(992_000);
+        // Never the sum: two rates added would take about 12 a week.
+        expect(rec.displacement_this_turn).toBeLessThan(Math.floor(5995 * (UNSUPPLIED_DISPLACEMENT_FRACTION + ENCIRCLEMENT_DISPLACEMENT_FRACTION)));
         expect(w.state.displacement.civilian_casualties?.RBiH?.killed ?? 0).toBe(0);
     });
 });
