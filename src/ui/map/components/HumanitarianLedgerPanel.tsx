@@ -263,6 +263,8 @@ export function HumanitarianLedgerPanel({ state, open, onClose }: HumanitarianLe
                           <p className="m-0 text-[14px] italic leading-relaxed text-[#b9ad94]">{t('humanitarianLedger.note.scope')}</p>
                           <p className="m-0 text-[14px] italic leading-relaxed text-[#b9ad94]">{t('humanitarianLedger.note.verbatim')}</p>
                         </div>
+                        {/* Four columns of unbreakable figures can outgrow a narrow panel: scroll inside the table, never the panel. */}
+                        <div data-testid="humanitarian-ledger-side-table" className="overflow-x-auto">
                         <table className="w-full border-collapse">
                           <thead>
                             <tr className="border-b border-[#262b35]">
@@ -283,6 +285,7 @@ export function HumanitarianLedgerPanel({ state, open, onClose }: HumanitarianLe
                             ))}
                           </tbody>
                         </table>
+                        </div>
                       </SurfacePanel>
                     </SurfaceSection>
                   )}
