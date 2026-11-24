@@ -1634,7 +1634,10 @@ export interface ParamilitaryRequest {
     decision?: 'allow' | 'deny' | 'regular';
 }
 
-export interface ParamilitaryDecisionRecord {
+/** The player's answer to one paramilitary request (written by `resolvePlayerParamilitaryDecisions`). */
+export interface ParamilitaryRequestDecisionRecord {
+    /** Absent on request answers; only the standing-order variant carries a kind. */
+    kind?: undefined;
     id: string;
     turn: number;
     target_osid: string;
@@ -1643,6 +1646,32 @@ export interface ParamilitaryDecisionRecord {
     decision: 'allow' | 'deny' | 'regular';
     mode?: 'rear_pocket' | 'offensive';
     estimated_civilian_risk?: number;
+}
+
+/**
+ * A standing order the manual (Full Control) player gave with no request pending (§6 mechanics item 2, signed
+ * 2026-11-23). It has no target and no `decision`: the order sits in its own field, never `decision: 'allow'`.
+ * It is the side's own record (the own-record readers count it, so it ends the no-card historical default),
+ * and every per-target reader skips it: no receipt, grade, cost-ledger line, deployment or spawn. Id
+ * `paramilitary_order:${turn}:${faction}` (deterministic; one per faction per turn, the latest order wins).
+ * Written only by `recordPlayerParamilitaryStandingOrder` (paramilitary_sweep.ts).
+ */
+export interface ParamilitaryStandingOrderRecord {
+    kind: 'standing_order';
+    id: string;
+    turn: number;
+    faction: FactionId;
+    order: 'always_allow' | 'always_deny' | 'ask';
+    /** Never present: a standing order answers no request, so it has no target and no decision. */
+    target_osid?: never;
+    decision?: never;
+}
+
+export type ParamilitaryDecisionRecord = ParamilitaryRequestDecisionRecord | ParamilitaryStandingOrderRecord;
+
+/** Whether a paramilitary history row is a target-less standing order (§6 item 2); per-target readers skip these. */
+export function isParamilitaryStandingOrderRecord(record: unknown): record is ParamilitaryStandingOrderRecord {
+    return record !== null && typeof record === 'object' && (record as { kind?: unknown }).kind === 'standing_order';
 }
 
 export interface OfficerDecisionRecord {

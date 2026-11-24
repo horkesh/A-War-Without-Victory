@@ -167,7 +167,8 @@ function projectionState(state: GameState): PresidentialCadenceProjectionState {
       faction: entry.faction,
       turn: entry.turn,
     })),
-    paramilitaryDecisionHistory: (state.paramilitary_decision_history ?? []).map((entry) => ({
+    // §6 item 2: a standing order (kind 'standing_order') is no per-request decision event.
+    paramilitaryDecisionHistory: (state.paramilitary_decision_history ?? []).filter((entry) => entry?.kind !== 'standing_order').map((entry) => ({
       id: entry.id,
       faction: entry.faction,
       turn: entry.turn,
