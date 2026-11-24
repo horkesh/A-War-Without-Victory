@@ -75,8 +75,11 @@ function world(opts: { linked: boolean; supplied: boolean; splitPocket?: boolean
         meta: { turn: opts.turn ?? 10, seed: 'siege', phase: 'war' },
         factions: ['HRHB', 'RBiH', 'RS'].map((id) => ({
             id,
-            supply_sources: id === 'RBiH' && opts.supplied ? ['S_home'] : [],
-            areasOfResponsibility: [],
+            // 'op:home:e' too: the legacy-edges path (updateDisplacement without operational inputs) reads
+            // supply sources as settlement ids, so A5's supplied main-body destination exists on both paths.
+            supply_sources: id === 'RBiH' && opts.supplied ? ['S_home', 'op:home:e'] : [],
+            // The legacy path's supply BFS walks the faction's AoR.
+            areasOfResponsibility: Object.keys(controllers).filter((sid) => controllers[sid] === id).sort(),
         })),
         military: {
             formations: {},
@@ -156,7 +159,8 @@ describe('update-displacement war step reads the campaign front (DA1)', () => {
 
 describe('one pass per municipality (binding condition: no per-pool triple processing)', () => {
     it('a besieged, unsupplied municipality with three pools is displaced once per turn', () => {
-        const w = world({ linked: true, supplied: false });
+        // A5: leavers need a supplied main-body destination, so the pocket is cut off from a supplied home.
+        const w = world({ linked: false, supplied: true });
         let report = updateDisplacement(w.state, w.settlements, w.edges, w.census);
         for (let t = 11; t <= 12; t++) {
             w.state.meta.turn = t;
@@ -181,8 +185,12 @@ describe('the siege counter lives in GameState (survives a save round trip)', ()
         const restored = JSON.parse(JSON.stringify(w.state)) as GameState;
         restored.meta.turn = 12;
         const report = updateDisplacement(restored, w.settlements, w.edges, w.census);
-        expect(report.by_municipality.map((r) => r.mun_id)).toEqual(['pocket']);
-        expect(causersWithHarm(restored)).toEqual(['RS']);
+        // The trigger fires on the third turn. A5: the whole side is unsupplied here, so no settlement is a
+        // supplied main-body destination and the leavers stay; the turn report names them (red-team M1).
+        expect(report.trapped?.filter((r) => r.mun_id === 'pocket').map((r) => r.faction_id)).toEqual(['RBiH']);
+        expect(report.trapped?.find((r) => r.mun_id === 'pocket')?.wanted).toBeGreaterThan(0);
+        expect(report.by_municipality).toEqual([]);
+        expect(causersWithHarm(restored)).toEqual([]);
     });
 
     it('clears the counter once the municipality is supplied again', async () => {
@@ -210,7 +218,8 @@ describe('pockets only (DA1 P5)', () => {
 
 describe('sourced rate (DA1 P3)', () => {
     it('an encircled, unsupplied pocket takes the larger rate, never the sum', () => {
-        const w = world({ linked: false, supplied: false });
+        // The pocket is cut off (unsupplied); home is supplied, so A5 lets the leavers go there.
+        const w = world({ linked: false, supplied: true });
         let report = updateDisplacement(w.state, w.settlements, w.edges, w.census);
         for (let t = 11; t <= 12; t++) {
             w.state.meta.turn = t;
@@ -261,7 +270,11 @@ function custom(controllers: Record<string, string>, edges: EdgeRecord[], poolKe
     const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 10, seed: 'siege', phase: 'war' },
-        factions: ['HRHB', 'RBiH', 'RS'].map((id) => ({ id, supply_sources: id === 'RBiH' ? ['S_home'] : [], areasOfResponsibility: [] })),
+        factions: ['HRHB', 'RBiH', 'RS'].map((id) => ({
+            id,
+            supply_sources: id === 'RBiH' ? ['S_home', 'op:home:e'] : [],
+            areasOfResponsibility: Object.keys(controllers).filter((sid) => controllers[sid] === id).sort(),
+        })),
         military: {
             formations: {}, front_segments: {}, front_pressure: {},
             militia_pools: Object.fromEntries(poolKeys.map((k) => {
@@ -396,8 +409,25 @@ describe('panel round 1 (DA1 P6)', () => {
         const census = { pocket: { total: 10000, bosniak: 10000, serb: 0, croat: 0, other: 0 } } as MunicipalityPopulation1991Map;
         const w = custom(controllers, edges, ['pocket:RBiH'], census, initial);
         const report = updateDisplacement(w.state, w.settlements, w.edges, census);
-        expect(report.by_municipality.find((r) => r.mun_id === 'pocket')?.reason).toContain('encircled');
-        expect(w.state.displacement.displacement_state.far?.displaced_in_by_faction?.RBiH ?? 0).toBeGreaterThan(0);
+        // A5 (SD7) governs the destination (orchestrator ruling 2026-11-23): the pocket IS the side's main
+        // body, so no supplied main-body municipality is left to go to; 'far' is cut off and never qualifies.
+        // (a) The encirclement fires on the largest body. This is the first turn, so the 3-turn siege trigger
+        // cannot be what fired; every leaver is trapped.
+        expect(report.trapped).toHaveLength(1);
+        const row = report.trapped![0];
+        expect(row).toMatchObject({ mun_id: 'pocket', faction_id: 'RBiH', routed: 0 });
+        expect(row.wanted).toBeGreaterThan(0);
+        expect(row.trapped).toBe(row.wanted);
+        // (b) Nothing is booked for those people: no departure record or route, no Ledger figure.
+        expect(report.by_municipality.filter((r) => r.mun_id === 'pocket')).toEqual([]);
+        expect(report.routing).toEqual([]);
+        expect(w.state.displacement.displacement_humanitarian_aggregates ?? {}).toEqual({});
+        expect(w.state.displacement.civilian_casualties?.RBiH?.killed ?? 0).toBe(0);
+        expect(w.state.displacement.displacement_state.pocket?.displaced_out ?? 0).toBe(0);
+        expect(w.state.displacement.displacement_state.pocket?.lost_population ?? 0).toBe(0);
+        // (c) The cut-off settlement receives nobody.
+        expect(w.state.displacement.displacement_state.far?.displaced_in_by_faction?.RBiH ?? 0).toBe(0);
+        expect(w.state.displacement.displacement_state.far?.displaced_in ?? 0).toBe(0);
     });
 
     it('A7 (SD11): a largest body above 15% of the turn-0 count is a split, not a siege, even under pressure', () => {

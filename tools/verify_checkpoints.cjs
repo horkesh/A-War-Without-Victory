@@ -368,7 +368,10 @@ const FARZ_EARLY_FALL_START = 160;
 const SECOND_CORPS_LATE_SCAN_START = 160;
 // Emergent mode (GameStateMeta.decision_mode === 'emergent') credits any RBiH operation-owned
 // capture inside the window; historical mode (or no mode recorded) keeps the authored Farz/Uragan
-// receipts.
+// receipts, plus the joint-offensive path (orchestrator ruling 2026-11-22; BB1 printed pp. 384-388):
+// another 2nd or 3rd Corps operation that started in the window and targeted the cell may take it
+// between the joint launch and Farz's end, provided Farz itself took a cell
+// (tools/lib/farz_objective_gate.cjs).
 const farzMode = (save.meta && save.meta.decision_mode) === 'emergent' ? 'emergent' : 'historical';
 const SECOND_CORPS = 'arbih_2nd_corps';
 
@@ -399,7 +402,9 @@ console.log(farz.mode === 'emergent'
   ? `  P-A (emergent) operation-owned RBiH captures in the window t${FARZ_PA_WINDOW_START}+, none before it`
   : `  P-A authored Farz objective receipts — operation-owned combat in the window t${FARZ_PA_WINDOW_START}+`);
 for (const row of farz.rows) {
-  const viaLabel = row.via === 'uragan' ? ' (2nd Corps, Uragan 95)' : row.via === 'operation' ? ' (operation-owned)' : '';
+  const viaLabel = row.via === 'uragan' ? ' (2nd Corps, Uragan 95)'
+    : row.via === 'joint' ? ` (joint offensive: ${row.operation_id})`
+      : row.via === 'operation' ? ' (operation-owned)' : '';
   const earlyLabel = row.early_captures.length > 0
     ? ` *** EARLY FALL: ${row.early_captures.map((c) => `t${c.turn}${c.operation_ids.length ? ` by ${c.operation_ids.join('+')}` : ''}`).join(', ')} ***`
     : '';

@@ -743,6 +743,13 @@ function routeDisplacedCohort(
         trackMilitiaPool?: boolean;
         requireBrigadePresence?: boolean;
         eventReason?: string;
+        /**
+         * A4: record each move as a turn-report row with this reason and the group, and write NO
+         * displacement event (a second move of people already displaced must not feed
+         * `displacement_origin_dest_arrivals`, which places brigade reconstitution, nor `refugees_received`).
+         * Ignored when `eventReason` is set.
+         */
+        reportReason?: string;
         causedByFaction?: FactionId;
     }
 ): { routed: number; remaining: number } {
@@ -809,6 +816,14 @@ function routeDisplacedCohort(
                 killed: 0,
                 fled_abroad: 0,
                 settled: routed,
+            });
+        } else if (options.reportReason) {
+            report.routing.push({
+                from_mun: sourceMunId,
+                to_mun: targetMunId,
+                amount: routed,
+                reason: options.reportReason,
+                group: faction
             });
         }
 
@@ -1241,17 +1256,22 @@ export function processDisplacementTakeover(
             // RF-5B (§6 panel, Calibration seat C1): a policy wave changes no holder, so the
             // people sheltering in the municipality (the holder's own refugees above all) are
             // not moved on; re-routing them handed the expelling side extra manpower.
+            // A4 (RB2, §6 seats round 3, 2026-11-22, narrowed after the round-1 rule failed its pair): at a
+            // capture only the captor's OWN sheltered people stay; every other group, an ally's refugees
+            // included, is moved on as before, recorded as a turn-report row (`capture_pass_through`) and
+            // never as a displacement event.
             if (!isPolicyTimer && dispState.displaced_in > 0) {
                 const byFaction = dispState.displaced_in_by_faction ?? {};
                 const fKeys = Object.keys(byFaction).sort(strictCompare);
                 for (const fid of fKeys) {
+                    if (fid === timer.to_faction) continue;
                     let rem = Math.max(0, Math.floor(byFaction[fid] ?? 0));
                     if (rem <= 0) continue;
                     const result = routeDisplacedCohort(
                         state, munId, fid, rem,
                         friendlyMunsByFaction[fid],
                         settlements, routedByPoolKey, report,
-                        { causedByFaction: timer.to_faction }
+                        { causedByFaction: timer.to_faction, reportReason: 'capture_pass_through' }
                     );
                     byFaction[fid] = result.remaining;
                 }

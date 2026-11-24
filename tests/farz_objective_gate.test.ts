@@ -379,3 +379,110 @@ describe('Farz objective gate', () => {
         });
     });
 });
+
+// Historical-mode third path (orchestrator ruling 2026-11-22, lane B historian + operations sitting):
+// another 2nd or 3rd Corps operation of the September 1995 offensive may take a Farz cell (BB1 printed
+// pp. 384-388). Shaped on k_bfsd: Farz started t180 and took Vozuća; the 2nd Corps' Operacija Slap 2
+// (started t181, targeting Briješnica) took Briješnica at t182 while Farz was still running.
+describe('Farz P-A historical mode: the joint-offensive path', () => {
+    const VOZUCA = 'op:zavidovici:vozuca_2';
+    const BRIJESNICA = 'op:lukavac:brijesnica_donja_2';
+    const farzId = 'arbih_3rd_corps:Operation Farz 95:t180';
+    const slapId = 'arbih_2nd_corps:Operacija Slap 2:t181';
+    const farzAar = {
+        operation_id: farzId,
+        corps_id: 'arbih_3rd_corps',
+        army_hq_telemetry: { army_hq_op_id: 'ahq:RBiH:3:farz_95' },
+        started_turn: 180,
+        ended_turn: 186,
+        // The AAR over-claims Briješnica (it logs control changes, not battle ownership); the gate
+        // reads the battle receipt, so this does not make it Farz's own capture.
+        objectives_logged_captured: [VOZUCA, BRIJESNICA],
+        objectives_targeted: [VOZUCA, BRIJESNICA],
+        participating_brigades: ['third_corps_brigade'],
+    };
+    const opAar = (id: string, corps: string, start: number, end: number, targeted: string[]) => ({
+        operation_id: id, corps_id: corps, started_turn: start, ended_turn: end,
+        objectives_logged_captured: [], objectives_targeted: targeted, participating_brigades: [],
+    });
+    const capture = (osid: string, turn: number, opId: string, brigade: string, battleId: string) => ({
+        event: { settlement_id: osid, to: 'RBiH', mechanism: 'combat', turn, attacker_brigade: brigade, battle_id: battleId },
+        battle: { battle_id: battleId, target_osid: osid, attacker_brigade: brigade, attacker_won: true, operation_id: opId },
+    });
+    const build = (second: ReturnType<typeof capture>, extraAars: object[], first = capture(VOZUCA, 181, farzId, 'third_corps_brigade', 'b_voz')) => ({
+        cells: [['Vozuća', VOZUCA], ['Briješnica', BRIJESNICA]],
+        at188: { [VOZUCA]: 'RBiH', [BRIJESNICA]: 'RBiH' },
+        events: [first.event, second.event],
+        battleById: new Map([[first.battle.battle_id, first.battle], [second.battle.battle_id, second.battle]]),
+        aars: [farzAar, ...extraAars],
+        corpsOf: input.corpsOf,
+        windowStart: 177,
+        earlyStart: 160,
+        mode: 'historical',
+    });
+    const slap = opAar(slapId, 'arbih_2nd_corps', 181, 183, [BRIJESNICA]);
+    const slapCapture = capture(BRIJESNICA, 182, slapId, 'second_corps_brigade', 'b_brij');
+
+    it('k_bfsd Slap 2: a 2nd Corps operation started in the window, targeting the cell, passes', () => {
+        const result = checkFarzObjectiveCaptures(build(slapCapture, [slap]));
+        expect(result.ok).toBe(true);
+        const row = result.rows.find((r: { osid: string }) => r.osid === BRIJESNICA);
+        expect(row).toMatchObject({ ok: true, turn: 182, via: 'joint', operation_id: slapId });
+        expect(result.rows.find((r: { osid: string }) => r.osid === VOZUCA).via).toBe('farz');
+    });
+
+    it('Nada 2 and Odbrana: a 3rd Corps operation started before the window stays out, even running into it', () => {
+        for (const [name, start] of [['Operacija Nada 2', 167], ['Operacija Odbrana', 171]] as const) {
+            const id = `arbih_3rd_corps:${name}:t${start}`;
+            const carried = opAar(id, 'arbih_3rd_corps', start, 184, [BRIJESNICA]);
+            const result = checkFarzObjectiveCaptures(build(capture(BRIJESNICA, 182, id, 'third_corps_brigade', 'b_brij'), [carried]));
+            expect(result.ok).toBe(false);
+            expect(result.rows.find((r: { osid: string }) => r.osid === BRIJESNICA).via).toBeNull();
+        }
+    });
+
+    it('an operation aimed elsewhere, or of another corps, stays out', () => {
+        const elsewhere = opAar(slapId, 'arbih_2nd_corps', 181, 183, ['op:somewhere:else']);
+        expect(checkFarzObjectiveCaptures(build(slapCapture, [elsewhere])).ok).toBe(false);
+        const firstId = 'arbih_1st_corps:Operacija Rijeka:t181';
+        const first = opAar(firstId, 'arbih_1st_corps', 181, 183, [BRIJESNICA]);
+        expect(checkFarzObjectiveCaptures(build(capture(BRIJESNICA, 182, firstId, 'first_corps_brigade', 'b_brij'), [first])).ok).toBe(false);
+    });
+
+    it('a capture before the joint launch, or after Farz ended, stays out', () => {
+        const early = opAar('arbih_2nd_corps:Operacija Slap 2:t177', 'arbih_2nd_corps', 177, 183, [BRIJESNICA]);
+        expect(checkFarzObjectiveCaptures(build(
+            capture(BRIJESNICA, 178, early.operation_id, 'second_corps_brigade', 'b_brij'), [early])).ok).toBe(false);
+        const late = opAar('arbih_2nd_corps:Operacija Slap 3:t185', 'arbih_2nd_corps', 185, 188, [BRIJESNICA]);
+        expect(checkFarzObjectiveCaptures(build(
+            capture(BRIJESNICA, 187, late.operation_id, 'second_corps_brigade', 'b_brij'), [late])).ok).toBe(false);
+    });
+
+    it('the Uragan start opens the joint window when it is earlier than Farz', () => {
+        const uragan = opAar('arbih_2nd_corps:Operation Uragan 95:t178', 'arbih_2nd_corps', 178, 182, []);
+        const early = opAar('arbih_2nd_corps:Operacija Slap 2:t178', 'arbih_2nd_corps', 178, 183, [BRIJESNICA]);
+        const result = checkFarzObjectiveCaptures(build(
+            capture(BRIJESNICA, 179, early.operation_id, 'second_corps_brigade', 'b_brij'), [uragan, early]));
+        expect(result.ok).toBe(true);
+    });
+
+    it('the path is closed when Farz itself took no cell', () => {
+        const slapVoz = opAar('arbih_2nd_corps:Operacija Slap 1:t181', 'arbih_2nd_corps', 181, 183, [VOZUCA]);
+        const result = checkFarzObjectiveCaptures(build(slapCapture, [slap, slapVoz],
+            capture(VOZUCA, 181, slapVoz.operation_id, 'second_corps_brigade', 'b_voz')));
+        expect(result.ok).toBe(false);
+        expect(result.rows.every((r: { via: string | null }) => r.via === null)).toBe(true);
+    });
+
+    it('a probe or operationless capture never counts', () => {
+        const probe = capture(BRIJESNICA, 182, '', 'second_corps_brigade', 'b_brij');
+        delete (probe.battle as { operation_id?: string }).operation_id;
+        expect(checkFarzObjectiveCaptures(build(probe, [slap])).ok).toBe(false);
+    });
+
+    it('emergent mode is unchanged by the joint path', () => {
+        const result = checkFarzObjectiveCaptures({ ...build(slapCapture, [slap]), mode: 'emergent' });
+        expect(result.ok).toBe(true);
+        expect(result.rows.every((r: { via: string }) => r.via === 'operation')).toBe(true);
+    });
+});
