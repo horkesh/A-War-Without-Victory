@@ -445,7 +445,7 @@ When `state.meta.recruitment_mode === 'bottom_up'`, the turn pipeline **must** r
 
 ### 14.10a Shared recruitment eligibility and autonomy
 
-Recruitment catalog visibility and recruitment application must evaluate the same faction, turn, scenario catalog, control, manpower, capital, equipment, availability, and already-recruited context. A brigade shown as eligible must be accepted under that unchanged context; an ineligible brigade must carry an explicit reason. In player campaigns, automatic recruitment excludes the selected player faction at autonomy levels 0 and 1 and includes it at autonomy level 2 or above. Headless auto-control has no selected-player exclusion.
+Recruitment catalog visibility and recruitment application must evaluate the same faction, turn, scenario catalog, control, manpower, capital, equipment, availability, and already-recruited context. A brigade shown as eligible must be accepted under that unchanged context; an ineligible brigade must carry an explicit reason. In player campaigns, automatic recruitment excludes the selected player faction at autonomy level 0 and includes it at autonomy level 1 or above (amended 2026-11-24, lane C s6 design sitting, game-designer and operations-expert unanimous: HISTORY IF LEFT ALONE, so a hands-off Assisted president gets the brigades the headless staff raise; the president keeps the Recruit modal, whose raise applies before the next Advance, and Full Control keeps recruitment manual). Headless auto-control has no selected-player exclusion.
 
 ### 14.10b Player operation-authorization boundary
 

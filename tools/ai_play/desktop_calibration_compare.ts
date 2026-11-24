@@ -36,6 +36,7 @@ import { selectBotEventResponse } from '../../src/sim/events/evaluate_events.js'
 import { strictCompare } from '../../src/state/validateGameState.js';
 import { isHistoricalOperationAuthorizationReview } from '../../src/sim/combat/historical_operation_authorization.js';
 import { assertNoPeacePlanWindowSkipped, resolvePeacePlan } from '../../src/sim/negotiation/peace_plans.js';
+import { planOwnerResponse } from '../../src/sim/negotiation/plan_answer.js';
 import { getPeacePlanById } from '../../src/sim/negotiation/peace_plan_data.js';
 import { createRequire } from 'node:module';
 import { raiseArmyClash, sweepLapsedArmyClashes } from '../../src/sim/combat/army_clashes.js';
@@ -80,6 +81,14 @@ interface CliOptions {
     outPath?: string;
     /** Player-branch autonomy: a fixed level, or 'production' to keep what startNewCampaign sets. */
     autonomyLevel: 0 | 1 | 2 | 3 | 'production';
+    /**
+     * `--decision-mode emergent` (live = headless in emergent mode, freeze condition 4): BOTH branches
+     * run with `meta.decision_mode = 'emergent'`, the setting the emergent 188w scenario adds
+     * (`apr1992_definitive_188w_emergent_local.json` differs from the historical scenario only in it).
+     * Needs `--event-policy bot_equivalent`, so the player answers as the emergent bot does. Unset keeps
+     * today's behaviour: headless historical, player mode from the event policy.
+     */
+    decisionMode?: 'emergent';
     /** When set, write `<dir>/{headless,player}/final_save.json` so each branch can be scored
      *  per-OSID with `tools/compare_painted_vs_sim.cjs <dir>/<branch> --target <checkpoint>`. */
     finalSaveDir?: string;
@@ -340,6 +349,16 @@ function parseArgs(argv: string[]): CliOptions {
         ...(values.get('--watch-cells')
             ? { watchCells: (values.get('--watch-cells') ?? '').split(',').filter(Boolean).sort(strictCompare) }
             : {}),
+        ...(() => {
+            const raw = values.get('--decision-mode');
+            if (raw === undefined) return {};
+            const mode = parseEnum(raw, ['historical', 'emergent'] as const, '--decision-mode');
+            if (mode === 'historical') return {};
+            if ((values.get('--event-policy') ?? 'defer') !== 'bot_equivalent') {
+                throw new Error('--decision-mode emergent needs --event-policy bot_equivalent');
+            }
+            return { decisionMode: 'emergent' as const };
+        })(),
         autonomyLevel: (() => {
             const raw = parseEnum(values.get('--autonomy-level') ?? '1', ['0', '1', '2', '3', 'production'] as const, '--autonomy-level');
             return raw === 'production' ? 'production' : (Number(raw) as 0 | 1 | 2 | 3);
@@ -684,9 +703,14 @@ function applyPeacePlanPolicy(
     const pending = state.military.negotiation?.pending_peace_plan;
     if (!pending) return;
     const plan = getPeacePlanById(pending.plan_id);
-    const response = policy === 'historical_default' || policy === 'bot_equivalent'
-        ? plan?.historical_responses[faction]
-        : undefined;
+    // bot_equivalent in an emergent campaign answers as the emergent bot's plan owner does (the plan
+    // scorer, with the RBiH Owen-Stoltenberg lock); in historical mode both policies keep the
+    // historical answer, unchanged.
+    const response = policy === 'bot_equivalent' && plan && state.meta.decision_mode === 'emergent'
+        ? planOwnerResponse(state, plan, faction, false)
+        : policy === 'historical_default' || policy === 'bot_equivalent'
+            ? plan?.historical_responses[faction]
+            : undefined;
     if (!response) {
         assertNoPeacePlanWindowSkipped(state);
         transcript.push({ turn: state.meta.turn, family: 'peace_plan', id: pending.plan_id, decision: 'defer' });
@@ -1052,6 +1076,7 @@ async function runComparison(baseDir: string, options: CliOptions) {
 
 
     let headlessState = (await loadStateFromPath(snapshotPath, baseDir)).state;
+    if (options.decisionMode === 'emergent') headlessState.meta.decision_mode = 'emergent';
     const electronReplay = await loadElectronReplayBinding(
         baseDir,
         options,
@@ -1069,9 +1094,11 @@ async function runComparison(baseDir: string, options: CliOptions) {
     // backward compatibility with existing artifacts.
     if (options.autonomyLevel !== 'production') playerState.meta.autonomy_level = options.autonomyLevel;
     const playerAutonomyLevel = playerState.meta.autonomy_level;
-    playerState.meta.decision_mode = options.eventPolicy === 'historical_default' || options.eventPolicy === 'bot_equivalent'
-        ? 'historical'
-        : 'emergent';
+    playerState.meta.decision_mode = options.decisionMode === 'emergent'
+        ? 'emergent'
+        : options.eventPolicy === 'historical_default' || options.eventPolicy === 'bot_equivalent'
+            ? 'historical'
+            : 'emergent';
     if (options.eventPolicy === 'bot_equivalent') {
         botEquivalentCatalog = new Map(
             loadEventDefinitionsFromDir(0, resolve(baseDir, 'data/scenarios/events')).map((def) => [def.id, def]),

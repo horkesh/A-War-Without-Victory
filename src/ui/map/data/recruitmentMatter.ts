@@ -6,11 +6,11 @@
  * Pure presentation. Eligibility itself is the engine's (`evaluateRecruitmentEligibility`
  * through the `get-recruitment-catalog` IPC); this module only remembers what the
  * president has already been told and turns the difference into one matter:
- *   - Full Control / Assisted (autonomy 0-1, recruitment stays with the president): a
- *     decision matter listing the brigades that can be raised and are not yet raised or
- *     set aside.
- *   - Delegated / Observer (autonomy 2-3, staff raise without asking): a short notice of
- *     what the staff raised since last week and which brigades are newly ready.
+ *   - Full Control (autonomy 0, recruitment stays with the president): a decision matter
+ *     listing the brigades that can be raised and are not yet raised or set aside.
+ *   - Assisted / Delegated / Observer (autonomy 1-3, staff raise without asking; lane C s6
+ *     design sitting 2026-11-24): a short notice of what the staff raised since last week
+ *     and which brigades are newly ready.
  *
  * "Newly" is derived by comparing the catalog at the previous snapshot turn with the
  * current one. The watch lives in the UI store only (never in GameState or a save), so
@@ -76,9 +76,9 @@ export const RECRUITMENT_MATTER_ID_PREFIX = 'recruitment:';
 export const RECRUITMENT_DECISION_MATTER_ID = 'recruitment:decision';
 export const RECRUITMENT_NOTICE_MATTER_ID = 'recruitment:notice';
 
-/** Autonomy 0-1 keep recruitment with the president (Rulebook §10; `selectAutomaticRecruitmentFactions`). */
+/** Only autonomy 0 keeps recruitment with the president (Rulebook §10; `selectAutomaticRecruitmentFactions`). */
 export function recruitmentStaysWithPresident(autonomyLevel: number): boolean {
-  return autonomyLevel < 2;
+  return autonomyLevel < 1;
 }
 
 export function isRecruitmentMatterId(id: string): boolean {

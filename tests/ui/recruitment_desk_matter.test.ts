@@ -4,7 +4,7 @@
  * visits recruitment tab.").
  *
  * Pins the UI-only watch (newly raisable, grouping, clearing when raised or lapsed, set
- * aside), the autonomy wording (decision at 0-1, staff notice at 2-3, EN + BCS), the
+ * aside), the autonomy wording (decision at 0, staff notice at 1-3, EN + BCS), the
  * Home Front card and its Advance standing, the Desk item, and the routing that opens
  * Recruitment straight on the named brigade.
  */
@@ -173,7 +173,7 @@ describe('recruitment watch: what is new', () => {
   });
 });
 
-describe('recruitment watch: staff notice at Delegated and Observer', () => {
+describe('recruitment watch: staff notice at Assisted, Delegated and Observer', () => {
   it('reports what the staff raised since last week and what is newly ready', () => {
     const watch = fold(
       snapshot(4, 2, [brigade('a', 'visoko'), notYet('b', 'zepce'), brigade('c', 'kakanj')]),
@@ -221,9 +221,13 @@ describe('recruitment matter wording', () => {
     expect(copy.primaryActionLabel).toBe('Open Recruitment');
   });
 
-  it('uses the Assisted label at autonomy 1 and the staff wording at 2 and 3', () => {
+  it('uses the staff wording at autonomy 1, 2 and 3, with the Assisted label at 1', () => {
+    // Level 1 delegates recruitment (lane C s6 design sitting, 2026-11-24): a notice, no "Not now".
     const assisted = matterAt(fold(snapshot(4, 1, [brigade('a', 'visoko')])))!;
-    expect(buildRecruitmentMatterCopy(assisted, MUNICIPALITIES).explanation).toContain('At Assisted, recruitment stays yours');
+    expect(assisted.mode).toBe('notice');
+    const assistedCopy = buildRecruitmentMatterCopy(assisted, MUNICIPALITIES);
+    expect(assistedCopy.explanation).toContain('At Assisted, your staff raises brigades without asking');
+    expect(assistedCopy.primaryActionLabel).toBe('View in Recruitment');
     const delegated = matterAt(fold(snapshot(4, 2, [brigade('a', 'visoko', { name: '7th Brigade' })])))!;
     const delegatedCopy = buildRecruitmentMatterCopy(delegated, MUNICIPALITIES);
     expect(delegatedCopy.title).toBe('7th Brigade is ready to be raised');

@@ -209,7 +209,7 @@ describe('runOngoingRecruitment', () => {
         expect(prioritized.formationIds).not.toContain('arbih_223rd_mountain');
     });
 
-    test('keeps player recruitment manual at autonomy 0-1 and delegates it at 2-3 or headless', () => {
+    test('keeps player recruitment manual at autonomy 0 and delegates it at 1-3 or headless', () => {
         const state = makeState();
         state.meta.player_faction = 'RBiH';
         state.factions = [
@@ -219,8 +219,9 @@ describe('runOngoingRecruitment', () => {
 
         state.meta.autonomy_level = 0;
         expect(selectAutomaticRecruitmentFactions(state)).toEqual(['RS']);
+        // Level 1 (Assisted) delegates: HISTORY IF LEFT ALONE (lane C s6 design sitting, 2026-11-24).
         state.meta.autonomy_level = 1;
-        expect(selectAutomaticRecruitmentFactions(state)).toEqual(['RS']);
+        expect(selectAutomaticRecruitmentFactions(state)).toEqual(['RBiH', 'RS']);
         state.meta.autonomy_level = 2;
         expect(selectAutomaticRecruitmentFactions(state)).toEqual(['RBiH', 'RS']);
         state.meta.autonomy_level = 3;
@@ -230,10 +231,11 @@ describe('runOngoingRecruitment', () => {
         expect(selectAutomaticRecruitmentFactions(state)).toEqual(['RBiH', 'RS']);
     });
 
-    test('does not consume an assisted player formation through ongoing bot recruitment', () => {
+    test('does not consume a Full Control player formation through ongoing bot recruitment', () => {
+        // The president's "saving a brigade for later" guarantee lives at Level 0 (Full Control).
         const state = makeState();
         state.meta.player_faction = 'RBiH';
-        state.meta.autonomy_level = 1;
+        state.meta.autonomy_level = 0;
         const brigade: OobBrigade = {
             id: 'rbih_player_choice',
             faction: 'RBiH',
@@ -255,6 +257,41 @@ describe('runOngoingRecruitment', () => {
         expect(report?.actions).toEqual([]);
         expect(state.military.formations[brigade.id]).toBeUndefined();
         expect(state.military.recruitment_state?.recruited_brigade_ids).not.toContain(brigade.id);
+    });
+
+    test('raises an Assisted (Level 1) player formation through ongoing staff recruitment, as headless does', () => {
+        // HISTORY IF LEFT ALONE: a hands-off Assisted president gets the brigades the headless
+        // staff raise (live HRHB a1 drifted from turn 2 when Level 1 recruited nothing).
+        const build = (playerLevel: 0 | 1 | 2 | 3 | null) => {
+            const state = makeState();
+            if (playerLevel !== null) {
+                state.meta.player_faction = 'RBiH';
+                state.meta.autonomy_level = playerLevel;
+            }
+            const brigade: OobBrigade = {
+                id: 'rbih_staff_choice',
+                faction: 'RBiH',
+                name: 'Staff Choice Brigade',
+                home_mun: 'zenica',
+                kind: 'brigade',
+                manpower_cost: 800,
+                capital_cost: 10,
+                default_equipment_class: 'light_infantry',
+                home_osid: 'op:zenica:core',
+                priority: 1,
+                mandatory: false,
+                available_from: 0,
+                max_personnel: 3000,
+            };
+            runOngoingRecruitment(state, [], [brigade], new Map([['s1', 'zenica']]), { zenica: 's1' });
+            return state;
+        };
+        const assisted = build(1);
+        const headless = build(null);
+        expect(assisted.military.recruitment_state?.recruited_brigade_ids).toContain('rbih_staff_choice');
+        expect(assisted.military.formations.rbih_staff_choice).toBeDefined();
+        expect(assisted.military.recruitment_state?.recruited_brigade_ids)
+            .toEqual(headless.military.recruitment_state?.recruited_brigade_ids);
     });
 
     test('applies per-faction recruit cap deterministically', () => {
