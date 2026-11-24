@@ -276,6 +276,38 @@ export async function fetchRecruitmentCatalogSnapshot({
     }
 }
 
+interface SetRecruitmentHoldDeps extends LoadDeps {
+    brigadeId: string;
+    held: boolean;
+}
+
+/**
+ * Holds or releases a brigade so the staff will not (or will again) raise it, then loads the
+ * updated state. Returns true on success.
+ */
+export async function setRecruitmentHoldAndSync({
+    ipc,
+    loadSave,
+    setLoadError,
+    brigadeId,
+    held,
+}: SetRecruitmentHoldDeps): Promise<boolean> {
+    const result = await ipc.setRecruitmentHold(brigadeId, held);
+    if (!result.ok) {
+        setLoadError(result.error ?? 'The hold could not be changed.');
+        return false;
+    }
+    try {
+        const stateJson = await ipc.getCurrentGameState();
+        if (stateJson) await loadSave(stateJson);
+        return true;
+    } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        setLoadError(message);
+        return false;
+    }
+}
+
 interface ApplyRecruitmentDeps extends LoadDeps {
     brigadeId: string;
     equipmentClass: string;

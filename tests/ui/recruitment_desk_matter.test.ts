@@ -23,7 +23,7 @@ import { cardBelongsToPresidentialCommandCategory } from '../../src/ui/map/data/
 import { withRecruitmentInboxItem } from '../../src/ui/map/data/inboxItems';
 import { openPresidentialDecisionRoomNavigationTarget } from '../../src/ui/map/utils/presidentialDecisionRoomNavigation';
 import type { ShellNavigationState } from '../../src/ui/map/utils/shellNavigation';
-import { selectInitialRecruitmentBrigade } from '../../src/ui/map/components/RecruitmentModal';
+import { recruitmentHoldAvailable, selectInitialRecruitmentBrigade } from '../../src/ui/map/components/RecruitmentModal';
 import { useGameStore } from '../../src/ui/map/store/gameStore';
 import { setLocale } from '../../src/ui/map/i18n';
 import type { RecruitmentCatalogBrigade, RecruitmentEligibilityReason } from '../../src/ui/map/desktop/types';
@@ -34,7 +34,7 @@ const MUNICIPALITIES = { visoko: 'Visoko', zepce: 'Žepče', kakanj: 'Kakanj', t
 function brigade(
   id: string,
   homeMun: string,
-  options: { eligible?: boolean; reasons?: RecruitmentEligibilityReason[]; faction?: string; name?: string } = {},
+  options: { eligible?: boolean; reasons?: RecruitmentEligibilityReason[]; faction?: string; name?: string; held?: boolean } = {},
 ): RecruitmentCatalogBrigade {
   return {
     id,
@@ -48,6 +48,7 @@ function brigade(
     mandatory: false,
     eligible: options.eligible ?? true,
     reason_codes: options.reasons ?? [],
+    ...(options.held === undefined ? {} : { held: options.held }),
   };
 }
 
@@ -207,6 +208,47 @@ describe('recruitment watch: staff notice at Assisted, Delegated and Observer', 
     const delegated = fold(snapshot(4, 2, [brigade('a', 'visoko')]));
     const full = advanceRecruitmentWatch(delegated, snapshot(4, 0, [brigade('a', 'visoko')]));
     expect(matterAt(full)?.mode).toBe('decision');
+  });
+});
+
+describe('recruitment hold (staff will not raise a held brigade)', () => {
+  it('leaves held brigades out of the staff notice ready list and names them in one fact line', () => {
+    const watch = fold(snapshot(5, 2, [
+      brigade('a', 'visoko', { name: '7th Brigade', held: true }),
+      brigade('b', 'zepce', { name: '8th Brigade' }),
+      brigade('c', 'kakanj', { name: '9th Brigade', held: true }),
+    ]));
+    const matter = matterAt(watch)!;
+    expect(matter.mode).toBe('notice');
+    expect(matter.ready.map((b) => b.id)).toEqual(['b']);
+    expect(matter.held.map((b) => b.id)).toEqual(['a', 'c']);
+    const copy = buildRecruitmentMatterCopy(matter, MUNICIPALITIES);
+    expect(copy.facts).toContain('Held by you: 7th Brigade, 9th Brigade.');
+    expect(copy.facts.some((f) => f.startsWith('7th Brigade: ready'))).toBe(false);
+  });
+
+  it('shows no notice when every raisable brigade is held and the staff raised nothing', () => {
+    expect(matterAt(fold(snapshot(5, 1, [brigade('a', 'visoko', { held: true })])))).toBeNull();
+  });
+
+  it('speaks the held line in BCS', () => {
+    setLocale('bcs', undefined);
+    const matter = matterAt(fold(snapshot(5, 3, [
+      brigade('a', 'visoko', { name: '7th Brigade', held: true }),
+      brigade('b', 'zepce'),
+    ])))!;
+    expect(buildRecruitmentMatterCopy(matter, MUNICIPALITIES).facts.some((f) => f.startsWith('Zadržali ste: ') && f.endsWith('.'))).toBe(true);
+  });
+
+  it('keeps the decision at Full Control free of holds, and the modal offers holds from level 1 only', () => {
+    const matter = matterAt(fold(snapshot(5, 0, [brigade('a', 'visoko', { held: true })])))!;
+    expect(matter.mode).toBe('decision');
+    expect(matter.held).toEqual([]);
+    expect(matter.ready.map((b) => b.id)).toEqual(['a']);
+    expect(recruitmentHoldAvailable(0)).toBe(false);
+    expect(recruitmentHoldAvailable(null)).toBe(false);
+    expect(recruitmentHoldAvailable(1)).toBe(true);
+    expect(recruitmentHoldAvailable(3)).toBe(true);
   });
 });
 

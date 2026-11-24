@@ -16,6 +16,10 @@ interface RecruitmentModalProps {
   onClose: () => void;
   onRefresh: () => void;
   onApply: (brigadeId: string, equipmentClass: string) => void;
+  /** Autonomy level of the catalog's state. Holding applies at 1 and above only (Level 0 is manual). */
+  autonomyLevel?: number | null;
+  /** Hold (true) or release (false) a brigade so the staff will not raise it. */
+  onToggleHold?: (brigadeId: string, held: boolean) => void;
 }
 
 const EQUIPMENT_CLASS_LABEL_KEYS: Record<string, MessageKey> = {
@@ -62,6 +66,11 @@ function isAlreadyRaised(brigade: RecruitmentCatalogBrigade): boolean {
   return (brigade.reason_codes ?? []).includes('already_recruited');
 }
 
+/** Level 0 (Full Control) raises by hand, so no hold is needed or shown there. */
+export function recruitmentHoldAvailable(autonomyLevel: number | null | undefined): boolean {
+  return typeof autonomyLevel === 'number' && autonomyLevel >= 1;
+}
+
 export function RecruitmentModal({
   isOpen,
   loading,
@@ -72,7 +81,23 @@ export function RecruitmentModal({
   onClose,
   onRefresh,
   onApply,
+  autonomyLevel = null,
+  onToggleHold,
 }: RecruitmentModalProps) {
+  const holdEnabled = recruitmentHoldAvailable(autonomyLevel) && onToggleHold !== undefined;
+  const holdControl = (brigade: RecruitmentCatalogBrigade) => (
+    <div className="mt-1 flex items-center gap-2" data-testid={`recruitment-hold-${brigade.id}`}>
+      {brigade.held === true && <span className="text-xs text-accent-gold">{t('recruitment.hold.marker')}</span>}
+      <button
+        type="button"
+        disabled={loading || applying}
+        onClick={() => onToggleHold?.(brigade.id, brigade.held !== true)}
+        className="min-h-8 px-2 py-1 text-xs font-sans text-text-primary bg-panel-bg hover:bg-panel-hover border border-panel-border rounded disabled:opacity-50"
+      >
+        {brigade.held === true ? t('recruitment.hold.release') : t('recruitment.hold.action')}
+      </button>
+    </div>
+  );
   const playerBrigades = useMemo(
     () => brigades.filter((b) => !playerFaction || b.faction === playerFaction),
     [brigades, playerFaction]
@@ -172,6 +197,16 @@ export function RecruitmentModal({
                   className="mt-1 w-full min-h-10 px-3 py-2 bg-panel-bg border border-panel-border rounded text-sm text-text-primary"
                 />
               </label>
+              {holdEnabled && (
+                <ul className="space-y-1">
+                  {eligible.map((brigade) => (
+                    <li key={brigade.id} className="border border-panel-border rounded px-3 py-2 bg-panel-bg">
+                      <div className="text-sm text-text-primary">{brigade.name}</div>
+                      {holdControl(brigade)}
+                    </li>
+                  ))}
+                </ul>
+              )}
               </>}
               </section>
               {unavailable.length > 0 && (
@@ -184,6 +219,7 @@ export function RecruitmentModal({
                         <div className="mt-1 text-xs leading-relaxed text-text-secondary">
                           {(brigade.reason_codes ?? []).map((reason) => getReasonLabel(brigade, reason)).join(' | ')}
                         </div>
+                        {holdEnabled && holdControl(brigade)}
                       </li>
                     ))}
                   </ul>

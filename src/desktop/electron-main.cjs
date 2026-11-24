@@ -2656,6 +2656,25 @@ app.whenReady().then(() => {
     }
   });
 
+  // The president's per-brigade recruitment hold (lane C s6 design sitting, 2026-11-24): at
+  // autonomy 1+ the staff raise his brigades by the historical default and skip a held one.
+  ipcMain.handle('set-recruitment-hold', async (_event, payload) => {
+    const { brigadeId, held } = payload || {};
+    if (!currentGameStateJson || typeof brigadeId !== 'string' || typeof held !== 'boolean') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const result = await sim.setPlayerRecruitmentHoldForCampaign(state, getBaseDir(), brigadeId, held);
+      if (!result.ok) return { ok: false, error: result.error };
+      writeCanonicalCurrentState(sim, result.state, _event.sender);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
   // --- Order staging IPC handlers ---
 
   // Retired 2026-11-17 (L7, dead IPC actions): `stage-deploy-order` and `stage-undeploy-order` (their

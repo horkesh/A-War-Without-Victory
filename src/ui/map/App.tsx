@@ -165,6 +165,7 @@ import { shouldShowOpeningBrief } from './data/openingBriefGate';
 import { deriveRecruitmentMatter } from './data/recruitmentMatter';
 import {
   applyRecruitmentAndSync,
+  setRecruitmentHoldAndSync,
   fetchRecruitmentCatalogSnapshot,
   type FetchedRecruitmentCatalog,
   resolveBrowserEventDecision,
@@ -1213,6 +1214,7 @@ function App() {
   // Recruitment on the Desk: re-read the catalog once per week (and when the autonomy panel
   // closes, since the level decides decision vs notice) so newly raisable brigades reach
   // the president without a visit to Army HQ → Personnel. Presentation only.
+  const recruitmentWatchAutonomyLevel = useGameStore((s) => s.recruitmentWatch?.autonomyLevel ?? null);
   const recruitmentWatchTurn = loadedGameState?.turn ?? null;
   const recruitmentWatchFaction = loadedGameState?.player_faction ?? null;
   const recruitmentWatchGameOver = loadedGameState?.gameOver === true;
@@ -1289,6 +1291,11 @@ function App() {
       setRecruitmentOpen(false);
       void refreshRecruitmentCatalog();
     }
+  };
+
+  const handleToggleRecruitmentHold = async (brigadeId: string, held: boolean) => {
+    const ok = await setRecruitmentHoldAndSync({ ipc, loadSave, setLoadError, brigadeId, held });
+    if (ok) void refreshRecruitmentCatalog({ silent: true });
   };
 
   const openSummary = (focus: SummaryFocusSection = 'overview') => {
@@ -2024,6 +2031,8 @@ function App() {
             playerFaction={playerFaction}
             brigades={recruitmentCatalog}
             initialBrigadeId={recruitmentFocusBrigadeId}
+            autonomyLevel={recruitmentWatchAutonomyLevel}
+            onToggleHold={(brigadeId, held) => void handleToggleRecruitmentHold(brigadeId, held)}
             onRefresh={() => void refreshRecruitmentCatalog()}
             onApply={(brigadeId, equipmentClass) => void handleApplyRecruitment(brigadeId, equipmentClass)}
             onClose={() => setRecruitmentOpen(false)}

@@ -241,7 +241,42 @@ export function runOngoingRecruitment(
         maxElectivePerFaction: maxRecruitsPerFaction,
         canonicalToOperational,
         factionIds: selectAutomaticRecruitmentFactions(state),
+        heldBrigadeIds: selectPlayerHeldBrigadeIds(state),
     });
+}
+
+/**
+ * The president's per-brigade holds the staff must skip, or undefined when none apply.
+ * Headless auto-control and campaigns without a player faction never hold (the field is
+ * player-only); the IPC that writes the list only accepts the player faction's own brigades.
+ */
+export function selectPlayerHeldBrigadeIds(state: GameState): ReadonlySet<string> | undefined {
+    if (state.meta.headless_scenario_auto_control === true || !state.meta.player_faction) return undefined;
+    const held = state.military.recruitment_state?.player_held_brigade_ids;
+    return held && held.length > 0 ? new Set(held) : undefined;
+}
+
+/**
+ * Set or clear the president's hold on one of his faction's brigades (lane C s6 design sitting,
+ * 2026-11-24). A hold keeps the staff from raising that brigade at autonomy 1+; it costs nothing
+ * but the brigade itself. Mutates state; keeps the list strictCompare-sorted and unique, and
+ * removes the field when the list empties so a save that never held stays byte-identical.
+ */
+export function setPlayerRecruitmentHold(
+    state: GameState,
+    brigadeId: string,
+    held: boolean,
+): void {
+    const resources = state.military.recruitment_state;
+    if (!resources) return;
+    const ids = new Set(resources.player_held_brigade_ids ?? []);
+    if (held) ids.add(brigadeId);
+    else ids.delete(brigadeId);
+    if (ids.size === 0) {
+        delete resources.player_held_brigade_ids;
+        return;
+    }
+    resources.player_held_brigade_ids = [...ids].sort(strictCompare);
 }
 
 export function selectAutomaticRecruitmentFactions(state: GameState): FactionId[] {

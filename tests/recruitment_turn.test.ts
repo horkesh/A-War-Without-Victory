@@ -3,7 +3,13 @@ import { describe, expect, test } from 'vitest';
 import { loadOobBrigades } from '../src/scenario/oob_loader.js';
 import type { OobBrigade } from '../src/scenario/oob_loader.js';
 import { initializeRecruitmentResources } from '../src/sim/recruitment_engine.js';
-import { accrueRecruitmentResources, runOngoingRecruitment, selectAutomaticRecruitmentFactions } from '../src/sim/recruitment_turn.js';
+import {
+    accrueRecruitmentResources,
+    runOngoingRecruitment,
+    selectAutomaticRecruitmentFactions,
+    selectPlayerHeldBrigadeIds,
+    setPlayerRecruitmentHold,
+} from '../src/sim/recruitment_turn.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { militiaPoolKey } from '../src/state/militia_pool_key.js';
@@ -292,6 +298,59 @@ describe('runOngoingRecruitment', () => {
         expect(assisted.military.formations.rbih_staff_choice).toBeDefined();
         expect(assisted.military.recruitment_state?.recruited_brigade_ids)
             .toEqual(headless.military.recruitment_state?.recruited_brigade_ids);
+    });
+
+    test('the president can hold a brigade: the staff skip it, the pool stays unspent, release restores the raise', () => {
+        const brigade: OobBrigade = {
+            id: 'rbih_held_choice',
+            faction: 'RBiH',
+            name: 'Held Choice Brigade',
+            home_mun: 'zenica',
+            kind: 'brigade',
+            manpower_cost: 800,
+            capital_cost: 10,
+            default_equipment_class: 'light_infantry',
+            home_osid: 'op:zenica:core',
+            priority: 1,
+            mandatory: false,
+            available_from: 0,
+            max_personnel: 3000,
+        };
+        const run = (state: GameState) =>
+            runOngoingRecruitment(state, [], [brigade], new Map([['s1', 'zenica']]), { zenica: 's1' });
+
+        const held = makeState();
+        held.meta.player_faction = 'RBiH';
+        held.meta.autonomy_level = 1;
+        setPlayerRecruitmentHold(held, brigade.id, true);
+        expect(held.military.recruitment_state?.player_held_brigade_ids).toEqual(['rbih_held_choice']);
+        const poolBefore = JSON.stringify(held.military.militia_pools);
+        run(held);
+        expect(held.military.formations.rbih_held_choice).toBeUndefined();
+        expect(held.military.recruitment_state?.recruited_brigade_ids).not.toContain('rbih_held_choice');
+        expect(JSON.stringify(held.military.militia_pools)).toBe(poolBefore);
+
+        // Release: the field disappears (a save that no longer holds is byte-identical) and the staff raise it.
+        setPlayerRecruitmentHold(held, brigade.id, false);
+        expect(held.military.recruitment_state?.player_held_brigade_ids).toBeUndefined();
+        run(held);
+        expect(held.military.formations.rbih_held_choice).toBeDefined();
+    });
+
+    test('holds keep a sorted unique list and never apply under headless auto-control', () => {
+        const state = makeState();
+        state.meta.player_faction = 'RBiH';
+        state.meta.autonomy_level = 2;
+        setPlayerRecruitmentHold(state, 'b_two', true);
+        setPlayerRecruitmentHold(state, 'a_one', true);
+        setPlayerRecruitmentHold(state, 'b_two', true);
+        expect(state.military.recruitment_state?.player_held_brigade_ids).toEqual(['a_one', 'b_two']);
+        expect([...(selectPlayerHeldBrigadeIds(state) ?? [])]).toEqual(['a_one', 'b_two']);
+        state.meta.headless_scenario_auto_control = true;
+        expect(selectPlayerHeldBrigadeIds(state)).toBeUndefined();
+        state.meta.headless_scenario_auto_control = false;
+        state.meta.player_faction = undefined;
+        expect(selectPlayerHeldBrigadeIds(state)).toBeUndefined();
     });
 
     test('applies per-faction recruit cap deterministically', () => {

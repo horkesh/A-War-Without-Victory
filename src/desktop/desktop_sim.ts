@@ -32,6 +32,7 @@ import { loadForestOsidSet, loadUrbanOsidSet } from '../sim/combat/combat_terrai
 import { computeFrontWidthMetrics } from '../sim/combat/front_width_metrics.js';
 import { computeSectorCombatRatings } from '../sim/combat/sector_combat_rating.js';
 import { applyRecruitment, evaluateRecruitmentEligibility, initializeRecruitmentResources, recruitBrigade } from '../sim/recruitment_engine.js';
+import { setPlayerRecruitmentHold } from '../sim/recruitment_turn.js';
 import { buildRecruitmentContext } from '../sim/recruitment_context.js';
 import { assertTurnSuccess, runTurn, type TurnInput } from '../sim/turn_pipeline.js';
 import { loadEventDefinitionsFromDir } from '../sim/events/event_loader.js';
@@ -785,6 +786,36 @@ export async function applyPlayerRecruitment(
     }
 
     applyRecruitment(state, result, state.military.recruitment_state);
+    // A raise from the Recruit modal clears that brigade's hold (lane C s6 design sitting).
+    setPlayerRecruitmentHold(state, brigadeId, false);
+    return { ok: true, state };
+}
+
+/**
+ * Hold or release one of the player faction's brigades (lane C s6 design sitting, 2026-11-24).
+ * At autonomy 1+ the staff raise the player's brigades by the historical default and skip a held
+ * one; holding is free, and the cost is going without the brigade. Only the player faction's own,
+ * not-yet-raised catalog brigades can be held; releasing is always accepted. Mutates state.
+ */
+export async function setPlayerRecruitmentHoldForCampaign(
+    state: GameState,
+    baseDir: string,
+    brigadeId: string,
+    held: boolean,
+): Promise<{ ok: true; state: GameState } | { ok: false; error: string }> {
+    const resources = state.military.recruitment_state;
+    if (!resources) return { ok: false, error: 'No recruitment state' };
+    const playerFaction = state.meta.player_faction;
+    if (!playerFaction) return { ok: false, error: 'No player faction' };
+    if (held) {
+        const brigade = (await loadOobBrigades(baseDir)).find((b) => b.id === brigadeId);
+        if (!brigade) return { ok: false, error: `Brigade not found: ${brigadeId}` };
+        if (brigade.faction !== playerFaction) return { ok: false, error: 'Only your own brigades can be held' };
+        if (resources.recruited_brigade_ids.includes(brigadeId) || state.military.formations?.[brigadeId]) {
+            return { ok: false, error: 'Brigade already raised' };
+        }
+    }
+    setPlayerRecruitmentHold(state, brigadeId, held);
     return { ok: true, state };
 }
 
@@ -840,6 +871,8 @@ export async function getPlayerRecruitmentCatalog(state: GameState, baseDir: str
         mandatory: boolean;
         eligible: boolean;
         reason_codes: string[];
+        /** The president holds this brigade: the staff will not raise it (lane C s6). */
+        held: boolean;
     }>;
 }> {
     const [brigades, municipalityHqSettlement, graph, operationalData] = await Promise.all([
@@ -854,6 +887,7 @@ export async function getPlayerRecruitmentCatalog(state: GameState, baseDir: str
     if (!resources) return { turn, autonomy_level, brigades: [] };
     const context = buildRecruitmentContext(state, graph.settlements, municipalityHqSettlement, operationalData);
     const playerFaction = state.meta.player_faction;
+    const heldIds = new Set(resources.player_held_brigade_ids ?? []);
 
     return {
         turn,
@@ -880,6 +914,7 @@ export async function getPlayerRecruitmentCatalog(state: GameState, baseDir: str
                 available_from: brigade.available_from,
                 mandatory: brigade.mandatory,
                 ...eligibility,
+                held: heldIds.has(brigade.id),
             };
         }),
     };

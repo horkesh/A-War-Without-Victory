@@ -62,7 +62,7 @@ const DELEGATING_LEVELS = ['autonomy.level.assisted.desc', 'autonomy.level.deleg
 const SIGNED: Record<'en' | 'bcs', Record<string, string>> = {
     en: {
         'autonomy.level.assisted.desc':
-            'Your staff runs corps and brigade orders. Corps commanders bring stance changes and operation plans to you, and operations wait for your approval. Your staff raises new brigades when they are ready; you can raise one sooner in Recruitment. Rear-area paramilitary sweeps follow your standing order: under Always allow your staff sends them without asking you, and each one counts against your side; under any other order, or none, it sends none.',
+            'Your staff runs corps and brigade orders. Corps commanders bring stance changes and operation plans to you, and operations wait for your approval. Your staff raises new brigades when they are ready; in Recruitment you can raise one sooner, or hold one so it is not raised. Rear-area paramilitary sweeps follow your standing order: under Always allow your staff sends them without asking you, and each one counts against your side; under any other order, or none, it sends none.',
         'autonomy.level.delegated.desc':
             'The default. Your staff runs the army, including operations and recruitment, without asking. Corps and OG commanders report their stance changes to you, and each change stands unless you answer. Event decisions still come to you. Rear-area paramilitary sweeps follow your standing order: under Always allow your staff sends them without asking you, and each one counts against your side; under any other order, or none, it sends none.',
         'autonomy.level.observer.desc':
@@ -95,7 +95,7 @@ const SIGNED: Record<'en' | 'bcs', Record<string, string>> = {
     },
     bcs: {
         'autonomy.level.assisted.desc':
-            'Štab vodi naredbe korpusa i brigada. Komandanti korpusa vam iznose promjene stava i planove operacija, a operacije čekaju vaše odobrenje. Štab formira nove brigade kad su spremne; jednu možete formirati i ranije u Regrutaciji. Paravojne akcije u pozadini slijede vašu stalnu naredbu: uz Uvijek dozvoli štab ih šalje bez pitanja, a svaka takva akcija pada na teret vaše strane; uz bilo koju drugu naredbu, ili bez naredbe, ne šalje nijednu.',
+            'Štab vodi naredbe korpusa i brigada. Komandanti korpusa vam iznose promjene stava i planove operacija, a operacije čekaju vaše odobrenje. Štab formira nove brigade kad su spremne; u Regrutaciji jednu možete formirati ranije ili je zadržati da se ne formira. Paravojne akcije u pozadini slijede vašu stalnu naredbu: uz Uvijek dozvoli štab ih šalje bez pitanja, a svaka takva akcija pada na teret vaše strane; uz bilo koju drugu naredbu, ili bez naredbe, ne šalje nijednu.',
         'autonomy.level.delegated.desc':
             'Zadani nivo. Štab vodi vojsku, uključujući operacije i regrutaciju, bez pitanja. Komandanti korpusa i OG vam prijavljuju promjene stava, a svaka promjena ostaje ako ne odgovorite. Odluke o događajima i dalje dolaze vama. Paravojne akcije u pozadini slijede vašu stalnu naredbu: uz Uvijek dozvoli štab ih šalje bez pitanja, a svaka takva akcija pada na teret vaše strane; uz bilo koju drugu naredbu, ili bez naredbe, ne šalje nijednu.',
         'autonomy.level.observer.desc':
