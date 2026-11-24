@@ -223,7 +223,7 @@ describe('recruitment hold (staff will not raise a held brigade)', () => {
     expect(matter.ready.map((b) => b.id)).toEqual(['b']);
     expect(matter.held.map((b) => b.id)).toEqual(['a', 'c']);
     const copy = buildRecruitmentMatterCopy(matter, MUNICIPALITIES);
-    expect(copy.facts).toContain('Held by you: 7th Brigade, 9th Brigade.');
+    expect(copy.facts).toContain('Held by you, not raised: 7th Brigade, 9th Brigade.');
     expect(copy.facts.some((f) => f.startsWith('7th Brigade: ready'))).toBe(false);
   });
 
@@ -237,7 +237,7 @@ describe('recruitment hold (staff will not raise a held brigade)', () => {
       brigade('a', 'visoko', { name: '7th Brigade', held: true }),
       brigade('b', 'zepce'),
     ])))!;
-    expect(buildRecruitmentMatterCopy(matter, MUNICIPALITIES).facts.some((f) => f.startsWith('Zadržali ste: ') && f.endsWith('.'))).toBe(true);
+    expect(buildRecruitmentMatterCopy(matter, MUNICIPALITIES).facts.some((f) => f.startsWith('Zadržano, ne formira se: ') && f.endsWith('.'))).toBe(true);
   });
 
   it('keeps the decision at Full Control free of holds, and the modal offers holds from level 1 only', () => {

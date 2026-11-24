@@ -1346,7 +1346,7 @@ export const enMessages = {
     'recruitment.desk.fact.ready': '{name}: forms in {place}. Cost: {manpower} manpower, {capital} capital.',
     'recruitment.desk.fact.readyStaff': '{name}: ready in {place}. Your staff decides when to raise it.',
     'recruitment.desk.fact.raised': '{name}: raised in {place}.',
-    'recruitment.desk.fact.held': 'Held by you: {names}.',
+    'recruitment.desk.fact.held': 'Held by you, not raised: {names}.',
     'recruitment.hold.action': 'Hold',
     'recruitment.hold.release': 'Release hold',
     'recruitment.hold.marker': 'Held: your staff will not raise it',
