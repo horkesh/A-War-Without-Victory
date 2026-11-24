@@ -24,6 +24,7 @@ import type {
 import { LARGE_URBAN_MUN_IDS } from './large_urban_mun_data.js';
 import { militiaPoolKey } from './militia_pool_key.js';
 import type { MunicipalityPopulation1991Map } from './population_share.js';
+import { getMunicipalityController } from '../sim/early_war/control_strain.js';
 import { strictCompare } from './validateGameState.js';
 import { recordWarCrime } from './war_crimes_record.js';
 
@@ -1268,7 +1269,14 @@ export function processDisplacementTakeover(
             // capture only the captor's OWN sheltered people stay; every other group, an ally's refugees
             // included, is moved on as before, recorded as a turn-report row (`capture_pass_through`) and
             // never as a displacement event.
-            if (!isPolicyTimer && dispState.displaced_in > 0) {
+            // A9 (SD13, §6 broader panel round 1, 2026-11-24; DISPLACEMENT_MASTER §10.6): the pass-through
+            // runs only when the capture leaves the captor as the municipality's majority holder. Taking an
+            // outlying settlement that does not change the municipality's holder moves no sheltered group.
+            if (
+                !isPolicyTimer &&
+                dispState.displaced_in > 0 &&
+                getMunicipalityController(state, [], munId) === timer.to_faction
+            ) {
                 const byFaction = dispState.displaced_in_by_faction ?? {};
                 const fKeys = Object.keys(byFaction).sort(strictCompare);
                 for (const fid of fKeys) {
