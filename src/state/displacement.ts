@@ -15,7 +15,7 @@ import { areRbihHrhbAllied, DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN } from '../sim/e
 import type { EdgeRecord } from '../map/settlements.js';
 import { getReceivingCapacityFraction } from './displacement_routing_data.js';
 import { appendDisplacementEvent, UNKNOWN_CAUSER_BUCKET } from './displacement_event_log.js';
-import { getBilateralRoutingOrder } from './displacement_takeover.js';
+import { getBilateralRoutingOrder, type PassThroughDestinationResolver } from './displacement_takeover.js';
 import { recordCivilianDisplacementCasualties } from './displacement_state_utils.js';
 import { strictCompare } from './validateGameState.js';
 import type { MunicipalityPopulation1991Map } from './population_share.js';
@@ -28,11 +28,13 @@ export const UNSUPPLIED_PRESSURE_TURNS = 3;
 /**
  * Share of the holder's own people leaving per turn (week) once the siege trigger fires.
  * DA1 P3 calibration (Historian seat, 2026-11-13): after the 1992 departures (which the
- * takeover writer books), outflow from besieged pockets ran about 0.05-0.2% a week:
- * Srebrenica's 8,000-9,000 UNHCR evacuees of spring 1993 (Krstić TJ ¶16) average about
- * 0.1% a week over the siege; government-held Sarajevo about 0.05-0.1% a week after 1992
- * (UNCOE S/1994/674/Add.2 Annex VI; Tabeau, Galić demographic report 2002). The dormant
- * 5% (and 10% encircled) per week were 50-500 times higher than any source supports.
+ * takeover writer books), background outflow from besieged pockets ran about 0.05-0.2% a
+ * week: government-held Sarajevo about 0.05-0.1% a week after 1992 (UNCOE S/1994/674/Add.2
+ * Annex VI; Tabeau, Galić demographic report 2002). The dormant 5% (and 10% encircled) per
+ * week were 50-500 times higher than any source supports.
+ * A9 B2 (Historian seat, 2026-11-24): this rate is a steady trickle. It does NOT model the
+ * spring 1993 UNHCR convoy evacuations from Srebrenica, which moved several thousand people
+ * within a few weeks; no rate of this scale can reproduce a concentrated event like that.
  */
 export const UNSUPPLIED_DISPLACEMENT_FRACTION = 0.001;
 /**
@@ -366,6 +368,80 @@ function buildSiegeDestinationsBySide(
         out.set(side, allowed);
     }
     return out;
+}
+
+/**
+ * A9 B2 (SD13, owner rulings 2-3 of 2026-11-24; the §6 broader panel round 1 A5b shape; DISPLACEMENT_MASTER
+ * §10.6): where a group sheltered in a captured municipality may be moved on. The answer is read from the
+ * same territorial bodies and supply as the siege route, at the moment the pass-through fires.
+ * - The group's side still holds a supplied settlement in the municipality: `null`, the group stays. A
+ *   pocket that is still held and supplied is never emptied because the enemy holds most of the municipality.
+ * - Otherwise: the municipalities where the side holds a supplied settlement in a body linked to the source
+ *   (the body of its own settlements there, or a body next to the municipality's settlements). An empty set
+ *   means no reachable destination, and the group stays.
+ * Bodies are built once per call of this builder; the caller builds it lazily, on the first pass-through.
+ */
+export function buildPassThroughDestinationResolver(
+    state: GameState,
+    settlementEdges: ReadonlyArray<EdgeRecord>,
+    suppliedByFaction: ReadonlyMap<string, ReadonlySet<string>>
+): PassThroughDestinationResolver {
+    const pc = state.political.political_controllers ?? {};
+    const controllerOf = new Map<string, FactionId>();
+    const osidsByMun = new Map<MunicipalityId, string[]>();
+    const munOf = (sid: string): MunicipalityId | undefined => {
+        const parts = sid.split(':');
+        return parts.length >= 3 && parts[0] === 'op' ? (parts[1] as MunicipalityId) : undefined;
+    };
+    for (const sid of Object.keys(pc).sort(strictCompare)) {
+        const mun = munOf(sid);
+        if (!mun) continue;
+        const list = osidsByMun.get(mun) ?? [];
+        list.push(sid);
+        osidsByMun.set(mun, list);
+        const side = pc[sid];
+        if (isCanonicalFaction(side)) controllerOf.set(sid, side);
+    }
+    const neighbourSets = new Map<string, Set<string>>();
+    for (const e of settlementEdges) {
+        if (e.a === e.b) continue;
+        if (!neighbourSets.has(e.a)) neighbourSets.set(e.a, new Set());
+        if (!neighbourSets.has(e.b)) neighbourSets.set(e.b, new Set());
+        neighbourSets.get(e.a)!.add(e.b);
+        neighbourSets.get(e.b)!.add(e.a);
+    }
+    const neighbours = new Map<string, string[]>();
+    for (const [k, v] of neighbourSets) neighbours.set(k, [...v].sort(strictCompare));
+    const bodies = computeTerritorialBodies(controllerOf, neighbours, rbihHrhbAtWar(state));
+    const none: ReadonlySet<string> = new Set<string>();
+
+    return (faction: FactionId, munId: MunicipalityId): ReadonlySet<MunicipalityId> | null => {
+        const body = bodies.get(faction);
+        const supplied = suppliedByFaction.get(faction) ?? none;
+        const allowed = new Set<MunicipalityId>();
+        if (!body) return allowed;
+        const inMun = osidsByMun.get(munId) ?? [];
+        const linked = new Set<number>();
+        for (const sid of inMun) {
+            const b = body.bodyOf.get(sid);
+            if (b === undefined) continue;
+            if (supplied.has(sid)) return null;
+            linked.add(b);
+        }
+        for (const sid of inMun) {
+            for (const nb of neighbours.get(sid) ?? []) {
+                const b = body.bodyOf.get(nb);
+                if (b !== undefined) linked.add(b);
+            }
+        }
+        if (linked.size === 0) return allowed;
+        for (const [sid, b] of body.bodyOf) {
+            if (!linked.has(b) || !supplied.has(sid)) continue;
+            const mun = munOf(sid);
+            if (mun && mun !== munId) allowed.add(mun);
+        }
+        return allowed;
+    };
 }
 
 /**

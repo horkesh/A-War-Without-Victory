@@ -894,13 +894,29 @@ function getInitialDisplacementFraction(
     return INITIAL_DISPLACEMENT_FRACTION;
 }
 
+/**
+ * A9 B2 (SD13): where a capture pass-through group of `faction` sheltered in `munId` may be moved on.
+ * `null` means the group stays (its side still holds a supplied settlement there); a set lists the
+ * reachable destinations, and an empty set also means the group stays. Built by
+ * `buildPassThroughDestinationResolver` (displacement.ts) from this turn's territorial bodies and supply.
+ */
+export type PassThroughDestinationResolver = (
+    faction: FactionId,
+    munId: MunicipalityId
+) => ReadonlySet<MunicipalityId> | null;
+
 export function processDisplacementTakeover(
     state: GameState,
     settlements: Map<string, SettlementRecord>,
     battleReport?: BattleResolutionLike,
     population1991ByMun?: MunicipalityPopulation1991Map,
     /** Optional OSID-keyed settlements with per-OSID census data (population_total, population_bosniaks, etc.). */
-    osidSettlements?: Map<string, SettlementRecord>
+    osidSettlements?: Map<string, SettlementRecord>,
+    /**
+     * A9 B2 (SD13): builds the pass-through reachability on first use (the turn pipeline passes it). Without
+     * it (unit fixtures, legacy harnesses) the pass-through routes as B1 did.
+     */
+    passThroughReach?: () => PassThroughDestinationResolver
 ): TakeoverDisplacementReport {
     if (state.meta.phase !== 'war') {
         return {
@@ -1073,6 +1089,7 @@ export function processDisplacementTakeover(
     }
 
     const friendlyMunsByFaction = buildFriendlyMunicipalitiesByFaction(state, settlements);
+    let passThroughResolver: PassThroughDestinationResolver | undefined;
 
     // 2) Mature timers into camp state (per-OSID displacement).
     // Count OSIDs per municipality once for per-OSID population split.
@@ -1264,6 +1281,10 @@ export function processDisplacementTakeover(
             // A9 (SD13, §6 broader panel round 1, 2026-11-24; DISPLACEMENT_MASTER §10.6): the pass-through
             // runs only when the capture leaves the captor as the municipality's majority holder. Taking an
             // outlying settlement that does not change the municipality's holder moves no sheltered group.
+            // A9 B2 (SD13, owner rulings 2-3 of 2026-11-24, inside the round-1 A5b shape): a group whose side
+            // still holds a supplied settlement in the municipality stays, and any other group goes only to
+            // supplied ground in a territorial body linked to the source; with none reachable it stays.
+            // Pass-through applies only to ground that is actually taken, never across enemy lines.
             if (
                 !isPolicyTimer &&
                 dispState.displaced_in > 0 &&
@@ -1275,9 +1296,16 @@ export function processDisplacementTakeover(
                     if (fid === timer.to_faction) continue;
                     let rem = Math.max(0, Math.floor(byFaction[fid] ?? 0));
                     if (rem <= 0) continue;
+                    let destinations: Set<MunicipalityId> = friendlyMunsByFaction[fid];
+                    if (passThroughReach) {
+                        passThroughResolver ??= passThroughReach();
+                        const reachable = passThroughResolver(fid as FactionId, munId);
+                        if (reachable === null || reachable.size === 0) continue;
+                        destinations = new Set([...(destinations ?? [])].filter(m => reachable.has(m)));
+                    }
                     const result = routeDisplacedCohort(
                         state, munId, fid, rem,
-                        friendlyMunsByFaction[fid],
+                        destinations,
                         settlements, routedByPoolKey, report,
                         { causedByFaction: timer.to_faction, reportReason: 'capture_pass_through' }
                     );

@@ -41,7 +41,7 @@ import { recomputeDimensionBases, applyDimensionShift } from '../events/strategi
 import { relieveOfficer, recordPresidentialOverride } from '../combat/order_interpretation.js';
 import { applyReplaceCoConsequence, applyForceOpConsequence, applyStopOpConsequence } from '../combat/command_lever_consequences.js';
 import { clamp } from '../../utils/math.js';
-import { updateDisplacement, type DisplacementPressureInputs } from '../../state/displacement.js';
+import { buildPassThroughDestinationResolver, updateDisplacement, type DisplacementPressureInputs } from '../../state/displacement.js';
 import { processDisplacementTakeover } from '../../state/displacement_takeover.js';
 import { getDoctrineTempoMultiplier, updateDoctrineState } from '../../state/doctrine.js';
 import { updateEmbargoProfiles } from '../../state/embargo.js';
@@ -3506,12 +3506,24 @@ export const warPhases: NamedPhase[] = [
                 }
             } catch { /* fallback: no OSID census data */ }
 
+            // A9 B2 (SD13): the capture pass-through reads this turn's territorial bodies and supply, in
+            // the OSID id space, built only if a pass-through fires.
+            const takeoverOd = getOperationalData(context);
+            const passThroughReach = takeoverOd?.edges?.length
+                ? () => buildPassThroughDestinationResolver(
+                    context.state,
+                    takeoverOd.edges,
+                    buildOsidDisplacementPressureInputs(context.state, takeoverOd).suppliedByFaction
+                )
+                : undefined;
+
             context.report.takeover_displacement = processDisplacementTakeover(
                 context.state,
                 graph.settlements,
                 combinedReport,
                 context.input.municipalityPopulation1991,
-                osidSettlements
+                osidSettlements,
+                passThroughReach
             );
         }
     },
