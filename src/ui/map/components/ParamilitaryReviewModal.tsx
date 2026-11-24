@@ -17,6 +17,7 @@ import {
 import { t, useLocale, type Locale } from '../i18n';
 import { formatLocaleNumber } from '../utils/formatters';
 import {
+    PARAMILITARY_ORDER_NOT_MANUAL,
     PARAMILITARY_POLICY_CANNOT_LOOSEN,
     isParamilitaryOrderWithinCap,
 } from '../../../sim/events/paramilitary_policy_card';
@@ -100,7 +101,12 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
         setStandingPolicy(null);
     }, [isOpen, requests]);
 
-    const allDecided = requests.length > 0 && requests.every((request) => decisions[request.target_osid]);
+    // §6 mechanics item 2 (signed 2026-11-23): with no request pending, the modal is the Full Control opener: the player
+    // gives a standing order on its own (the review IPC's policy-only call; it refuses below Full Control and above the cap).
+    const orderOnly = requests.length === 0;
+    const allDecided = orderOnly
+        ? standingPolicy !== null
+        : requests.every((request) => decisions[request.target_osid]);
     const totalStrength = requests.reduce((sum, request) => sum + request.strength, 0);
 
     const choose = (targetOsid: string, decision: ParamilitaryDecision) => {
@@ -141,7 +147,9 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
             if (!result.ok) {
                 setLoadError(result.error === PARAMILITARY_POLICY_CANNOT_LOOSEN
                     ? t('paramilitaryReview.error.cannotLoosen')
-                    : result.error ?? t('paramilitaryReview.error.resolveFailed'));
+                    : result.error === PARAMILITARY_ORDER_NOT_MANUAL
+                        ? t('paramilitaryReview.error.notManual')
+                        : result.error ?? t('paramilitaryReview.error.resolveFailed'));
                 return;
             }
             const stateJson = await ipc.getCurrentGameState();
@@ -172,14 +180,15 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                     <DecisionModalImageHeader
                         imageUrl={headerImage}
                         imageAlt={t('paramilitaryReview.imageAlt')}
-                        eyebrow={t('paramilitaryReview.eyebrow')}
-                        title={t('paramilitaryReview.title')}
+                        eyebrow={orderOnly ? t('paramilitaryReview.order.eyebrow') : t('paramilitaryReview.eyebrow')}
+                        title={orderOnly ? t('paramilitaryReview.order.title') : t('paramilitaryReview.title')}
                         titleId="paramilitary-review-title"
-                        description={t('paramilitaryReview.description')}
+                        description={orderOnly ? t('paramilitaryReview.order.description') : t('paramilitaryReview.description')}
                         accentClassName="text-red-300"
                     />
                 )}
                 <div className="shrink-0 border-b border-[#262b35] bg-red-950/20 px-8 py-4">
+                    {!orderOnly && (
                     <div className="flex flex-wrap gap-2 text-[15px] font-semibold text-[#f1e6c8]">
                         <span className="rounded-md border border-[#3a4150] bg-[#161a22] px-3 py-1.5">
                             {requests.length === 1
@@ -190,10 +199,13 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                             {t('paramilitaryReview.estimatedStrength', { strength: totalStrength })}
                         </span>
                     </div>
+                    )}
+                    {!orderOnly && (
                     <div className="mt-3 text-[16px] leading-relaxed text-[#ddd1b3]">
                         {t('paramilitaryReview.packetHint')}
                     </div>
-                    <div className="mt-1 text-[16px] leading-relaxed text-[#ddd1b3]">
+                    )}
+                    <div className={`${orderOnly ? '' : 'mt-1 '}text-[16px] leading-relaxed text-[#ddd1b3]`}>
                         {/* §6 D1 stage 2 round 4s: a side with no policy card (no cap) gets the no-card hint (§4 copy panel). */}
                         {state && policyCap === null ? t('paramilitaryReview.policyHintNoCard') : t('paramilitaryReview.policyHint')}
                     </div>
@@ -208,9 +220,17 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                 </div>
 
                 <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-8 py-6">
-                    {requests.length === 0 ? (
-                        <div className="rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-4 text-[16px] text-[#c2b69c]">
-                            {t('paramilitaryReview.empty')}
+                    {orderOnly ? (
+                        <div
+                            data-testid="paramilitary-standing-order-only"
+                            className="space-y-2 rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-4 text-[16px] leading-relaxed text-[#c2b69c]"
+                        >
+                            <p>{t('paramilitaryReview.empty')}</p>
+                            <p>
+                                {state && policyCap === null
+                                    ? t('paramilitaryReview.order.bodyNoCard')
+                                    : t('paramilitaryReview.order.body')}
+                            </p>
                         </div>
                     ) : requests.map((request) => {
                         const selected = decisions[request.target_osid];
@@ -332,29 +352,33 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
 
                 <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-[#262b35] bg-[#12161e] px-8 pb-6 pt-5">
                     <div className="flex flex-wrap gap-2">
+                        {!orderOnly && (
                         <button
                             type="button"
                             data-testid="paramilitary-deny-packet"
                             onClick={() => chooseAll('deny')}
-                            disabled={requests.length === 0 || submitting}
+                            disabled={submitting}
                             className="h-11 rounded-md border border-[#3a4150] bg-[#1b2029] px-4 text-[15px] font-semibold text-[#e8dcbc] hover:border-accent-gold/60 disabled:opacity-45"
                         >
                             {t('paramilitaryReview.denyPacket')}
                         </button>
+                        )}
+                        {!orderOnly && (
                         <button
                             type="button"
                             data-testid="paramilitary-allow-packet"
                             onClick={() => chooseAll('allow')}
-                            disabled={requests.length === 0 || submitting}
+                            disabled={submitting}
                             className="h-11 rounded-md border border-red-500/40 px-4 text-[15px] font-semibold text-red-200 hover:bg-red-500/10 disabled:opacity-45"
                         >
                             {t('paramilitaryReview.allowPacket')}
                         </button>
+                        )}
                         <button
                             type="button"
                             data-testid="paramilitary-always-deny"
                             onClick={() => chooseStandingPolicy('always_deny')}
-                            disabled={requests.length === 0 || submitting}
+                            disabled={submitting}
                             className={`h-11 rounded-md border px-4 text-[15px] font-semibold transition-colors disabled:opacity-40 ${
                                 standingPolicy === 'always_deny'
                                     ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-200'
@@ -380,7 +404,7 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                                 type="button"
                                 data-testid="paramilitary-always-allow"
                                 onClick={() => chooseStandingPolicy('always_allow')}
-                                disabled={requests.length === 0 || submitting}
+                                disabled={submitting}
                                 className={`h-11 rounded-md border px-4 text-[15px] font-semibold transition-colors disabled:opacity-40 ${
                                     standingPolicy === 'always_allow'
                                         ? 'border-red-400/75 bg-red-500/15 text-red-200'
@@ -407,7 +431,9 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                             disabled={!allDecided || submitting}
                             className={SURFACE_PRIMARY_BUTTON_COMPACT}
                         >
-                            {submitting ? t('paramilitaryReview.submitting') : t('paramilitaryReview.submit')}
+                            {submitting
+                                ? t('paramilitaryReview.submitting')
+                                : orderOnly ? t('paramilitaryReview.order.submit') : t('paramilitaryReview.submit')}
                         </button>
                     </div>
                     {alwaysAllowUnavailable && (

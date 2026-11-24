@@ -17,11 +17,13 @@
  * Deterministic: sorted iteration, no randomness, no timestamps.
  */
 
-import type {
-    FactionId,
-    FormationId,
-    FormationState,
-    GameState,
+import {
+    isParamilitaryStandingOrderRecord,
+    type FactionId,
+    type FormationId,
+    type FormationState,
+    type GameState,
+    type ParamilitaryStandingOrderRecord,
 } from '../../state/game_state.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { recordBattleCasualties } from '../../state/casualty_ledger.js';
@@ -414,6 +416,8 @@ function collectParamilitaryIssuedTargets(
         targets.add(request.target_osid);
     }
     for (const decision of state.paramilitary_decision_history ?? []) {
+        // §6 item 2: a standing order has no target; it issues nothing.
+        if (isParamilitaryStandingOrderRecord(decision)) continue;
         if (decision.faction !== faction || decision.turn !== turn) continue;
         const decisionMode = decision.mode === 'offensive' ? 'offensive' : 'rear_pocket';
         if (mode && decisionMode !== mode) continue;
@@ -986,4 +990,34 @@ export function resolvePlayerParamilitaryDecisions(state: GameState): Paramilita
         a.turn !== b.turn ? a.turn - b.turn : strictCompare(a.id, b.id)
     );
     return report;
+}
+
+/**
+ * Record a standing order the manual player gave with no request pending (§6 mechanics item 2, signed 2026-11-23).
+ * Writes ONE target-less row, `paramilitary_order:${turn}:${faction}`; a second order the same turn replaces that row,
+ * so the id stays unique. The row is the side's own record (it ends the no-card historical default) and has no target
+ * and no `decision`, so it files no receipt and sends nothing. The caller (the review IPC) has already checked the
+ * manual faction, the cap and the request gate, and writes the global `paramilitary_policy` itself (its one write
+ * site, §6 M-a3 allowlist). Same sort as `resolvePlayerParamilitaryDecisions`: turn, then strictCompare(id).
+ */
+export function recordPlayerParamilitaryStandingOrder(
+    state: GameState,
+    faction: FactionId,
+    order: ParamilitaryStandingOrderRecord['order'],
+): ParamilitaryStandingOrderRecord {
+    const turn = state.meta?.turn ?? 0;
+    const record: ParamilitaryStandingOrderRecord = {
+        kind: 'standing_order',
+        id: `paramilitary_order:${turn}:${faction}`,
+        turn,
+        faction,
+        order,
+    };
+    const history = (Array.isArray(state.paramilitary_decision_history) ? state.paramilitary_decision_history : [])
+        .filter((row) => row?.id !== record.id);
+    history.push(record);
+    state.paramilitary_decision_history = history.sort((a, b) =>
+        a.turn !== b.turn ? a.turn - b.turn : strictCompare(a.id, b.id)
+    );
+    return record;
 }

@@ -2036,6 +2036,11 @@ function App() {
             onClose={() => setAutonomyOpen(false)}
             playerFaction={playerFaction}
             namedOfficerData={loadedGameState?.namedOfficerData}
+            onOpenParamilitaryOrder={() => {
+              // §6 mechanics item 2: the Full Control opener (no request needed).
+              setAutonomyOpen(false);
+              setParamilitaryReviewOpen(true);
+            }}
           />
         </Suspense>
       )}

@@ -4497,6 +4497,8 @@ function deriveParamilitaryDecisionHistory(
         if (turnA !== turnB) return turnB - turnA;
         return strictCompare(String(a?.id ?? ''), String(b?.id ?? ''));
     })) {
+        // §6 item 2: a standing order has no target and no decision; it is no consequence-ledger or cadence line.
+        if (raw?.kind === 'standing_order') continue;
         const decision = asParamilitaryDecision(raw?.decision);
         if (!raw || typeof raw.id !== 'string' || !decision) continue;
         const faction = String(raw.faction ?? '');
@@ -4584,6 +4586,8 @@ function deriveParamilitaryUnrequested(
     if (!formations || typeof formations !== 'object') return undefined;
     const decided = new Set<string>();
     for (const record of Array.isArray(state.paramilitary_decision_history) ? state.paramilitary_decision_history : []) {
+        // §6 item 2: a standing order decides no sweep; it never hides an unrequested sweep's receipt.
+        if (record?.kind === 'standing_order') continue;
         if (record && typeof record.target_osid === 'string') decided.add(`${Number(record.turn)}:${record.target_osid}`);
     }
     // The engine books civilian harm and the war-crime count ONLY when a paramilitary action takes its target (the control flip

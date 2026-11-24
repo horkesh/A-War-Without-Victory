@@ -9,21 +9,28 @@
  * always_allow; engine D9): a standing order above the cap is refused, and so is a per-request Allow (an
  * `ask`-rank act) under an applied Refuse. Re-raising up to the card's own Always allow stays allowed. HRHB has
  * no card and is not capped. The refusal code maps to `paramilitaryReview.error.cannotLoosen` in the renderer.
+ *
+ * §6 mechanics item 2 (signed 2026-11-23): with nothing of the side's pending, a call with no decisions and a
+ * standing order records that order on its own (the Full Control opener). Only the manual player may give it,
+ * under the same cap and request gate. The global order is written only after a call has fully succeeded.
  */
 
 import type { GameState } from '../state/game_state.js';
 import {
     isPlayerParamilitaryRequestGateHolding,
+    recordPlayerParamilitaryStandingOrder,
     resolvePlayerParamilitaryDecisions,
     type ParamilitarySweepReport,
 } from '../sim/combat/paramilitary_sweep.js';
 import {
+    PARAMILITARY_ORDER_NOT_MANUAL,
     PARAMILITARY_POLICY_CANNOT_LOOSEN,
     isParamilitaryOrderWithinCap,
     isParamilitaryPolicyOrder,
     paramilitaryStandingOrderCap,
     type ParamilitaryPolicyOrder,
 } from '../sim/events/paramilitary_policy_card.js';
+import { selectManualPlayerFaction } from '../sim/bot/staff_control.js';
 
 export type ParamilitaryReviewResult =
     | { ok: true; report: ParamilitarySweepReport }
@@ -59,10 +66,20 @@ export function resolveParamilitaryReviewRequests(state: GameState | null, paylo
             decisionByTarget.set(row.target_osid, row.decision);
         }
     }
-    if (decisionByTarget.size === 0) return { ok: false, error: 'invalid_decisions' };
 
     const pending = Array.isArray(state.pending_paramilitary_requests) ? state.pending_paramilitary_requests : [];
     const playerFaction = state.meta?.player_faction ?? null;
+    if (decisionByTarget.size === 0) {
+        // §6 mechanics item 2: a standing order with no request of the side's pending (the Full Control opener).
+        const ownOpenRequest = pending.some((request) =>
+            request
+            && (!playerFaction || request.faction === playerFaction)
+            && !isFinalParamilitaryDecision(request.decision),
+        );
+        if (decisions.length === 0 && policy && !ownOpenRequest) return recordStandingOrderOnly(state, policy);
+        return { ok: false, error: 'invalid_decisions' };
+    }
+
     const approvesARequest = [...decisionByTarget.values()].includes('allow');
     // §6 design M (M-a): the rank check against the card's APPLIED answer (`ask` before it applies).
     const cap = paramilitaryStandingOrderCap(state, playerFaction);
@@ -76,7 +93,6 @@ export function resolveParamilitaryReviewRequests(state: GameState | null, paylo
     if (approves && isPlayerParamilitaryRequestGateHolding(state)) {
         return { ok: false, error: 'paramilitary_policy_not_applied' };
     }
-    if (policy) state.paramilitary_policy = policy;
     let matched = 0;
 
     for (const request of pending) {
@@ -98,6 +114,37 @@ export function resolveParamilitaryReviewRequests(state: GameState | null, paylo
     );
     if (unresolved.length > 0) return { ok: false, error: 'incomplete_decisions' };
 
+    // §6 mechanics item 2 (the historian's finding): the global order is written only once matching has succeeded,
+    // so a call that ends in request_not_found or incomplete_decisions leaves it as it was.
+    commitStandingOrder(state, policy);
     const report = resolvePlayerParamilitaryDecisions(state);
     return { ok: true, report };
+}
+
+/** The review IPC's one write of the global standing order, reached only by a call that has fully succeeded. */
+function commitStandingOrder(state: GameState, policy: ParamilitaryPolicyOrder | null): void {
+    if (policy) state.paramilitary_policy = policy;
+}
+
+/**
+ * The policy-only call (§6 mechanics item 2): nothing of the side's is pending, so the order is recorded on its own.
+ * Same rules as the opener: only the manual (Full Control) player gives it (`selectManualPlayerFaction`, the
+ * predicate the request gate and the Advance blocker use), the cap of §6 design M applies (never above the card's
+ * applied answer, nor above `ask` before it applies; HRHB has no card and no cap), and no Always allow while the
+ * request gate holds. Then one standing-order row; nothing is spawned, so the report is empty.
+ */
+function recordStandingOrderOnly(state: GameState, policy: ParamilitaryPolicyOrder): ParamilitaryReviewResult {
+    const playerFaction = state.meta?.player_faction ?? null;
+    if (!playerFaction || selectManualPlayerFaction(state) !== playerFaction) {
+        return { ok: false, error: PARAMILITARY_ORDER_NOT_MANUAL };
+    }
+    if (!isParamilitaryOrderWithinCap(policy, paramilitaryStandingOrderCap(state, playerFaction))) {
+        return { ok: false, error: PARAMILITARY_POLICY_CANNOT_LOOSEN };
+    }
+    if (policy === 'always_allow' && isPlayerParamilitaryRequestGateHolding(state)) {
+        return { ok: false, error: 'paramilitary_policy_not_applied' };
+    }
+    recordPlayerParamilitaryStandingOrder(state, playerFaction, policy);
+    commitStandingOrder(state, policy);
+    return { ok: true, report: { spawned: [], captured: [], dissolved: [], pending_player_requests: 0 } };
 }
