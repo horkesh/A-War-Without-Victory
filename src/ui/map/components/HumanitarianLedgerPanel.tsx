@@ -259,12 +259,13 @@ export function HumanitarianLedgerPanel({ state, open, onClose }: HumanitarianLe
                   {bySide.length > 0 && (
                     <SurfaceSection label={t('humanitarianLedger.section.byPerpetrator')}>
                       <SurfacePanel>
+                        {/* Four columns of unbreakable figures can outgrow a narrow panel: scroll inside this block, never the panel.
+                            The notes stay in the same block as the rows, so a crop of the rows carries them. */}
+                        <div data-testid="humanitarian-ledger-side-table" className="overflow-x-auto">
                         <div data-testid="humanitarian-ledger-side-notes" className="mb-3 flex flex-col gap-2">
                           <p className="m-0 text-[14px] italic leading-relaxed text-[#b9ad94]">{t('humanitarianLedger.note.scope')}</p>
                           <p className="m-0 text-[14px] italic leading-relaxed text-[#b9ad94]">{t('humanitarianLedger.note.verbatim')}</p>
                         </div>
-                        {/* Four columns of unbreakable figures can outgrow a narrow panel: scroll inside the table, never the panel. */}
-                        <div data-testid="humanitarian-ledger-side-table" className="overflow-x-auto">
                         <table className="w-full border-collapse">
                           <thead>
                             <tr className="border-b border-[#262b35]">
