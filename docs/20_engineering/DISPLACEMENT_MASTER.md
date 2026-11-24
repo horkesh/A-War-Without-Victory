@@ -83,7 +83,7 @@ Runs every turn after attack resolution. The primary displacement writer since 2
 
 3. **Step 2 — Timer maturation:** After `TAKEOVER_DISPLACEMENT_DELAY_TURNS = 4` turns, the timer matures. Per-OSID population is looked up from the operational settlements census data (`population_total`); falls back to `floor(mun_pop / osid_count)` if unavailable. Hostile share is computed from per-OSID ethnic composition (cap 0.95); falls back to municipality-level `getDynamicHostileShare()` (cap 0.80). Initial displaced amount = `min(floor(osidPop × hostileShare × initFraction), remainingPop)`, where `initFraction` is determined by `getInitialDisplacementFraction(toFaction, fromFaction, munId, isFrontAdjacent)` (see per-faction table above; default 70%). Kill/flee fractions applied, survivors enter camp. `timer.cumulative_displaced` is set; remaining 30% flows through sustained displacement (Branch B).
 
-**Also handles re-displacement pass-through:** When a municipality with `displaced_in > 0` has a timer mature, displaced people already sheltering there are re-routed to new friendly municipalities with **zero casualties and zero flee-abroad**. This prevents double-counting — a person displaced twice counts as 1 displaced person.
+**Also handles re-displacement pass-through (§10.6):** When a municipality with `displaced_in > 0` has a capture timer mature and the captor is then the municipality's majority holder, displaced people already sheltering there are re-routed to new friendly municipalities with **zero casualties and zero flee-abroad**. This prevents double-counting — a person displaced twice counts as 1 displaced person.
 
 **Minority flight** (`processMinorityFlight()`) is **retired and deleted**: it was switched off in the pipeline on 2026-03-01 and the module `src/state/minority_flight.ts` was deleted on 2026-06-09 (#360, "dead minority_flight removal"). The earlier note here that it was active (about 493k displaced in 52 weeks) is superseded; displacement is carried by takeover displacement, the war-displacement triggers and the stranded-brigade lifecycle (EH-3). *(Corrected 2026-11-17, steward, on the orchestrator's ruling that the minority family is dead.)*
 
@@ -171,7 +171,7 @@ The primary displacement trigger since 2026-03-01: capture displacement flows th
 
 Per-OSID data is loaded from `data/derived/operational/operational_settlements.geojson` via the `osidSettlements` parameter.
 
-**Re-displacement pass-through:** When a timer matures on a municipality that has `displaced_in > 0`, those already-displaced people are re-routed to new friendly municipalities with:
+**Re-displacement pass-through (§10.6):** When a capture timer matures on a municipality that has `displaced_in > 0` and the captor is then its majority holder, those already-displaced people are re-routed to new friendly municipalities with:
 - **Zero casualties** (no kill fraction)
 - **Zero flee-abroad** (no abroad fraction)
 - **No double-counting** (displaced_total does not increment for pass-through)
@@ -649,6 +649,10 @@ When a municipality that has received displaced people (`displaced_in > 0`) is i
 2. **Already-displaced people** (`displaced_in_by_faction`) are re-routed to new friendly municipalities
 3. Re-routing applies **zero casualties** and **zero flee-abroad** — these people were already counted once
 4. This prevents double-counting: a person displaced twice counts as 1 displaced person total
+
+**When it runs (A9, SD13, broader bright-line panel round 1, 2026-11-24):** the pass-through runs only when the capture leaves the captor as the municipality's majority holder (`getMunicipalityController`, `src/sim/early_war/control_strain.ts`: majority of OSIDs, strictCompare tie-break). A capture of an outlying settlement that does not change the municipality's holder moves no sheltered group. Before A9, any single matured capture moved every non-captor group out of the whole municipality. The policy-wave rule (RF-5B) and the captor's-own-group rule (A4) are unchanged.
+
+Known limit (A9): pass-through and takeover-cohort destinations are not checked for reachability. A group can still be moved across enemy-held ground into another pocket when its municipality does change hands. The takeover-side reachability rule (A5b) is deferred as its own measured change.
 
 **Accounting invariant:** `Sum(displaced_out) = Sum(displaced_in) + Sum(camp_population)` — verified as exactly 0 in every run.
 
