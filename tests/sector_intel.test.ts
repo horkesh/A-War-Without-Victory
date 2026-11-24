@@ -114,31 +114,42 @@ describe('T2: intel staleness — in-contact confidence decays to floor', () => 
 });
 
 // ---------------------------------------------------------------------------
-// T3: No-contact decay
+// T3: No out-of-contact carry (ghost loop retired 2026-11-24, game-designer + historian sitting)
 // ---------------------------------------------------------------------------
-describe('T3: no-contact decay', () => {
-    it('decays record confidence when sectors no longer share edges', () => {
-        const sectorA = makeSector('sector:corps-A:0', 'corps-A', 'RBiH', ['e1'], ['oA'], ['oB']);
-        const sectorB = makeSector('sector:corps-B:0', 'corps-B', 'RS', ['e1'], ['oB'], ['oA']);
+describe('T3: no out-of-contact carry', () => {
+    it('drops the record when sectors no longer share edges, even with high confidence', () => {
+        const sectorA = makeSector('sector:corps-A:0', 'corps-A', 'RS', ['e1', 'e2'], ['oA'], ['oB']);
+        const sectorB = makeSector('sector:corps-B:0', 'corps-B', 'RBiH', ['e1'], ['oB'], ['oA']);
         const state = makeMinimalState({ 'sector:corps-A:0': sectorA, 'sector:corps-B:0': sectorB });
         state.military.sector_intel = {};
-        // First turn: build contact
         deriveSectorIntel(state, 1);
-        const confAfterContact = (state.military.sector_intel!['sector:corps-A:0'] ?? [])[0]!.confidence;
-        // Remove shared edge — no longer in contact
-        sectorA.edge_ids = [];
-        sectorA.sub_segments[0]!.edge_ids = [];
+        const rec = (state.military.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
+        rec.confidence = 0.9; // a picture well above what one week of decay would erase
+        // Contact lost: B leaves the shared edge; A keeps e1, so A's own stable key is unchanged.
+        sectorB.edge_ids = ['e9'];
+        sectorB.sub_segments[0]!.edge_ids = ['e9'];
         deriveSectorIntel(state, 2);
-        const records = state.military.sector_intel!['sector:corps-A:0'] ?? [];
-        // Record should have decayed confidence
-        const decayedConf = confAfterContact - FACTION_RECON_PROFILES['RBiH'].confidence_decay_per_turn;
-        if (decayedConf > 0) {
-            expect(records.length).toBe(1);
-            expect(records[0]!.confidence).toBeCloseTo(decayedConf, 5);
-        } else {
-            // Fully decayed: record dropped
-            expect(records.length).toBe(0);
-        }
+        expect(state.military.sector_intel!['sector:corps-A:0'] ?? []).toHaveLength(0);
+    });
+
+    it('re-contact after a gap restarts at the faction floor', () => {
+        const sectorA = makeSector('sector:corps-A:0', 'corps-A', 'RS', ['e1', 'e2'], ['oA'], ['oB']);
+        const sectorB = makeSector('sector:corps-B:0', 'corps-B', 'RBiH', ['e1'], ['oB'], ['oA']);
+        const state = makeMinimalState({ 'sector:corps-A:0': sectorA, 'sector:corps-B:0': sectorB });
+        state.military.sector_intel = {};
+        deriveSectorIntel(state, 1);
+        (state.military.sector_intel!['sector:corps-A:0'] ?? [])[0]!.confidence = 0.9;
+        sectorB.edge_ids = ['e9'];
+        sectorB.sub_segments[0]!.edge_ids = ['e9'];
+        deriveSectorIntel(state, 2);
+        sectorB.edge_ids = ['e1'];
+        sectorB.sub_segments[0]!.edge_ids = ['e1'];
+        deriveSectorIntel(state, 3);
+        const fresh = (state.military.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
+        const p = FACTION_RECON_PROFILES['RS'];
+        expect(fresh.confidence).toBeCloseTo(
+            Math.max(0, FACTION_INITIAL_INTEL_CONFIDENCE['RS'] + p.passive_buildup_per_turn - p.confidence_decay_per_turn), 5);
+        expect(fresh.turns_in_contact).toBe(1);
     });
 });
 

@@ -33,6 +33,7 @@ import { isWarOutsideHistoricalBand } from '../political/historical_territory_ba
 import { isPoliticalGateEligible, isPoliticsOffHistoryFor } from '../political/political_departure_markers.js';
 import { compareCausalityEntries, strictCompare } from '../../state/validateGameState.js';
 import { findAnswerAheadOfFiring, isAnswerAheadOfFiringDecision } from './answer_ahead_of_firing.js';
+import { isObserverDrainablePendingDecision } from './observer_drain.js';
 import { hasInPersonParamilitaryStandingOrder, paramilitaryPolicyFlagKey } from './paramilitary_policy_flag.js';
 import { isRoutedPeacePlanCard, selectRoutedBotOption } from '../negotiation/plan_answer.js';
 
@@ -785,20 +786,27 @@ export function evaluateEvents(
             // option", which is the only thing this mode is licensed to choose.
             // A birth card for an opening event that has not fired yet is resolved when it fires
             // (fire-time branch below), not here: applying it now would land its effects early.
-            if (!def || !hasAuthoredAIDefaultResponse(def) || isAnswerAheadOfFiringDecision(state, pending.event_id)) {
+            // `isObserverDrainablePendingDecision` is the ONE predicate the player-decision manifest also
+            // reads: exactly these rows stop hard-blocking Advance at Observer (§6 mechanics item 6).
+            if (!def || !hasAuthoredAIDefaultResponse(def) || !isObserverDrainablePendingDecision(state, pending)) {
                 stillPending.push(pending);
                 continue;
             }
+            const respondingFaction = pending.faction ?? playerFaction ?? null;
             // F1-B: the player's own policy card takes the option of an order given in person,
             // chosen here before any part of the answer is applied (read before write).
-            const chosen = selectInPersonParamilitaryOrderResponse(state, def) ?? selectAIDefaultResponse(def);
+            // Otherwise the fire-time Observer selector (§6 mechanics item 5): the authored default on
+            // every card except a routed peace-plan card, where a plan answer already on record for
+            // that side wins, as it does at fire time.
+            const chosen = selectInPersonParamilitaryOrderResponse(state, def)
+                ?? selectBotEventResponse(state, def, respondingFaction, true).chosen;
             // The same applier as every other path, so the drained answer also writes its runtime
             // causality and its notifications (they were dropped here before 2026-11-23).
             applyChosenEventResponse(state, {
                 eventId: def.id,
                 chosen,
                 decisionSource: 'bot_ai_default',
-                faction: pending.faction ?? playerFaction ?? null,
+                faction: respondingFaction,
                 turn: currentTurn,
                 answeredBy: 'automatic',
                 notifications: def.notifications_to_other_factions,

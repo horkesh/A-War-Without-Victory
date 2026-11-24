@@ -35,6 +35,7 @@ import { resolveFormationName } from '../state/formation_naming.js';
 import type { FormationSpawnDirective, FormationState, GameState, MilitiaPoolState } from '../state/game_state.js';
 import { militiaPoolKey } from '../state/militia_pool_key.js';
 import { strictCompare } from '../state/validateGameState.js';
+import { isSectorAssignmentExemptCorpsId } from './combat/corps_front_sectors_constants.js';
 import type { MunicipalityPopulation1991Map } from './early_war/pool_population.js';
 import { getEligiblePopulationCount } from './early_war/pool_population.js';
 import { type SiegeRatioByMunFaction, getSiegeRatio } from './early_war/compute_siege_state.js';
@@ -143,6 +144,8 @@ export interface SpawnFormationsReport {
     manpower_committed: number;
     pools_touched: number;
     created: Array<{ formation_id: string; name: string; mun_id: string; faction: string; kind: string }>;
+    /** C3: brigades spawned past the OOB list for which no corps could be found (present only when non-empty). */
+    unassigned_corps?: string[];
 }
 
 function generateDeterministicFormationId(state: GameState, faction: string): string {
@@ -880,6 +883,15 @@ export function spawnFormationsFromPools(
             );
             if (!location_osid) continue;
 
+            // C3 (RB8): past the OOB list the lookup returns null, and a brigade without a corps can
+            // never attack (brigades attack only through CorpsOperation). Only when an OOB lookup
+            // exists: lookup-less callers keep their behaviour.
+            let corpsId = historicalCorps;
+            if (corpsId === null && kind === 'brigade' && options.historicalCorpsLookup) {
+                corpsId = resolveSpawnFallbackCorps(state, faction, mun_id, location_osid);
+                if (corpsId === null) (report.unassigned_corps ??= []).push(formationId);
+            }
+
             const formation: FormationState = {
                 id: formationId,
                 faction,
@@ -896,7 +908,7 @@ export function spawnFormationsFromPools(
                 activation_turn: null,
                 origin_mun: mun_id,
                 officer_quality: getFactionDefaultOfficerQuality(faction, currentTurn),
-                ...(historicalCorps ? { corps_id: historicalCorps } : {}),
+                ...(corpsId ? { corps_id: corpsId } : {}),
                 ...(hq_sid ? { hq_sid } : {}),
                 location_osid,
             };
@@ -919,7 +931,72 @@ export function spawnFormationsFromPools(
     }
 
     report.created.sort((a, b) => strictCompare(a.formation_id, b.formation_id));
+    report.unassigned_corps?.sort(strictCompare);
     return report;
+}
+
+/** An active corps formation of `faction` that may command a spawned brigade (never army staff). */
+function isEligibleSpawnCorps(state: GameState, corpsId: string, faction: string): boolean {
+    if (isSectorAssignmentExemptCorpsId(corpsId)) return false;
+    const f = state.military.formations?.[corpsId];
+    if (!f || f.faction !== faction || f.status !== 'active') return false;
+    return f.kind === 'corps' || f.kind === 'corps_asset' || f.kind === 'army_hq';
+}
+
+/** Highest count wins; ties go to the strictCompare-first corps id. */
+function pickTopCorps(counts: Map<string, number>): string | null {
+    let best: string | null = null;
+    let bestN = 0;
+    for (const id of [...counts.keys()].sort(strictCompare)) {
+        const n = counts.get(id)!;
+        if (n > bestN) { best = id; bestN = n; }
+    }
+    return best;
+}
+
+/**
+ * C3 (RB8) corps for a brigade spawned past its municipality's OOB list. Ruling of the
+ * formation-expert and corps-army-commander seats, 2026-11-24:
+ * 1. the faction's sector whose territory holds the spawn OSID;
+ * 2. the corps of the faction's brigades in the municipality (majority);
+ * 3. the faction's sector with the most territory in the municipality;
+ * 4. none (the caller reports it; no corps is invented for a cut-off pocket).
+ * Reads the persisted corps_front_sectors snapshot; never mutates. Ties: strictCompare on corps id.
+ */
+function resolveSpawnFallbackCorps(
+    state: GameState,
+    faction: string,
+    munId: string,
+    locationOsid: string,
+): string | null {
+    const sectors = Object.values(state.military.corps_front_sectors ?? {})
+        .filter(s => s && s.faction === faction && isEligibleSpawnCorps(state, s.corps_id, faction));
+
+    const holding = new Map<string, number>();
+    for (const s of sectors) {
+        if ((s.territory_osids ?? []).includes(locationOsid)) holding.set(s.corps_id, 1);
+    }
+    const byTerritory = pickTopCorps(holding);
+    if (byTerritory) return byTerritory;
+
+    const munTag = `mun:${munId}`;
+    const siblings = new Map<string, number>();
+    for (const f of Object.values(state.military.formations ?? {})) {
+        if (!f || f.faction !== faction || f.kind !== 'brigade' || f.status !== 'active') continue;
+        if (!f.corps_id || !Array.isArray(f.tags) || !f.tags.includes(munTag)) continue;
+        if (!isEligibleSpawnCorps(state, f.corps_id, faction)) continue;
+        siblings.set(f.corps_id, (siblings.get(f.corps_id) ?? 0) + 1);
+    }
+    const bySibling = pickTopCorps(siblings);
+    if (bySibling) return bySibling;
+
+    const munPrefix = `op:${munId}:`;
+    const inMun = new Map<string, number>();
+    for (const s of sectors) {
+        const n = (s.territory_osids ?? []).filter(o => o.startsWith(munPrefix)).length;
+        if (n > 0) inMun.set(s.corps_id, (inMun.get(s.corps_id) ?? 0) + n);
+    }
+    return pickTopCorps(inMun);
 }
 
 export interface WiaTricklebackReport {

@@ -61,7 +61,13 @@ describe('paramilitary spawn guards (§6 D1 stage 2)', () => {
     });
 
     it('no turn phase calls an offensive spawner: phases import only detection and advance from the sweep module', () => {
-        const allowed = new Set(['detectParamilitaryTargets', 'advanceParamilitaries']);
+        // §6 mechanics item 4 (6/6, 2026-11-23): apply-autonomy-transition deletes a non-manual side's undecided
+        // requests without history. That function never spawns, never resolves and writes no history (asserted
+        // here, so the allowance cannot become a spawn route).
+        const allowed = new Set(['detectParamilitaryTargets', 'advanceParamilitaries', 'removeNonManualPlayerParamilitaryRequests']);
+        const remover = functionBody(code(SWEEP_FILE), 'removeNonManualPlayerParamilitaryRequests');
+        expect(remover.length).toBeGreaterThan(0);
+        expect(remover).not.toMatch(/spawnParamilitary\(|resolvePlayerParamilitaryDecisions\(|paramilitary_decision_history/);
         let importers = 0;
         for (const file of sourceFiles().filter((f) => f.startsWith('src/sim/turn_phases/') || f === 'src/sim/turn_pipeline.ts')) {
             const source = code(file);
