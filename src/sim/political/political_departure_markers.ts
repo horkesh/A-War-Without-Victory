@@ -96,6 +96,8 @@ export const POLITICAL_GATE_EXCLUDED_EVENT_IDS: ReadonlySet<string> = new Set([
     'deliberate_force_rs_compliance_1995', // the Sarajevo siege guns (Galić IT-98-29)
     'rbih_nato_ultimatum_compliance_1994', // the Sarajevo heavy-weapons exclusion zone
     'rs_strategic_goals', // Strategic Goal 1, the separation of peoples (not reachable in time; safeguard)
+    // RB5 (§6 broader bright-line panel, 2026-11-23): the HRHB halt card; one option lets the expulsions proceed.
+    'hrhb_minority_policy_1993',
 ]);
 
 /**

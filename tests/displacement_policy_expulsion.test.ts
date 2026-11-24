@@ -1,7 +1,8 @@
 // RF-5B: policy-driven bilateral displacement (RBiH-HRHB war).
 // A bot-controlled faction with a historical expulsion policy (HRHB) seeds, once, after the
 // open bilateral war begins, one bounded wave for the other community in OSIDs it holds
-// inside its POLICY_EXPULSION_SCOPE municipalities. A human-controlled faction never expels
+// inside its POLICY_EXPULSION_SCOPE municipalities. A human-controlled faction's staff apply it
+// once the halt card's decision is on record, unless the player ordered a halt (RB5)
 // (wave A after the standard delay, wave B POLICY_WAVE_B_DELAY_TURNS later). Control never
 // changes; the waves are booked to the holder and recorded as one authorized war crime.
 import fs from 'node:fs';
@@ -123,7 +124,11 @@ test('scope table: HRHB only, no RBiH entry, fractions in (0, 1], waves A/B', ()
     }
 });
 
-test('a human-controlled HRHB never expels: no policy timers, policy never applied', () => {
+// Owner rule 2026-11-22, RB5 ruling 2026-11-23 (supersedes the 2026-11-14 bot-only ruling): a human
+// HRHB's staff apply the historical default once the halt card's decision is on record. With no
+// decision on record (the card never fired, or it is still unanswered) nothing is seeded: no expulsion
+// of a human never offered the halt. Default, halt and Observer rows: rb5_hrhb_minority_policy_halt.test.ts.
+test('a human-controlled HRHB with no halt-card decision on record does not expel: no policy timers', () => {
     const state = warState(50);
     state.meta.player_faction = 'HRHB';
     for (let t = 50; t <= 70; t++) {

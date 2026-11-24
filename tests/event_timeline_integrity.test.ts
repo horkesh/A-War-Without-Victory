@@ -349,6 +349,8 @@ describe('Event timeline historical integrity', () => {
         // belgrade_signs_dayton_for_rs_1995 and zagreb_signs_dayton_for_hrhb_1995 fire only
         // after a player declines Dayton (tests/dayton_decline_imposition.test.ts). They carry
         // no control_change.
-        expect(allEvents.length).toBe(162);
+        // 162 -> 163 on 2026-11-24 (RB5, #854): hrhb_minority_policy_1993, the HRHB halt card
+        // (data only; fires when the RBiH-HRHB war begins; carries no control_change).
+        expect(allEvents.length).toBe(163);
     });
 });

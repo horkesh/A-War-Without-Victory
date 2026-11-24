@@ -33,6 +33,16 @@ const RESIDUAL_CLASSIFICATIONS = new Map([
       reason: 'HRHB press visit risks unsupported detention/blockade implications from the current row.',
     },
   ],
+  // RB5 (2026-11-23): the halt card is an internal HRHB staff order. The other sides learn of the
+  // policy only through the waves themselves (displacement record), never by a notification that
+  // would disclose the answer or credit a halt.
+  ...['no_halt', 'order_halt'].flatMap((response) => ['RBiH', 'RS'].map((recipient) => [
+    `war_1993.json|hrhb_minority_policy_1993|${response}|${recipient}`,
+    {
+      bucket: 'blocked-sensitive',
+      reason: 'Internal HRHB staff order on the expulsion policy; other sides see only the waves, never the answer.',
+    },
+  ])),
 ]);
 
 function isNonEmptyText(value) {

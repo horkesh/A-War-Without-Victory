@@ -18,7 +18,7 @@ export function countFiledTurnRecords(state: LoadedGameState | null | undefined)
 
 export function countFiledDecisionRecords(state: LoadedGameState | null | undefined): number {
   return buildDecisionConsequenceLedger(state, Number.MAX_SAFE_INTEGER)
-    .filter((record) => record.recordTarget !== 'chronicle' && record.familyId !== 'paramilitary-receipt')
+    .filter((record) => record.recordTarget !== 'chronicle' && record.familyId !== 'paramilitary-receipt' && record.familyId !== 'minority-policy-receipt')
     .length;
 }
 
