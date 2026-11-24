@@ -138,26 +138,11 @@ describe('RF-F1g: generateAllCorpsOrders passes the OSID edges to the threat', (
     });
 });
 
-describe('RF-F1g: the player-faction stance recommendation step reads the OSID graph', () => {
-    it('generate-player-stance-recommendations uses the operational OSID edges, not the settlement edges', async () => {
-        const step = warPhases.find(s => s.name === 'generate-player-stance-recommendations')!;
-        const run = async (withOsid: boolean) => {
-            const state = makeState();
-            state.meta.player_faction = 'RS';
-            state.meta.autonomy_level = 1;
-            const context = {
-                state,
-                input: {
-                    settlementGraph: { settlements: new Map(), edges: S_EDGES },
-                    settlementEdges: S_EDGES,
-                    ...(withOsid ? { operationalData: { edges: OSID_EDGES } } : {}),
-                },
-            };
-            await step.run(context as never);
-            return state.military.corps_command![CORPS]!.ai_recommended_stance;
-        };
-        const withGraph = await run(true);
-        const without = await run(false);
-        expect(withGraph).not.toBe(without);
+describe('RF-F1g: the player faction gets its stance from the same OSID-graph pass as every faction', () => {
+    // The separate generate-player-stance-recommendations step was RETIRED (lane C s6, 2026-11-24):
+    // at autonomy >= 1 staff execution covers the player, so generate-bot-corps-orders computes the
+    // player's stance with the OSID edges (pinned above), and a second pass overwrote it.
+    it('no second player stance pass exists in the war pipeline', () => {
+        expect(warPhases.some(s => s.name === 'generate-player-stance-recommendations')).toBe(false);
     });
 });

@@ -376,6 +376,10 @@ function projectRecruitmentState(state, playerFaction, ownFormationIds) {
   projected.recruited_brigade_ids = (Array.isArray(state.recruited_brigade_ids) ? state.recruited_brigade_ids : [])
     .filter((id) => ownFormationIds.has(id))
     .sort(strictCompare);
+  // The president's own holds (lane C s6): the field is player-only by construction.
+  if (Array.isArray(state.player_held_brigade_ids) && state.player_held_brigade_ids.length > 0) {
+    projected.player_held_brigade_ids = [...state.player_held_brigade_ids].sort(strictCompare);
+  }
   return projected;
 }
 

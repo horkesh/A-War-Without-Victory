@@ -113,6 +113,9 @@ export function buildRecruitmentMatterCopy(matter: RecruitmentMatter, municipali
         name: recruitmentBrigadeName(brigade),
         place: recruitmentBrigadePlace(brigade, municipalityNames),
       })),
+      ...(matter.held.length > 0
+        ? [t('recruitment.desk.fact.held', { names: matter.held.map(recruitmentBrigadeName).join(', ') })]
+        : []),
     ],
     primaryActionLabel: t('recruitment.desk.action.view'),
     setAsideLabel: t('recruitment.desk.action.noted'),

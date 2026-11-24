@@ -6,11 +6,11 @@
  * Pure presentation. Eligibility itself is the engine's (`evaluateRecruitmentEligibility`
  * through the `get-recruitment-catalog` IPC); this module only remembers what the
  * president has already been told and turns the difference into one matter:
- *   - Full Control / Assisted (autonomy 0-1, recruitment stays with the president): a
- *     decision matter listing the brigades that can be raised and are not yet raised or
- *     set aside.
- *   - Delegated / Observer (autonomy 2-3, staff raise without asking): a short notice of
- *     what the staff raised since last week and which brigades are newly ready.
+ *   - Full Control (autonomy 0, recruitment stays with the president): a decision matter
+ *     listing the brigades that can be raised and are not yet raised or set aside.
+ *   - Assisted / Delegated / Observer (autonomy 1-3, staff raise without asking; lane C s6
+ *     design sitting 2026-11-24): a short notice of what the staff raised since last week
+ *     and which brigades are newly ready.
  *
  * "Newly" is derived by comparing the catalog at the previous snapshot turn with the
  * current one. The watch lives in the UI store only (never in GameState or a save), so
@@ -45,6 +45,8 @@ export interface RecruitmentWatch {
   eligible: RecruitmentWatchBrigade[];
   /** Ids of the faction's brigades already in the field. */
   raisedIds: string[];
+  /** Raisable brigades the president holds: the staff will not raise them (autonomy 1-3). */
+  heldIds: string[];
   /** Decision queue: announced, still raisable, neither raised nor set aside. */
   pendingIds: string[];
   /** Set aside by the president while still raisable; re-announced only if they lapse and return. */
@@ -68,6 +70,8 @@ export interface RecruitmentMatter {
   ready: RecruitmentWatchBrigade[];
   /** Notice only: what the staff raised since last week. */
   raised: RecruitmentWatchBrigade[];
+  /** Notice only: raisable brigades the president holds (always empty for a decision). */
+  held: RecruitmentWatchBrigade[];
   /** The brigade Recruitment opens on (first ready one), or null when none is raisable. */
   focusBrigadeId: string | null;
 }
@@ -76,9 +80,9 @@ export const RECRUITMENT_MATTER_ID_PREFIX = 'recruitment:';
 export const RECRUITMENT_DECISION_MATTER_ID = 'recruitment:decision';
 export const RECRUITMENT_NOTICE_MATTER_ID = 'recruitment:notice';
 
-/** Autonomy 0-1 keep recruitment with the president (Rulebook §10; `selectAutomaticRecruitmentFactions`). */
+/** Only autonomy 0 keeps recruitment with the president (Rulebook §10; `selectAutomaticRecruitmentFactions`). */
 export function recruitmentStaysWithPresident(autonomyLevel: number): boolean {
-  return autonomyLevel < 2;
+  return autonomyLevel < 1;
 }
 
 export function isRecruitmentMatterId(id: string): boolean {
@@ -121,6 +125,7 @@ export function advanceRecruitmentWatch(
   const eligibleIds = eligible.map((brigade) => brigade.id);
   const eligibleSet = new Set(eligibleIds);
   const raisedIds = sortedUnique(own.filter(isRaised).map((brigade) => brigade.id));
+  const heldIds = sortedUnique(own.filter((brigade) => brigade.held === true && eligibleSet.has(brigade.id)).map((brigade) => brigade.id));
 
   const fresh = previous === null
     || previous.faction !== snapshot.faction
@@ -132,6 +137,7 @@ export function advanceRecruitmentWatch(
       autonomyLevel: snapshot.autonomyLevel,
       eligible,
       raisedIds,
+      heldIds,
       pendingIds: eligibleIds,
       setAsideIds: [],
       newlyEligibleIds: eligibleIds,
@@ -155,6 +161,7 @@ export function advanceRecruitmentWatch(
       autonomyLevel: snapshot.autonomyLevel,
       eligible,
       raisedIds,
+      heldIds,
       pendingIds,
       setAsideIds,
       newlyEligibleIds: sortedUnique([...previous.newlyEligibleIds, ...appeared]),
@@ -172,6 +179,7 @@ export function advanceRecruitmentWatch(
     autonomyLevel: snapshot.autonomyLevel,
     eligible,
     raisedIds,
+    heldIds,
     pendingIds,
     setAsideIds,
     newlyEligibleIds: appeared,
@@ -221,16 +229,23 @@ export function deriveRecruitmentMatter(
       turn: watch.turn,
       ready,
       raised: [],
+      held: [],
       focusBrigadeId: ready[0]!.id,
     };
   }
 
   if (watch.noticeDismissedTurn === watch.turn) return null;
+  const heldSet = new Set(watch.heldIds);
+  // A held brigade is not "ready for the staff": the president told them not to raise it.
   const ready = watch.newlyEligibleIds
+    .filter((id) => !heldSet.has(id))
     .map((id) => eligibleById.get(id))
     .filter((brigade): brigade is RecruitmentWatchBrigade => brigade !== undefined);
   const raised = [...watch.newlyRaised];
   if (ready.length === 0 && raised.length === 0) return null;
+  const held = watch.heldIds
+    .map((id) => eligibleById.get(id))
+    .filter((brigade): brigade is RecruitmentWatchBrigade => brigade !== undefined);
   return {
     id: RECRUITMENT_NOTICE_MATTER_ID,
     mode: 'notice',
@@ -238,6 +253,7 @@ export function deriveRecruitmentMatter(
     turn: watch.turn,
     ready,
     raised,
+    held,
     focusBrigadeId: ready[0]?.id ?? null,
   };
 }

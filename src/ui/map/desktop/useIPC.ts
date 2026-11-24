@@ -226,6 +226,7 @@ interface WindowAwwv {
     subscribeReplayManifestUpdated: (cb: (manifestJson: string) => void) => () => void;
     getRecruitmentCatalog: () => Promise<{ brigades?: unknown[]; turn?: number; autonomy_level?: number; error?: string }>;
     applyRecruitment: (brigadeId: string, equipmentClass: string) => Promise<{ ok: boolean; newFormationId?: string; error?: string }>;
+    setRecruitmentHold: (brigadeId: string, held: boolean) => Promise<{ ok: boolean; error?: string }>;
     getSettings: () => Promise<{ ok: boolean; settings?: unknown; error?: string }>;
     saveSettings: (settings: unknown, options?: SettingsSaveOptions) => Promise<{ ok: boolean; error?: string }>;
     getAiCommanderConfig: () => Promise<{ mode: string; session_cost_estimate: number }>;
@@ -518,6 +519,10 @@ export function useIPC() {
             applyRecruitment: awwv
                 ? (brigadeId: string, equipmentClass: string) => awwv.applyRecruitment(brigadeId, equipmentClass)
                 : makeNoop<{ ok: boolean; newFormationId?: string; error?: string }>(),
+
+            setRecruitmentHold: awwv
+                ? (brigadeId: string, held: boolean) => awwv.setRecruitmentHold(brigadeId, held)
+                : makeNoop<{ ok: boolean; error?: string }>(),
 
             getSettings: awwv
                 ? () => awwv.getSettings()
