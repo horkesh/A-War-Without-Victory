@@ -94,17 +94,15 @@ export function deriveSectorIntel(state: GameState, turn: number): void {
             ));
         }
 
-        for (const [enemySectorId, prev] of prevByEnemySector) {
-            if (enemySectorEdgeCounts.has(enemySectorId)) continue;
-            const decayed = Math.max(0, prev.confidence - profile.confidence_decay_per_turn);
-            if (decayed <= 0) continue;
-            const enemySector = sectors[enemySectorId];
-            if (!enemySector) continue;
-            newRecords.push(buildRecord(
-                sector, enemySectorId, enemySector, 0,
-                decayed, 0, turn, state, profile.recon_range
-            ));
-        }
+        // NO OUT-OF-CONTACT CARRY (ghost loop RETIRED 2026-11-24, game-designer + historian
+        // sitting, F/laneb_ghost_p6_ruling.md). Only pairs in contact this turn keep a record.
+        // When two sectors lose contact their record is dropped, and a later re-contact restarts
+        // at the faction floor (FACTION_INITIAL_INTEL_CONFIDENCE). The retired loop looked ghosts
+        // up by stable key in maps keyed by positional sector id, so it never kept a record (main
+        // 211a4b517: 89 / 97 would-be ghosts per 188w run, 0 kept); deleting it is hash-neutral.
+        // A carried ghost would have beaten the floor on only 11-14 re-contacts a run and rests on
+        // unsourced decay constants. If P3 needs a stronger 1st Corps picture of the Sarajevo
+        // ring at re-contact, the remedy is a floor change in data, not a decay loop.
 
         newRecords.sort((a, b) => strictCompare(a.enemy_sector_id, b.enemy_sector_id));
         nextIntel[sectorId] = newRecords;
