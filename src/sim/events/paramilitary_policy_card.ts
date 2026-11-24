@@ -42,6 +42,12 @@ export const PARAMILITARY_POLICY_CARD_BY_FACTION: Readonly<Partial<Record<Factio
 export const PARAMILITARY_POLICY_CANNOT_LOOSEN = 'paramilitary_policy_cannot_loosen';
 
 /**
+ * The IPC error code for a standing order given with no request pending while the side is not at Full Control
+ * (§6 mechanics item 2: the opener is Full Control only; copy: `paramilitaryReview.error.notManual`).
+ */
+export const PARAMILITARY_ORDER_NOT_MANUAL = 'paramilitary_order_not_manual';
+
+/**
  * The minimal read shape of these accessors. `GameState`, the player-visible projection the renderer receives,
  * and the Codex's state view all fit it, so every surface reads the cap through the same code.
  */

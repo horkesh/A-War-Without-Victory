@@ -799,7 +799,8 @@ function projectCanonicalDecisionReceipts(state, playerFaction) {
     ),
     paramilitaryDecisionReceipts: sortReceipts(
       (Array.isArray(state?.paramilitary_decision_history) ? state.paramilitary_decision_history : [])
-        .filter((receipt) => receipt && (!playerFaction || receipt.faction === playerFaction))
+        // §6 item 2: a standing order (kind 'standing_order') is no per-request receipt.
+        .filter((receipt) => receipt && receipt.kind !== 'standing_order' && (!playerFaction || receipt.faction === playerFaction))
         .map((receipt) => ({
           id: receipt.id ?? null,
           targetOsid: receipt.target_osid ?? null,

@@ -318,9 +318,15 @@ export interface AutonomyPanelProps {
      * plain text (no dossier link).
      */
     namedOfficerData?: NamedOfficerView[];
+    /**
+     * §6 mechanics item 2 (signed 2026-11-23): opens the paramilitary review modal with no request pending, so the
+     * player gives a standing order without waiting for one. Offered only while the side is at Full Control; the
+     * review IPC refuses the order at any other level.
+     */
+    onOpenParamilitaryOrder?: () => void;
 }
 
-export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: AutonomyPanelProps) {
+export function AutonomyPanel({ onClose, playerFaction, namedOfficerData, onOpenParamilitaryOrder }: AutonomyPanelProps) {
     // Officer Dossier: which officer (if any) is currently being inspected.
     const [dossierOfficerId, setDossierOfficerId] = useState<string | null>(null);
     const [autonomyState, setAutonomyState] = useState<AutonomyState | null>(null);
@@ -470,6 +476,26 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
                             </div>
                         )}
                     </div>
+
+                    {/* ── Paramilitary standing order (Full Control only; §6 mechanics item 2) ── */}
+                    {currentLevel === 0 && onOpenParamilitaryOrder && isCanonicalPlayerFaction(playerFaction) && (
+                        <div className="space-y-2">
+                            <button
+                                type="button"
+                                data-testid="autonomy-paramilitary-order"
+                                onClick={onOpenParamilitaryOrder}
+                                disabled={!bridge}
+                                className="w-full text-left px-2.5 py-2 rounded border border-white/10 bg-black/20 hover:border-[#c4a04a]/40 hover:bg-black/30 transition-all disabled:cursor-not-allowed"
+                            >
+                                <div className="text-[13px] font-mono font-medium text-[#d4d0c8]">
+                                    {t('autonomy.paramilitaryOrder.open')}
+                                </div>
+                                <div className="text-[13px] text-[#a9a398] mt-1 leading-relaxed">
+                                    {t('autonomy.paramilitaryOrder.hint')}
+                                </div>
+                            </button>
+                        </div>
+                    )}
 
                     {/* ── Pending Proposals (Level 1 only) ── */}
                     {currentLevel === 1 && proposals.length > 0 && (
