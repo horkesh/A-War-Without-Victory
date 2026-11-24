@@ -407,7 +407,7 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
                         }
                         return (
                             <SummarySection title={t('warSummary.section.civilianImpact')}>
-                                <div className="flex gap-6 text-[13px]">
+                                <div className="flex flex-wrap gap-x-6 gap-y-1 text-[13px]">
                                     <div>
                                         <span className="text-text-secondary">{t('warSummary.label.civilianKilled')} </span>
                                         <span className="text-red-400 font-semibold tabular-nums">{localizedInteger(totalKilled)}</span>
@@ -417,6 +417,7 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
                                         <span className="text-text-primary tabular-nums">{fmtK(totalFled)}</span>
                                     </div>
                                 </div>
+                                <p data-testid="war-summary-fled-abroad-note" className="mt-2 mb-0 text-[13px] leading-snug text-text-secondary">{t('warSummary.note.fledAbroad')}</p>
                             </SummarySection>
                         );
                     })()}
