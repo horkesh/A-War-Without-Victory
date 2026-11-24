@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "fingerprint": "449bbd5d5a7fc962",
+  "fingerprint": "bebfdd573bb907ed",
   "fields": {
     "schema_version": 2,
     "scenario_id": "apr1992_definitive_188w",
@@ -8,8 +8,8 @@
     "final_turn": 40,
     "control_counts": {
       "HRHB": 86,
-      "RBiH": 264,
-      "RS": 362
+      "RBiH": 262,
+      "RS": 364
     },
     "control_flips": [
       {
@@ -149,12 +149,6 @@
         "municipality_id": "bratunac",
         "from": "RBiH",
         "to": "RS"
-      },
-      {
-        "settlement_id": "op:bratunac:jezestica_2",
-        "municipality_id": "bratunac",
-        "from": "RS",
-        "to": "RBiH"
       },
       {
         "settlement_id": "op:bratunac:zapolje_2",
@@ -538,6 +532,12 @@
         "settlement_id": "op:sanski_most:stari_majdan",
         "municipality_id": "sanski_most",
         "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:sipovo:volari_2",
+        "municipality_id": "sipovo",
+        "from": "RBiH",
         "to": "RS"
       },
       {
