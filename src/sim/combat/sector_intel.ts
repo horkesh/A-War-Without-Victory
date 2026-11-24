@@ -463,6 +463,108 @@ export function stableSectorKey(sector: CorpsFrontSector): string {
 }
 
 /**
+ * RE-KEY SECTOR INTEL TO THIS TURN'S SECTORS (SE9, 2026-11-15).
+ *
+ * `partition-corps-front-sectors` re-mints every positional sector id early in the turn, but
+ * `deriveSectorIntel` re-keys `sector_intel` only at the END of the turn. Every read in between
+ * (the commander briefing, attack intel, the probe/launch confidence gate) looked up THIS turn's
+ * ids in LAST turn's map, so it read another sector's intel. Measured on main 16fc0a62f: 44% of
+ * reads in t2-26 found the sector's own intel filed under another id (17% in t182-188).
+ *
+ * This runs right after the partition and moves each record to its sector's new id on both sides,
+ * matching on the stable keys the records already carry (the same match `deriveSectorIntel` makes).
+ * No confidence, age or contact count is touched. Mid-turn readers get the right sector's intel
+ * instead of a stranger's.
+ * - SE9 v2 (2026-11-24): a key that no longer exists exactly (a lower edge joined the sector when
+ *   the front moved) resolves to the same corps's current sector that still holds the key's edge.
+ *   The record follows its ground and takes the current stable keys, so the end-of-turn derivation
+ *   carries it on instead of restarting the sector at the faction floor. Measured on C2: Farz's own
+ *   Ozren record, 1.00 at t179, read 0.00 at t180 and climbed 0.02 a week, so the op never passed
+ *   its intel gate. A moved record never displaces an exact one; between moved records for one
+ *   pair, the higher confidence wins.
+ * - A record whose own or enemy edge is held by no sector of that corps cannot be placed and is
+ *   dropped.
+ * - Legacy records with no stable keys (pre-2026-08-26 saves) keep the old positional lookup.
+ */
+export function rekeySectorIntelToCurrentSectors(state: GameState): void {
+    const sectors = state.military.corps_front_sectors;
+    const prevIntel = state.military.sector_intel;
+    if (!sectors || !prevIntel) return;
+
+    const sortedSectorIds = Object.keys(sectors).sort(strictCompare);
+    const currentIdByStable = new Map<string, string>();
+    // Ground lookup (SE9 v2, 2026-11-24): corps|edge -> the first current sector (strictCompare) of
+    // that corps holding the edge. A stable key is corps|lowest edge id, so when the front moves and
+    // a lower edge joins a sector, its key changes although it is the same ground.
+    const currentIdByCorpsEdge = new Map<string, string>();
+    for (const sectorId of sortedSectorIds) {
+        const sector = sectors[sectorId]!;
+        currentIdByStable.set(stableSectorKey(sector), sectorId);
+        for (const edgeId of sector.edge_ids) {
+            const corpsEdge = `${sector.corps_id}|${edgeId}`;
+            if (!currentIdByCorpsEdge.has(corpsEdge)) currentIdByCorpsEdge.set(corpsEdge, sectorId);
+        }
+    }
+    const resolve = (stableKey: string): { id: string; exact: boolean } | undefined => {
+        const exactId = currentIdByStable.get(stableKey);
+        if (exactId !== undefined) return { id: exactId, exact: true };
+        const movedId = currentIdByCorpsEdge.get(stableKey); // a stable key is corps|edge
+        return movedId === undefined ? undefined : { id: movedId, exact: false };
+    };
+
+    const nextIntel: Record<string, SectorIntelRecord[]> = {};
+    const place = (sectorId: string, rec: SectorIntelRecord): void => {
+        (nextIntel[sectorId] ??= []).push(rec);
+    };
+    const pairKey = (ownId: string, enemyId: string): string => `${ownId}\u0000${enemyId}`;
+    const exactPairs = new Set<string>();
+    const moved = new Map<string, { ownId: string; rec: SectorIntelRecord }>();
+    for (const key of Object.keys(prevIntel).sort(strictCompare)) {
+        for (const rec of prevIntel[key] ?? []) {
+            if (rec.own_stable_key === undefined || rec.enemy_stable_key === undefined) {
+                // Legacy record: positional, as before this change.
+                if (sectors[key]) place(key, rec);
+                continue;
+            }
+            const own = resolve(rec.own_stable_key);
+            const enemy = resolve(rec.enemy_stable_key);
+            if (own === undefined || enemy === undefined) continue;
+            if (own.exact && enemy.exact) {
+                exactPairs.add(pairKey(own.id, enemy.id));
+                place(own.id, enemy.id === rec.enemy_sector_id ? rec : { ...rec, enemy_sector_id: enemy.id });
+                continue;
+            }
+            // Moved with its ground: new ids and the current stable keys, so the stable-key readers
+            // (the preparation gate, the end-of-turn carry-forward) find it. Confidence, age and
+            // contact count are unchanged.
+            const pk = pairKey(own.id, enemy.id);
+            const held = moved.get(pk);
+            if (held !== undefined && held.rec.confidence >= rec.confidence) continue;
+            moved.set(pk, {
+                ownId: own.id,
+                rec: {
+                    ...rec,
+                    enemy_sector_id: enemy.id,
+                    own_stable_key: stableSectorKey(sectors[own.id]!),
+                    enemy_stable_key: stableSectorKey(sectors[enemy.id]!),
+                },
+            });
+        }
+    }
+    // A moved record never displaces one whose keys matched exactly; between moved records for the
+    // same pair, the higher confidence wins (ties: the first in sorted source order).
+    for (const pk of [...moved.keys()].sort(strictCompare)) {
+        if (exactPairs.has(pk)) continue;
+        const { ownId, rec } = moved.get(pk)!;
+        place(ownId, rec);
+    }
+    for (const sectorId of Object.keys(nextIntel)) {
+        nextIntel[sectorId]!.sort((a, b) => strictCompare(a.enemy_sector_id, b.enemy_sector_id));
+    }
+    state.military.sector_intel = nextIntel;
+}
+
+/**
  * Previous-turn records for this sector, matched on stable identity with a positional fallback.
  *
  * The fallback is what keeps pre-2026-08-26 saves behaving exactly as before: their records carry
