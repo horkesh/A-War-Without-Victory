@@ -1237,6 +1237,14 @@ function collectAdjacentUncontestedTerritoryIssues(state) {
     };
 }
 
+/** C3 (RB8): ids of active kind-'brigade' formations with no corps_id, sorted. */
+function collectCorpslessBrigadeIssues(state) {
+    return Object.values(state.military?.formations ?? {})
+        .filter((f) => f && f.kind === 'brigade' && f.status === 'active' && !f.corps_id)
+        .map((f) => f.id)
+        .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+}
+
 function validateState(state, runLabel) {
     const lines = [];
     const log = (line = '') => lines.push(line);
@@ -1598,6 +1606,16 @@ function validateState(state, runLabel) {
     }
     log('');
 
+    // ── C3 (RB8) tripwire: an active brigade without a corps can never attack ──
+    log('--- Corps-less Brigades (C3) ---');
+    const corpsless = collectCorpslessBrigadeIssues(state);
+    if (corpsless.length === 0) {
+        ok('0 active brigades without a corps');
+    } else {
+        for (const id of corpsless) fail(`${id} is an active brigade with no corps_id (it can never attack through a CorpsOperation)`);
+    }
+    log('');
+
     const result = failures === 0 ? 'PASS' : 'FAIL';
     log(`=== RESULT: ${result} ===`);
     if (failures > 0) {
@@ -1637,6 +1655,7 @@ module.exports = {
     collectAssignmentCompletenessIssues,
     inspectAssignmentCompletenessEvidence,
     collectAdjacentUncontestedTerritoryIssues,
+    collectCorpslessBrigadeIssues,
     collectEmptyContestedSectorIssues,
     collectSectorFloorShortfallIssues,
     collectSectorGeometryIssues,
