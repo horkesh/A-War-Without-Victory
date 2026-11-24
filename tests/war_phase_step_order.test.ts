@@ -337,7 +337,11 @@ describe('war-phase step ordering', () => {
         //        Fable consult 6: the supply-reserve economy is not modelled in 1.0).
         // +1 from rekey-sector-intel (2026-11-15, SE9): directly after the partition; moves last
         //        turn's sector intel to this turn's sector ids by stable key.
-        expect(stepNames.length).toBe(192);
+        // -1 from retiring generate-player-stance-recommendations (2026-11-24, lane C s6): a second
+        //        stance pass for the player at autonomy 1 that overwrote the staff stance computed in
+        //        generate-bot-corps-orders (live RS a1 left the headless war at turn 1).
+        expect(stepNames.length).toBe(191);
+        expect(stepNames).not.toContain('generate-player-stance-recommendations');
         expect(stepNames).not.toContain('compute-supply-reserves');
         expect(stepNames).not.toContain('update-smuggling-routes');
         expect(stepNames).not.toContain('produce-political-directive');

@@ -25,6 +25,8 @@ export interface RecruitmentCatalogBrigade {
     mandatory: boolean;
     eligible?: boolean;
     reason_codes?: RecruitmentEligibilityReason[];
+    /** The president holds this brigade: the staff will not raise it (autonomy 1-3). */
+    held?: boolean;
 }
 
 export type RecruitmentEligibilityReason =
@@ -101,6 +103,7 @@ export interface AwwvBridge {
     startNewCampaign?(payload: StartNewCampaignPayload): Promise<StartNewCampaignResult>;
     getRecruitmentCatalog?(): Promise<RecruitmentCatalogResult | null>;
     applyRecruitment?(brigadeId: string, equipmentClass: string): Promise<ApplyRecruitmentResult>;
+    setRecruitmentHold?(brigadeId: string, held: boolean): Promise<DesktopOkError>;
 }
 
 export interface DesktopBridgeClient {
@@ -115,4 +118,5 @@ export interface DesktopBridgeClient {
     startNewCampaign(payload: StartNewCampaignPayload): Promise<StartNewCampaignResult>;
     getRecruitmentCatalog(): Promise<RecruitmentCatalogResult | null>;
     applyRecruitment(brigadeId: string, equipmentClass: string): Promise<ApplyRecruitmentResult>;
+    setRecruitmentHold(brigadeId: string, held: boolean): Promise<DesktopOkError>;
 }

@@ -3,7 +3,13 @@ import { describe, expect, test } from 'vitest';
 import { loadOobBrigades } from '../src/scenario/oob_loader.js';
 import type { OobBrigade } from '../src/scenario/oob_loader.js';
 import { initializeRecruitmentResources } from '../src/sim/recruitment_engine.js';
-import { accrueRecruitmentResources, runOngoingRecruitment, selectAutomaticRecruitmentFactions } from '../src/sim/recruitment_turn.js';
+import {
+    accrueRecruitmentResources,
+    runOngoingRecruitment,
+    selectAutomaticRecruitmentFactions,
+    selectPlayerHeldBrigadeIds,
+    setPlayerRecruitmentHold,
+} from '../src/sim/recruitment_turn.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { militiaPoolKey } from '../src/state/militia_pool_key.js';
@@ -209,7 +215,7 @@ describe('runOngoingRecruitment', () => {
         expect(prioritized.formationIds).not.toContain('arbih_223rd_mountain');
     });
 
-    test('keeps player recruitment manual at autonomy 0-1 and delegates it at 2-3 or headless', () => {
+    test('keeps player recruitment manual at autonomy 0 and delegates it at 1-3 or headless', () => {
         const state = makeState();
         state.meta.player_faction = 'RBiH';
         state.factions = [
@@ -219,8 +225,9 @@ describe('runOngoingRecruitment', () => {
 
         state.meta.autonomy_level = 0;
         expect(selectAutomaticRecruitmentFactions(state)).toEqual(['RS']);
+        // Level 1 (Assisted) delegates: HISTORY IF LEFT ALONE (lane C s6 design sitting, 2026-11-24).
         state.meta.autonomy_level = 1;
-        expect(selectAutomaticRecruitmentFactions(state)).toEqual(['RS']);
+        expect(selectAutomaticRecruitmentFactions(state)).toEqual(['RBiH', 'RS']);
         state.meta.autonomy_level = 2;
         expect(selectAutomaticRecruitmentFactions(state)).toEqual(['RBiH', 'RS']);
         state.meta.autonomy_level = 3;
@@ -230,10 +237,11 @@ describe('runOngoingRecruitment', () => {
         expect(selectAutomaticRecruitmentFactions(state)).toEqual(['RBiH', 'RS']);
     });
 
-    test('does not consume an assisted player formation through ongoing bot recruitment', () => {
+    test('does not consume a Full Control player formation through ongoing bot recruitment', () => {
+        // The president's "saving a brigade for later" guarantee lives at Level 0 (Full Control).
         const state = makeState();
         state.meta.player_faction = 'RBiH';
-        state.meta.autonomy_level = 1;
+        state.meta.autonomy_level = 0;
         const brigade: OobBrigade = {
             id: 'rbih_player_choice',
             faction: 'RBiH',
@@ -255,6 +263,94 @@ describe('runOngoingRecruitment', () => {
         expect(report?.actions).toEqual([]);
         expect(state.military.formations[brigade.id]).toBeUndefined();
         expect(state.military.recruitment_state?.recruited_brigade_ids).not.toContain(brigade.id);
+    });
+
+    test('raises an Assisted (Level 1) player formation through ongoing staff recruitment, as headless does', () => {
+        // HISTORY IF LEFT ALONE: a hands-off Assisted president gets the brigades the headless
+        // staff raise (live HRHB a1 drifted from turn 2 when Level 1 recruited nothing).
+        const build = (playerLevel: 0 | 1 | 2 | 3 | null) => {
+            const state = makeState();
+            if (playerLevel !== null) {
+                state.meta.player_faction = 'RBiH';
+                state.meta.autonomy_level = playerLevel;
+            }
+            const brigade: OobBrigade = {
+                id: 'rbih_staff_choice',
+                faction: 'RBiH',
+                name: 'Staff Choice Brigade',
+                home_mun: 'zenica',
+                kind: 'brigade',
+                manpower_cost: 800,
+                capital_cost: 10,
+                default_equipment_class: 'light_infantry',
+                home_osid: 'op:zenica:core',
+                priority: 1,
+                mandatory: false,
+                available_from: 0,
+                max_personnel: 3000,
+            };
+            runOngoingRecruitment(state, [], [brigade], new Map([['s1', 'zenica']]), { zenica: 's1' });
+            return state;
+        };
+        const assisted = build(1);
+        const headless = build(null);
+        expect(assisted.military.recruitment_state?.recruited_brigade_ids).toContain('rbih_staff_choice');
+        expect(assisted.military.formations.rbih_staff_choice).toBeDefined();
+        expect(assisted.military.recruitment_state?.recruited_brigade_ids)
+            .toEqual(headless.military.recruitment_state?.recruited_brigade_ids);
+    });
+
+    test('the president can hold a brigade: the staff skip it, the pool stays unspent, release restores the raise', () => {
+        const brigade: OobBrigade = {
+            id: 'rbih_held_choice',
+            faction: 'RBiH',
+            name: 'Held Choice Brigade',
+            home_mun: 'zenica',
+            kind: 'brigade',
+            manpower_cost: 800,
+            capital_cost: 10,
+            default_equipment_class: 'light_infantry',
+            home_osid: 'op:zenica:core',
+            priority: 1,
+            mandatory: false,
+            available_from: 0,
+            max_personnel: 3000,
+        };
+        const run = (state: GameState) =>
+            runOngoingRecruitment(state, [], [brigade], new Map([['s1', 'zenica']]), { zenica: 's1' });
+
+        const held = makeState();
+        held.meta.player_faction = 'RBiH';
+        held.meta.autonomy_level = 1;
+        setPlayerRecruitmentHold(held, brigade.id, true);
+        expect(held.military.recruitment_state?.player_held_brigade_ids).toEqual(['rbih_held_choice']);
+        const poolBefore = JSON.stringify(held.military.militia_pools);
+        run(held);
+        expect(held.military.formations.rbih_held_choice).toBeUndefined();
+        expect(held.military.recruitment_state?.recruited_brigade_ids).not.toContain('rbih_held_choice');
+        expect(JSON.stringify(held.military.militia_pools)).toBe(poolBefore);
+
+        // Release: the field disappears (a save that no longer holds is byte-identical) and the staff raise it.
+        setPlayerRecruitmentHold(held, brigade.id, false);
+        expect(held.military.recruitment_state?.player_held_brigade_ids).toBeUndefined();
+        run(held);
+        expect(held.military.formations.rbih_held_choice).toBeDefined();
+    });
+
+    test('holds keep a sorted unique list and never apply under headless auto-control', () => {
+        const state = makeState();
+        state.meta.player_faction = 'RBiH';
+        state.meta.autonomy_level = 2;
+        setPlayerRecruitmentHold(state, 'b_two', true);
+        setPlayerRecruitmentHold(state, 'a_one', true);
+        setPlayerRecruitmentHold(state, 'b_two', true);
+        expect(state.military.recruitment_state?.player_held_brigade_ids).toEqual(['a_one', 'b_two']);
+        expect([...(selectPlayerHeldBrigadeIds(state) ?? [])]).toEqual(['a_one', 'b_two']);
+        state.meta.headless_scenario_auto_control = true;
+        expect(selectPlayerHeldBrigadeIds(state)).toBeUndefined();
+        state.meta.headless_scenario_auto_control = false;
+        state.meta.player_faction = undefined;
+        expect(selectPlayerHeldBrigadeIds(state)).toBeUndefined();
     });
 
     test('applies per-faction recruit cap deterministically', () => {

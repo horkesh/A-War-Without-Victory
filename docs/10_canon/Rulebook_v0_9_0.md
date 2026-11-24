@@ -389,7 +389,7 @@ Enclaves are isolated areas under pressure that generate humanitarian and politi
 
 Population is both a resource and a constraint. Recruitment depends on authority, legitimacy, and exhaustion.
 
-The recruitment list and the final activation check use the same current-turn eligibility: faction, availability, existing formation, home-municipality control and manpower, recruitment capital, and equipment. Player autonomy also sets the boundary: at autonomy 0 or 1 the staff does not recruit automatically for the player's faction; at autonomy 2 or above it may. Other factions and fully headless campaigns continue deterministic automatic recruitment.
+The recruitment list and the final activation check use the same current-turn eligibility: faction, availability, existing formation, home-municipality control and manpower, recruitment capital, and equipment. Player autonomy also sets the boundary: at autonomy 0 (Full Control) the staff does not recruit automatically for the player's faction; at autonomy 1 or above it does, and the player may still raise an eligible brigade sooner from Recruitment, or hold one so the staff do not raise it (amended 2026-11-24). Other factions and fully headless campaigns continue deterministic automatic recruitment.
 
 ### 10.2 Displacement effects
 

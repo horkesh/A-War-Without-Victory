@@ -68,6 +68,7 @@ contextBridge.exposeInMainWorld('awwv', {
   openTacticalMapWindow: (payload) => ipcRenderer.invoke('open-tactical-map-window', payload),
   getRecruitmentCatalog: () => ipcRenderer.invoke('get-recruitment-catalog'),
   applyRecruitment: (brigadeId, equipmentClass) => ipcRenderer.invoke('apply-recruitment', { brigadeId, equipmentClass }),
+  setRecruitmentHold: (brigadeId, held) => ipcRenderer.invoke('set-recruitment-hold', { brigadeId, held }),
   queryMovementRange: (brigadeId) => ipcRenderer.invoke('query-movement-range', { brigadeId }),
   queryMovementPath: (brigadeId, destinationSid) => ipcRenderer.invoke('query-movement-path', { brigadeId, destinationSid }),
   queryCombatEstimate: (brigadeId, targetSettlementId) => ipcRenderer.invoke('query-combat-estimate', { brigadeId, targetSettlementId }),

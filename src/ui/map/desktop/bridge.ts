@@ -96,5 +96,11 @@ export function createDesktopBridgeClient(bridge: AwwvBridge | null): DesktopBri
         { ok: false, error: BRIDGE_UNAVAILABLE }
       );
     },
+    setRecruitmentHold(brigadeId: string, held: boolean): Promise<DesktopOkError> {
+      return invokeOrUnavailable(
+        bridge?.setRecruitmentHold ? () => bridge.setRecruitmentHold!(brigadeId, held) : undefined,
+        { ok: false, error: BRIDGE_UNAVAILABLE }
+      );
+    },
   };
 }
