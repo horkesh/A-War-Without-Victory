@@ -1503,7 +1503,9 @@
   },
   {
     "id": "croatia_herceg_bosna_control_1993",
-    "audience": ["HRHB"],
+    "audience": [
+      "HRHB"
+    ],
     "image": "event_patron_relations_HRHB.webp",
     "title": "Croatia Tightens Control over Herceg-Bosna",
     "narrative": "The Republic of Croatia deepens its de facto control over the Croatian Community of Herceg-Bosna: HV officers serve in HVO command positions, Croatian state resources flow across the border, and Zagreb's directives increasingly drive HVO military strategy. The ICTY Prlić trial establishes a Joint Criminal Enterprise involving Tudjman's inner circle and HVO commanders aimed at creating ethnically homogeneous Croat territory for eventual annexation.",
@@ -2051,7 +2053,10 @@
   },
   {
     "id": "vitez_kiseljak_pockets_1993",
-    "audience": ["HRHB", "RBiH"],
+    "audience": [
+      "HRHB",
+      "RBiH"
+    ],
     "image": "event_central_bosnia_front.webp",
     "title": "Vitez-Kiseljak Pockets Isolated",
     "narrative": "With the alliance broken, HVO garrisons in the Vitez-Busovača pocket and the Kiseljak enclave are cut off from resupply by HVO main forces in western Herzegovina. The pockets must survive on local resources and intermittent VRS cooperation, while the ARBiH weighs the cost of an assault against the benefits of encirclement.",
@@ -8508,7 +8513,7 @@
   {
     "id": "hrhb_minority_policy_1993",
     "title": "Staff Orders for the Bosniak Population",
-    "narrative": "The war with the ARBiH has begun. In the ground the HVO holds in central Bosnia and Herzegovina, your side's historical default is the expulsion of the Bosniak population from 11 municipalities, in two waves over the coming months. Your staff will carry it out unless you order a halt now. The order can be given only now; it cannot be given later.\n\nModelled scale if no halt is ordered: about 24,000 people expelled, about 18% of the Bosniaks who lived in those municipalities before the war. About 700 of them are killed and about 6,300 are forced abroad. One war crime is recorded against your side, and international standing falls by about 10 points. This is an event of the simulated war.",
+    "narrative": "The war with the ARBiH has begun. In 11 municipalities of central Bosnia and Herzegovina, your side's historical default is to expel Bosniaks from the ground the HVO holds, in two waves over the coming months. Your staff will carry it out unless you order a halt now. The halt can be ordered only now. It cannot be ordered later.\n\nModelled scale if no halt is ordered: about 24,000 people expelled, about 18% of the Bosniaks who lived in those 11 municipalities before the war, including those living outside ground the HVO holds. About 700 of them are killed and about 6,300 are forced abroad. One war crime is recorded against your side, and international standing falls by about 10 points. This is an event of the simulated war.",
     "category": "humanitarian",
     "family": "hrhb_minority_policy",
     "source_tier": "icty_icj_un",
@@ -8528,15 +8533,15 @@
     "historical_default_response_id": "no_halt",
     "effect": {
       "kind": "narrative",
-      "text": "The HVO staff's orders for the Bosniak population in HVO-held ground are on record."
+      "text": "The order on the Bosniak population is on record."
     },
-    "staff_assessment": "If no halt is ordered, both waves run and the record is your side's. A halt stops both waves for the rest of the war. Its cost is modelled, not sourced: Zagreb's confidence in you falls by 10 points. Neither choice shows a gain.",
+    "staff_assessment": "If no halt is ordered, both waves run and the war crime is recorded against your side. A halt stops both waves for the rest of the war. Its cost is modelled and unsourced: Zagreb's confidence in you falls by 10 points. Neither choice shows a gain.",
     "trigger_evidence": [
       "The HVO and the ARBiH are now at open war.",
       "The HVO holds ground in central Bosnia and Herzegovina where Bosniaks still live."
     ],
-    "historical_source": "ICTY Prlić et al. (IT-04-74-T, Trial Judgement, 29 May 2013; Appeal Judgement, 29 November 2017): a joint criminal enterprise of the HZ(R) H-B political and military leadership whose common purpose included the ethnic cleansing of the Muslim population. ICTY Kordić and Čerkez (IT-95-14/2-T, Trial Judgement, 26 February 2001), paras 511, 646 (Busovača, Vitez). Balkan Battlegrounds, Vol. I (CIA, 2002), on the 1993 Croat-Muslim war.",
-    "source_note": "Modelling note. The card stands for the policy the ICTY attributed to the HZ(R) H-B political and military leadership in 1993 (Prlić et al.; Kordić and Čerkez); its scope, shares and wave timing are the RF-5B historian table (POLICY_EXPULSION_SCOPE in src/state/displacement_takeover.ts). The numbers on the card are static estimates from that table and the measured headless run, checked by a bounds test. The player's only act is the halt; the card never offers an expulsion as a choice (SENSITIVE_HISTORY_DESIGN_GATE.md section 3; RB5 ruling 2026-11-23). The cost of the halt is modelled and unsourced: no ICTY finding sizes it. Future rows consuming this card must not author cleansing, forced displacement or any other sensitive act as a player choice.",
+    "historical_source": "ICTY, Prlić et al. (IT-04-74-T), Trial Judgement, 29 May 2013, and Appeal Judgement (IT-04-74-A), 29 November 2017: a joint criminal enterprise whose members included the political and military leadership of the HZ(R) H-B and officials of Croatia, whose common purpose included the permanent removal of the Muslim population by forcible transfer and deportation. ICTY, Kordić and Čerkez (IT-95-14/2-T), Trial Judgement, 26 February 2001, para. 646 (Vitez). Balkan Battlegrounds, Vols. I and II (CIA, 2002).",
+    "source_note": "Modelling note. The card stands for the policy the ICTY attributed to a joint criminal enterprise of the HZ(R) H-B political and military leadership and officials of Croatia in 1993 (Prlić et al.; Kordić and Čerkez para. 646); its scope, shares and wave timing are the RF-5B historian table (POLICY_EXPULSION_SCOPE in src/state/displacement_takeover.ts). Scope is a model list: the Prlić municipalities except Vareš, plus Vitez, Busovača, Kiseljak (Kordić) and Žepče (low confidence, no ICTY finding read). The 18% divides by the 1991 population of the whole municipalities. The numbers on the card are static estimates from that table and the measured headless run, checked by a bounds test. The player's only act is the halt; the card never offers an expulsion as a choice (SENSITIVE_HISTORY_DESIGN_GATE.md section 3; RB5 ruling 2026-11-23). The cost of the halt is modelled and unsourced: no ICTY finding sizes it. Future rows consuming this card must not author cleansing, forced displacement or any other sensitive act as a player choice.",
     "response_options": [
       {
         "id": "no_halt",
@@ -8549,7 +8554,7 @@
       {
         "id": "order_halt",
         "label": "Order a halt",
-        "description": "No wave runs in this war. Modelled, unsourced cost: Zagreb's confidence in you falls by 10 points. The order is final.",
+        "description": "No wave runs in this war. The cost is modelled and unsourced: Zagreb's confidence in you falls by 10 points. The order is final.",
         "historical_marker": "counterfactual",
         "aggression_affinity": -0.5,
         "risk_level": 0.4,
@@ -8564,6 +8569,31 @@
           }
         ]
       }
-    ]
+    ],
+    "localizations": {
+      "en": {
+        "source_note": "ICTY, Prlić et al. (IT-04-74), Trial Judgement 2013 and Appeal Judgement 2017: a joint criminal enterprise of the political and military leadership of the HZ(R) H-B and officials of Croatia, whose common purpose included the removal of the Muslim population by forcible transfer and deportation. ICTY, Kordić and Čerkez (IT-95-14/2), Trial Judgement 2001, para. 646 (Vitez). Balkan Battlegrounds, Vols. I and II (CIA, 2002). The figures on this card are modelled estimates; the cost of a halt is modelled and unsourced."
+      },
+      "bcs": {
+        "title": "Naredbe štaba o bošnjačkom stanovništvu",
+        "narrative": "Rat s ARBiH je počeo. U 11 općina srednje Bosne i Hercegovine historijska zadana postavka vaše strane jeste da se Bošnjaci protjeraju s područja koje drži HVO, u dva vala tokom narednih mjeseci. Vaš štab će je provesti ako sada ne naredite obustavu. Obustava se može narediti samo sada. Kasnije se ne može narediti.\n\nModelirani razmjer ako se obustava ne naredi: protjerano oko 24.000 ljudi, oko 18% Bošnjaka koji su prije rata živjeli u tih 11 općina, uključujući one koji žive izvan područja koje drži HVO. Oko 700 njih je ubijeno, a oko 6.300 je prisiljeno otići u inostranstvo. Protiv vaše strane bilježi se jedan ratni zločin, a međunarodni ugled pada za oko 10 bodova. Ovo je događaj simuliranog rata.",
+        "staff_assessment": "Ako se obustava ne naredi, oba vala se provode, a ratni zločin se bilježi na teret vaše strane. Obustava zaustavlja oba vala do kraja rata. Njena cijena je modelirana i bez izvora: povjerenje Zagreba u vas pada za 10 bodova. Nijedan izbor ne donosi dobit.",
+        "trigger_evidence": [
+          "HVO i ARBiH su sada u otvorenom ratu.",
+          "HVO drži područja u srednjoj Bosni i Hercegovini na kojima Bošnjaci još žive."
+        ],
+        "source_note": "MKSJ, Prlić i drugi (IT-04-74), prvostepena presuda 2013. i žalbena presuda 2017: udruženi zločinački poduhvat političkog i vojnog rukovodstva HZ(R) H-B i zvaničnika Hrvatske, čija je zajednička svrha uključivala uklanjanje muslimanskog stanovništva prisilnim premještanjem i deportacijom. MKSJ, Kordić i Čerkez (IT-95-14/2), prvostepena presuda 2001., par. 646 (Vitez). Balkan Battlegrounds, sv. I i II (CIA, 2002). Brojke na ovoj kartici su modelirane procjene; cijena obustave je modelirana i bez izvora.",
+        "response_options": {
+          "no_halt": {
+            "label": "Ne intervenirati: protjerivanja se provode",
+            "description": "Vaš štab primjenjuje historijsku zadanu postavku vaše strane. Iz 11 općina protjera se oko 24.000 ljudi, a oko 700 njih je ubijeno. Protiv vaše strane bilježi se jedan ratni zločin, a međunarodni ugled pada za oko 10 bodova."
+          },
+          "order_halt": {
+            "label": "Narediti obustavu",
+            "description": "Nijedan val se u ovom ratu ne provodi. Cijena je modelirana i bez izvora: povjerenje Zagreba u vas pada za 10 bodova. Naredba je konačna."
+          }
+        }
+      }
+    }
   }
 ]
