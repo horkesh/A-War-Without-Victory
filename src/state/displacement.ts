@@ -42,6 +42,12 @@ export const UNSUPPLIED_DISPLACEMENT_FRACTION = 0.001;
  */
 export const ENCIRCLEMENT_DISPLACEMENT_FRACTION = 0.001;
 /**
+ * A6 (SD9): the siege outflow is computed in integer parts per million, so the weekly
+ * fraction of a small pocket (under 1,000 people at 0.001) carries over in
+ * `DisplacementState.siege_outflow_carry_by_side` instead of rounding to 0 every week.
+ */
+export const SIEGE_OUTFLOW_PPM_SCALE = 1_000_000;
+/**
  * DA1 P5: a cut-off body counts as an encircled POCKET only when it holds at most this
  * share of its side's settlements. The besieged pockets of the war are small: Sarajevo,
  * Goražde, Srebrenica, Žepa, the Bihać pocket (about 8% of RBiH-held settlements), and the
@@ -733,6 +739,8 @@ export function updateDisplacement(
         const dispState = getOrInitDisplacementState(state, munId, defaultOriginalPopulation);
         const munPop = munSids.reduce((s, sid) => s + (popOf.get(sid) ?? 0), 0);
         const counters = dispState.unsupplied_pressure_by_side ?? {};
+        // A6 (SD9): integer ppm remainder of the siege outflow per side (reset points below).
+        const carries = dispState.siege_outflow_carry_by_side ?? {};
 
         // DA1 P6 (Red-team): one pass per side holding settlements here, so a pocket that is
         // a minority of its municipality (Žepa is one of Rogatica's settlements) is still
@@ -741,6 +749,8 @@ export function updateDisplacement(
             const sideSids = munSids.filter((sid) => controllerOf.get(sid) === side);
             if (sideSids.length === 0) {
                 delete counters[side];
+                // A6: holder change / enclave fall. A captor never inherits a pre-paid fraction.
+                delete carries[side];
                 continue;
             }
             const sideSidSet = new Set(sideSids);
@@ -783,11 +793,19 @@ export function updateDisplacement(
                 fraction = Math.max(fraction, ENCIRCLEMENT_DISPLACEMENT_FRACTION);
                 reasons.push('encircled');
             }
-            if (fraction <= 0) continue;
+            if (fraction <= 0) {
+                // A6: no live trigger this week, so no departure and nothing carried.
+                delete carries[side];
+                continue;
+            }
 
             const remainingPopulation =
                 dispState.original_population - dispState.displaced_out - dispState.lost_population;
-            if (remainingPopulation <= 0) continue;
+            if (remainingPopulation <= 0) {
+                // A6: nobody left to carry.
+                delete carries[side];
+                continue;
+            }
             const sidePop = sideSids.reduce((s, sid) => s + (popOf.get(sid) ?? 0), 0);
             const heldRemaining = munPop > 0 ? Math.floor((remainingPopulation * sidePop) / munPop) : remainingPopulation;
             // DA1 P3: only the holder's own people leave under siege. Sources do not attribute a
@@ -802,7 +820,15 @@ export function updateDisplacement(
             // DA1 P4: the Phase 22 sustainability-collapse multiplier (x1.5) is not read here.
             // `sustainability_state` runs on legacy settlement edges and marks 109 of 110
             // municipalities collapsed every turn of a campaign; no source supports it.
-            const wanted = Math.min(Math.floor(heldPeople * fraction), heldPeople);
+            // A6 (SD9): the sub-person remainder carries as integer ppm, updated here before any
+            // further continue, on the attempted outflow (`wanted`), so trapped weeks build no
+            // debt and capacity opening later releases no burst. The carry stays in [0, 1e6).
+            const ppm = Math.round(fraction * SIEGE_OUTFLOW_PPM_SCALE);
+            const total = heldPeople * ppm + (carries[side] ?? 0);
+            const wanted = Math.min(Math.floor(total / SIEGE_OUTFLOW_PPM_SCALE), heldPeople);
+            const carry = total % SIEGE_OUTFLOW_PPM_SCALE;
+            if (carry > 0) carries[side] = carry;
+            else delete carries[side];
             if (wanted <= 0) continue;
 
             // SC1: the causer is the pressing side, never this holder (passed in, not re-derived:
@@ -892,6 +918,8 @@ export function updateDisplacement(
 
         if (Object.keys(counters).length > 0) dispState.unsupplied_pressure_by_side = counters;
         else delete dispState.unsupplied_pressure_by_side;
+        if (Object.keys(carries).length > 0) dispState.siege_outflow_carry_by_side = carries;
+        else delete dispState.siege_outflow_carry_by_side;
     }
 
     records.sort((a, b) => strictCompare(a.mun_id, b.mun_id) || strictCompare(String(a.faction_id), String(b.faction_id)));

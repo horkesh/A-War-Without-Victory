@@ -836,7 +836,10 @@ describe('strict null inventory progress', () => {
             // (absent until a zero-order launch is demoted). No new type escape. 610 -> 612.
             // Never-ending-op exit (2026-11-22): CorpsOperation.silent_execution_turn_streak
             // (absent until an executing op issues a turn with no orders). No new type escape. 612 -> 613.
-            optional_fields_game_state: 613,
+            // A6 (SD9, batch A round 2, unanimous; strict-null pin +1 per round 1 ruling 3):
+            // DisplacementState.siege_outflow_carry_by_side, the integer ppm siege-outflow carry, absent
+            // when no side has a carry (old saves load). No new type escape. 613 -> 614.
+            optional_fields_game_state: 614,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
@@ -862,13 +865,14 @@ describe('strict null inventory progress', () => {
         // P3 mismatch rider: +2 sim (CorpsOperation.planning_phase_started_turn /
         // launch_demotion_count). 610 -> 612 / sim 372 -> 374.
         // Never-ending-op exit: +1 sim (CorpsOperation.silent_execution_turn_streak). 612 -> 613 / sim 374 -> 375.
-        expect(current.optional_field_domains.total).toBe(613);
+        // A6 (SD9): +1 state (DisplacementState.siege_outflow_carry_by_side). 613 -> 614 / state 228 -> 229.
+        expect(current.optional_field_domains.total).toBe(614);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
             sim: 375,
-            state: 228,
+            state: 229,
             ui_adapter: 0,
             unknown: 0,
         });

@@ -1877,6 +1877,15 @@ export interface DisplacementState {
      * absent when no side qualifies. Persisted so a save round trip keeps the count (DA1).
      */
     unsupplied_pressure_by_side?: Partial<Record<FactionId, { turns: number; last_turn: number }>>;
+    /**
+     * A6 (SD9, broader bright-line panel batch A round 2): per side holding settlements here,
+     * the integer parts-per-million remainder of the siege outflow, carried week to week so a
+     * pocket under 1,000 people still drains at the sourced rate instead of rounding to 0.
+     * Always in [0, 1e6). Advances on the attempted outflow (`wanted`), not on the routed count.
+     * A side is absent when its carry is 0 or reset (side no longer holds settlements here,
+     * neither trigger holds, nobody remains); the field is absent when no side has a carry.
+     */
+    siege_outflow_carry_by_side?: Partial<Record<FactionId, number>>;
 }
 
 /** Per-event displacement record for tracking and reporting. Sorted by (turn, origin_mun). */
