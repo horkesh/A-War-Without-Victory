@@ -36,6 +36,7 @@ function filesMatching(pattern: RegExp): string[] {
     const files: string[] = [];
     walk(join(ROOT, 'src'), files);
     walk(join(ROOT, 'tools'), files);
+    walk(join(ROOT, 'scripts'), files);
     return files
         .filter((f) => !f.includes(`${sep}i18n${sep}`))
         .filter((f) => pattern.test(withoutComments(readFileSync(f, 'utf8'))))
