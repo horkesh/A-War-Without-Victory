@@ -31,11 +31,17 @@ export interface ParamilitaryPolicyCard {
     readonly eventId: string;
     /** The event flag every option of the card sets to its own option id. */
     readonly flag: string;
+    /**
+     * The card's `historical_default_response_id` in the event data, mirrored here so read models that have no
+     * event catalog can key on it (§6 item 3: the cleansing_refused ghost's label). Pinned against the catalog by
+     * tests/s6_item3_cleansing_ghost.test.ts.
+     */
+    readonly historicalDefault: ParamilitaryPolicyOrder;
 }
 
 export const PARAMILITARY_POLICY_CARD_BY_FACTION: Readonly<Partial<Record<FactionId, ParamilitaryPolicyCard>>> = {
-    RBiH: { eventId: 'rbih_paramilitary_policy_1992', flag: 'rbih_paramilitary_policy' },
-    RS: { eventId: 'rs_paramilitary_policy_1992', flag: 'rs_paramilitary_policy' },
+    RBiH: { eventId: 'rbih_paramilitary_policy_1992', flag: 'rbih_paramilitary_policy', historicalDefault: 'always_deny' },
+    RS: { eventId: 'rs_paramilitary_policy_1992', flag: 'rs_paramilitary_policy', historicalDefault: 'always_allow' },
 };
 
 /** The IPC error code for a refused attempt to loosen the side's paramilitary policy (copy: `paramilitaryReview.error.cannotLoosen`). */
@@ -95,6 +101,12 @@ export function appliedParamilitaryPolicyCardAnswer(
     const receipted = (military?.event_decision_log ?? []).some((row) => row.event_id === card.eventId);
     if (!receipted) return null;
     const order = military?.event_flags?.[card.flag];
+    return isParamilitaryPolicyOrder(order) ? order : null;
+}
+
+/** The historical default of the faction's policy card (its data), or null when the faction has no card. */
+export function paramilitaryPolicyCardHistoricalDefault(faction: string | null | undefined): ParamilitaryPolicyOrder | null {
+    const order = paramilitaryPolicyCardFor(faction)?.historicalDefault;
     return isParamilitaryPolicyOrder(order) ? order : null;
 }
 

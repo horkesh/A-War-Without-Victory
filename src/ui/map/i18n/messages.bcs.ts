@@ -4060,6 +4060,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'codex.record.pathNotTaken': 'Put kojim se nije krenulo',
     'codex.record.divergenceContext': 'Odstupanje kampanje',
     'codex.record.auditContext': 'Kontekst revizije',
+    'codex.record.campaignRecord': 'Zapis kampanje',
     'codex.essayAvailableSingular': '1 esej dostupan',
     'codex.essayAvailablePlural': '{count} eseja dostupno',
     'codex.ghost': 'Duh',

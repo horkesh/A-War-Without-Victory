@@ -373,6 +373,9 @@ const PER_TARGET_READERS = new Set([
 ]);
 /** Readers of the adapter's view (already filtered in GameStateAdapter), plumbing, and name-only references. */
 const VIEW_OR_PLUMBING = new Set([
+    // §6 item 3: the ghost view's field and an owner-path name; it reads the rows only through
+    // hasInPersonParamilitaryStandingOrder (paramilitary_policy_flag.ts, an own-record reader).
+    'src/sim/codex/dynamic_section_builder.ts',
     'src/ui/map/data/decisionConsequenceLedger.ts',
     'src/sim/presidency/presidential_cadence.ts',
     'src/ui/map/data/types.ts',
