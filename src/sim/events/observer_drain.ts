@@ -18,11 +18,15 @@
 import type { GameState } from '../../state/game_state.js';
 import { isAnswerAheadOfFiringDecision } from './answer_ahead_of_firing.js';
 
-/** The fields of a pending decision row the predicate reads. */
+/**
+ * The fields of a pending decision row the predicate reads. Typed `unknown` so each reader passes its row as it holds
+ * it, with no cast: the drain its typed GameState row, the manifest its raw save record, the renderer its sanitized
+ * view (GameStateAdapter `observer_drainable`). The predicate narrows each field itself, so all three run this code.
+ */
 export interface ObserverDrainRow {
-    event_id: string;
-    historical_default_response_id?: string;
-    response_options?: ReadonlyArray<{ id: string }>;
+    readonly event_id?: unknown;
+    readonly historical_default_response_id?: unknown;
+    readonly response_options?: unknown;
 }
 
 export const OBSERVER_AUTONOMY_LEVEL = 3;
@@ -31,6 +35,11 @@ export function isObserverDrainablePendingDecision(state: GameState, row: Observ
     if ((state.meta?.autonomy_level ?? 0) < OBSERVER_AUTONOMY_LEVEL) return false;
     const defaultId = row.historical_default_response_id;
     if (typeof defaultId !== 'string') return false;
-    if (!(row.response_options ?? []).some((option) => option.id === defaultId)) return false;
+    const options: readonly unknown[] = Array.isArray(row.response_options) ? row.response_options : [];
+    const namesOwnOption = options.some((option) =>
+        typeof option === 'object' && option !== null && 'id' in option && option.id === defaultId);
+    if (!namesOwnOption) return false;
+    // A row without an event id cannot be matched to its firing; it keeps blocking.
+    if (typeof row.event_id !== 'string') return false;
     return !isAnswerAheadOfFiringDecision(state, row.event_id);
 }

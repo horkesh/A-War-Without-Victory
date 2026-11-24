@@ -1,5 +1,5 @@
 import type { GameState } from './game_state.js';
-import { isObserverDrainablePendingDecision, type ObserverDrainRow } from '../sim/events/observer_drain.js';
+import { isObserverDrainablePendingDecision } from '../sim/events/observer_drain.js';
 import { selectManualPlayerFaction } from '../sim/bot/staff_control.js';
 
 export type PlayerDecisionFamilyId =
@@ -293,7 +293,7 @@ function eventDecisionInstances(state: GameStateLike, playerFaction: string | nu
             // hold Advance shut. The drain reads the same predicate, so the two cannot diverge; a card with
             // no authored default, or an opening card answered ahead of its firing, keeps blocking.
             const blocking = item.requires_player_response === true
-                && !isObserverDrainablePendingDecision(state as GameState, item as unknown as ObserverDrainRow);
+                && !isObserverDrainablePendingDecision(state as GameState, item);
             const gatePolicy: PlayerDecisionGatePolicy = blocking ? 'hard_block' : 'advisory';
             return instance(family, id, blocking, stringFrom(item.faction), gatePolicy);
         });
