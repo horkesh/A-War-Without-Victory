@@ -150,7 +150,7 @@ import { resolvePlayerFacingFaction } from '../shared/playerVisibility';
 import type { RecruitmentCatalogBrigade, StartNewCampaignPayload } from './desktop/types';
 import type { LoadedGameState, SummaryFocusSection } from './data/types';
 import type { InboxItem } from './data/inboxItems';
-import { isRequiredPendingEventDecision } from './data/eventDecisionRouting';
+import { isRequiredPendingEventDecision, selectNextPendingEventDecision } from './data/eventDecisionRouting';
 import type { PreAdvanceCommandReviewItem } from './data/preAdvanceCommandReview';
 import type { PresidentialDecisionRoomNavigationTarget } from './data/presidentialDecisionRoom';
 import { shouldShowPeaceWarTransition } from './data/peaceWarTransitionGate';
@@ -306,29 +306,6 @@ export function buildAcknowledgementEventEffects(
   ];
 }
 
-function comparePendingEventDecisionPriority(a: PendingEventDecisionView, b: PendingEventDecisionView): number {
-  const aRequired = a.requires_player_response === true ? 0 : 1;
-  const bRequired = b.requires_player_response === true ? 0 : 1;
-  if (aRequired !== bRequired) return aRequired - bRequired;
-  if (a.turn_fired !== b.turn_fired) return a.turn_fired - b.turn_fired;
-  if (a.event_id < b.event_id) return -1;
-  if (a.event_id > b.event_id) return 1;
-  return 0;
-}
-
-function selectNextPendingEventDecision(
-  decisions: LoadedGameState['pendingEventDecisions'],
-  playerFaction: string | null,
-  excludedEventId: string | null = null,
-): PendingEventDecisionView | null {
-  if (!playerFaction) return null;
-  const playerDecisions = (decisions ?? [])
-    .filter((decision) => decision.faction === playerFaction)
-    .filter(isRequiredPendingEventDecision)
-    .filter((decision) => decision.event_id !== excludedEventId)
-    .sort(comparePendingEventDecisionPriority);
-  return playerDecisions[0] ?? null;
-}
 
 /**
  * Phase 2 slice 1 "Back the Officer": resolve the named advisor whose voice

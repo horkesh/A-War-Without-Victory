@@ -1705,6 +1705,12 @@ export interface LoadedGameState {
         turn_fired: number;
         faction: string;
         requires_player_response?: boolean;
+        /**
+         * §6 mechanics item 6: true when the Observer drain answers this card at the next evaluate-events
+         * (`isObserverDrainablePendingDecision`, the predicate the manifest's Advance gate also reads). Such a
+         * card does not block, auto-open or lock the toolbar; see `isRequiredPendingEventDecision`.
+         */
+        observer_drainable?: boolean;
         historical_default_response_id?: string;
         staff_recommended_response_id?: string;
         response_options: Array<{

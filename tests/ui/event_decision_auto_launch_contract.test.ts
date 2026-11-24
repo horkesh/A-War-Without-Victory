@@ -10,6 +10,10 @@ function readApp(): string {
   return readFileSync(join(__dirname, '../../src/ui/map/App.tsx'), 'utf8');
 }
 
+function readEventDecisionRouting(): string {
+  return readFileSync(join(__dirname, '../../src/ui/map/data/eventDecisionRouting.ts'), 'utf8');
+}
+
 function readPresidentialAttentionPanel(): string {
   return readFileSync(join(__dirname, '../../src/ui/map/components/army_hq/PresidentialAttentionPanel.tsx'), 'utf8');
 }
@@ -123,20 +127,23 @@ describe('event decision modal auto-launch contract', () => {
 
   it('orders multiple pending decisions by required/blocking status, turn, then event id without a once-per-turn gate', () => {
     const app = readApp();
+    // The selector and its order live in eventDecisionRouting.ts (moved out of App so the renderer gate is
+    // testable; §6 item 6). App imports and calls it.
+    const routing = readEventDecisionRouting();
 
-    expect(app).toContain('function comparePendingEventDecisionPriority');
-    expect(app).toContain('requires_player_response');
-    expect(app).toContain('a.turn_fired - b.turn_fired');
-    expect(app).toContain('a.event_id < b.event_id');
+    expect(app).toContain("import { isRequiredPendingEventDecision, selectNextPendingEventDecision } from './data/eventDecisionRouting';");
+    expect(routing).toContain('function comparePendingEventDecisionPriority');
+    expect(routing).toContain('requires_player_response');
+    expect(routing).toContain('const aRequired = isRequiredPendingEventDecision(a) ? 0 : 1;');
+    expect(routing).toContain('a.turn_fired - b.turn_fired');
+    expect(routing).toContain('a.event_id < b.event_id');
     expect(app).not.toContain('lastAutoLaunchTurn');
+    expect(routing).not.toContain('lastAutoLaunchTurn');
   });
 
   it('auto-launch selector ignores advisory event decisions', () => {
-    const app = readApp();
-    const selectorBlock = app.slice(
-      app.indexOf('function selectNextPendingEventDecision'),
-      app.indexOf('/**', app.indexOf('function selectNextPendingEventDecision')),
-    );
+    const routing = readEventDecisionRouting();
+    const selectorBlock = routing.slice(routing.indexOf('function selectNextPendingEventDecision'));
 
     expect(selectorBlock).toContain('isRequiredPendingEventDecision');
     expect(selectorBlock).toContain('.filter(isRequiredPendingEventDecision)');

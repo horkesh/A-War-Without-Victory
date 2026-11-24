@@ -290,22 +290,27 @@ describe('§6 D1 stage 2: the standing policy binds every non-manual paramilitar
         expect(attackerOutcome(fromHrhb, 'RBiH')).toEqual([0, 0]);
     });
 
-    it('pending requests carried across an autonomy switch never spawn without a decision', () => {
-        const state = pocketState('RBiH', metaFor('RBiH', 0));
-        applyOrder(state, 'RBiH', 0, 'ask');
-        expect(attackerOutcome(state, 'RBiH')).toEqual([0, 1]);
-        state.meta.autonomy_level = 2;
-        for (const order of ['ask', 'always_deny', 'always_allow'] as const) {
+    // §6 mechanics item 4 (ruled 6/6, 2026-11-23) replaced the earlier pin here ("the carried request stays, and no new
+    // sweep takes its cell"): a carried request of a side that is no longer manual is DELETED without a decision and
+    // without history, and the staff then follow the order in force. The invariant kept: a carried request is never
+    // approved, and no paramilitary decision is written for the player (tests/s6_observer_block_items_4567.test.ts).
+    it.each(['ask', 'always_deny', 'always_allow'] as const)(
+        'pending requests carried across an autonomy switch are never approved; deleted without history, the staff follow %s',
+        (order) => {
+            const state = pocketState('RBiH', metaFor('RBiH', 0));
+            applyOrder(state, 'RBiH', 0, 'ask');
+            expect(attackerOutcome(state, 'RBiH')).toEqual([0, 1]);
+            state.meta.autonomy_level = 2;
             if (order === 'always_allow') applyOrder(state, 'RBiH', 2, 'always_allow');
             else state.paramilitary_policy = order;
-            const before = JSON.stringify(state.pending_paramilitary_requests);
-            const [spawns] = attackerOutcome(state, 'RBiH');
-            // The carried request names the only pocket: it is never auto-approved, and no new sweep takes its cell.
-            expect(spawns, order).toBe(0);
-            expect(JSON.stringify(state.pending_paramilitary_requests), order).toBe(before);
-            expect(state.pending_paramilitary_requests?.[0]?.decision, order).toBeUndefined();
-        }
-    });
+            const historyBefore = JSON.stringify(state.paramilitary_decision_history ?? []);
+            const [spawns, pending] = attackerOutcome(state, 'RBiH');
+            expect(pending).toBe(0);
+            expect(JSON.stringify(state.paramilitary_decision_history ?? [])).toBe(historyBefore);
+            // Only the player's own Always allow lets the staff sweep the pocket; ask and Always deny send nothing.
+            expect(spawns).toBe(order === 'always_allow' ? 1 : 0);
+        },
+    );
 
     it('Observer: a modal Always deny stays binding, and an HRHB human with no decision on record follows the historical default', () => {
         const rs = pocketState('RS', metaFor('RS', 0));

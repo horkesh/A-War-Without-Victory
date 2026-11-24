@@ -1,0 +1,45 @@
+/**
+ * THE one predicate for "the Observer drain will answer this pending card" (§6 mechanics batch item 6, ruled 6/6,
+ * 2026-11-23). Two readers, so they cannot diverge:
+ * - the drain in `evaluateEvents` (evaluate_events.ts, OBSERVER SWEEP) answers exactly these rows;
+ * - the player-decision manifest (player_decision_manifest.ts) stops hard-blocking Advance for exactly these rows.
+ *
+ * A row qualifies at Observer (autonomy 3) when its authored historical default names one of its own options and it is
+ * not an opening card answered ahead of its firing (that one keeps blocking and resolves at fire time). A card with no
+ * authored default keeps blocking: the drain leaves it on the desk, and only the player may answer it.
+ *
+ * The row is read, not the catalog definition: the manifest cannot see the catalog. Rows copy `response_options` and
+ * `historical_default_response_id` from the definition when they are queued. The drain also requires the definition to
+ * carry the default; if a later catalog dropped it, the card is advisory and waits for the player's answer.
+ *
+ * Pure: types only, plus the answer-ahead predicate (itself import-free), so the state layer and the UI bundle can use it.
+ */
+
+import type { GameState } from '../../state/game_state.js';
+import { isAnswerAheadOfFiringDecision } from './answer_ahead_of_firing.js';
+
+/**
+ * The fields of a pending decision row the predicate reads. Typed `unknown` so each reader passes its row as it holds
+ * it, with no cast: the drain its typed GameState row, the manifest its raw save record, the renderer its sanitized
+ * view (GameStateAdapter `observer_drainable`). The predicate narrows each field itself, so all three run this code.
+ */
+export interface ObserverDrainRow {
+    readonly event_id?: unknown;
+    readonly historical_default_response_id?: unknown;
+    readonly response_options?: unknown;
+}
+
+export const OBSERVER_AUTONOMY_LEVEL = 3;
+
+export function isObserverDrainablePendingDecision(state: GameState, row: ObserverDrainRow): boolean {
+    if ((state.meta?.autonomy_level ?? 0) < OBSERVER_AUTONOMY_LEVEL) return false;
+    const defaultId = row.historical_default_response_id;
+    if (typeof defaultId !== 'string') return false;
+    const options: readonly unknown[] = Array.isArray(row.response_options) ? row.response_options : [];
+    const namesOwnOption = options.some((option) =>
+        typeof option === 'object' && option !== null && 'id' in option && option.id === defaultId);
+    if (!namesOwnOption) return false;
+    // A row without an event id cannot be matched to its firing; it keeps blocking.
+    if (typeof row.event_id !== 'string') return false;
+    return !isAnswerAheadOfFiringDecision(state, row.event_id);
+}

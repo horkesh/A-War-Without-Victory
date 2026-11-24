@@ -75,6 +75,7 @@ import historicalBaseline from '../../../../data/reference/historical_baseline.j
 import { computeCorpsCommandStrainBreakdown, getCommandStrainLabel, projectStrainDecay, deriveRecoveryForecast, deriveRecoveryForecastToken, deriveCorpsSituationAssessment, deriveReadinessTrend } from './command_strain.js';
 import type { GameState } from '../../../state/game_state.js';
 import { summarizePlayerDecisions } from '../../../state/player_decision_manifest.js';
+import { isObserverDrainablePendingDecision } from '../../../sim/events/observer_drain.js';
 import { toCommandBriefingView } from '../../shared/command_briefing_views.js';
 import { getOperationalSitrepView } from '../../shared/operational_sitrep_views.js';
 import { deriveOperationOpportunityRecords, deriveOperationOpportunitySummary } from './operationOpportunityLedger.js';
@@ -3977,7 +3978,11 @@ function derivePendingEventDecisions(state: any, playerFaction: string | null): 
             typeof decision.faction === 'string' ? decision.faction : undefined,
             playerFaction,
         ))
-        .map(sanitizePendingEventDecision);
+        // §6 mechanics item 6: the raw save row goes through the SAME predicate the manifest's Advance gate and
+        // the Observer drain read, so the renderer cannot block, auto-open or lock on a card the drain answers.
+        .map((decision) => isObserverDrainablePendingDecision(state, decision)
+            ? { ...sanitizePendingEventDecision(decision), observer_drainable: true }
+            : sanitizePendingEventDecision(decision));
     return scoped.length > 0 ? scoped : undefined;
 }
 

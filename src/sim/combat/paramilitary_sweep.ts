@@ -132,6 +132,32 @@ function removePrematurePlayerParamilitaryRequests(state: GameState, playerFacti
         .filter((request) => request.faction !== playerFaction);
 }
 
+/**
+ * §6 mechanics item 4 (ruled 6/6, 2026-11-23): when the player's side is no longer manual (autonomy >= 1, its staff
+ * in control), its UNDECIDED paramilitary requests are deleted WITHOUT writing history, as the premature-request
+ * removal above does. A deleted request was never answered, so it is no decision of the player's: it must not reach
+ * `resolvePlayerParamilitaryDecisions`, `paramilitary_decision_history`, or any receipt. The staff default then acts on
+ * those targets at the next detect. Decided requests (allow / deny / regular) are kept for their resolver.
+ *
+ * Callers: `apply-autonomy-transition` (the advance that raises the level) and `detectParamilitaryTargets` (saves
+ * already at levels 1-3). No-op without a player faction, for a manual player, and when the field is absent (never
+ * created), so headless stays byte-identical.
+ */
+export function removeNonManualPlayerParamilitaryRequests(state: GameState): void {
+    const playerFaction = state.meta?.player_faction ?? null;
+    if (playerFaction == null || selectManualPlayerFaction(state) === playerFaction) return;
+    if (!Array.isArray(state.pending_paramilitary_requests)) return;
+    const kept = state.pending_paramilitary_requests.filter((request) => (
+        request.faction !== playerFaction
+        || request.decision === 'allow'
+        || request.decision === 'deny'
+        || request.decision === 'regular'
+    ));
+    if (kept.length !== state.pending_paramilitary_requests.length) {
+        state.pending_paramilitary_requests = kept;
+    }
+}
+
 export function classifyParamilitaryDeploymentBand(deploymentCount: number): ParamilitarySeverityBand {
     if (deploymentCount >= 10) return 'severe';
     if (deploymentCount >= 4) return 'mid';
@@ -467,6 +493,9 @@ export function detectParamilitaryTargets(
     } else {
         resolveStandingPolicyPendingParamilitaryRequests(state, playerFaction);
     }
+    // §6 mechanics item 4: a save already at levels 1-3 may still hold the player's undecided requests from
+    // Full Control. Delete them before the targets are built, so the staff default can take those targets.
+    removeNonManualPlayerParamilitaryRequests(state);
     if (turn > PARAMILITARY_FADE_WEEK) return report;
 
     const adjacency = buildOsidAdjacency(edges);

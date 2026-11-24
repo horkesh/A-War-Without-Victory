@@ -1,4 +1,6 @@
 import type { GameState } from './game_state.js';
+import { isObserverDrainablePendingDecision } from '../sim/events/observer_drain.js';
+import { selectManualPlayerFaction } from '../sim/bot/staff_control.js';
 
 export type PlayerDecisionFamilyId =
     | 'event_decision'
@@ -287,7 +289,11 @@ function eventDecisionInstances(state: GameStateLike, playerFaction: string | nu
         .filter((item) => matchesPlayerFaction(item, playerFaction))
         .map((item, index) => {
             const id = stringFrom(item.event_id) ?? `event:${index}`;
-            const blocking = item.requires_player_response === true;
+            // §6 mechanics item 6: at Observer a card the drain answers at the next evaluate-events does not
+            // hold Advance shut. The drain reads the same predicate, so the two cannot diverge; a card with
+            // no authored default, or an opening card answered ahead of its firing, keeps blocking.
+            const blocking = item.requires_player_response === true
+                && !isObserverDrainablePendingDecision(state as GameState, item);
             const gatePolicy: PlayerDecisionGatePolicy = blocking ? 'hard_block' : 'advisory';
             return instance(family, id, blocking, stringFrom(item.faction), gatePolicy);
         });
@@ -312,12 +318,18 @@ function singletonInstance(
 
 function paramilitaryRequestInstances(state: GameStateLike, playerFaction: string | null): PlayerDecisionInstance[] {
     const family = requiredFamily('paramilitary_request');
+    // §6 mechanics item 4: a request blocks Advance only while its faction is manual (autonomy 0), the same
+    // predicate detect files requests under. A staff-controlled side's leftover request is deleted, without
+    // history, at the transition or the next detect (paramilitary_sweep.ts); until then it is advisory.
+    const manualFaction = selectManualPlayerFaction(state as GameState);
     return arrayFrom(state.pending_paramilitary_requests)
         .filter((item) => matchesPlayerFaction(item, playerFaction))
         .filter((item) => item.decision !== 'allow' && item.decision !== 'deny' && item.decision !== 'regular')
         .map((item, index) => {
             const target = stringFrom(item.target_osid) ?? `request:${index}`;
-            return instance(family, target, true, stringFrom(item.faction));
+            const faction = stringFrom(item.faction);
+            const blocking = manualFaction != null && faction === manualFaction;
+            return instance(family, target, blocking, faction, blocking ? family.gatePolicy : 'advisory');
         });
 }
 
