@@ -21,6 +21,9 @@ function loadOldSave() {
     return deserializeState(readFileSync(SNAPSHOT, 'utf8'));
 }
 
+// The field name appears in serialized save JSON or validator output, never in source text.
+const mentionsHoldField = (text: string): boolean => text.includes('player_held_brigade_ids');
+
 describe('recruitment hold in a save', () => {
     test('an old save without the field loads and re-serializes byte-identically, with no empty list', () => {
         const state = loadOldSave();
@@ -31,7 +34,7 @@ describe('recruitment hold in a save', () => {
         state.meta.autonomy_level = 1;
         expect(selectPlayerHeldBrigadeIds(state)).toBeUndefined();
         const json = serializeState(state);
-        expect(json).not.toContain('player_held_brigade_ids');
+        expect(mentionsHoldField(json)).toBe(false);
         // Nothing but the two meta fields changed.
         const reloaded = deserializeState(before);
         expect(serializeState(reloaded)).toBe(before);
@@ -57,7 +60,8 @@ describe('recruitment hold in a save', () => {
 
         setPlayerRecruitmentHold(round, first, false);
         setPlayerRecruitmentHold(round, second, false);
-        expect(serializeState(round)).not.toContain('player_held_brigade_ids');
+        expect(mentionsHoldField(serializeState(round))).toBe(false);
+        expect(round.military.recruitment_state!.player_held_brigade_ids).toBeUndefined();
     });
 
     test('the validator rejects an unsorted or duplicated hold list', () => {
@@ -71,6 +75,6 @@ describe('recruitment hold in a save', () => {
         resources.player_held_brigade_ids = ['a', 'a'];
         expect(JSON.stringify(validateGameStateShape(target))).toContain('player_held_brigade_ids');
         resources.player_held_brigade_ids = ['a', 'b'];
-        expect(JSON.stringify(validateGameStateShape(target))).not.toContain('player_held_brigade_ids');
+        expect(mentionsHoldField(JSON.stringify(validateGameStateShape(target)))).toBe(false);
     });
 });
