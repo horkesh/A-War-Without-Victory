@@ -85,6 +85,20 @@ const livnoOf = (state: GameState) => state.displacement.displacement_state!.liv
 const passThroughRows = (report: any) =>
     (report.routing ?? []).filter((r: any) => r.reason === 'capture_pass_through');
 
+test('Ledger line 1: the write-only counter equals the capture_pass_through rows, by people', () => {
+    const { state, report } = captureLivno(40, 25);
+    const rows = passThroughRows(report);
+    expect(rows.length).toBeGreaterThan(0);
+    const expected: Record<string, number> = {};
+    for (const r of rows) expected[r.group] = (expected[r.group] ?? 0) + r.amount;
+    expect(state.displacement.moved_on_at_capture_by_people).toEqual(expected);
+});
+
+test('Ledger line 1: absent until a capture moves sheltered people on', () => {
+    const state = baseState(30);
+    expect(state.displacement.moved_on_at_capture_by_people).toBeUndefined();
+});
+
 test('the captor\'s own sheltered people stay at a capture (Croats sheltering in a town the HVO retakes)', () => {
     const { state, report } = captureLivno(30, null);
     expect(livnoOf(state).displaced_in_by_faction.HRHB).toBe(500);

@@ -146,9 +146,20 @@ export function HumanitarianLedgerPanel({ state, open, onClose }: HumanitarianLe
   const overTime = nd?.refugeesByTurn ?? [];
   const maxWeek = useMemo(() => overTime.reduce((m, p) => Math.max(m, p.refugeesCreated), 0), [overTime]);
 
+  // Ledger lines 1-2 (s6_ledger12_ruling.md): line 1 is cumulative, by people; line 2 is the
+  // player's own side THIS WEEK only, never summed, trended or colour-thresholded.
+  const movedOn = useMemo(() => {
+    const rows = Object.entries(nd?.movedOnAtCaptureByPeople ?? {})
+      .map(([faction, movedOnAgain]) => ({ faction, movedOnAgain }))
+      .sort((a, b) => strictCompare(a.faction, b.faction));
+    return { rows, total: rows.reduce((sum, r) => sum + r.movedOnAgain, 0) };
+  }, [nd?.movedOnAtCaptureByPeople]);
+  const unableThisWeek = nd?.unableToLeaveThisWeek;
+
   if (!open) return null;
 
-  const hasAny = byPeople.rows.length > 0 || bySide.length > 0 || overTime.length > 0;
+  const hasAny = byPeople.rows.length > 0 || bySide.length > 0 || overTime.length > 0
+    || movedOn.rows.length > 0 || unableThisWeek !== undefined;
 
   return (
     <SurfaceModalLayer>
@@ -201,6 +212,44 @@ export function HumanitarianLedgerPanel({ state, open, onClose }: HumanitarianLe
                             </tr>
                           </tbody>
                         </table>
+                      </SurfacePanel>
+                    </SurfaceSection>
+                  )}
+
+                  {/* Ledger lines 1-2: forced to move again (cumulative, by people); unable to leave (own side, this week) */}
+                  {(movedOn.rows.length > 0 || unableThisWeek !== undefined) && (
+                    <SurfaceSection label={t('humanitarianLedger.section.movedOnAtCapture')}>
+                      <SurfacePanel>
+                        <div data-testid="humanitarian-ledger-moved-on">
+                          {movedOn.rows.length > 0 && (
+                            <table className="w-full border-collapse">
+                              <thead>
+                                <tr className="border-b border-[#262b35]">
+                                  <th className={`${TH} text-left`}>{t('humanitarianLedger.col.people')}</th>
+                                  <th className={`${TH} text-right`}>{t('humanitarianLedger.col.movedOnAtCapture')}</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {movedOn.rows.map((r) => (
+                                  <tr key={r.faction} className="border-b border-[#262b35]/60">
+                                    <td className={`${TD} text-left text-[#f1e6c8]`}>{peopleLabel(r.faction)}</td>
+                                    <td className={`${TD} ${NUM} text-right text-amber-300`}>{fmt(r.movedOnAgain)}</td>
+                                  </tr>
+                                ))}
+                                <tr className="border-t border-[#3a4150]">
+                                  <td className={`${TD} text-left text-[#b9ad94]`}>{t('humanitarianLedger.label.total')}</td>
+                                  <td className={`${TD} ${NUM} text-right text-amber-300`}>{fmt(movedOn.total)}</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          )}
+                          {unableThisWeek !== undefined && (
+                            <p data-testid="humanitarian-ledger-unable-to-leave" className="m-0 mt-3 text-[16px] text-[#f1e6c8]">
+                              {t('humanitarianLedger.label.unableToLeaveThisWeek', { count: fmt(unableThisWeek) })}
+                            </p>
+                          )}
+                          <p className="m-0 mt-3 text-[14px] italic leading-relaxed text-[#b9ad94]">{t('humanitarianLedger.note.movedOnAtCapture')}</p>
+                        </div>
                       </SurfacePanel>
                     </SurfaceSection>
                   )}

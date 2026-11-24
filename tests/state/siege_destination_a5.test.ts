@@ -135,3 +135,32 @@ describe('A5: siege leavers go only to a supplied settlement in the main body', 
         expect(JSON.stringify(w.state)).not.toContain('trapped');
     });
 });
+
+describe('Ledger line 2 (s6_ledger12_ruling.md): the write-only "unable to leave" stock', () => {
+    it('stores this week\'s trapped amount per side with the turn stamp, and only amounts of 1 or more', async () => {
+        const w = world({ homeSupplied: false, enclaveSupplied: true });
+        const report = await runWarStep(w);
+        const rows = (report.displacement?.trapped ?? []) as Array<{ mun_id: string; faction_id: string; trapped: number }>;
+        expect(rows.some((r) => r.trapped >= 1)).toBe(true);
+        for (const r of rows) {
+            const stored = (ds(w) as any)[r.mun_id]?.unable_to_leave_by_side?.[r.faction_id];
+            if (r.trapped >= 1) expect(stored).toEqual({ amount: r.trapped, turn: w.state.meta.turn });
+            else expect(stored).toBeUndefined();
+        }
+    });
+
+    it('is cleared from every municipality at the start of the step, including on the no-pools early return', async () => {
+        const w = world({ homeSupplied: true, enclaveSupplied: true });
+        (ds(w) as any).home.unable_to_leave_by_side = { RBiH: { amount: 77, turn: w.state.meta.turn - 1 } };
+        const report = await runWarStep(w);
+        const rows = (report.displacement?.trapped ?? []) as Array<{ trapped: number }>;
+        expect(rows.every((r) => r.trapped === 0)).toBe(true);
+        for (const row of Object.values(ds(w) as Record<string, any>)) expect(row.unable_to_leave_by_side).toBeUndefined();
+
+        const w2 = world({ homeSupplied: false, enclaveSupplied: true });
+        (ds(w2) as any).home.unable_to_leave_by_side = { RBiH: { amount: 5, turn: 1 } };
+        delete (w2.state.military as any).militia_pools;
+        await runWarStep(w2);
+        expect((ds(w2) as any).home.unable_to_leave_by_side).toBeUndefined();
+    });
+});

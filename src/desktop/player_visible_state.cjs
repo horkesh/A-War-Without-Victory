@@ -819,6 +819,23 @@ function projectSustainabilityState(sustainability, controllers, playerFaction) 
   );
 }
 
+/**
+ * Ledger line 2 (A5; s6_ledger12_ruling.md, red-team): `unable_to_leave_by_side` tells which
+ * pockets ran out of supplied, connected destinations, so only the player's own side is kept.
+ * With no player faction every entry is dropped. Works on the already-cloned projection; empty
+ * containers are removed.
+ */
+function stripUnableToLeaveToPlayer(displacementState, playerFaction) {
+  if (!isRecord(displacementState)) return;
+  for (const munId of Object.keys(displacementState).sort()) {
+    const row = displacementState[munId];
+    if (!isRecord(row) || !isRecord(row.unable_to_leave_by_side)) continue;
+    const own = playerFaction ? row.unable_to_leave_by_side[playerFaction] : undefined;
+    if (isRecord(own)) row.unable_to_leave_by_side = { [playerFaction]: own };
+    else delete row.unable_to_leave_by_side;
+  }
+}
+
 function projectDisplacement(displacement, controllers, playerFaction) {
   const projected = copyKeys(displacement, [
     'civilian_casualties',
@@ -827,7 +844,9 @@ function projectDisplacement(displacement, controllers, playerFaction) {
     'displacement_humanitarian_aggregates',
     'displacement_recent_by_turn',
     'displacement_state',
+    'moved_on_at_capture_by_people',
   ]);
+  stripUnableToLeaveToPlayer(projected.displacement_state, playerFaction);
   projected.sustainability_state = projectSustainabilityState(
     isRecord(displacement) ? displacement.sustainability_state : undefined,
     controllers,
