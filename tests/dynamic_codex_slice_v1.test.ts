@@ -99,6 +99,14 @@ function playerDecision(
     return { event_id, response_id, decision_source: 'player', faction, turn };
 }
 
+/** §6 item 3: the side's own in-person Always deny on record (a Full Control standing order row). */
+function withOwnDeny(state: GameState, faction: FactionId = 'RBiH' as FactionId): GameState {
+    (state as { paramilitary_decision_history?: unknown }).paramilitary_decision_history = [
+        { kind: 'standing_order', id: `paramilitary_order:10:${faction}`, turn: 10, faction, order: 'always_deny' },
+    ];
+    return state;
+}
+
 /** `authored`: recordWarCrime's in-play counter, which the clean-hands ghosts read (§6 E3b). */
 function makeBreakdown(warCrimes: number, authored = 0) {
     return {
@@ -219,22 +227,29 @@ describe('LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE — T3: ghost-entry conditionality
         expect(buildGhostEntries(crimesPositive, 120).find((g) => g.ghost_id === 'cleansing_refused')).toBeUndefined();
 
         // §6 E3b: a scripted historical record (shared counter only) is not the side's own conduct.
-        const scriptedOnly = makeState({
+        const scriptedOnly = withOwnDeny(makeState({
             paramilitary_policy: 'always_deny',
             negotiation_capital: { RBiH: makeBreakdown(2) },
-        });
+        }));
         expect(buildGhostEntries(scriptedOnly, 120).find((g) => g.ghost_id === 'cleansing_refused')).toBeDefined();
 
-        const tooEarly = makeState({
+        const tooEarly = withOwnDeny(makeState({
             paramilitary_policy: 'always_deny',
             negotiation_capital: { RBiH: makeBreakdown(0) },
-        });
+        }));
         expect(buildGhostEntries(tooEarly, 99).find((g) => g.ghost_id === 'cleansing_refused')).toBeUndefined();
 
-        const passes = makeState({
+        // §6 item 3: without the side's own deny on record the order is not the player's refusal.
+        const notOwn = makeState({
             paramilitary_policy: 'always_deny',
             negotiation_capital: { RBiH: makeBreakdown(0) },
         });
+        expect(buildGhostEntries(notOwn, 120).find((g) => g.ghost_id === 'cleansing_refused')).toBeUndefined();
+
+        const passes = withOwnDeny(makeState({
+            paramilitary_policy: 'always_deny',
+            negotiation_capital: { RBiH: makeBreakdown(0) },
+        }));
         expect(buildGhostEntries(passes, 120).find((g) => g.ghost_id === 'cleansing_refused')).toBeDefined();
     });
 
@@ -625,7 +640,8 @@ describe('R4 Phase 4 - dynamic claims name their truth owner', () => {
     it('derives every ghost predicate from exact mutable owner operands', () => {
         const expectedClassifications = new Map<string, BuiltGhostEntry['classification']>([
             ['alliance_held', 'path_not_taken'],
-            ['cleansing_refused', 'divergence_context'],
+            // §6 item 3 §4 panel: RBiH's card default is Always deny, so the refusal is a campaign record.
+            ['cleansing_refused', 'campaign_record'],
             ['enclave_defended', 'audit_context'],
             ['patron_resisted', 'divergence_context'],
             ['early_peace_accepted', 'path_not_taken'],
@@ -649,10 +665,10 @@ describe('R4 Phase 4 - dynamic claims name their truth owner', () => {
             { ghostId: 'alliance_held', state: makeState({ event_flags: { federation_never_fractured: true } }), turn: 70 },
             {
                 ghostId: 'cleansing_refused',
-                state: makeState({
+                state: withOwnDeny(makeState({
                     paramilitary_policy: 'always_deny',
                     negotiation_capital: { RBiH: makeBreakdown(0) },
-                }),
+                })),
                 turn: 100,
             },
             { ghostId: 'enclave_defended', state: makeState({ event_flags: { enclave_held_through_turn: true } }), turn: 80 },

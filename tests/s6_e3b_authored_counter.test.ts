@@ -189,6 +189,10 @@ describe('Codex clean-hands ghosts read the authored count', () => {
     function codexState(faction: string, capital: Partial<NegotiationBreakdown>, fires: Record<string, number> = {}): GameState {
         return {
             paramilitary_policy: 'always_deny',
+            // §6 item 3: the deny is the side's own (an in-person standing order on record).
+            paramilitary_decision_history: [
+                { kind: 'standing_order', id: `paramilitary_order:10:${faction}`, turn: 10, faction, order: 'always_deny' },
+            ],
             meta: { turn: 120, phase: 'war', player_faction: faction },
             military: {
                 event_flags: { rear_pocket_discipline_held_through_turn: true },
