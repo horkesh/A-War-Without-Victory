@@ -521,6 +521,13 @@ In practice, this means the player can:
 
 These tools expand agency without overriding command friction, logistics, exhaustion, or international consequences.
 
+### 16.4 Sensitive decisions left to the staff
+
+(Amended 2026-11-25, player-override model; Sensitive History Design Gate §3 and §6.) The two sensitive standing decisions follow the same rule as every other decision: if the player gives no order, the staff apply the side's historical default, on the turn and in the way the side would without a president, at every autonomy level. The player's explicit act overrides it and stands until they change it.
+- **Paramilitary deployment (RBiH, RS, HRHB).** With no order of the player's, the side's forces send the rear-area sweeps its historical default sends (the RS default sends them, the RBiH default refuses them). An opening policy card left unanswered is answered by the staff as the historical default when it fires. A refusal the player gives (Always deny, or a request refused) binds at every level and is never lifted by the staff. At Full Control the player can also choose Review each deployment and decide each request; a request left undecided when the turn is advanced is resolved by the staff under the standing default, and recorded as such.
+- **The HRHB halt card.** Its staff apply the side's historical default unless the player orders the halt when the card comes, the week after the war with the ARBiH begins and before the first wave. Left unanswered, the staff answer it with the default. A halt, once ordered, holds for the rest of the war.
+Every act carried out under the standing default counts against the player's side exactly as one the player ordered; the record names the side's forces, says the staff proceeded under the standing default, and says that the refusal was available.
+
 ## 17. Player's Turn Guide
 
 A phase-by-phase summary of player actions each turn. For system details, see the relevant sections above. *Implementation-note: This section satisfies pipeline backlog item 1.2 (Player's Turn Guide); confirmed 2026-02-24.*

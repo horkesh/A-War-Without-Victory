@@ -1,0 +1,13 @@
+## 2026-11-25 — Player-override model PR-C, the §6 group: silence is the bot's choice for the paramilitary policy (H-21, H-14) and the HRHB halt card (H-20); the bright-line penalty stays on the seat with a staff-default attribution (H-17)
+
+Owner: "There should be no drift between live and headless games." Givens: 2026-11-22 (staff keep the historical default, the player can refuse) and 2026-11-23 #854 ("You are just doing it as bot playing the live game. Humans will have choice when playing."; "THIS goes for any similar items"). §6 HOW panel (lane C s8, four seats, unanimous with guards G1-G5) for H-14, H-21, H-17; RB5 (9/9) as the broader panel of record and the orchestrator's settlement (2026-11-25) for H-20. Record: SENSITIVE_HISTORY_DESIGN_GATE.md §6, "Player-override model, the §6 group".
+
+**Change.**
+- `src/sim/combat/paramilitary_policy.ts`: `newestOwnParamilitaryAct` and `explicitParamilitaryOrder` read the player's explicit order from persisted records (G1: a refusal is durable and never clamped into `ask`); `resolveNonManualParamilitaryPolicy` (levels 1-3) and the new `resolveManualParamilitaryOrder` (Full Control) fall back to `botParamilitaryPolicy` through `staffChoiceUnlessExplicit` (`src/sim/player_override.ts`). `followsNoCardHistoricalDefault` is folded in and removed.
+- `src/sim/combat/paramilitary_sweep.ts`: the Full Control side sends the bot's sweeps on silence in the same candidate loop; requests only under a Review each the player chose; the request gate (§6 T3) still deletes and refuses requests and the held side follows the bot's order; a request undecided at the next Advance resolves as the bot's order with a "staff proceeded" receipt and no player history.
+- `src/sim/events/silence_resolution.ts`: the §6 cards join the silence rule (paramilitary card: the in-person order first, F1-B; halt card: its authored default, never the halt).
+- `src/state/displacement_takeover.ts`: `hasMinorityExpulsionPolicy` reads `!== 'refused'`; a halt on record retires unmatured policy waves; a filed, unapplied halt is not a decision.
+- UI read model: `authored_by: 'staff_default'` on unrequested-sweep and halt-card receipts with an attribution line (draft copy, flagged for the §4 copy pass); the unrequested-sweep cause names the historical default for an RS sweep before its card applied.
+- Canon: SHDG §1, §2a(i), §3, §6 record; Engine Invariants §14.10b and new §14.10e; Rulebook §16.4; Systems Manual policy seed; DISPLACEMENT_MASTER §3.4. FORAWWV unchanged. No GameState field added.
+
+**Measured.** Unit and engine-fixture proof in `tests/sim/player_override_s6.test.ts`; live parity and the 188w headless pair are run by the orchestrator (see the PR body).
