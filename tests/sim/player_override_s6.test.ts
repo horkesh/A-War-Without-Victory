@@ -445,15 +445,15 @@ describe('H-20: the HRHB expulsion policy, silence = the default, the halt outra
             expect(Object.keys(policyTimers(live)).length).toBeGreaterThan(0);
             expect(live.military.event_flags[minorityPolicyAppliedFlag('HRHB')]).toBe(bot.military.event_flags[minorityPolicyAppliedFlag('HRHB')]);
             expect((live.military.negotiation as any).capital.HRHB.war_crimes_events).toBe((bot.military.negotiation as any).capital.HRHB.war_crimes_events);
-            // The halt card fires the turn after the war began, before the seed, and (below Observer) waits at the pause:
-            // the refusal is reachable before the first wave at every level.
+            // The halt card fires the turn after the war began, before the seed, and waits at the pause at every level,
+            // Observer included (H-20, orchestrator call 1): the refusal is reachable before the first wave at every level.
             const fired = live.military.event_last_fired_turn?.[HALT_CARD_ID];
             expect(fired).toBe(WAR_STARTED + 1);
             const wave = firstWaveTurn(live);
             expect(wave).not.toBeNull();
             expect(fired!).toBeLessThan(wave!);
             expect(cardRows(live, HALT_CARD_ID).map((row) => row.turn)).toEqual([WAR_STARTED + 1]);
-            expect(pendingAtPause).toEqual(level < 3 ? [HALT_CARD_ID] : []);
+            expect(pendingAtPause).toEqual([HALT_CARD_ID]);
             expect(cardRows(live, HALT_CARD_ID).map((row) => [row.response_id, row.decision_source])).toEqual([[MINORITY_POLICY_DEFAULT_RESPONSE_ID, 'bot_ai_default']]);
             expect(live.military.event_flags[HALT_FLAG]).toBeUndefined();
         });
@@ -468,7 +468,7 @@ describe('H-20: the HRHB expulsion policy, silence = the default, the halt outra
         });
     }
 
-    for (const level of [0, 1, 2] as const) {
+    for (const level of [0, 1, 2, 3] as const) {
         it(`a${level}: a halt ordered at the pause outranks silence and persists across turns, a level change and save/load`, () => {
             let state = warState(hrhb(level));
             runTurns(state, WAR_STARTED + 1, WAR_STARTED + 1, (s, turn) => {

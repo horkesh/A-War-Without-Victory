@@ -2,7 +2,8 @@
  * Event decisions resolved by silence (player-override model, owner 2026-11-25; Engine Invariants
  * §14.10a; lane C s8 ruling Q7b, H-16; the §6 cards by the §6 HOW ruling, lane C s8, H-14, H-20, H-21).
  *
- * A player-respondent event at autonomy 0-2 is queued for the President when it fires. The desktop
+ * A player-respondent event at autonomy 0-2 (and the halt card at every level, Observer included:
+ * H-20) is queued for the President when it fires. The desktop
  * pauses the turn right after `evaluate-events` (PAUSE BEFORE COMBAT, turn_pipeline.ts) so their
  * answer lands in-turn, where a bot's answer lands. Whatever they leave unanswered when the turn
  * resumes is resolved HERE, in the same step boundary, as the bot's choice: `selectBotEventResponse`
@@ -30,11 +31,10 @@
  */
 
 import type { FactionId, GameState } from '../../state/game_state.js';
-import { MINORITY_POLICY_CARD_ID_BY_FACTION } from '../../state/displacement_takeover.js';
 import { recordSilenceReceipt, selectLivePlayerFaction } from '../player_override.js';
 import { selectInPersonParamilitaryOrderResponse } from './ai_default_response.js';
 import { isAnswerAheadOfFiringDecision } from './answer_ahead_of_firing.js';
-import { applyChosenEventResponse, selectBotEventResponse, type BotEventResponseSelection } from './evaluate_events.js';
+import { applyChosenEventResponse, isMinorityPolicyHaltCardId, selectBotEventResponse, type BotEventResponseSelection } from './evaluate_events.js';
 import type { EventDefinition, EventResponseOption, PendingEventDecision } from './event_types.js';
 import { PARAMILITARY_POLICY_CARD_ID_BY_FACTION } from './paramilitary_policy_flag.js';
 
@@ -42,9 +42,7 @@ function isParamilitaryPolicyCard(eventId: string): boolean {
     return Object.values(PARAMILITARY_POLICY_CARD_ID_BY_FACTION).includes(eventId);
 }
 
-function isMinorityPolicyHaltCard(eventId: string): boolean {
-    return Object.values(MINORITY_POLICY_CARD_ID_BY_FACTION).includes(eventId);
-}
+const isMinorityPolicyHaltCard = isMinorityPolicyHaltCardId;
 
 function firedThisTurn(state: GameState, decision: PendingEventDecision, turn: number): boolean {
     return decision.turn_fired === turn || state.military.event_last_fired_turn?.[decision.event_id] === turn;
@@ -95,8 +93,10 @@ export function resolvePlayerEventDecisionsBySilence(
     const playerFaction: FactionId | null = selectLivePlayerFaction(state);
     if (playerFaction == null) return [];
     if (state.meta.phase !== 'war') return [];
-    // Observer answers every decision itself at fire time (evaluate_events.ts).
-    if ((state.meta.autonomy_level ?? 0) >= 3) return [];
+    // Observer answers every decision itself at fire time (evaluate_events.ts), except the halt card,
+    // which queues at every level so the halt is reachable before the first wave (H-20, orchestrator
+    // call 1, 2026-11-25); at Observer only that card is resolved here.
+    const observer = (state.meta.autonomy_level ?? 0) >= 3;
     const pending = state.military.pending_event_decisions ?? [];
     if (pending.length === 0) return [];
 
@@ -111,6 +111,7 @@ export function resolvePlayerEventDecisionsBySilence(
     for (const decision of [...pending]) {
         const def = defsById.get(decision.event_id);
         const eligible = def != null
+            && (!observer || isMinorityPolicyHaltCard(decision.event_id))
             && decision.faction === playerFaction
             && firedThisTurn(state, decision, turn)
             && !isAnswerAheadOfFiringDecision(state, decision.event_id);
