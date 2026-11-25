@@ -1630,6 +1630,14 @@ function validateRecruitmentState(value: unknown, errors: string[]): void {
     if (!isStringArray(value.recruited_brigade_ids)) {
         errors.push(`${path}.recruited_brigade_ids must be string[]`);
     }
+    if (value.player_held_brigade_ids !== undefined) {
+        const held = value.player_held_brigade_ids;
+        if (!isStringArray(held)) {
+            errors.push(`${path}.player_held_brigade_ids must be string[] when present`);
+        } else if ((held as string[]).some((id, i) => i > 0 && strictCompare((held as string[])[i - 1]!, id) >= 0)) {
+            errors.push(`${path}.player_held_brigade_ids must be strictCompare-sorted and unique`);
+        }
+    }
     if (value.recruitment_capital_trickle !== undefined) {
         validateFactionNumberRecord(value.recruitment_capital_trickle, `${path}.recruitment_capital_trickle`, errors);
     }

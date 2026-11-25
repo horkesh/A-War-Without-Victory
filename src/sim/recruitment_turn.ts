@@ -241,23 +241,60 @@ export function runOngoingRecruitment(
         maxElectivePerFaction: maxRecruitsPerFaction,
         canonicalToOperational,
         factionIds: selectAutomaticRecruitmentFactions(state),
+        heldBrigadeIds: selectPlayerHeldBrigadeIds(state),
     });
+}
+
+/**
+ * The president's per-brigade holds the staff must skip, or undefined when none apply.
+ * Headless auto-control and campaigns without a player faction never hold (the field is
+ * player-only); the IPC that writes the list only accepts the player faction's own brigades.
+ */
+export function selectPlayerHeldBrigadeIds(state: GameState): ReadonlySet<string> | undefined {
+    if (state.meta.headless_scenario_auto_control === true || !state.meta.player_faction) return undefined;
+    const held = state.military.recruitment_state?.player_held_brigade_ids;
+    return held && held.length > 0 ? new Set(held) : undefined;
+}
+
+/**
+ * Set or clear the president's hold on one of his faction's brigades (lane C s6 design sitting,
+ * 2026-11-24). A hold keeps the staff from raising that brigade at autonomy 1+; it costs nothing
+ * but the brigade itself. Mutates state; keeps the list strictCompare-sorted and unique, and
+ * removes the field when the list empties so a save that never held stays byte-identical.
+ */
+export function setPlayerRecruitmentHold(
+    state: GameState,
+    brigadeId: string,
+    held: boolean,
+): void {
+    const resources = state.military.recruitment_state;
+    if (!resources) return;
+    const ids = new Set(resources.player_held_brigade_ids ?? []);
+    if (held) ids.add(brigadeId);
+    else ids.delete(brigadeId);
+    if (ids.size === 0) {
+        delete resources.player_held_brigade_ids;
+        return;
+    }
+    resources.player_held_brigade_ids = [...ids].sort(strictCompare);
 }
 
 export function selectAutomaticRecruitmentFactions(state: GameState): FactionId[] {
     const playerFaction = state.meta.headless_scenario_auto_control === true
         ? null
         : state.meta.player_faction ?? null;
-    // Level 2 (Political) and above delegate force generation; Levels 0-1 keep
-    // recruitment with the player. This threshold was briefly lowered to >= 1 on
-    // 2026-08-31 to stop the player's army manoeuvring without reinforcement, but
-    // that was only a problem while new campaigns started at Level 1. They now
-    // start at Level 2 (see desktop_sim.startNewCampaign), where recruitment
-    // already delegates — and at Level 1 the lower threshold broke a deliberate
-    // guarantee: the bot would consume the very brigade a player was saving for
-    // through the Recruit modal, since both draw the same `recruitment_state`
-    // pool. Kept at >= 2. See tests/recruitment_turn.ts, which pins both halves.
-    const delegatesRecruitment = (state.meta.autonomy_level ?? 0) >= 2;
+    // Level 1 (Assisted) and above delegate force generation; only Level 0 (Full
+    // Control) keeps recruitment with the player. HISTORY IF LEFT ALONE, AGENCY IF
+    // PLAYED (owner 2026-11-22; lane C s6 design sitting, game-designer and
+    // operations-expert unanimous, 2026-11-24): the staff of a human faction raise
+    // the historical brigades unless the president acts. With the old `>= 2`
+    // threshold a hands-off Level-1 president raised nothing, and live HRHB at
+    // Level 1 left the headless war from turn 2 (three HVO brigades never formed).
+    // The president keeps the Recruit modal: a raise there applies at once, before
+    // the next Advance runs this staff pass, so he picks first. Saving a brigade for
+    // later is Full Control's lever: at Level 0 the staff raise nothing for him.
+    // See tests/recruitment_turn.test.ts, which pins both halves.
+    const delegatesRecruitment = (state.meta.autonomy_level ?? 0) >= 1;
     return sortedFactionIds(state).filter(
         (factionId) => playerFaction == null || delegatesRecruitment || factionId !== playerFaction,
     );

@@ -366,6 +366,8 @@ export interface EnclaveResilienceView {
     supply_state?: 'adequate' | 'strained' | 'critical';
     faction?: FactionId;
     display_name?: string;
+    /** Ledger line 2 (A5): people unable to leave this enclave THIS WEEK (player's own side only); absent when none. */
+    unable_to_leave_this_week?: number;
 }
 
 export interface SectorEntrenchmentSummaryView {
@@ -1368,6 +1370,10 @@ export interface LoadedGameState {
          * from it must read "no staff report", not 0.
          */
         humanitarianAggregatesRecorded?: boolean;
+        /** Ledger line 1 (A4): cumulative people moved on when a place sheltering them was taken, by people. */
+        movedOnAtCaptureByPeople?: Record<string, number>;
+        /** Ledger line 2 (A5): the player's own side, THIS WEEK only (a stock, never a total); absent when none. */
+        unableToLeaveThisWeek?: number;
     };
     /** Presidential command authority (Level 3 override resource). */
     commandAuthority?: {

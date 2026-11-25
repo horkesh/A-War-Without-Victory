@@ -14,6 +14,7 @@ import { useMemo } from 'react';
 import type { EnclaveResilienceView, LoadedGameState } from '../data/types';
 import { getPlayerSafeEnclaveName, getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { t, type MessageKey } from '../i18n';
+import { formatLocaleNumber } from '../utils/formatters';
 import { strictCompare } from '../../../state/validateGameState';
 import {
   SURFACE_CHIP,
@@ -170,6 +171,12 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
                           tone={supplyState ? SUPPLY_CLASSES[supplyState] : SUPPLY_UNREPORTED_CLASS}
                         />
                       </div>
+                      {/* Ledger line 2 (A5): this week only; never summed, trended or colour-thresholded */}
+                      {enclave.unable_to_leave_this_week !== undefined && (
+                        <p data-testid="enclave-unable-to-leave" className="m-0 text-[15px] text-[#f1e6c8]">
+                          {t('enclave.unableToLeaveThisWeek', { count: formatLocaleNumber(Math.round(enclave.unable_to_leave_this_week)) })}
+                        </p>
+                      )}
                     </SurfacePanel>
                   );
                 })}

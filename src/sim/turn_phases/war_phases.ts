@@ -2635,37 +2635,20 @@ export const warPhases: NamedPhase[] = [
             }
         }
     },
-    {
-        // v0.8.4 Phase C: Compute formula AI stance recommendations for the player faction.
-        // generate-bot-corps-orders skips playerFaction — this step fills in ai_recommended_stance
-        // so that generate-level1-proposals can surface meaningful proposals.
-        // Runs AFTER bot corps orders so the same pass sees current sector/commander state.
-        name: 'generate-player-stance-recommendations',
-        run: async (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            const playerFaction = context.state.meta.player_faction;
-            if (!playerFaction) return;
-            if (context.state.meta.autonomy_level !== 1) return;
-            const graph = context.input.settlementGraph ?? (await getOperationalSettlementGraph(context));
-            const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
-                ? context.input.settlementEdges
-                : graph.edges;
-            const sidToMun = new Map<string, string>();
-            for (const [sid, rec] of graph.settlements.entries()) {
-                const munId = rec.mun1990_id ?? rec.mun_code;
-                if (munId) sidToMun.set(sid, munId);
-            }
-            // generateCorpsStanceOrders sets ai_recommended_stance on each corps cmd
-            // and respects player_ordered_stance guard (will not overwrite cmd.stance).
-            // The threat ratio reads the OSID contact graph, as in generate-bot-corps-orders
-            // (RF-F1g): brigade locations are OSIDs, so S-id edges gave a threat of 0.
-            const stanceThreatEdges = getOperationalData(context)?.edges ?? edges;
-            generateCorpsStanceOrders(context.state, playerFaction, stanceThreatEdges, sidToMun);
-        },
-    },
+    // RETIRED 2026-11-24 (lane C s6): `generate-player-stance-recommendations`. It ran
+    // generateCorpsStanceOrders a SECOND time for the player faction at autonomy 1, after the
+    // commander loop, on the premise that generate-bot-corps-orders skipped the player. That has
+    // been false since staff execution covers the player at autonomy >= 1
+    // (selectBotBrigadeOrderFactions), so the second pass recomputed the stance on later state and
+    // overwrote cmd.stance: live RS at autonomy 1 left the headless war at turn 1 (three corps
+    // defensive instead of offensive, Zvornik not taken). Because it wrote cmd.stance equal to its own
+    // recommendation, the Level-1 stance proposal below could never differ from the current stance,
+    // so no stance proposal ever reached the president: retiring it removes no player surface.
+    // generate-bot-corps-orders already sets ai_recommended_stance and cmd.stance for the player
+    // faction, exactly as headless (player_ordered_stance still guards a president's order).
     {
         // v0.8.4 Phase C: Generate Level 1 Assisted stance proposals for player review.
-        // Reads ai_recommended_stance set by generate-player-stance-recommendations above.
+        // Reads ai_recommended_stance set for the player faction by generate-bot-corps-orders.
         name: 'generate-level1-proposals',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;

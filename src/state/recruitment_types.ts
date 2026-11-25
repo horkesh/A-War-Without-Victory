@@ -84,6 +84,14 @@ export interface RecruitmentResourceState {
     max_recruits_per_faction_per_turn?: number;
     /** Brigade IDs that have been recruited (activated from catalog). */
     recruited_brigade_ids: string[];
+    /**
+     * The president's per-brigade holds (player faction only; strictCompare-sorted, unique).
+     * At autonomy 1+ the staff raise the player faction's brigades by the historical default
+     * (silence is consent) and skip every id held here; a raise from the Recruit modal clears
+     * that brigade's hold. Absent in headless runs and in saves that never held a brigade.
+     * Lane C s6 design sitting (game-designer + operations-expert, unanimous, 2026-11-24).
+     */
+    player_held_brigade_ids?: string[];
 }
 
 // ---------------------------------------------------------------------------

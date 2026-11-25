@@ -733,6 +733,26 @@ export function splitAmountByCauser(
  *
  * Without `pressure`, inputs are derived from `settlementEdges` (fixtures and harnesses).
  */
+/**
+ * Ledger line 2 (A5): delete this week's write-only "unable to leave" stock from every
+ * municipality. Display only; no simulation code reads `unable_to_leave_by_side`.
+ */
+function clearUnableToLeaveStock(state: GameState): void {
+    const all = state.displacement?.displacement_state;
+    if (!all) return;
+    for (const munId of Object.keys(all)) {
+        const entry = all[munId];
+        if (entry && entry.unable_to_leave_by_side !== undefined) delete entry.unable_to_leave_by_side;
+    }
+}
+
+/** Ledger line 2 (A5): record this week's stock for one side; 0 is never stored. */
+function writeUnableToLeaveStock(dispState: DisplacementState, side: FactionId, trapped: number, turn: number): void {
+    const amount = Math.max(0, Math.floor(trapped));
+    if (amount < 1) return;
+    (dispState.unable_to_leave_by_side ??= {})[side] = { amount, turn };
+}
+
 export function updateDisplacement(
     state: GameState,
     settlements: Map<string, SettlementRecord>,
@@ -740,6 +760,9 @@ export function updateDisplacement(
     population1991ByMun?: MunicipalityPopulation1991Map,
     pressure?: DisplacementPressureInputs
 ): DisplacementStepReport {
+    // Ledger line 2 (A5): the "unable to leave" stock is this week's only. Clear it from every
+    // municipality before any early return, then rewrite it below (s6_ledger12_ruling.md).
+    clearUnableToLeaveStock(state);
     const currentTurn = state.meta.turn;
     const militiaPools = state.military.militia_pools as Record<string, MilitiaPoolState> | undefined;
 
@@ -934,6 +957,7 @@ export function updateDisplacement(
             const displacementAmount = routing.reduce((s, r) => s + r.amount, 0);
             // A5 (red-team M1): record who could not leave, before the no-route continue.
             trappedRecords.push({ mun_id: munId, faction_id: side, wanted, routed: displacementAmount, trapped: wanted - displacementAmount });
+            writeUnableToLeaveStock(dispState, side, wanted - displacementAmount, currentTurn);
             if (displacementAmount <= 0) continue;
 
             const beforeOut = dispState.displaced_out;

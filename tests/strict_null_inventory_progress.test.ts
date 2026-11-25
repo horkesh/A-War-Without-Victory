@@ -844,7 +844,11 @@ describe('strict null inventory progress', () => {
             // ParamilitaryStandingOrderRecord.target_osid / decision (`?: never`, never present). No persisted
             // field is optional that was required before; headless writes no row. No new type escape.
             // 613 -> 614 (A6) -> 617 (§6 item 2).
-            optional_fields_game_state: 617,
+            // Ledger lines 1-2 (§6 + §4 panels, s6_ledger12, 2026-11-25): +2 write-only display fields,
+            // absent until first written (old saves load): DisplacementDomainState.moved_on_at_capture_by_people
+            // (line 1, cumulative by people) and DisplacementState.unable_to_leave_by_side (line 2, this
+            // week's stock). Nothing in the sim reads them. No new type escape. 617 -> 619.
+            optional_fields_game_state: 619,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
@@ -874,13 +878,14 @@ describe('strict null inventory progress', () => {
         // matches the Paramilitary* interface names: ParamilitaryRequestDecisionRecord.kind,
         // ParamilitaryStandingOrderRecord.target_osid / decision, the union's discriminating markers).
         // 613 -> 617 / state 228 -> 229 / sim 375 -> 378.
-        expect(current.optional_field_domains.total).toBe(617);
+        // Ledger lines 1-2: +2 state (moved_on_at_capture_by_people, unable_to_leave_by_side). 617 -> 619 / state 229 -> 231.
+        expect(current.optional_field_domains.total).toBe(619);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
             sim: 378,
-            state: 229,
+            state: 231,
             ui_adapter: 0,
             unknown: 0,
         });

@@ -728,6 +728,12 @@ export interface RunBotRecruitmentOptions {
     canonicalToOperational?: CanonicalToOperationalMap;
     /** Restrict automatic recruitment to these factions. */
     factionIds?: readonly FactionId[];
+    /**
+     * Brigades the president holds (`recruitment_state.player_held_brigade_ids`, player faction
+     * only): the staff skip them in the mandatory and elective passes, so a held brigade stays
+     * unraised and its pool unspent. Empty or unset ⇒ unchanged behaviour (headless never sets it).
+     */
+    heldBrigadeIds?: ReadonlySet<string>;
 }
 
 function markExistingFormationAsRecruited(
@@ -868,12 +874,18 @@ export function runBotRecruitment(
             markExistingFormationAsRecruited(state, resources, brigade.id);
         }
 
+        // The president's holds leave the staff's candidate lists (lane C s6 design sitting).
+        const heldBrigadeIds = options?.heldBrigadeIds;
+        const selectableBrigades = heldBrigadeIds && heldBrigadeIds.size > 0
+            ? factionBrigades.filter(b => !heldBrigadeIds.has(b.id))
+            : factionBrigades;
+
         // Step 1: Recruit mandatory formations first (zero cost for capital/equipment)
         // Pool-gated emergent formation: turn-0 brigades spawn unconditionally;
         // later brigades require pool surplus + existing brigades at capacity.
         const pools = state.military.militia_pools as Record<string, { available: number; committed: number }> | undefined;
         const mandatoryBrigades = includeMandatory
-            ? factionBrigades
+            ? selectableBrigades
                 .filter(b => b.mandatory)
                 .filter(b => {
                     if (b.available_from > currentTurn) return false;
@@ -1030,7 +1042,7 @@ export function runBotRecruitment(
 
         // Step 2: Score and recruit elective formations
         // Same pool-gated emergent formation logic as mandatory brigades.
-        const electiveBrigades = factionBrigades
+        const electiveBrigades = selectableBrigades
             .filter(b => !b.mandatory && !resources.recruited_brigade_ids.includes(b.id))
             .filter(b => {
                 if (b.available_from > currentTurn) return false;
