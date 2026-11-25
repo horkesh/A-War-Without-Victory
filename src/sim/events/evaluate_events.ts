@@ -744,15 +744,36 @@ export function fireOwedFollowUpsAtTermination(
  */
 export function evaluateEvents(
     state: GameState,
-    _rng: Rng,
+    rng: Rng,
     currentTurn: number,
     registry: EventDefinition[],
 ): EventsEvaluationReport {
+    return beginEvaluateEvents(state, rng, currentTurn, registry).finish();
+}
+
+/** The primary firing pass of `evaluateEvents`; `finish()` runs the same-turn follow-up snapshot. */
+export interface PrimaryEventsPass {
+    finish(): EventsEvaluationReport;
+}
+
+/**
+ * `evaluateEvents` in two halves (#865 r4693814641). The turn pipeline settles this turn's player
+ * decisions (the PAUSE BEFORE COMBAT, then silence as the staff default) between them, so the
+ * same-turn follow-up rows see an answered decision, as they do in headless, where the bot answers
+ * at fire time. Headless runs nothing in between, so it is byte-identical to one call.
+ */
+export function beginEvaluateEvents(
+    state: GameState,
+    _rng: Rng,
+    currentTurn: number,
+    registry: EventDefinition[],
+): PrimaryEventsPass {
     const fired: FiredEvent[] = [];
     const phase = state.meta.phase;
     if (phase !== 'war') {
         state.military.event_overflow_queue = [];
-        return { fired, candidates_considered: 0, overflowed: false, overflowed_ids: [], mutex_suppressed_ids: [] };
+        const report: EventsEvaluationReport = { fired, candidates_considered: 0, overflowed: false, overflowed_ids: [], mutex_suppressed_ids: [] };
+        return { finish: () => report };
     }
 
     // Ensure fired_event_ids array exists
@@ -1085,41 +1106,48 @@ export function evaluateEvents(
         fireEvent(def);
     }
 
-    // One bounded post-primary snapshot lets explicitly opted-in automatic rows
-    // observe receipts and flags written above. The snapshot is collected in
-    // canonical order before any of its members fire, so it cannot recurse into
-    // a third level. Readiness is deliberately not updated here.
-    const primaryCandidateIds = new Set(candidates.map((def) => def.id));
-    const occupiedMutexGroups = new Set(
-        toFire.map((def) => def.mutex_group).filter((group): group is string => Boolean(group)),
-    );
-    const followUpSnapshot: EventDefinition[] = [];
-    for (const def of canonicalEvents) {
-        if (def.same_turn_requires_events !== true || primaryCandidateIds.has(def.id)) continue;
-        if (!isCandidateEligible(def, state, currentTurn)) continue;
-        if (def.mutex_group && occupiedMutexGroups.has(def.mutex_group)) {
-            mutexFiltered.mutex_suppressed_ids.push(def.id);
-            recordCausality(state, {
-                turn: currentTurn,
-                from_event: def.id,
-                to_event: null,
-                to_flag: null,
-                kind: 'mutex_suppressed',
-            });
-            continue;
+    let finished = false;
+    const finish = (): EventsEvaluationReport => {
+        if (finished) throw new Error('beginEvaluateEvents: finish() called twice');
+        finished = true;
+        // One bounded post-primary snapshot lets explicitly opted-in automatic rows
+        // observe receipts and flags written above. The snapshot is collected in
+        // canonical order before any of its members fire, so it cannot recurse into
+        // a third level. Readiness is deliberately not updated here. In the turn pipeline
+        // it runs after this turn's player decisions are settled (`beginEvaluateEvents`).
+        const primaryCandidateIds = new Set(candidates.map((def) => def.id));
+        const occupiedMutexGroups = new Set(
+            toFire.map((def) => def.mutex_group).filter((group): group is string => Boolean(group)),
+        );
+        const followUpSnapshot: EventDefinition[] = [];
+        for (const def of canonicalEvents) {
+            if (def.same_turn_requires_events !== true || primaryCandidateIds.has(def.id)) continue;
+            if (!isCandidateEligible(def, state, currentTurn)) continue;
+            if (def.mutex_group && occupiedMutexGroups.has(def.mutex_group)) {
+                mutexFiltered.mutex_suppressed_ids.push(def.id);
+                recordCausality(state, {
+                    turn: currentTurn,
+                    from_event: def.id,
+                    to_event: null,
+                    to_flag: null,
+                    kind: 'mutex_suppressed',
+                });
+                continue;
+            }
+            followUpSnapshot.push(def);
+            if (def.mutex_group) occupiedMutexGroups.add(def.mutex_group);
         }
-        followUpSnapshot.push(def);
-        if (def.mutex_group) occupiedMutexGroups.add(def.mutex_group);
-    }
-    for (const def of followUpSnapshot) {
-        fireEvent(def);
-    }
+        for (const def of followUpSnapshot) {
+            fireEvent(def);
+        }
 
-    return {
-        fired,
-        candidates_considered: candidates.length + followUpSnapshot.length,
-        overflowed: overflowedIds.length > 0,
-        overflowed_ids: overflowedIds,
-        mutex_suppressed_ids: mutexFiltered.mutex_suppressed_ids,
+        return {
+            fired,
+            candidates_considered: candidates.length + followUpSnapshot.length,
+            overflowed: overflowedIds.length > 0,
+            overflowed_ids: overflowedIds,
+            mutex_suppressed_ids: mutexFiltered.mutex_suppressed_ids,
+        };
     };
+    return { finish };
 }

@@ -734,6 +734,13 @@ export function processOfficerSuccession(
         // step 3b applies it (status, operation release, casualty). Inert with an empty schedule.
         if (scheduledDeathBy(corpsRoster, data.id, turn)) continue;
         if (data.available_until_turn !== undefined && turn >= data.available_until_turn) {
+            // This departure is the OOB calendar end of the officer's historical command
+            // (`available_until_turn`, no fate attached): a staff rotation, not a physical loss.
+            // Physical losses are steps 3 (combat casualty) and 3b ('killed' tenure), which still
+            // apply to an appointee. The President's explicit appointment outranks the staff
+            // calendar at every autonomy level (§15.1, G1), as the 3b relief guard already does
+            // (#865 r4693814626). Headless writes no appointment, so it is unaffected.
+            if (os.assigned_corps_id && isPresidentialAppointee(state, os.assigned_corps_id, data.id)) continue;
             os.status = 'retired';
             if (os.assigned_corps_id) {
                 os.assigned_corps_id = null;
