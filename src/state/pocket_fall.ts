@@ -80,6 +80,13 @@ function containsOwnEnclaveSettlement(osidsInMun: readonly string[], side: Facti
     return false;
 }
 
+/** M's settlements that belong to one of `side`'s ENCLAVE_DEFINITIONS enclaves, in id order. */
+function ownEnclaveSettlements(osidsInMun: readonly string[], side: FactionId): string[] {
+    return osidsInMun.filter((sid) =>
+        ENCLAVE_DEFINITIONS.some((enclave) => enclave.faction === side && osidBelongsToEnclave(sid, enclave))
+    );
+}
+
 /** A takeover timer for `side`'s people in M that is still pending (not matured) or dormant. */
 function hasBlockingTakeoverTimer(state: GameState, munId: MunicipalityId, side: FactionId): boolean {
     const timers = state.displacement.hostile_takeover_timers ?? {};
@@ -194,8 +201,14 @@ export function processPocketFalls(
             const sheltered = Math.max(0, Math.floor(entry.displaced_in_by_faction?.[side] ?? 0));
 
             // (c) the B2 resolver (with P0-B). A destination means a same-body move of the sheltered stock (D7).
+            // At a fall of one of the side's own enclaves, the link is tested from the enclave's own settlements
+            // (the ground the side held last), not from every settlement of a large municipality: measured on
+            // the 188w pair, Rogatica's RS-held cells touch the Goražde pocket and Srebrenica's touch Žepa, so the
+            // whole-municipality test found a "destination" in another besieged pocket across RS-held ground,
+            // which delayed Srebrenica's booking from t171 to t173 and kept Žepa from firing at all.
             resolver ??= buildPassThroughDestinationResolver(state, edges, suppliedByFaction);
-            const reachable = resolver(side, munId);
+            const enclaveSids = ownEnclaveSettlements(osidsInMun, side);
+            const reachable = resolver(side, munId, enclaveSids.length > 0 ? enclaveSids : undefined);
             if (reachable !== null && reachable.size > 0) {
                 if (sheltered <= 0) continue;
                 const moves = routeDisplacedWithCapacity(state, munId, side, sheltered, captor, reachable);

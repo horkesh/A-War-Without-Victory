@@ -527,7 +527,7 @@ export function buildPassThroughDestinationResolver(
     const bodies = computeTerritorialBodies(controllerOf, neighbours, rbihHrhbAtWar(state));
     const none: ReadonlySet<string> = new Set<string>();
 
-    return (faction: string, munId: MunicipalityId): ReadonlySet<MunicipalityId> | null => {
+    return (faction: string, munId: MunicipalityId, linkFrom?: readonly string[]): ReadonlySet<MunicipalityId> | null => {
         const allowed = new Set<MunicipalityId>();
         const side = CANONICAL_FACTIONS.find((f) => f === faction);
         const body = side === undefined ? undefined : bodies.get(side);
@@ -537,7 +537,7 @@ export function buildPassThroughDestinationResolver(
         for (const sid of inMun) {
             if (body.bodyOf.has(sid) && supplied.has(sid)) return null;
         }
-        const linked = linkedBodiesInMunicipality(body, inMun, neighbours);
+        const linked = linkedBodiesInMunicipality(body, linkFrom ?? inMun, neighbours);
         if (linked.size === 0) return allowed;
         // A9 P0-B (SD13, 8-seat §6 ruling D7, 2026-11-25): when the side holds ZERO ground in the municipality,
         // a destination in a linked body qualifies without the supply requirement (capacity still applies in

@@ -913,7 +913,12 @@ function getInitialDisplacementFraction(
  */
 export type PassThroughDestinationResolver = (
     faction: string,
-    munId: MunicipalityId
+    munId: MunicipalityId,
+    /**
+     * A9 P0-A: test the link from these settlements only (a fallen enclave's own settlements), instead of
+     * from every settlement of the municipality. The capture pass-through never passes it.
+     */
+    linkFrom?: readonly string[]
 ) => ReadonlySet<MunicipalityId> | null;
 
 export function processDisplacementTakeover(

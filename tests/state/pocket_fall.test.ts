@@ -149,6 +149,31 @@ function srebrenicaWorld(opts: { holdLast?: boolean; timers?: Record<string, Hos
     });
 }
 
+describe('P0-A: an enclave fall tests the link from the enclave, not the whole municipality', () => {
+    // Measured on the 188w pair: Rogatica's RS-held cells touch the Goražde pocket, so the whole-municipality
+    // link found a "destination" in another besieged pocket across RS ground and Žepa never fired.
+    it('Žepa-shaped: an RS cell of the municipality touches another RBiH pocket; the fall still fires', () => {
+        const w = world({
+            turn: 173,
+            controllers: { 'op:rogatica:zepa_2': 'RS', 'op:rogatica:r_rs': 'RS', 'op:gorazde:g1': 'RBiH' },
+            extraEdges: [{ a: 'op:rogatica:r_rs', b: 'op:gorazde:g1' }],
+            disp: {
+                rogatica: { original_population: 21800, displaced_out: 9000, lost_population: 2000, displaced_in: 20000, by_faction: { RS: 20000 } },
+                gorazde: { original_population: 37500 },
+            },
+        });
+        const report = run(w);
+        expect(report.same_body_moves).toHaveLength(0);
+        expect(report.firings).toHaveLength(1);
+        const f = report.firings[0];
+        expect(f.mun_id).toBe('rogatica');
+        expect(f.side).toBe('RBiH');
+        expect(f.left).toBeGreaterThan(0);
+        expect(ds(w, 'gorazde').displaced_in).toBe(0);
+        expect(ds(w, 'rogatica').displaced_in_by_faction?.RS).toBe(20000);
+    });
+});
+
 describe('P0-A: assaulted enclave fall (Srebrenica-shaped)', () => {
     it('the ratio is the single sourced constant, and the takeover overrun reads the same value', () => {
         expect(ASSAULTED_POCKET_FALL_KILL_RATIO).toBe(0.19);
