@@ -29,9 +29,11 @@ const EN = {
     outcomeMany: (m: number) => `Your side's historical default ran: Bosniaks were expelled from the ground the HVO held in ${m} municipalities.`,
     outcomeOne: 'Your side\'s historical default ran: Bosniaks were expelled from the ground the HVO held in 1 municipality.',
     detailInPerson: `No halt was ordered. This counts against your side, which left the expulsions unopposed. A halt could be ordered only when the war with the ARBiH began. ${TAIL_EN}`,
-    detailAutomatic: `Your staff answered automatically with your side's historical default, and no halt was ordered. This counts against your side, which left the expulsions unopposed. A halt could be ordered only when the war with the ARBiH began, and only if you were playing below Observer level. ${TAIL_EN}`,
+    // was: `Your staff answered automatically with your side's historical default, and no halt was ordered. This counts against ... A halt could be ordered only when the war with the ARBiH began, and only if you were playing below Observer level. ${TAIL_EN}`
+    detailAutomatic: `You gave no answer before the turn went on, so your staff kept your side's historical default and no halt was ordered. This counts against your side, which left the expulsions unopposed. A halt could be ordered only when the war with the ARBiH began; that decision comes to you at every command level. ${TAIL_EN}`,
     detailNoWarCrimeInPerson: `No halt was ordered. A halt could be ordered only when the war with the ARBiH began. ${TAIL_EN}`,
-    detailNoWarCrimeAutomatic: `Your staff answered automatically with your side's historical default, and no halt was ordered. A halt could be ordered only when the war with the ARBiH began, and only if you were playing below Observer level. ${TAIL_EN}`,
+    // was: `Your staff answered automatically with your side's historical default, and no halt was ordered. A halt could be ordered only when the war with the ARBiH began, and only if you were playing below Observer level. ${TAIL_EN}`
+    detailNoWarCrimeAutomatic: `You gave no answer before the turn went on, so your staff kept your side's historical default and no halt was ordered. A halt could be ordered only when the war with the ARBiH began; that decision comes to you at every command level. ${TAIL_EN}`,
 };
 const BCS = {
     chip: 'Provedeno',
@@ -39,9 +41,11 @@ const BCS = {
     titleAutomatic: 'Obustava nije naređena (automatski odgovor)',
     outcome: (m: number) => `Historijska zadana postavka vaše strane se provela: Bošnjaci su protjerani s područja koje je držao HVO. Broj općina: ${m}.`,
     detailInPerson: `Obustava nije naređena. To pada na teret vaše strane, koja se protjerivanju nije suprotstavila. Obustava se mogla narediti samo kad je počeo rat s ARBiH. ${TAIL_BCS}`,
-    detailAutomatic: `Vaš štab je automatski odgovorio historijskom zadanom postavkom vaše strane i obustava nije naređena. To pada na teret vaše strane, koja se protjerivanju nije suprotstavila. Obustava se mogla narediti samo kad je počeo rat s ARBiH, i to samo ako ste igrali ispod nivoa Posmatrač. ${TAIL_BCS}`,
+    // was: `Vaš štab je automatski odgovorio historijskom zadanom postavkom vaše strane i obustava nije naređena. To pada na teret ... samo kad je počeo rat s ARBiH, i to samo ako ste igrali ispod nivoa Posmatrač. ${TAIL_BCS}`
+    detailAutomatic: `Niste odgovorili prije nego što je potez otišao dalje, pa je štab zadržao historijsku zadanu postavku vaše strane i obustava nije naređena. To pada na teret vaše strane, koja se protjerivanju nije suprotstavila. Obustava se mogla narediti samo kad je počeo rat s ARBiH; ta odluka vam stiže na svakom nivou komandovanja. ${TAIL_BCS}`,
     detailNoWarCrimeInPerson: `Obustava nije naređena. Obustava se mogla narediti samo kad je počeo rat s ARBiH. ${TAIL_BCS}`,
-    detailNoWarCrimeAutomatic: `Vaš štab je automatski odgovorio historijskom zadanom postavkom vaše strane i obustava nije naređena. Obustava se mogla narediti samo kad je počeo rat s ARBiH, i to samo ako ste igrali ispod nivoa Posmatrač. ${TAIL_BCS}`,
+    // was: `Vaš štab je automatski odgovorio historijskom zadanom postavkom vaše strane i obustava nije naređena. Obustava se mogla narediti samo kad je počeo rat s ARBiH, i to samo ako ste igrali ispod nivoa Posmatrač. ${TAIL_BCS}`
+    detailNoWarCrimeAutomatic: `Niste odgovorili prije nego što je potez otišao dalje, pa je štab zadržao historijsku zadanu postavku vaše strane i obustava nije naređena. Obustava se mogla narediti samo kad je počeo rat s ARBiH; ta odluka vam stiže na svakom nivou komandovanja. ${TAIL_BCS}`,
 };
 
 interface Opts {

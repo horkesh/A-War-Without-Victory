@@ -1504,12 +1504,12 @@ function addRecruitmentMatterCard(
 ): void {
   if (!matter) return;
   const copy = buildRecruitmentMatterCopy(matter, municipalityNames);
-  const decision = matter.mode === 'decision';
+  // A notice at every level: the staff raise brigades at every level (§14.10a); the hold is in Recruitment.
   const brigadeIds = [...matter.ready, ...matter.raised].map((brigade) => brigade.id);
   cards.push({
     id: matter.id,
-    category: decision ? 'command' : 'briefing',
-    severity: decision ? 'warning' : 'info',
+    category: 'briefing',
+    severity: 'info',
     title: copy.title,
     explanation: copy.explanation,
     sourceOwner: copy.familyLabel,
@@ -1520,7 +1520,7 @@ function addRecruitmentMatterCard(
     navigationTarget: { kind: 'recruitment', brigadeId: matter.focusBrigadeId },
     ...(brigadeIds.length > 0 ? { sourceIds: brigadeIds } : {}),
     countWeight: 1,
-    urgencySort: decision ? 30 : 60,
+    urgencySort: 60,
     sourceSort: matter.id,
   });
 }

@@ -4742,6 +4742,41 @@ function deriveParamilitaryReceiptCause(
 }
 
 /**
+ * The player's newest own explicit paramilitary act for `faction` filed up to `turn`, read as the order it gives (display
+ * mirror of `newestOwnParamilitaryAct` in paramilitary_policy.ts, bounded by the sweep's turn). The acts:
+ * - an in-person answer to the side's policy card (its response id is the order);
+ * - a standing order from the review modal;
+ * - a request decided one by one (Allow reads as deciding each request, `ask`; any other decision reads as a refusal).
+ * Newest by turn; on a tie the refusal wins, then `ask`.
+ */
+function newestOwnParamilitaryActUpTo(state: any, faction: string, turn: number): 'always_deny' | 'ask' | 'always_allow' | null {
+    const rank = { always_deny: 0, ask: 1, always_allow: 2 } as const;
+    type Order = keyof typeof rank;
+    let newestTurn = Number.NEGATIVE_INFINITY;
+    let newest: Order | null = null;
+    const consider = (rawTurn: unknown, order: Order): void => {
+        const at = Number(rawTurn);
+        if (!Number.isFinite(at) || at > turn) return;
+        if (newest === null || at > newestTurn || (at === newestTurn && rank[order] < rank[newest])) {
+            newestTurn = at;
+            newest = order;
+        }
+    };
+    const asOrder = (value: unknown): Order => (value === 'always_allow' || value === 'ask' ? value : 'always_deny');
+    const cardId = (PARAMILITARY_POLICY_CARD_ID_BY_FACTION as Readonly<Record<string, string | undefined>>)[faction];
+    if (cardId) {
+        for (const entry of Array.isArray(state.military?.event_decision_log) ? state.military.event_decision_log : []) {
+            if (entry?.event_id === cardId && entry.decision_source === 'player') consider(entry.turn, asOrder(entry.response_id));
+        }
+    }
+    for (const record of Array.isArray(state.paramilitary_decision_history) ? state.paramilitary_decision_history : []) {
+        if (!record || record.faction !== faction) continue;
+        consider(record.turn, record.kind === 'standing_order' ? asOrder(record.order) : (record.decision === 'allow' ? 'ask' : 'always_deny'));
+    }
+    return newest;
+}
+
+/**
  * Paramilitary sweeps the player's side carried out with no request to the player (under the standing order Always allow, at any
  * command level; a pre-stage-2 save also holds staff sweeps sent under any order). A sweep the player decided has a decision
  * record with the same turn and target and is not listed here.
@@ -4782,7 +4817,12 @@ function deriveParamilitaryUnrequested(
         if (capture) capture.used = true;
         const cause = deriveParamilitaryReceiptCause(state, String(formation.faction), Number(turn));
         // H-17: an act under the standing default with no order of the player's is attributed to the staff (display only).
-        const staffDefault = cause === 'historical_default_staff' || cause === 'standing_order_automatic';
+        // Authorship is read apart from the cause line (Codex P2 on #866, §14.10e(6)): under the player's own "decide each
+        // request" (`ask`), no request reaches them at Assisted-Observer and the staff follow the default, so an unrequested
+        // sweep then is the staff's even though the cause line stays neutral.
+        const staffDefault = cause === 'historical_default_staff'
+            || cause === 'standing_order_automatic'
+            || (cause === 'neutral' && newestOwnParamilitaryActUpTo(state, String(formation.faction), Number(turn)) === 'ask');
         sweeps.push({
             id: String(formation.id ?? id),
             turn: Number(turn),

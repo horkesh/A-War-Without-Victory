@@ -4,9 +4,11 @@
  * visits recruitment tab.").
  *
  * Pins the UI-only watch (newly raisable, grouping, clearing when raised or lapsed, set
- * aside), the autonomy wording (decision at 0, staff notice at 1-3, EN + BCS), the
- * Home Front card and its Advance standing, the Desk item, and the routing that opens
- * Recruitment straight on the named brigade.
+ * aside), the autonomy wording (the staff notice at every level, Full Control included,
+ * EN + BCS), the Home Front card and its Advance standing, the Desk item, and the routing
+ * that opens Recruitment straight on the named brigade.
+ * (was, until lane C s11: a Full Control "decision" matter with "Not now"; #865 made the
+ * staff raise at every level, so Full Control gets the notice and the hold.)
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
@@ -105,7 +107,7 @@ describe('recruitment watch: what is new', () => {
   it('announces everything raisable once on a fresh watch, in strictCompare id order', () => {
     const watch = fold(snapshot(4, 0, [brigade('b_zepce', 'zepce'), brigade('a_visoko', 'visoko'), notYet('c_kakanj', 'kakanj')]));
     const matter = matterAt(watch);
-    expect(matter?.mode).toBe('decision');
+    expect(matter?.mode).toBe('notice'); // was: 'decision' at Full Control
     expect(matter?.ready.map((b) => b.id)).toEqual(['a_visoko', 'b_zepce']);
     expect(matter?.focusBrigadeId).toBe('a_visoko');
   });
@@ -117,7 +119,7 @@ describe('recruitment watch: what is new', () => {
     );
     expect(watch.newlyEligibleIds).toEqual(['a', 'b']);
     const matter = matterAt(watch);
-    expect(matter?.id).toBe('recruitment:decision');
+    expect(matter?.id).toBe('recruitment:notice'); // was: 'recruitment:decision'
     expect(matter?.ready).toHaveLength(2);
   });
 
@@ -136,9 +138,11 @@ describe('recruitment watch: what is new', () => {
   });
 
   it('clears a brigade that is no longer raisable (lost control, no manpower)', () => {
+    // was: across weeks 4 -> 5 (the decision queue carried 'a' into week 5). The notice is
+    // weekly, so the lapse is pinned inside the week the brigades were announced.
     const watch = fold(
       snapshot(4, 0, [brigade('a', 'visoko'), brigade('b', 'zepce')]),
-      snapshot(5, 0, [brigade('a', 'visoko'), brigade('b', 'zepce', { eligible: false, reasons: ['no_control'] })]),
+      snapshot(4, 0, [brigade('a', 'visoko'), brigade('b', 'zepce', { eligible: false, reasons: ['no_control'] })]),
     );
     expect(matterAt(watch)?.ready.map((b) => b.id)).toEqual(['a']);
   });
@@ -156,10 +160,13 @@ describe('recruitment watch: what is new', () => {
     expect(matterAt(back)?.ready.map((b) => b.id)).toEqual(['a']);
   });
 
-  it('an undecided brigade stays on the desk week after week as the same single matter', () => {
+  it('at Full Control a ready brigade is reported in the week it becomes ready; the next week names only what is new', () => {
+    // was: 'an undecided brigade stays on the desk week after week' (ready ['a', 'b']): the
+    // Full Control decision queue. The staff raise at every level now (#865), so nothing waits.
     const watch = fold(snapshot(4, 0, [brigade('a', 'visoko')]), snapshot(5, 0, [brigade('a', 'visoko'), brigade('b', 'zepce')]));
     const matter = matterAt(watch);
-    expect(matter?.ready.map((b) => b.id)).toEqual(['a', 'b']);
+    expect(matter?.mode).toBe('notice');
+    expect(matter?.ready.map((b) => b.id)).toEqual(['b']);
   });
 
   it('shows nothing for a watch from another week or faction (a snapshot still in flight)', () => {
@@ -174,7 +181,7 @@ describe('recruitment watch: what is new', () => {
   });
 });
 
-describe('recruitment watch: staff notice at Assisted, Delegated and Observer', () => {
+describe('recruitment watch: staff notice at every level', () => {
   it('reports what the staff raised since last week and what is newly ready', () => {
     const watch = fold(
       snapshot(4, 2, [brigade('a', 'visoko'), notYet('b', 'zepce'), brigade('c', 'kakanj')]),
@@ -204,10 +211,14 @@ describe('recruitment watch: staff notice at Assisted, Delegated and Observer', 
     expect(matterAt(setAsideRecruitmentMatter(busy))).toBeNull();
   });
 
-  it('switching to Full Control turns the still-raisable brigades into a decision', () => {
+  it('switching to Full Control keeps the staff notice (the staff raise at every level)', () => {
+    // was: switching to Full Control turned the still-raisable brigades into a decision.
     const delegated = fold(snapshot(4, 2, [brigade('a', 'visoko')]));
     const full = advanceRecruitmentWatch(delegated, snapshot(4, 0, [brigade('a', 'visoko')]));
-    expect(matterAt(full)?.mode).toBe('decision');
+    const matter = matterAt(full);
+    expect(matter?.mode).toBe('notice');
+    expect(matter?.autonomyLevel).toBe(0);
+    expect(matter?.ready.map((b) => b.id)).toEqual(['a']);
   });
 });
 
@@ -240,12 +251,15 @@ describe('recruitment hold (staff will not raise a held brigade)', () => {
     expect(buildRecruitmentMatterCopy(matter, MUNICIPALITIES).facts.some((f) => f.startsWith('Zadržano, ne formira se: ') && f.endsWith('.'))).toBe(true);
   });
 
-  it('keeps the decision at Full Control free of holds, and the modal offers holds from level 1 only', () => {
-    const matter = matterAt(fold(snapshot(5, 0, [brigade('a', 'visoko', { held: true })])))!;
-    expect(matter.mode).toBe('decision');
-    expect(matter.held).toEqual([]);
-    expect(matter.ready.map((b) => b.id)).toEqual(['a']);
-    expect(recruitmentHoldAvailable(0)).toBe(false);
+  it('honours a hold at Full Control too, and the modal offers the hold at every level', () => {
+    // was: the Full Control decision ignored holds (held []) and the modal offered holds from
+    // level 1 only. The staff raise at Full Control since #865, so the hold is the lever there too.
+    const matter = matterAt(fold(snapshot(5, 0, [brigade('a', 'visoko', { held: true }), brigade('b', 'zepce')])))!;
+    expect(matter.mode).toBe('notice');
+    expect(matter.held.map((b) => b.id)).toEqual(['a']);
+    expect(matter.ready.map((b) => b.id)).toEqual(['b']);
+    expect(matterAt(fold(snapshot(5, 0, [brigade('a', 'visoko', { held: true })])))).toBeNull();
+    expect(recruitmentHoldAvailable(0)).toBe(true);
     expect(recruitmentHoldAvailable(null)).toBe(false);
     expect(recruitmentHoldAvailable(1)).toBe(true);
     expect(recruitmentHoldAvailable(3)).toBe(true);
@@ -253,14 +267,18 @@ describe('recruitment hold (staff will not raise a held brigade)', () => {
 });
 
 describe('recruitment matter wording', () => {
-  it('names the brigade, where it would form and its cost, and says recruitment is the president\'s', () => {
+  it('at Full Control names the brigade and where it forms, and says the staff raise it unless held', () => {
+    // was: '111th Brigade can be raised', a cost line, 'At Full Control, recruitment stays yours'
+    // and 'Open Recruitment' (the Full Control decision copy, removed in lane C s11).
     const matter = matterAt(fold(snapshot(4, 0, [brigade('a', 'zepce', { name: '111th Brigade' })])))!;
     const copy = buildRecruitmentMatterCopy(matter, MUNICIPALITIES);
-    expect(copy.title).toBe('111th Brigade can be raised');
-    expect(copy.summary).toBe('Forms in Žepče. Cost: 800 manpower, 10 capital.');
-    expect(copy.explanation).toContain('At Full Control, recruitment stays yours');
-    expect(copy.facts).toEqual(['111th Brigade: forms in Žepče. Cost: 800 manpower, 10 capital.']);
-    expect(copy.primaryActionLabel).toBe('Open Recruitment');
+    expect(copy.title).toBe('111th Brigade is ready to be raised');
+    expect(copy.summary).toBe('Ready: 111th Brigade.');
+    expect(copy.explanation).toContain('At every command level, Full Control included, your staff raises brigades without asking');
+    expect(copy.explanation).not.toContain('stays yours');
+    expect(copy.facts).toEqual(['111th Brigade: ready in Žepče. Your staff raises it when it is due, unless you hold it.']);
+    expect(copy.primaryActionLabel).toBe('View in Recruitment');
+    expect(copy.setAsideLabel).toBe('Noted');
   });
 
   it('uses the staff wording at autonomy 1, 2 and 3, with the Assisted label at 1', () => {
@@ -268,12 +286,12 @@ describe('recruitment matter wording', () => {
     const assisted = matterAt(fold(snapshot(4, 1, [brigade('a', 'visoko')])))!;
     expect(assisted.mode).toBe('notice');
     const assistedCopy = buildRecruitmentMatterCopy(assisted, MUNICIPALITIES);
-    expect(assistedCopy.explanation).toContain('At Assisted, your staff raises brigades without asking');
+    expect(assistedCopy.explanation).toContain('At every command level, Assisted included, your staff raises brigades without asking'); // was: 'At Assisted, your staff raises ...'
     expect(assistedCopy.primaryActionLabel).toBe('View in Recruitment');
     const delegated = matterAt(fold(snapshot(4, 2, [brigade('a', 'visoko', { name: '7th Brigade' })])))!;
     const delegatedCopy = buildRecruitmentMatterCopy(delegated, MUNICIPALITIES);
     expect(delegatedCopy.title).toBe('7th Brigade is ready to be raised');
-    expect(delegatedCopy.explanation).toContain('At Delegated, your staff raises brigades without asking');
+    expect(delegatedCopy.explanation).toContain('At every command level, Delegated included, your staff raises brigades without asking'); // was: 'At Delegated, your staff raises ...'
     expect(delegatedCopy.primaryActionLabel).toBe('View in Recruitment');
     const observer = matterAt(fold(snapshot(4, 3, [notYet('a', 'visoko')]), snapshot(5, 3, [raised('a', 'visoko')])))!;
     expect(buildRecruitmentMatterCopy(observer, MUNICIPALITIES).title).toBe('Staff raised a Brigade');
@@ -282,8 +300,8 @@ describe('recruitment matter wording', () => {
   it('summarises a long list with "and N more"', () => {
     const matter = matterAt(fold(snapshot(4, 0, ['a', 'b', 'c', 'd', 'e'].map((id) => brigade(id, 'visoko', { name: id.toUpperCase() })))))!;
     const copy = buildRecruitmentMatterCopy(matter, MUNICIPALITIES);
-    expect(copy.title).toBe('5 brigades can be raised');
-    expect(copy.summary).toBe('A, B, C and 2 more.');
+    expect(copy.title).toBe('5 brigades are ready to be raised'); // was: '5 brigades can be raised'
+    expect(copy.summary).toBe('Ready: A, B, C and 2 more.'); // was: 'A, B, C and 2 more.'
   });
 
   it('speaks BCS with diacritics and falls back to a readable municipality name', () => {
@@ -291,28 +309,35 @@ describe('recruitment matter wording', () => {
     const matter = matterAt(fold(snapshot(4, 0, [brigade('a', 'han_pijesak', { name: 'Test brigada' })])))!;
     const copy = buildRecruitmentMatterCopy(matter, MUNICIPALITIES);
     // Brigade names go through the BCS formation-name localizer (generic names lower-cased).
-    expect(copy.title).toBe('Može se formirati: test brigada');
-    expect(copy.summary).toBe('Mjesto formiranja: Han Pijesak. Cijena: ljudstvo 800, kapital 10.');
+    expect(copy.title).toBe('Spremna za formiranje: test brigada'); // was: 'Može se formirati: test brigada'
+    // was: summary 'Mjesto formiranja: Han Pijesak. Cijena: ljudstvo 800, kapital 10.'
+    expect(copy.summary).toBe('Spremne: test brigada.');
+    expect(copy.facts[0]).toContain('mjesto formiranja Han Pijesak');
     expect(copy.explanation).toContain('„Puna kontrola”');
-    expect(copy.setAsideLabel).toBe('Ne sada');
+    expect(copy.explanation).toContain('štab formira brigade bez pitanja');
+    expect(copy.setAsideLabel).toBe('Primljeno k znanju'); // was: 'Ne sada'
     const delegated = matterAt(fold(snapshot(4, 2, [notYet('a', 'visoko')]), snapshot(5, 2, [raised('a', 'visoko')])))!;
     expect(buildRecruitmentMatterCopy(delegated, MUNICIPALITIES).title).toBe('Štab je formirao: a brigada');
   });
 });
 
 describe('recruitment matter on the Command Surface and the Desk', () => {
-  it('is one Home Front decision card, recommended before Advance but never blocking', () => {
+  it('at Full Control is one Home Front watch card outside the Advance review', () => {
+    // was: 'one Home Front decision card, recommended before Advance' (id recruitment:decision,
+    // band recommended, in the Advance review). Since #865 there is no Full Control decision.
     const matter = matterAt(fold(snapshot(4, 0, [brigade('a', 'visoko'), brigade('b', 'zepce')])));
     const view = buildPresidentialDecisionRoomView({ state: makeState(4), recruitmentMatter: matter, municipalityNames: MUNICIPALITIES });
     const cards = view.cards.filter((card) => card.id.startsWith('recruitment:'));
     expect(cards).toHaveLength(1);
     const card = cards[0]!;
-    expect(card.priorityBand).toBe('recommended');
+    expect(card.id).toBe('recruitment:notice');
+    expect(card.priorityBand).toBe('monitor');
     expect(cardBelongsToPresidentialCommandCategory(card, 'cat_home_front')).toBe(true);
     expect(cardBelongsToPresidentialCommandCategory(card, 'cat_command')).toBe(false);
-    expect(card.sourceHandoffTarget).toEqual({ kind: 'recruitment', brigadeId: 'a' });
+    // was: sourceHandoffTarget (a Decision Room-owned decision card). The notice opens Recruitment directly.
+    expect(card.navigationTarget).toEqual({ kind: 'recruitment', brigadeId: 'a' });
     const review = buildPreAdvanceCommandReviewView({ state: makeState(4), recruitmentMatter: matter, municipalityNames: MUNICIPALITIES });
-    expect(review.items.map((item) => item.id)).toContain('recruitment:decision');
+    expect(review.items.some((item) => item.id.startsWith('recruitment:'))).toBe(false);
     expect(review.status).not.toBe('blocked');
   });
 
@@ -335,13 +360,14 @@ describe('recruitment matter on the Command Surface and the Desk', () => {
     const matter = matterAt(fold(snapshot(4, 0, [brigade('a', 'visoko', { name: 'Guards' })])));
     const items = withRecruitmentInboxItem([], matter, MUNICIPALITIES, 4);
     expect(items).toHaveLength(1);
+    // was: id 'recruitment:decision', band 'recommended', 'Guards can be raised', 'Open Recruitment'.
     expect(items[0]).toMatchObject({
-      id: 'recruitment:decision',
+      id: 'recruitment:notice',
       type: 'recruitment',
       action: 'recruitment',
-      priorityBand: 'recommended',
-      title: 'Guards can be raised',
-      actionLabel: 'Open Recruitment',
+      priorityBand: 'monitor',
+      title: 'Guards is ready to be raised',
+      actionLabel: 'View in Recruitment',
     });
     expect(withRecruitmentInboxItem([], null, MUNICIPALITIES, 4)).toEqual([]);
   });
@@ -377,9 +403,11 @@ describe('opening Recruitment on the named brigade', () => {
   it('the store folds snapshots and set-aside through the same pure watch', () => {
     const store = useGameStore.getState();
     store.observeRecruitmentCatalog(snapshot(4, 0, [brigade('a', 'visoko')]));
-    expect(useGameStore.getState().recruitmentWatch?.pendingIds).toEqual(['a']);
+    // was: pendingIds ['a'] -> [] and setAsideIds ['a'] (the Full Control decision queue).
+    expect(useGameStore.getState().recruitmentWatch?.newlyEligibleIds).toEqual(['a']);
+    expect(useGameStore.getState().recruitmentWatch?.noticeDismissedTurn).toBeNull();
     useGameStore.getState().setAsideRecruitmentMatter();
-    expect(useGameStore.getState().recruitmentWatch?.pendingIds).toEqual([]);
-    expect(useGameStore.getState().recruitmentWatch?.setAsideIds).toEqual(['a']);
+    expect(useGameStore.getState().recruitmentWatch?.noticeDismissedTurn).toBe(4);
+    expect(matterAt(useGameStore.getState().recruitmentWatch!)).toBeNull();
   });
 });

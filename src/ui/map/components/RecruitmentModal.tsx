@@ -66,9 +66,13 @@ function isAlreadyRaised(brigade: RecruitmentCatalogBrigade): boolean {
   return (brigade.reason_codes ?? []).includes('already_recruited');
 }
 
-/** Level 0 (Full Control) raises by hand, so no hold is needed or shown there. */
+/**
+ * The hold is offered at every level, Full Control included: the staff raise the player's
+ * brigades at every level (player-override model, §14.10a, #865), and only a hold stops them.
+ * Unknown level (no catalog yet): not shown.
+ */
 export function recruitmentHoldAvailable(autonomyLevel: number | null | undefined): boolean {
-  return typeof autonomyLevel === 'number' && autonomyLevel >= 1;
+  return typeof autonomyLevel === 'number' && autonomyLevel >= 0;
 }
 
 export function RecruitmentModal({

@@ -9,7 +9,6 @@ import { getActiveLocale, t, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from './formationNameLocalizations';
 import {
   humanizeMunicipalityId,
-  recruitmentStaysWithPresident,
   type RecruitmentMatter,
   type RecruitmentWatchBrigade,
 } from './recruitmentMatter';
@@ -51,7 +50,7 @@ export interface RecruitmentMatterCopy {
   explanation: string;
   /** One line for the Desk card. */
   summary: string;
-  /** One line per brigade: name, where it forms, the cost (decision) or that staff decide. */
+  /** One line per brigade: name, where it forms, and what the staff did or will do. */
   facts: string[];
   primaryActionLabel: string;
   setAsideLabel: string;
@@ -61,33 +60,6 @@ export interface RecruitmentMatterCopy {
 export function buildRecruitmentMatterCopy(matter: RecruitmentMatter, municipalityNames: MunicipalityNames): RecruitmentMatterCopy {
   const level = autonomyLevelLabel(matter.autonomyLevel);
   const familyLabel = t('recruitment.desk.family');
-  if (recruitmentStaysWithPresident(matter.autonomyLevel) && matter.mode === 'decision') {
-    const first = matter.ready[0]!;
-    const one = matter.ready.length === 1;
-    return {
-      title: one
-        ? t('recruitment.desk.decision.titleOne', { name: recruitmentBrigadeName(first) })
-        : t('recruitment.desk.decision.titleMany', { count: matter.ready.length }),
-      explanation: t('recruitment.desk.decision.explanation', { level }),
-      summary: one
-        ? t('recruitment.desk.decision.summaryOne', {
-          place: recruitmentBrigadePlace(first, municipalityNames),
-          manpower: first.manpowerCost,
-          capital: first.capitalCost,
-        })
-        : t('recruitment.desk.decision.summaryMany', { names: nameList(matter.ready) }),
-      facts: matter.ready.map((brigade) => t('recruitment.desk.fact.ready', {
-        name: recruitmentBrigadeName(brigade),
-        place: recruitmentBrigadePlace(brigade, municipalityNames),
-        manpower: brigade.manpowerCost,
-        capital: brigade.capitalCost,
-      })),
-      primaryActionLabel: t('recruitment.desk.action.open'),
-      setAsideLabel: t('recruitment.desk.action.setAside'),
-      familyLabel,
-    };
-  }
-
   const raised = matter.raised;
   const ready = matter.ready;
   const title = raised.length > 0
