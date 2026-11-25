@@ -138,7 +138,7 @@ describe('Level-1 stance answer hold: writers (source scan)', () => {
         expect(trig).not.toContain('clearCorpsHoldsForPresidentialOperation');
     });
 
-    it('only the President\'s own operation orders clear a hold (war_phases op directive and authored ops)', () => {
+    it('only the President\'s own operation orders clear a hold (war_phases op directive and authored ops; their explicit backing of a staff plan)', () => {
         const hits: string[] = [];
         const walk = (dir: string) => {
             for (const name of readdirSync(resolve(root, dir)).sort()) {
@@ -149,8 +149,22 @@ describe('Level-1 stance answer hold: writers (source scan)', () => {
         };
         walk('src');
         hits.sort();
-        expect(hits).toEqual(['src/sim/combat/stance_matters.ts', 'src/sim/turn_phases/war_phases.ts']);
+        expect(hits).toEqual([
+            'src/sim/combat/commander/commander_loop.ts',
+            'src/sim/combat/stance_matters.ts',
+            'src/sim/turn_phases/war_phases.ts',
+        ]);
         expect(read('src/sim/turn_phases/war_phases.ts').match(/clearCorpsHoldsForPresidentialOperation\(state, corpsId, turn\)/g)?.length).toBe(2);
+        // Player-override model (ruling Q5, 2026-11-25): the commander loop clears a hold once, and
+        // only inside the branch of a staged presidential answer for that plan (never on silence).
+        const loop = read('src/sim/combat/commander/commander_loop.ts');
+        expect(loop.match(/clearCorpsHoldsForPresidentialOperation\(/g)?.length).toBe(1);
+        const branchStart = loop.indexOf('&& playerOpResp.plan_id === updatedPlan.plan_id');
+        const call = loop.indexOf('clearCorpsHoldsForPresidentialOperation(state');
+        const branchEnd = loop.indexOf('if (!operationsAdmitted) admitCommanderOperations();');
+        expect(branchStart).toBeGreaterThan(-1);
+        expect(call).toBeGreaterThan(branchStart);
+        expect(call).toBeLessThan(branchEnd);
     });
 
     it('the AI corps commander respects the President\'s order and hold', () => {

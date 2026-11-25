@@ -234,9 +234,10 @@ describe('commander operation commander assignment', () => {
         source: 'reactive',
     });
 
-    it('does not allocate an officer while Level-1 approval is absent for the player corps', () => {
-        // The Level-1 hold applies to the human player's corps only (PK1, 2026-11-14): RS is the player.
+    it('does not allocate an officer when the President refused the player corps plan', () => {
+        // Player-override model (§14.10a-b, 2026-11-25): silence launches; only a staged refusal stops it.
         const game = state({ autonomyLevel: 1, playerFaction: 'RS' });
+        game.military.corps_command![CORPS_ID]!.player_op_response = { plan_id: 'p1', approved: false, turn: 25 };
         applyCommanderOutput(game, CORPS_ID, output(operation(), executingPlan()));
 
         expect(game.military.corps_command![CORPS_ID]!.active_operations).toHaveLength(0);

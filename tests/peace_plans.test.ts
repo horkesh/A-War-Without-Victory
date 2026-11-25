@@ -19,6 +19,8 @@ function makeState(overrides: {
     war_start_turn?: number;
     player_faction?: FactionId;
     no_player?: boolean;
+    /** Headless auto-control with an authored player faction: the only lens that still opens the fallback pointer. */
+    headless_authored_player?: boolean;
     decision_mode?: 'historical' | 'emergent';
     controllers?: Record<string, string>;
     negotiation?: any;
@@ -35,6 +37,7 @@ function makeState(overrides: {
             war_start_turn: warStart,
             ...(overrides.decision_mode ? { decision_mode: overrides.decision_mode } : {}),
             ...(overrides.no_player ? {} : { player_faction: overrides.player_faction ?? 'RBiH' }),
+            ...(overrides.headless_authored_player ? { headless_scenario_auto_control: true } : {}),
         },
         factions: [
             { id: 'RBiH' },
@@ -146,37 +149,52 @@ describe('Peace Plan Data', () => {
 });
 
 describe('evaluatePeacePlans', () => {
-    // §6 E3a2: no pointer at a plan's trigger week. A human player side with no recorded
-    // answer gets the pointer (the modal) only as the close-week fallback.
-    it('Vance-Owen: no pointer at war week 40; the fallback pointer at its close week 58', () => {
+    // §6 E3a2: nothing resolves at a plan's trigger week without the three answers. At the close
+    // week a live human side with no recorded answer gets the plan owner's answer by silence, as
+    // headless gives that seat (player-override model, §14.10a, 2026-11-25; it used to get the
+    // fallback pointer, the modal). Only a headless run with an authored player opens the pointer.
+    it('Vance-Owen: nothing at war week 40; silence resolves it at its close week 58', () => {
         const state = makeState({ turn: 50, war_start_turn: 10 }); // war week = 40
         evaluatePeacePlans(state);
         expect(state.military.negotiation?.pending_peace_plan).toBeUndefined();
+        expect(state.military.negotiation?.peace_plan_history ?? []).toHaveLength(0);
 
         state.meta.turn = 68; // war week = 58
         evaluatePeacePlans(state);
-        const pending = state.military.negotiation?.pending_peace_plan;
-        expect(pending).toBeDefined();
-        expect(pending!.plan_id).toBe('vance_owen');
-        expect(pending!.turn_offered).toBe(50);
+        expect(state.military.negotiation?.pending_peace_plan).toBeUndefined();
+        const row = state.military.negotiation?.peace_plan_history.find((h) => h.plan_id === 'vance_owen');
+        expect(row?.responses.RBiH).toBe('accepted'); // the historical RBiH answer to Vance-Owen
+        expect(state.meta.proposal_decision_history?.map((r) => [r.proposed_action, r.resolved_by]))
+            .toEqual([['PEACE_PLAN:vance_owen', 'silence']]);
     });
 
-    it('Owen-Stoltenberg: the fallback pointer at its close week 78', () => {
+    it('Vance-Owen: a headless run with an authored player still opens the fallback pointer at week 58', () => {
+        const state = makeState({ turn: 68, war_start_turn: 10, headless_authored_player: true });
+        evaluatePeacePlans(state);
+        const pending = state.military.negotiation?.pending_peace_plan;
+        expect(pending?.plan_id).toBe('vance_owen');
+        expect(pending?.turn_offered).toBe(50);
+        expect(state.meta.proposal_decision_history).toBeUndefined();
+    });
+
+    it('Owen-Stoltenberg: silence resolves it at its close week 78', () => {
         const state = makeState({ turn: 70, war_start_turn: 0 });
         evaluatePeacePlans(state);
         expect(state.military.negotiation?.pending_peace_plan).toBeUndefined();
         state.meta.turn = 78;
         evaluatePeacePlans(state);
-        expect(state.military.negotiation?.pending_peace_plan?.plan_id).toBe('owen_stoltenberg');
+        expect(state.military.negotiation?.pending_peace_plan).toBeUndefined();
+        expect(state.military.negotiation?.peace_plan_history.map((h) => h.plan_id)).toContain('owen_stoltenberg');
     });
 
-    it('Contact Group: the fallback pointer at its close week 120', () => {
+    it('Contact Group: silence resolves it at its close week 120', () => {
         const state = makeState({ turn: 118, war_start_turn: 0 });
         evaluatePeacePlans(state);
         expect(state.military.negotiation?.pending_peace_plan).toBeUndefined();
         state.meta.turn = 120;
         evaluatePeacePlans(state);
-        expect(state.military.negotiation?.pending_peace_plan?.plan_id).toBe('contact_group');
+        expect(state.military.negotiation?.pending_peace_plan).toBeUndefined();
+        expect(state.military.negotiation?.peace_plan_history.map((h) => h.plan_id)).toContain('contact_group');
     });
 
     it('does not trigger at non-matching war week', () => {
@@ -237,17 +255,19 @@ describe('evaluatePeacePlans', () => {
             negotiation: neg,
         });
 
-        evaluatePeacePlans(state);
+        // The RBiH Owen-Stoltenberg lock: its fallback is the historical Assembly refusal. Read on
+        // a silent copy (player-override model: a silent RS seat is answered like headless).
+        const silent = structuredClone(state);
+        evaluatePeacePlans(silent);
+        const silentRow = silent.military.negotiation?.peace_plan_history.find((h) => h.plan_id === 'owen_stoltenberg');
+        expect(silentRow?.responses).toMatchObject({ RBiH: 'rejected', HRHB: 'accepted' });
 
-        // The RBiH Owen-Stoltenberg lock: its fallback is the historical Assembly refusal.
-        expect(neg.pending_peace_plan).toMatchObject({
+        // The President's explicit answer on a pending fallback (an older save's pointer) still wins.
+        neg.pending_peace_plan = {
             plan_id: 'owen_stoltenberg',
-            bot_responses: {
-                RBiH: 'rejected',
-                HRHB: 'accepted',
-            },
-        });
-
+            turn_offered: 70,
+            bot_responses: { RBiH: 'rejected', HRHB: 'accepted' },
+        };
         const result = resolvePeacePlan(state, 'owen_stoltenberg', 'accepted');
 
         expect(result).toEqual({
@@ -258,15 +278,22 @@ describe('evaluatePeacePlans', () => {
         expect(state.military.event_flags?.war_ended_early).not.toBe(true);
     });
 
-    it('skips player faction in bot responses', () => {
+    it('a silent player seat gets the plan owner answer headless gives it; the pointer only in the authored headless lens', () => {
         const state = makeState({ turn: 68, war_start_turn: 10, player_faction: 'RS' }); // VOPP close week
+        const headless = makeState({ turn: 68, war_start_turn: 10, no_player: true });
         evaluatePeacePlans(state);
+        evaluatePeacePlans(headless);
+        expect(state.military.negotiation?.pending_peace_plan).toBeUndefined();
+        const live = state.military.negotiation?.peace_plan_history.find((h) => h.plan_id === 'vance_owen');
+        const bot = headless.military.negotiation?.peace_plan_history.find((h) => h.plan_id === 'vance_owen');
+        expect(live?.responses).toEqual(bot?.responses);
 
-        const pending = state.military.negotiation?.pending_peace_plan;
+        // Headless with an authored player: RS is the pointer's seat and not among its bot responses.
+        const authored = makeState({ turn: 68, war_start_turn: 10, player_faction: 'RS', headless_authored_player: true });
+        evaluatePeacePlans(authored);
+        const pending = authored.military.negotiation?.pending_peace_plan;
         expect(pending).toBeDefined();
-        // RS is player — should not appear in bot_responses
         expect(pending!.bot_responses.RS).toBeUndefined();
-        // RBiH and HRHB should have responses
         expect(pending!.bot_responses.RBiH).toBeDefined();
         expect(pending!.bot_responses.HRHB).toBeDefined();
     });
@@ -337,6 +364,16 @@ describe('evaluatePeacePlans', () => {
     });
 });
 
+/**
+ * The close-week answers of Vance-Owen. The live player seat (RBiH by default here) is answered by
+ * silence like headless (§14.10a), so the plan resolves and its row carries every side's answer.
+ */
+function vanceOwenCloseWeekResponses(state: GameState): Partial<Record<FactionId, string>> {
+    const row = state.military.negotiation?.peace_plan_history.find((h) => h.plan_id === 'vance_owen');
+    expect(row).toBeDefined();
+    return row!.responses;
+}
+
 describe('Bot response logic (the close-week fallback)', () => {
     it('bot accepts when override_authority > 50', () => {
         const neg = makeNegotiationState({
@@ -354,10 +391,9 @@ describe('Bot response logic (the close-week fallback)', () => {
         });
         evaluatePeacePlans(state);
 
-        const pending = state.military.negotiation?.pending_peace_plan;
-        expect(pending).toBeDefined();
-        expect(pending!.bot_responses.RS).toBe('accepted');
-        expect(pending!.bot_responses.HRHB).toBe('accepted');
+        const responses = vanceOwenCloseWeekResponses(state);
+        expect(responses.RS).toBe('accepted');
+        expect(responses.HRHB).toBe('accepted');
     });
 
     // REMOVED 2026-08-31 with the Cutileiro plan: 'bot rejects when override low and
@@ -420,7 +456,7 @@ describe('Bot response logic (the close-week fallback)', () => {
             negotiation: makeNegotiationState({ override_authority: { RS: 10, HRHB: 10, RBiH: 10 } }),
         });
         evaluatePeacePlans(state);
-        expect(state.military.negotiation?.pending_peace_plan?.bot_responses.RS).toBe('accepted');
+        expect(vanceOwenCloseWeekResponses(state).RS).toBe('accepted');
     });
 
     it('bot accepts when plan offers more than current territory', () => {
@@ -438,9 +474,7 @@ describe('Bot response logic (the close-week fallback)', () => {
         });
         evaluatePeacePlans(state);
 
-        const pending = state.military.negotiation?.pending_peace_plan;
-        expect(pending).toBeDefined();
-        expect(pending!.bot_responses.RS).toBe('accepted');
+        expect(vanceOwenCloseWeekResponses(state).RS).toBe('accepted');
     });
 });
 
@@ -699,10 +733,11 @@ describe('Determinism', () => {
         evaluatePeacePlans(state1);
         evaluatePeacePlans(state2);
 
-        const pending1 = state1.military.negotiation?.pending_peace_plan;
-        const pending2 = state2.military.negotiation?.pending_peace_plan;
+        const history1 = state1.military.negotiation?.peace_plan_history;
+        const history2 = state2.military.negotiation?.peace_plan_history;
 
-        expect(pending1).toBeDefined();
-        expect(pending1).toEqual(pending2);
+        expect(history1?.length).toBeGreaterThan(0);
+        expect(history1).toEqual(history2);
+        expect(state1).toEqual(state2);
     });
 });

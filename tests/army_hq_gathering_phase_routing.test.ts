@@ -83,7 +83,9 @@ describe('production Army HQ gathering faction routing', () => {
         { name: 'absent player, interactive', playerFaction: null, autonomy: 0, headless: false, expectedPlan: true },
         { name: 'absent player, headless', playerFaction: null, autonomy: 0, headless: true, expectedPlan: true },
         { name: 'selected player, headless', playerFaction: FACTION, autonomy: 0, headless: true, expectedPlan: true },
-        { name: 'selected player, autonomy 0', playerFaction: FACTION, autonomy: 0, headless: false, expectedPlan: false },
+        // Player-override model (§14.10a, 2026-11-25): Army HQ gathering has no 1.0 surface, so it
+        // runs for the player faction at autonomy 0 too (it used to leave them the plan manually).
+        { name: 'selected player, autonomy 0', playerFaction: FACTION, autonomy: 0, headless: false, expectedPlan: true },
         { name: 'selected player, autonomy 1', playerFaction: FACTION, autonomy: 1, headless: false, expectedPlan: true },
         { name: 'selected player, autonomy 2', playerFaction: FACTION, autonomy: 2, headless: false, expectedPlan: true },
         { name: 'selected player, autonomy 3', playerFaction: FACTION, autonomy: 3, headless: false, expectedPlan: true },

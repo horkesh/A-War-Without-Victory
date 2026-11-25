@@ -528,7 +528,9 @@ describe('player_op_response lifecycle', () => {
         });
     });
 
-    it('keeps an approval authoritative when the commander emits no operation', () => {
+    // Amended 2026-11-25, player-override model (residue A retired, ruling Q4): an approved plan
+    // whose emission comes out empty is consumed and proceeds as headless; it is not held at ready.
+    it('consumes an approval when the commander emits no operation, and the plan proceeds as headless', () => {
         const state = makeState({
             autonomyLevel: 1,
             turn: 6,
@@ -557,12 +559,8 @@ describe('player_op_response lifecycle', () => {
             garrison_locks: [],
         } as any);
 
-        expect(state.military.corps_command?.arbih_1st?.player_op_response).toEqual({
-            plan_id: 'plan_arbih_1st_t5',
-            approved: true,
-            turn: 5,
-        });
-        expect(state.military.corps_command?.arbih_1st?.commander_state?.current_plan?.status).toBe('ready');
+        expect(state.military.corps_command?.arbih_1st?.player_op_response).toBeUndefined();
+        expect(state.military.corps_command?.arbih_1st?.commander_state?.current_plan?.status).toBe('executing');
     });
 
     it('clears a rejected response when the commander consumes it', () => {

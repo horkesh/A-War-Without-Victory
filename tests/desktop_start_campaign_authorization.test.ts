@@ -45,13 +45,15 @@ function controlCounts(state: any): Record<string, number> {
 }
 
 describe('desktop startNewCampaign historical operation authorization', () => {
-  it('includes the player faction in bot order selection only when assisted execution is active', () => {
+  // Amended 2026-11-25, player-override model (§14.10a): the staff runs for the player faction at
+  // every autonomy level, 0 included (Level 0 used to drop them from bot order selection).
+  it('includes the player faction in bot order selection at every autonomy level', () => {
     const baseState = {
       factions: [{ id: 'RBiH' }, { id: 'RS' }, { id: 'HRHB' }],
       meta: { player_faction: 'RS' },
     } as any;
 
-    expect(selectBotBrigadeOrderFactions(baseState)).toEqual(['HRHB', 'RBiH']);
+    expect(selectBotBrigadeOrderFactions(baseState)).toEqual(['HRHB', 'RBiH', 'RS']);
 
     baseState.meta.autonomy_level = 1;
     expect(selectBotBrigadeOrderFactions(baseState)).toEqual(['HRHB', 'RBiH', 'RS']);
@@ -180,56 +182,37 @@ describe('desktop startNewCampaign historical operation authorization', () => {
     expect(authorizedTurn.state.meta.turn).toBe(1);
   });
 
-  it('assists only participants of accepted selected player-faction historical operations', async () => {
+  // Amended 2026-11-25, player-override model (§14.10a, ruling Q2): at autonomy 0 the staff runs
+  // the whole player faction exactly as at the delegated levels (the operation-scoped "assist" of
+  // accepted historical-operation participants is retired). A hands-off Full Control advance gives
+  // the same orders, battles and control as a hands-off Delegated one.
+  it('a hands-off Full Control advance runs the player staff exactly as a hands-off Delegated one', async () => {
     const { state } = await startNewCampaign(process.cwd(), 'RS', 'apr_1992');
+    const delegated = structuredClone(state);
     state.meta.autonomy_level = 0;
+    delegated.meta.autonomy_level = 2;
     const review = state.meta.pending_proposal_reviews?.find((proposal) =>
       proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_drina:Operation Drina'
     );
     expect(review).toBeDefined();
     expect(review?.accepted).toBe(true);
-    const assisted = await advanceTurn(state, process.cwd());
-    const injectedDrina = findOperation(assisted.state, 'vrs_drina', 'Operation Drina');
-    expect(injectedDrina?.phase).toBe('execution');
+    const [full, staff] = await Promise.all([
+      advanceTurn(state, process.cwd()),
+      advanceTurn(delegated, process.cwd()),
+    ]);
+    expect(full.error).toBeUndefined();
+    expect(staff.error).toBeUndefined();
+    expect(findOperation(full.state, 'vrs_drina', 'Operation Drina')?.phase).toBe('execution');
 
-    const drina = findOperation(assisted.state, 'vrs_drina', 'Operation Drina');
-    expect(drina).toBeDefined();
-    expect(drina?.phase).toBe('execution');
-    // Every player historical operation now carries standing authorization, so the assist
-    // covers the union of their participants rather than Operation Drina's alone. The contract
-    // under test is unchanged: ONLY participants of accepted operations are assisted.
-    const participants = new Set<string>();
-    for (const corpsId of Object.keys(assisted.state.military.corps_command ?? {})) {
-      const cmd = (assisted.state.military.corps_command ?? {})[corpsId] as
-        { active_operations?: Array<{ is_pre_planned?: boolean; participating_brigades?: string[] }> };
-      for (const op of cmd?.active_operations ?? []) {
-        if (op.is_pre_planned !== true) continue;
-        for (const b of op.participating_brigades ?? []) {
-          if (assisted.state.military.formations?.[b]?.faction === 'RS') participants.add(b);
-        }
-      }
-    }
-    expect(participants.size).toBeGreaterThan(0);
-
-    const assistDiagnostics = (assisted.report?.details as any)?.player_historical_operation_assist;
-    // Every accepted player historical operation is assisted now that all of them carry
-    // standing authorization — previously only the one manually accepted above was.
-    expect(Object.keys(assistDiagnostics?.eligible_attackers_by_corps ?? {})).toContain('vrs_drina');
-    expect(assistDiagnostics.eligible_attackers_by_corps.vrs_drina).toBeGreaterThan(0);
-    expect(assistDiagnostics.eligible_attackers_by_corps.vrs_drina).toBeLessThanOrEqual(participants.size);
-
-    const ordersSeenByResolver = (assisted.report?.details as any)?.attack_resolution_osid
-      ?.orders_seen_by_brigade ?? {};
-    const playerAttackers = Object.keys(ordersSeenByResolver).filter((brigadeId) =>
-      assisted.state.military.formations?.[brigadeId]?.faction === 'RS'
-    );
+    const fullDetails = full.report?.details as any;
+    const staffDetails = staff.report?.details as any;
+    expect(fullDetails?.player_historical_operation_assist).toBeUndefined();
+    const playerAttackers = Object.keys(fullDetails?.attack_resolution_osid?.orders_seen_by_brigade ?? {})
+      .filter((brigadeId) => full.state.military.formations?.[brigadeId]?.faction === 'RS');
     expect(playerAttackers.length).toBeGreaterThan(0);
-    expect(playerAttackers.every((brigadeId) => participants.has(brigadeId))).toBe(true);
-
-    const nonParticipant = Object.values(assisted.state.military.formations ?? {}).find((formation: any) =>
-      formation.faction === 'RS' && formation.kind === 'brigade' && !participants.has(formation.id)
-    ) as any;
-    expect(nonParticipant).toBeDefined();
-    expect(ordersSeenByResolver).not.toHaveProperty(nonParticipant.id);
+    expect(fullDetails?.attack_resolution_osid?.orders_seen_by_brigade)
+      .toEqual(staffDetails?.attack_resolution_osid?.orders_seen_by_brigade);
+    expect(controlCounts(full.state)).toEqual(controlCounts(staff.state));
+    expect(full.state.political.political_controllers).toEqual(staff.state.political.political_controllers);
   });
 });

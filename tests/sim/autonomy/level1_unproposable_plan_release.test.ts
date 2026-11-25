@@ -75,7 +75,7 @@ const op = (id: string) => ({
     objectives: ['op:test:objective'], participating_brigades: [`${id}_b1`, `${id}_b2`], commander_officer_id: `officer_${id}`,
 });
 
-describe('L3c: a Level-1 plan with no objective is released, not held for an answer that cannot come', () => {
+describe('L3c: a Level-1 plan with no objective is never held for an answer that cannot come', () => {
     it('one rule decides what can be proposed', () => {
         expect(isLevel1ProposablePlan({ target_osids: ['op:x:1'] })).toBe(true);
         expect(isLevel1ProposablePlan({ target_osids: [] })).toBe(false);
@@ -88,20 +88,30 @@ describe('L3c: a Level-1 plan with no objective is released, not held for an ans
         expect(generateLevel1OpProposals(makeState({ targets: ['op:test:objective'] }), 'RBiH')).toHaveLength(1);
     });
 
-    it('a player corps at Level 1 releases it: no operation, the commander replans', () => {
+    // Amended 2026-11-25, player-override model (§14.10a-b): the player's corps follows the headless
+    // plan lifecycle, so an unproposable plan proceeds exactly as the bot corps' identical plan does.
+    it('a player corps at Level 1 proceeds with it exactly as the bot corps does', () => {
         const state = makeState();
         applyExecuting(state, PLAYER, []);
+        applyExecuting(state, BOT, []);
         expect(cmd(state, PLAYER).active_operations).toEqual([]);
-        expect(cmd(state, PLAYER).commander_state?.current_plan).toBeNull();
-        expect(cmd(state, PLAYER).status_reason).toBe('plan released: no objective to put to the president at Level 1');
+        expect(cmd(state, PLAYER).commander_state?.current_plan?.status).toBe('executing');
+        expect(cmd(state, PLAYER).commander_state?.current_plan?.status)
+            .toBe(cmd(state, BOT).commander_state?.current_plan?.status);
+        expect(cmd(state, PLAYER).status_reason ?? '').not.toMatch(/Level 1/);
     });
 
-    it('control: a plan with targets is still held at ready for the President\'s answer', () => {
+    it('a plan with targets launches on the staff clock unless the President refused it', () => {
         const state = makeState({ targets: ['op:test:objective'] });
         applyExecuting(state, PLAYER, ['op:test:objective'], [op(PLAYER)]);
-        expect(cmd(state, PLAYER).active_operations).toEqual([]);
-        expect(cmd(state, PLAYER).commander_state?.current_plan?.status).toBe('ready');
-        expect(cmd(state, PLAYER).status_reason).toBe('plan held at ready: awaiting player approval at Level 1');
+        expect(cmd(state, PLAYER).active_operations.map((o) => o.name)).toEqual([`op_${PLAYER}`]);
+        expect(cmd(state, PLAYER).commander_state?.current_plan?.status).toBe('executing');
+
+        const refused = makeState({ targets: ['op:test:objective'] });
+        cmd(refused, PLAYER).player_op_response = { plan_id: EMPTY_PLAN_ID, approved: false, turn: 16 };
+        applyExecuting(refused, PLAYER, ['op:test:objective'], [op(PLAYER)]);
+        expect(cmd(refused, PLAYER).active_operations).toEqual([]);
+        expect(cmd(refused, PLAYER).commander_state?.current_plan).toBeNull();
     });
 
     it('bot corps and headless auto-control are unchanged (no guard, plan proceeds)', () => {

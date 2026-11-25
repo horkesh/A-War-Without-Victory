@@ -77,7 +77,6 @@ import { isVlasicCohaExceptionOperation } from './coha_operation_exception.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { effectivePersonnel } from './tactical_group_personnel.js';
 import { isSectorRosterEligibleFormation } from './sector_roster_eligibility.js';
-import { selectStaffControlledFactions } from '../bot/staff_control.js';
 import { getPrimaryOperation } from './corps_operation_helpers.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { removeFromActiveOperation } from './brigade_dissolution.js';
@@ -1407,19 +1406,10 @@ export function evaluateArmyReserveAssignments(
     const fulfilled: ArmyReserveRequest[] = [];
     const remaining: ArmyReserveRequest[] = [];
 
-    // Auto-assign for every staff-controlled faction: bots, and the player's staff at
-    // autonomy >= 1 (owner calibration directive 2026-11-05: live must reproduce headless).
-    // Only a manual (autonomy 0) player's requests stay pending for the UI.
-    const playerFaction = state.meta.player_faction ?? null;
-    const manualPlayerFaction = playerFaction != null
-        && !selectStaffControlledFactions(state).includes(playerFaction)
-        ? playerFaction
-        : null;
+    // Auto-assign for every faction: bots and the player's staff at every autonomy level (owner
+    // calibration directive 2026-11-05; player-override model 2026-11-25, §14.10a, ruling Q2:
+    // live must reproduce headless, and reserve auto-assign has no 1.0 surface).
     for (const req of requests) {
-        if (manualPlayerFaction != null && req.faction === manualPlayerFaction) {
-            remaining.push(req);
-            continue;
-        }
 
         const brigadeId = req.suggested_brigade_id;
         if (!brigadeId || usedBrigades.has(brigadeId)) {

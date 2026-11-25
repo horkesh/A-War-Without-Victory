@@ -8,9 +8,10 @@
  * zero commander operations after week 20 and the 1992 islands it normally clears survived to 1995
  * (docs/40_reports/20261114_UNHELD_POCKETS_DIAGNOSIS.md §8).
  *
- * Contract pinned here:
- *   - Level 1: the player's corps are held until approved; bot corps plan and launch normally.
- *   - Levels 0 and 2: nothing is held, for any faction (unchanged).
+ * Contract pinned here (amended 2026-11-25, player-override model, Engine Invariants §14.10a-b):
+ *   - No level holds a plan for anyone: a silent player's staff plan launches on the headless turn,
+ *     exactly as a bot corps' does. Only their explicit staged refusal for that plan stops it.
+ *   - Bot corps are never read for a player answer.
  *   - Headless auto-control (no human player): nothing is held, even at Level 1.
  */
 
@@ -99,29 +100,27 @@ function planStatus(state: GameState, faction: FactionId): string | undefined {
     return state.military.corps_command?.[CORPS[faction]]?.commander_state?.current_plan?.status;
 }
 
-describe('Level 1 holds only the human player\'s corps', () => {
-    it('at Level 1 with an RBiH player, RBiH is held while RS and HRHB bot corps launch', () => {
+describe('Level 1 reads an answer only from the human player\'s corps; silence launches', () => {
+    it('at Level 1 with an RBiH player, the silent RBiH plan launches like the RS and HRHB bot plans', () => {
         const state = makeState(1, 'RBiH');
         for (const faction of FACTIONS) applyExecutingPlan(state, faction);
 
-        expect(launched(state, 'RBiH')).toEqual([]);
-        expect(planStatus(state, 'RBiH')).toBe('ready');
-        expect(state.military.corps_command?.[CORPS.RBiH]?.status_reason)
-            .toBe('plan held at ready: awaiting player approval at Level 1');
-
-        for (const bot of ['RS', 'HRHB'] as FactionId[]) {
-            expect(launched(state, bot)).toEqual([`op_${CORPS[bot]}`]);
-            expect(planStatus(state, bot)).toBe('executing');
-            expect(state.military.corps_command?.[CORPS[bot]]?.status_reason ?? '').not.toMatch(/Level 1/);
+        for (const faction of FACTIONS) {
+            expect(launched(state, faction)).toEqual([`op_${CORPS[faction]}`]);
+            expect(planStatus(state, faction)).toBe('executing');
+            expect(state.military.corps_command?.[CORPS[faction]]?.status_reason ?? '').not.toMatch(/Level 1/);
         }
     });
 
-    it('at Level 1 with an RS player, RS is held while RBiH and HRHB bot corps launch', () => {
+    it('at Level 1 with an RS player, an explicit refusal stops only the RS plan', () => {
         const state = makeState(1, 'RS');
+        state.military.corps_command![CORPS.RS]!.player_op_response = {
+            plan_id: `plan_${CORPS.RS}_t10`, approved: false, turn: 10,
+        };
         for (const faction of FACTIONS) applyExecutingPlan(state, faction);
 
         expect(launched(state, 'RS')).toEqual([]);
-        expect(planStatus(state, 'RS')).toBe('ready');
+        expect(state.military.corps_command?.[CORPS.RS]?.commander_state?.current_plan).toBeNull();
         expect(launched(state, 'RBiH')).toEqual([`op_${CORPS.RBiH}`]);
         expect(launched(state, 'HRHB')).toEqual([`op_${CORPS.HRHB}`]);
     });
@@ -136,8 +135,11 @@ describe('Level 1 holds only the human player\'s corps', () => {
         expect(state.military.corps_command?.[CORPS.RBiH]?.player_op_response).toBeUndefined();
     });
 
-    it('holds a player corps that exists only in corps_command when the caller passes its faction', () => {
+    it('reads the refusal of a player corps that exists only in corps_command when the caller passes its faction', () => {
         const state = makeState(1, 'RBiH');
+        state.military.corps_command![CORPS.RBiH]!.player_op_response = {
+            plan_id: `plan_${CORPS.RBiH}_t10`, approved: false, turn: 10,
+        };
         delete (state.military.formations as Record<string, unknown>)[CORPS.RBiH];
         delete (state.military.formations as Record<string, unknown>)[CORPS.RS];
         const id = CORPS.RBiH;
@@ -154,7 +156,7 @@ describe('Level 1 holds only the human player\'s corps', () => {
         } as any;
         applyCommanderOutput(state, id, output, 'RBiH');
         expect(launched(state, 'RBiH')).toEqual([]);
-        expect(planStatus(state, 'RBiH')).toBe('ready');
+        expect(state.military.corps_command?.[CORPS.RBiH]?.commander_state?.current_plan).toBeNull();
 
         const rsId = CORPS.RS;
         applyCommanderOutput(state, rsId, {

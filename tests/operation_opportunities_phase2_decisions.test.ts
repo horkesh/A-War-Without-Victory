@@ -395,11 +395,11 @@ describe('operation_opportunities — Phase 2 decision surface', () => {
         expect(state.military.corps_command![def.primary_corps].active_operations).toHaveLength(1);
     });
 
-    it('headless scenario bridge includes the player faction in bot brigade orders only when flagged', () => {
+    it('bot brigade orders include the player faction at every level, live or headless (player-override model)', () => {
         const state = buildMinimalState(176, 'RBiH', 0);
         state.factions = [{ id: 'RBiH' }, { id: 'RS' }, { id: 'HRHB' }] as GameState['factions'];
 
-        expect(selectBotBrigadeOrderFactions(state)).toEqual(['HRHB', 'RS']);
+        expect(selectBotBrigadeOrderFactions(state)).toEqual(['HRHB', 'RBiH', 'RS']);
 
         state.meta.headless_scenario_auto_control = true;
 
@@ -541,16 +541,14 @@ describe('BC01 opportunity ownership', () => {
             const reviews = generateOpportunityProposalReviews(state, 'RBiH', [def]);
             (state.meta.pending_proposal_reviews ??= []).push(...reviews);
         }
-        if (level < 2) {
-            expect(state.military.operation_opportunities![0].status).toBe('eligible_pending_review');
-            expect(state.meta.pending_proposal_reviews).toHaveLength(1);
-            expect(state.military.corps_command![def.primary_corps].active_operations).toHaveLength(0);
-        } else {
-            expect(state.military.operation_opportunities![0].status).toBe('approved');
-            expect(state.meta.pending_proposal_reviews).toHaveLength(0);
-            expect(state.military.corps_command![def.primary_corps].active_operations).toHaveLength(1);
-            expect(state.military.operation_opportunity_resolutions).toHaveLength(1);
-        }
+        // Player-override model (§14.10a, H-15, 2026-11-25): a live president's staff decide on the
+        // headless turn at every level; below Level 2 the decision leaves a silence receipt.
+        expect(state.military.operation_opportunities![0].status).toBe('approved');
+        expect(state.meta.pending_proposal_reviews).toHaveLength(0);
+        expect(state.military.corps_command![def.primary_corps].active_operations).toHaveLength(1);
+        expect(state.military.operation_opportunity_resolutions).toHaveLength(1);
+        expect((state.meta.proposal_decision_history ?? []).map((row) => row.resolved_by))
+            .toEqual(level < 2 ? ['silence'] : []);
     });
 
     it.each([0, 1, 2, 3] as const)('real war routing steps obey level %i', async (level) => {
@@ -571,8 +569,9 @@ describe('BC01 opportunity ownership', () => {
             await warPhases.find(p => p.name === 'apply-bot-opportunity-decisions')!.run(context);
             await warPhases.find(p => p.name === 'generate-level1-opportunity-proposals')!.run(context);
         }
-        expect(state.military.operation_opportunities![0].status).toBe(level < 2 ? 'eligible_pending_review' : 'approved');
-        expect(state.meta.pending_proposal_reviews ?? []).toHaveLength(level < 2 ? 1 : 0);
+        // Player-override model (§14.10a, H-15): the staff decide on the headless turn at every level.
+        expect(state.military.operation_opportunities![0].status).toBe('approved');
+        expect(state.meta.pending_proposal_reviews ?? []).toHaveLength(0);
     });
 
     it('no selected player preserves automatic decision output across autonomy levels', () => {

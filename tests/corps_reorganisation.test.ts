@@ -375,25 +375,26 @@ describe('commander_handover', () => {
         return state;
     }
 
-    it('a manually controlled player is asked, never overruled: one deduplicated matter, no move, no receipt', () => {
+    // Amended 2026-11-25, player-override model (§14.10a, H-13): Full Control follows the authored
+    // handover as headless (it used to put a matter to them); their explicit "kept" still makes it lapse.
+    it('a Full Control player follows the handover as headless; a commander they explicitly kept is never displaced', () => {
         const state = presidentState({ player_faction: 'RBiH', autonomy_level: 0 });
+        const headless = presidentState({});
         processCorpsReorganisationEvents(state, [HANDOVER]);
+        processCorpsReorganisationEvents(headless, [HANDOVER]);
         const o = state.military.named_officers as any;
-        expect(o.arbih_alagic).toMatchObject({ status: 'active', assigned_corps_id: 'arbih_3rd_corps' });
-        expect(o.generic_7th).toMatchObject({ status: 'active', assigned_corps_id: 'arbih_7th_corps' });
-        expect(state.military.formation_lifecycle_events_fired?.h).toBeUndefined();
-        expect(state.military.pending_officer_events).toEqual([expect.objectContaining({
-            type: 'replacement_suggested', corps_id: 'arbih_7th_corps', officer_id: 'arbih_alagic', current_commander_id: 'generic_7th',
-        })]);
-        state.meta.turn = 100;
-        processCorpsReorganisationEvents(state, [HANDOVER]);
-        expect(state.military.pending_officer_events).toHaveLength(1);
-        // He declines (keeps the incumbent): the handover lapses and is receipted.
-        state.military.officer_decision_history = [{ event_type: 'replacement_suggested', decision: 'acknowledged', corps_id: 'arbih_7th_corps', outgoing_officer_id: 'generic_7th', officer_id: 'arbih_alagic' }] as any;
-        const report = processCorpsReorganisationEvents(state, [HANDOVER])!;
+        expect(o.arbih_alagic.assigned_corps_id).toBe('arbih_7th_corps');
+        expect(state.military.named_officers).toEqual(headless.military.named_officers);
+        expect(state.military.formation_lifecycle_events_fired).toEqual(headless.military.formation_lifecycle_events_fired);
+        expect(state.military.pending_officer_events ?? []).toEqual([]);
+
+        // They kept the incumbent explicitly (an answered matter on record): the handover lapses and is receipted.
+        const kept = presidentState({ player_faction: 'RBiH', autonomy_level: 0 });
+        kept.military.officer_decision_history = [{ event_type: 'replacement_suggested', decision: 'acknowledged', corps_id: 'arbih_7th_corps', outgoing_officer_id: 'generic_7th', officer_id: 'arbih_alagic' }] as any;
+        const report = processCorpsReorganisationEvents(kept, [HANDOVER])!;
         expect(report.handovers?.[0]).toMatchObject({ lapsed: true });
-        expect(o.generic_7th.assigned_corps_id).toBe('arbih_7th_corps');
-        expect(state.military.formation_lifecycle_events_fired?.h).toBe(100);
+        expect((kept.military.named_officers as any).generic_7th.assigned_corps_id).toBe('arbih_7th_corps');
+        expect(kept.military.formation_lifecycle_events_fired?.h).toBe(99);
     });
 
     it('a staff-controlled player and a bot follow the handover; a presidential appointee is never displaced', () => {

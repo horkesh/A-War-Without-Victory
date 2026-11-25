@@ -171,18 +171,27 @@ describe('runTurn determinism', () => {
       } as any
     };
 
+    // Player-override model (§14.10a, 2026-11-25): a decision left unanswered is resolved in-turn as
+    // the bot's choice, so the President gives their hard line in the pause on the turn the card fires.
+    const pausedOn: number[] = [];
     while (state.meta.turn < 184) {
       const result = await runTurn(state, {
         seed: 'dayton-hardline-chain',
         eventDefinitions,
-        settlementEdges: []
+        settlementEdges: [],
+        onPlayerDecisionsPending: (working, decisions) => {
+          for (const decision of decisions) {
+            if (decision.event_id !== 'dayton_talks_begin_1995') continue;
+            pausedOn.push(working.meta.turn);
+            resolveEventDecisionCore(working, decision.event_id, 'hardline');
+          }
+        },
       });
       state = result.nextState;
     }
-    expect(state.military.pending_event_decisions?.map((decision) => decision.event_id)).toContain(
-      'dayton_talks_begin_1995'
-    );
-    resolveEventDecisionCore(state, 'dayton_talks_begin_1995', 'hardline');
+    expect(pausedOn).toHaveLength(1);
+    expect(state.military.event_decision_log?.find((row) => row.event_id === 'dayton_talks_begin_1995'))
+      .toMatchObject({ response_id: 'hardline', decision_source: 'player' });
 
     const firedAfterRejection: string[] = [];
     while (state.meta.turn < 188) {
@@ -200,20 +209,21 @@ describe('runTurn determinism', () => {
     expect(state.military.event_flags?.dayton_signed).not.toBe(true);
     expect(state.meta.game_over).not.toBe(true);
     // Previously the horizon menu still opened at 188. A player's hard line is now a
-    // decline: recorded at the end of the next resolution (185), menu never offered,
-    // settlement imposed eight weeks later (DAYTON_DECLINE_GRACE_WEEKS).
-    expect(state.military.negotiation?.dayton_decline).toMatchObject({ faction: 'RBiH', declined_turn: 185, imposition_turn: 193 });
+    // decline: menu never offered, settlement imposed eight weeks later (DAYTON_DECLINE_GRACE_WEEKS).
+    // Answered in the pause, the hard line lands in-turn, so the decline is recorded on the card's
+    // own turn (184; it was 185 when the answer came between turns).
+    expect(state.military.negotiation?.dayton_decline).toMatchObject({ faction: 'RBiH', declined_turn: 184, imposition_turn: 192 });
     expect(state.military.negotiation?.pending_dayton).toBeUndefined();
     expect(state.military.event_flags?.dayton_declined_by).toBe('RBiH');
 
     let next = state;
-    while (next.meta.turn < 193) {
+    while (next.meta.turn < 192) {
       next = (await runTurn(next, { seed: 'dayton-hardline-chain', eventDefinitions, settlementEdges: [] })).nextState;
-      if (next.meta.turn < 193) expect(next.meta.game_over).not.toBe(true);
+      if (next.meta.turn < 192) expect(next.meta.game_over).not.toBe(true);
     }
     // The imposition turn reopens the table with no decline (owner, 2026-11-07); left
     // unanswered, it is signed on the Dayton map at the next turn.
-    expect(next.meta.turn).toBe(193);
+    expect(next.meta.turn).toBe(192);
     expect(next.meta.game_over).not.toBe(true);
     expect(next.military.negotiation?.pending_dayton?.forced?.by).toBe('united_states');
     next = (await runTurn(next, { seed: 'dayton-hardline-chain', eventDefinitions, settlementEdges: [] })).nextState;

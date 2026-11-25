@@ -1,9 +1,9 @@
 /**
  * Live/headless parity for authored officer succession.
  *
- * A player whose staff is in control (autonomy >= 1) must change commanders on the authored
- * schedule exactly like a bot faction. Only a manually controlled player (autonomy 0) gets a
- * `replacement_suggested` matter and keeps the outgoing commander until it answers. Before this
+ * A player faction must change commanders on the authored schedule exactly like a bot faction, at
+ * every autonomy level (player-override model, 2026-11-25; until then a manually controlled player,
+ * autonomy 0, got a `replacement_suggested` matter and kept the outgoing commander). Before this
  * rule, a staff-controlled RS player kept Sipcic at the Sarajevo-Romanija Corps past turn 18
  * (Galic never took over) and an RBiH player kept Knez, Talijan, Drekovic and Halilovic, which
  * made the live game diverge from the no-player run.
@@ -126,20 +126,19 @@ describe('authored officer succession for a staff-controlled player', () => {
         expect(replacementMatters(staff)).toEqual([]);
     });
 
-    it('still leaves a manual (autonomy 0) player in charge of the corps succession', () => {
+    // Amended 2026-11-25, player-override model (§14.10a, H-13): Full Control no longer waits on a
+    // matter; the schedule applies as headless and the President's explicit appointment overrides.
+    it('a Full Control (autonomy 0) player corps follows the authored schedule exactly like the no-player run', () => {
+        const headless = sarajevoRomanija(18, null);
         const manual = sarajevoRomanija(18, { faction: 'RS', autonomy: 0 });
 
-        processOfficerSuccession(manual, new Set());
+        const headlessReport = processOfficerSuccession(headless, new Set());
+        const manualReport = processOfficerSuccession(manual, new Set());
 
-        expect(manual.military.named_officers!.vrs_sipcic).toMatchObject({
-            status: 'active',
-            assigned_corps_id: 'vrs_sarajevo_romanija',
-        });
-        expect(replacementMatters(manual)).toEqual([expect.objectContaining({
-            current_commander_id: 'vrs_sipcic',
-            officer_id: 'vrs_galic',
-            corps_id: 'vrs_sarajevo_romanija',
-        })]);
+        expect(manual.military.named_officers!.vrs_sipcic!.status).toBe('retired');
+        expect(manualReport.departures).toEqual(headlessReport.departures);
+        expect(manual.military.named_officers).toEqual(headless.military.named_officers);
+        expect(replacementMatters(manual)).toEqual([]);
     });
 
     it('changes a staff-controlled player army commander on the authored schedule like a bot', () => {
@@ -161,11 +160,9 @@ describe('authored officer succession for a staff-controlled player', () => {
         expect(staff.military.named_officers).toEqual(headless.military.named_officers);
         expect(replacementMatters(staff)).toEqual([]);
 
-        expect(manualReport.army_replacements).toEqual([]);
-        expect(manual.military.named_officers!.arbih_halilovic!.status).toBe('active');
-        expect(replacementMatters(manual)).toEqual([expect.objectContaining({
-            current_commander_id: 'arbih_halilovic',
-            officer_id: 'arbih_delic',
-        })]);
+        // Full Control too (player-override model, H-13): the schedule applies, no matter is raised.
+        expect(manualReport.army_replacements).toEqual(headlessReport.army_replacements);
+        expect(manual.military.named_officers).toEqual(headless.military.named_officers);
+        expect(replacementMatters(manual)).toEqual([]);
     });
 });

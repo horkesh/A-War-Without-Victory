@@ -1751,10 +1751,14 @@ describe('empty-objective probe guard', () => {
         );
         expect(cooldownOutput.operations[0]).toMatchObject({ type: 'sector_attack', objectives: [target] });
 
-        // Level 1 withholds the standalone local task for the PLAYER's corps only (PK1,
-        // 2026-11-14): RS is the player here, so the task is withheld.
+        // Player-override model (§14.10a, ruling Q4 residue B, 2026-11-25): Level 1 no longer withholds
+        // the standalone local task for the player's corps; only the President's own hold that forbids
+        // new plans does. RS is the player here and holds this corps at Defensive.
         state.meta.autonomy_level = 1;
         state.meta.player_faction = 'RS';
+        (state.military as any).stance_matter_state = {
+            holds: [{ matter_id: 'level1_stance:test', faction: 'RS', scope: 'corps', corps_id: corpsId, mode: 'fixed', stance: 'defensive', effective_from_turn: 0, until_turn: 999 }],
+        };
         const playerAuthorityOutput = emitCommanderOutput(
             briefing,
             [makeZone({ corps_id: corpsId, faction: 'RS', osids: [approach, ring], enemy_adjacent_osids: [target] })],
@@ -1771,6 +1775,16 @@ describe('empty-objective probe guard', () => {
             makeNoThreats(),
         );
         expect(playerAuthorityOutput.operations.every((operation) => operation.type !== 'sector_attack')).toBe(true);
+        // Silence (no hold): the player's corps keeps the task at Level 1 exactly as a bot corps does.
+        delete (state.military as any).stance_matter_state;
+        const silentPlayerOutput = emitCommanderOutput(
+            briefing,
+            [makeZone({ corps_id: corpsId, faction: 'RS', osids: [approach, ring], enemy_adjacent_osids: [target] })],
+            makeForces([evaluation]),
+            { zones: [], garrison_locks: [], surplus_pool: [evaluation], total_garrison_budget: 1, can_launch_ops: true },
+            makeNullPlanDecision(), makePassiveDecisions(), makeNoThreats(),
+        );
+        expect(silentPlayerOutput.operations[0]).toMatchObject({ type: 'sector_attack', objectives: [target] });
         // Positive control: with RBiH as the player, this RS corps is a bot and keeps the task at Level 1.
         state.meta.player_faction = 'RBiH';
         const botAuthorityOutput = emitCommanderOutput(

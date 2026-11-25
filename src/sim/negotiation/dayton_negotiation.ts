@@ -60,6 +60,7 @@ import type { TerritorialPackage } from '../../state/negotiation_types.js';
 import { loadEventDefinitions } from '../events/event_loader.js';
 import { fireEventDefinitionNow } from '../events/evaluate_events.js';
 import type { EventDefinition } from '../events/event_types.js';
+import { recordSilenceReceipt, selectLivePlayerFaction } from '../player_override.js';
 
 /** Territorial package id of the Brčko District (its outcome is brcko_status). */
 const BRCKO_DISTRICT_PACKAGE_ID = 'brcko_district';
@@ -113,6 +114,24 @@ export function projectDaytonAgreement(
 }
 
 /**
+ * The delegation a Dayton signature that no human made is computed for: the seat headless runs
+ * have always used (player-override model, owner 2026-11-25, §14.10a; lane C s8 ruling Q7b, H-19).
+ * A silence resolution (the historical-default close-out) uses it whoever the player is, so the
+ * outcome when nobody acts does not depend on the human's seat.
+ */
+export const DAYTON_DEFAULT_PROPOSER: FactionId = 'RBiH';
+
+/** Who proposes at the Dayton table. Absent = the President's faction, or the default seat without one. */
+export interface DaytonResolutionOptions {
+    proposer?: FactionId;
+}
+
+/** The President's faction when a player is seated, else `DAYTON_DEFAULT_PROPOSER` (headless). */
+export function daytonProposerFaction(state: GameState): FactionId {
+    return state.meta.player_faction ?? DAYTON_DEFAULT_PROPOSER;
+}
+
+/**
  * Sign a proposal and snapshot the public treaty: the terms, the map, the treaty against
  * the mediator's draft, and the signing beat's turn and cost line (DC A5). The one owner
  * for a recorded signature, used by the desktop signature and by the forced table's
@@ -122,12 +141,13 @@ export function resolveDaytonWithRecord(
     state: GameState,
     proposal: DaytonProposal,
     eventDefinitions?: readonly EventDefinition[],
+    options: DaytonResolutionOptions = {},
 ): { result: DaytonResult; agreement: DaytonAgreementRecord } {
     const wartimeControllers = { ...state.political.political_controllers };
     // Captured-ground names and the mediator's draft are read before the signature.
     const frontPackages = frontPackagesForProposal(state, proposal);
-    const player: FactionId = state.meta.player_faction ?? 'RBiH';
-    const result = resolveDaytonNegotiation(state, proposal, eventDefinitions);
+    const player: FactionId = options.proposer ?? daytonProposerFaction(state);
+    const result = resolveDaytonNegotiation(state, proposal, eventDefinitions, { proposer: player });
     const agreement = projectDaytonAgreement(state, wartimeControllers);
     // The treaty against the mediator's draft (owner, 2026-11-08). The draft map reads only
     // the wartime controllers, captured above.
@@ -363,7 +383,24 @@ export function resolvePendingDaytonCloseOut(state: GameState): DaytonResult | n
     // `meta.dayton_close_out`, set only by scenario_runner): it resolves an unresolved
     // terminal menu via the deterministic historical-default proposal so a horizon-
     // reached headless campaign closes on a coherent verdict instead of an open menu.
-    return resolveDaytonNegotiation(state, buildHistoricalDefaultDaytonProposal());
+    // Silence (player-override model, §14.10a, H-19): nobody proposed, so the table is computed
+    // for the default seat whoever the player is; a live run left alone closes exactly as headless.
+    const result = resolveDaytonNegotiation(
+        state, buildHistoricalDefaultDaytonProposal(), undefined, { proposer: DAYTON_DEFAULT_PROPOSER },
+    );
+    const livePlayer = selectLivePlayerFaction(state);
+    if (livePlayer != null) {
+        recordSilenceReceipt(state, {
+            id: 'DAYTON_SILENCE',
+            faction: livePlayer,
+            turn: state.meta.turn,
+            domain: 'political',
+            description: 'Dayton — staff proceeded: the historical default settlement',
+            proposed_action: 'DAYTON:historical_default',
+            adopted: true,
+        }, state.meta.turn);
+    }
+    return result;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -579,6 +616,7 @@ export function resolveDaytonNegotiation(
     state: GameState,
     playerProposal: DaytonProposal,
     eventDefinitions?: readonly EventDefinition[],
+    options: DaytonResolutionOptions = {},
 ): DaytonResult {
     ensureNegotiationState(state);
 
@@ -595,7 +633,7 @@ export function resolveDaytonNegotiation(
         return neg.dayton_result;
     }
 
-    const playerFaction = state.meta.player_faction ?? 'RBiH';
+    const playerFaction = options.proposer ?? daytonProposerFaction(state);
     const botFactions = CANONICAL_FACTIONS.filter(f => f !== playerFaction).sort(strictCompare);
 
     // ── Step 1: engine-level player-budget enforcement (defense-in-depth) ──────
