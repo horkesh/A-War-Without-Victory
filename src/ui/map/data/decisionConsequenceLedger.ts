@@ -688,23 +688,27 @@ export function buildDecisionConsequenceLedger(
     const resolvedTurn = proposal.resolved_turn;
     const identitySource = { id: proposal.id, resolved_turn: resolvedTurn };
     const detailToken = proposalDetailToken(proposal, formationDisplayMaps);
+    // Player-override model (§14.10a): a decision left unanswered is the staff's, not his.
+    const bySilence = (proposal as { resolved_by?: unknown }).resolved_by === 'silence';
+    const titleKey = bySilence
+      ? 'decisionConsequences.title.autonomyProposal.staffProceeded'
+      : accepted
+        ? 'decisionConsequences.title.autonomyProposal.accepted'
+        : 'decisionConsequences.title.autonomyProposal.declined';
+    const outcomeKey = bySilence
+      ? 'decisionConsequences.outcome.staffProceeded'
+      : accepted
+        ? 'decisionConsequences.outcome.accepted'
+        : 'decisionConsequences.outcome.declined';
     records.push({
       id: proposalDecisionLedgerId(identitySource),
       turn: resolvedTurn,
       familyId: 'autonomy-proposal',
       family: 'Staff proposal',
-      title: accepted ? 'Staff proposal accepted' : 'Staff proposal declined',
-      titleToken: {
-        key: accepted
-          ? 'decisionConsequences.title.autonomyProposal.accepted'
-          : 'decisionConsequences.title.autonomyProposal.declined',
-      },
-      outcome: accepted ? 'Accepted' : 'Declined',
-      outcomeToken: {
-        key: accepted
-          ? 'decisionConsequences.outcome.accepted'
-          : 'decisionConsequences.outcome.declined',
-      },
+      title: bySilence ? 'Staff proceeded' : accepted ? 'Staff proposal accepted' : 'Staff proposal declined',
+      titleToken: { key: titleKey },
+      outcome: bySilence ? 'Staff proceeded' : accepted ? 'Accepted' : 'Declined',
+      outcomeToken: { key: outcomeKey },
       detail: t(detailToken.key, detailToken.params),
       detailToken,
       recordTarget: 'records',
