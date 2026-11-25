@@ -364,6 +364,51 @@ export function clearCorpsHoldsForPresidentialOperation(state: GameState, corpsI
     appendReceipts(state, cleared.map((hold) => holdLapseReceipt(hold, turn, 'presidential_operation')));
 }
 
+/**
+ * Matter-id prefix of a hold written by a Level-1 stance answer (§14.10c). The prefix marks
+ * the hold's origin so it survives the off-level-2 lapse while the game stays at autonomy 1.
+ */
+export const LEVEL1_STANCE_HOLD_PREFIX = 'level1_stance:';
+
+export function isLevel1StanceAnswerHold(hold: Pick<PresidentialStanceHold, 'matter_id'>): boolean {
+    return hold.matter_id.startsWith(LEVEL1_STANCE_HOLD_PREFIX);
+}
+
+/**
+ * A Level-1 (Assisted) President answered a SET_STANCE proposal: write the §14.10c
+ * 4-turn corps `fixed` hold at the stance he chose (the current stance on a refusal,
+ * the proposed one on an acceptance). It starts this turn, with no Main Staff delay and
+ * no cost (Level-1 stance answers are free), and replaces any earlier corps hold on the
+ * corps. Only the desktop answer IPC calls this, so headless and bot runs never reach it.
+ * Returns false (no write) off autonomy 1, without a live president, or for a corps
+ * outside the player faction.
+ */
+export function recordLevel1StanceAnswerHold(
+    state: GameState,
+    corpsId: string,
+    stance: unknown,
+    proposalId: string,
+): boolean {
+    if (!isLivePresident(state) || state.meta.autonomy_level !== 1) return false;
+    if (!isCorpsStance(stance)) return false;
+    const faction = state.military.formations?.[corpsId]?.faction;
+    if (!faction || faction !== state.meta.player_faction) return false;
+    if (!state.military.corps_command?.[corpsId]) return false;
+    const turn = state.meta.turn;
+    const ms = ensureMatterState(state);
+    const hold: PresidentialStanceHold = {
+        matter_id: `${LEVEL1_STANCE_HOLD_PREFIX}${proposalId}`,
+        faction, scope: 'corps', corps_id: corpsId,
+        mode: 'fixed', stance,
+        effective_from_turn: turn, until_turn: turn + STANCE_HOLD_TURNS - 1,
+    };
+    ms.holds = sortHolds([
+        ...ms.holds.filter((h) => !(h.corps_id === corpsId && h.scope === 'corps')),
+        hold,
+    ]);
+    return true;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Generation (after the player faction's bot pass)
 // ═══════════════════════════════════════════════════════════════════════════
@@ -714,8 +759,12 @@ export function resolveStanceMatters(state: GameState): void {
     if (matterState || state.military.stance_matter_state) {
         const ms = state.military.stance_matter_state!;
         if (!levelOk && ms.holds.length > 0) {
-            receipts.push(...ms.holds.map((hold) => holdLapseReceipt(hold, turn, 'autonomy_changed')));
-            ms.holds = [];
+            // A Level-1 stance answer's hold stays while the game is at autonomy 1 (§14.10c).
+            const keep = (hold: PresidentialStanceHold) =>
+                state.meta.autonomy_level === 1 && isLevel1StanceAnswerHold(hold);
+            receipts.push(...ms.holds.filter((hold) => !keep(hold))
+                .map((hold) => holdLapseReceipt(hold, turn, 'autonomy_changed')));
+            ms.holds = ms.holds.filter(keep);
         }
         ms.holds = sortHolds(ms.holds.filter((h) => h.until_turn >= turn));
         // A hold delayed by the Main Staff that takes effect this turn gets its own receipt,

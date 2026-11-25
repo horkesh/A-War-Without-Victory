@@ -62,6 +62,7 @@ import type { ArmyHqOpId, ArmyHqOperation } from '../../state/game_state.js';
 import { resolveOperationFormation } from './operation_formation_resolver.js';
 import { isOperationObjectiveHostile } from './operation_objective_hostility.js';
 import { isFactionBoundByOct1995Ceasefire } from './oct1995_ceasefire.js';
+import { corpsHoldForbidsNewPlans } from './stance_matter_holds.js';
 
 const MIN_OPERATION_PARTICIPANTS = 2;
 
@@ -1290,6 +1291,13 @@ export function checkTriggeredOperations(state: GameState): string[] {
             continue;
         }
 
+        // Engine Invariants §14.10c (override ruling Q5): a standing-authorization op waits,
+        // not consumed, while the President's explicit hold forbids new plans. Inert without a hold.
+        if (corpsHoldForbidsNewPlans(state, def.primary_corps, turn)) {
+            recordWatchedOperationTrace(state, def, turn, { launch_status: 'not_launched', blocker_code: 'presidential_stance_hold' });
+            continue;
+        }
+
         // Triggered operations use ordinary concurrent corps capacity. They are
         // explicitly non-slot-0 operations, so an unrelated probe or queued campaign
         // must not suppress them when the corps still has another operation slot.
@@ -1626,6 +1634,11 @@ export function injectArmyHqOperations(state: GameState): string[] {
         // triggered path, an unrelated probe in another slot does not suppress the op.
         // S1: an op already in recovery does not hold the slot, the same rule the commander
         // loop uses when it starts generic operations.
+        // §14.10c (override ruling Q5): waits while the President's explicit hold forbids new plans.
+        if (corpsHoldForbidsNewPlans(state, def.primary_corps, turn)) {
+            recordWatchedOperationTrace(state, def, turn, { launch_status: 'not_launched', blocker_code: 'presidential_stance_hold' });
+            continue;
+        }
         const primaryCmd = cc[def.primary_corps];
         if (!primaryCmd || !hasAvailableSlotIgnoringRecovery(primaryCmd, activeCorpsBrigadeCount(state, def.primary_corps))) {
             recordWatchedOperationTrace(state, def, turn, {

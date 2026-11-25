@@ -102,6 +102,8 @@ export { declineDaytonNegotiation } from '../sim/negotiation/dayton_negotiation.
 export { parseDaytonProposal } from './dayton_proposal.js';
 // Command loop L7: army clashes are raised and swept only from desktop IPC (never the war pipeline).
 export { raiseArmyClash, sweepLapsedArmyClashes } from '../sim/combat/army_clashes.js';
+// Engine Invariants §14.10c: a Level-1 stance answer writes the 4-turn corps hold (desktop IPC only).
+export { recordLevel1StanceAnswerHold } from '../sim/combat/stance_matters.js';
 
 /** Table a draft for the next Dayton round (DC A2): every other delegation answers; the round is recorded. */
 export function tableDesktopDaytonRound(state: GameState, payload: unknown): TableDaytonRoundResult {
