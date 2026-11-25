@@ -852,7 +852,11 @@ describe('strict null inventory progress', () => {
             // written (old saves load): DisplacementDomainState.pocket_fall_records (write-only display record)
             // and DisplacementState.pocket_fall_originals_booked_by_side (booked-once marker, read only by the
             // step). No new type escape. 619 -> 621.
-            optional_fields_game_state: 621,
+            // A9 P1 negotiated-evacuation convoy (8-seat §6 ruling D9, 2026-11-25): +2 optional fields, absent until
+            // first written (old saves load): DisplacementDomainState.negotiated_evacuation_records (write-only
+            // display record) and DisplacementState.negotiated_evacuation_by_side (episode state, read only by the
+            // convoy rule). No new type escape. 621 -> 623.
+            optional_fields_game_state: 623,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
@@ -884,13 +888,14 @@ describe('strict null inventory progress', () => {
         // 613 -> 617 / state 228 -> 229 / sim 375 -> 378.
         // Ledger lines 1-2: +2 state (moved_on_at_capture_by_people, unable_to_leave_by_side). 617 -> 619 / state 229 -> 231.
         // A9 P0-A: +2 state (pocket_fall_records, pocket_fall_originals_booked_by_side). 619 -> 621 / state 231 -> 233.
-        expect(current.optional_field_domains.total).toBe(621);
+        // A9 P1: +2 state (negotiated_evacuation_records, negotiated_evacuation_by_side). 621 -> 623 / state 233 -> 235.
+        expect(current.optional_field_domains.total).toBe(623);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
             sim: 378,
-            state: 233,
+            state: 235,
             ui_adapter: 0,
             unknown: 0,
         });

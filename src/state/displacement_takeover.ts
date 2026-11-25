@@ -613,7 +613,11 @@ function getPolicyTargetShare(
     return entry && munTotal > 0 ? Math.max(0, Math.min(1, entry.bosniak / munTotal)) : 0;
 }
 
-function getDynamicHostileShare(
+/**
+ * `fromFaction`'s people as a share of the municipality's 1991 census plus incoming displaced (1 when no census).
+ * Exported unchanged for the A9 P1 convoy rule's besieger-intent predicate (`displacement.ts`).
+ */
+export function getDynamicHostileShare(
     munId: MunicipalityId,
     fromFaction: FactionId,
     dispState: DisplacementState,

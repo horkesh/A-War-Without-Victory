@@ -86,6 +86,22 @@ export const FLEE_ABROAD_FRACTION_RBIH = 0.20;
  */
 export const ASSAULTED_POCKET_FALL_KILL_RATIO = 0.19;
 
+/**
+ * A9 P1 (SD13, 8-seat §6 ruling D9, 2026-11-25; DISPLACEMENT_MASTER §3.6): the most people one negotiated-
+ * evacuation episode moves out of one besieged pocket (municipality and people). A RULE BOUND, not a scripted
+ * population: the convoy rule (`displacement.ts`) opens only from state and moves fewer when the pocket's stock,
+ * the receiving capacity or the squeeze runs out first. Sources (Srebrenica, spring 1993): Krstić TJ IT-98-33-T
+ * para 16; UN SG report A/54/549 paras 39-40 (the UNHCR convoys moved about 8,100 in all); Tolimir TJ about
+ * para 176 ("approximately 8,000 to 9,000" by the end of April 1993). The later calibration pass may revisit it.
+ */
+export const NEGOTIATED_EVACUATION_EPISODE_CAP = 9_000;
+
+/**
+ * A9 P1 (ruling D9): the most people one convoy moves (at most one convoy a week). A RULE BOUND. Source: UN SG
+ * report A/54/549 para 40 (the 14-truck convoy loads were 2,100-3,000 people; mean about 1,700).
+ */
+export const NEGOTIATED_EVACUATION_CONVOY_MAX = 3_000;
+
 /** Flee-abroad fraction for an ethnicity-aligned faction. */
 export function getFactionFleeAbroadFraction(faction: FactionId): number {
     if (faction === 'RS') return FLEE_ABROAD_FRACTION_RS;
