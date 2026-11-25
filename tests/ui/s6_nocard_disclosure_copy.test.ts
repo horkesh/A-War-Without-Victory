@@ -18,8 +18,14 @@ const bcs = bcsMessages as Record<string, string>;
 
 // The middle sentence was reworded for §6 mechanics item 2 (the Full Control opener), signed by the §4 copy panel
 // (historian + narrative designer, unanimous), 2026-11-24.
-const P_EN = "No paramilitary policy decision comes up for your side. Until you decide yourself, your staff sends rear-area paramilitary sweeps without asking you, by your side's historical default, and each sweep that takes its target counts against your side. To refuse, take Full Control: there you can give a standing order at once, without waiting for a request, and each request comes to you. Your decision there replaces the historical default at every command level. After that, your staff sends sweeps without asking you only under Always allow.";
-const P_BCS = 'Za vašu stranu ne dolazi nikakva odluka o paravojnoj politici. Dok sami ne odlučite, štab bez pitanja šalje paravojne akcije u pozadini po historijskoj zadanoj postavci vaše strane, a svaka akcija koja zauzme cilj pada na teret vaše strane. Da biste ih odbili, preuzmite Punu kontrolu: tamo odmah možete dati stalnu naredbu, bez čekanja na zahtjev, a svaki zahtjev stiže vama. Vaša odluka tamo zamjenjuje historijsku zadanu postavku na svakom nivou komandovanja. Nakon toga štab bez pitanja šalje akcije samo uz Uvijek dozvoli.';
+// The signed passage was rewritten for the staff-run-every-level rule (S6 copy pass, §4 panel).
+// was (EN): "No paramilitary policy decision comes up for your side. Until you decide yourself, your staff sends ... counts against your side. To refuse, take Full Control: there you can give a standing order at once, without waiting for a request, and each request comes to you. Your decision there replaces the historical default at every command level. After that, your staff sends sweeps without asking you only under Always allow."
+const P_EN = "No paramilitary policy decision comes up for your side. Your staff sends rear-area paramilitary sweeps without asking you, by your side's historical default, and each sweep that takes its target counts against your side. To refuse, take Full Control: there you can give a standing order at once, without waiting for a request. Always deny there, or a request you deny there, holds at every command level. If you allow requests one by one, they come to you only at Full Control; at the other levels your staff keeps to the historical default.";
+// was (BCS): 'Za vašu stranu ne dolazi nikakva odluka o paravojnoj politici. Dok sami ne odlučite, štab bez pitanja šalje ... a svaki zahtjev stiže vama. Vaša odluka tamo zamjenjuje historijsku zadanu postavku na svakom nivou komandovanja. Nakon toga štab bez pitanja šalje akcije samo uz Uvijek dozvoli.'
+const P_BCS = 'Za vašu stranu ne dolazi nikakva odluka o paravojnoj politici. Štab bez pitanja šalje paravojne akcije u pozadini po historijskoj zadanoj postavci vaše strane, a svaka akcija koja zauzme cilj pada na teret vaše strane. Da biste ih odbili, preuzmite Punu kontrolu: tamo odmah možete dati stalnu naredbu, bez čekanja na zahtjev. Uvijek odbij data tamo, ili zahtjev koji tamo odbijete, vrijedi na svakom nivou komandovanja. Kad zahtjeve dozvoljavate jedan po jedan, zahtjevi vam stižu samo na nivou Pune kontrole; na drugim nivoima štab se drži historijske zadane postavke.';
+// The Observer no-card variant also states that the halt card still waits at Observer (the halt card waits at every level).
+const HALT_EN = 'The decision "Staff Orders for the Bosniak Population" still comes to you at Observer once the war with the ARBiH has begun. It waits before the turn goes on. If you do not order a halt, the expulsions go ahead. ';
+const HALT_BCS = 'Odluka „Naredbe štaba o bošnjačkom stanovništvu” i na nivou Posmatrač dolazi vama kad počne rat s ARBiH. Čeka prije nego što potez ide dalje. Ako ne naredite obustavu, protjerivanje se provodi. ';
 
 const NO_CARD_KEYS = [
     'autonomy.level.assisted.descNoCard',
@@ -45,6 +51,19 @@ describe('§6 round 4s: the no-card disclosure and receipt', () => {
             expect(bcs[key]!.endsWith(P_BCS), key).toBe(true);
             const enPrefix = en[key]!.slice(0, en[key]!.length - P_EN.length);
             const bcsPrefix = bcs[key]!.slice(0, bcs[key]!.length - P_BCS.length);
+            if (level === 'observer') {
+                // Observer: the card variant's opening is its text up to the paramilitary sentences; the no-card variant is
+                // that opening, then the signed halt-card sentences, then the signed passage.
+                const enDesc = en[`autonomy.level.${level}.desc`]!;
+                const bcsDesc = bcs[`autonomy.level.${level}.desc`]!;
+                const enOpen = enDesc.slice(0, enDesc.indexOf('If you have not given the paramilitary'));
+                const bcsOpen = bcsDesc.slice(0, bcsDesc.indexOf('Ako niste izdali stalnu naredbu'));
+                expect(enOpen.length, key).toBeGreaterThan(0);
+                expect(bcsOpen.length, key).toBeGreaterThan(0);
+                expect(enPrefix, key).toBe(enOpen + HALT_EN);
+                expect(bcsPrefix, key).toBe(bcsOpen + HALT_BCS);
+                continue;
+            }
             expect(en[`autonomy.level.${level}.desc`]!.startsWith(enPrefix), key).toBe(true);
             expect(bcs[`autonomy.level.${level}.desc`]!.startsWith(bcsPrefix), key).toBe(true);
         }

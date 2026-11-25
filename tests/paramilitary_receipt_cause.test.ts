@@ -187,3 +187,35 @@ describe('the unrequested-sweep receipt cause is derived from the saved basis', 
         expect(rows.every((row) => row.cause === 'standing_order' && row.captured)).toBe(true);
     }, 300_000);
 });
+
+describe('Codex P2 on #866: who authored an unrequested sweep is read apart from the cause line (§14.10e(6))', () => {
+    const rowOf = (raw: any) => {
+        const rows = parseGameState(raw).paramilitaryUnrequested ?? [];
+        expect(rows).toHaveLength(1);
+        return rows[0]!;
+    };
+    const standing = (order: string, turn = 3) => ({ id: `standing:${turn}`, kind: 'standing_order', turn, faction: 'HRHB', order });
+
+    it('HRHB deciding each request (an `ask` standing order) then a sweep at Assisted-Observer: neutral cause, staff-attributed', () => {
+        const row = rowOf(rawSave('HRHB', [], [standing('ask')]));
+        expect(row.cause).toBe('neutral');
+        expect(row.authored_by).toBe('staff_default');
+    });
+
+    it('a request allowed one by one reads as deciding each request: staff-attributed', () => {
+        const row = rowOf(rawSave('HRHB', [], [
+            { id: 'paramilitary:3:op:x:y', turn: 3, target_osid: 'op:x:y', faction: 'HRHB', strength: 150, decision: 'allow' },
+        ]));
+        expect(row.authored_by).toBe('staff_default');
+    });
+
+    it('the player\'s own Always allow in force at the sweep is the player\'s order: no staff attribution', () => {
+        expect(rowOf(rawSave('HRHB', [], [standing('always_allow')])).authored_by).toBeUndefined();
+        // Newest act wins: an Always allow given after deciding each request.
+        expect(rowOf(rawSave('HRHB', [], [standing('ask', 2), standing('always_allow', 4)])).authored_by).toBeUndefined();
+    });
+
+    it('an act filed after the sweep does not change that sweep\'s author', () => {
+        expect(rowOf(rawSave('HRHB', [], [standing('ask', 3), standing('always_allow', 7)])).authored_by).toBe('staff_default');
+    });
+});

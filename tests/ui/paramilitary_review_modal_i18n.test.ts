@@ -98,7 +98,8 @@ describe('Paramilitary review modal — i18n Car 3 (EN keys)', () => {
         // §6 design M (M-a), §4 copy panel 2026-11-19: the per-act sentence joins the hint (appended on D1's merge onto main,
         // PENDING §4 PANEL); the cap sentence is its own key, shown only for RBiH and RS (pinned with the BCS in
         // tests/ui/s6_modal_cost_copy.test.ts).
-        expect(en['paramilitaryReview.policyHint']).toBe('Use a standing order if you want future paramilitary packets resolved the same way. Your staff follows it at every command level: at Assisted, Delegated or Observer, Always allow sends sweeps without asking you, and each one counts against your side; Always deny, or no standing order, sends none. Each sweep that takes its target counts against your side, however it was sent.');
+        // was: '... Always allow sends sweeps without asking you, and each one counts against your side; Always deny, or no standing order, sends none. Each sweep that takes its target ...'
+        expect(en['paramilitaryReview.policyHint']).toBe('Use a standing order if you want future paramilitary packets resolved the same way. Your staff follows it at every command level: at Assisted, Delegated or Observer, Always allow sends sweeps without asking you, and Always deny sends none. With no standing order, or if you decide requests one by one, no request comes to you at those levels: your staff decides, and it may send sweeps. Each sweep that takes its target counts against your side, however it was sent.');
         expect(en['paramilitaryReview.close']).toBe('Close');
         expect(en['paramilitaryReview.submit']).toBe('Submit Decisions');
         expect(en['paramilitaryReview.submitting']).toBe('Submitting...');
