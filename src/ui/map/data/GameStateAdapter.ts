@@ -916,6 +916,39 @@ const ENCLAVE_UI_DEFINITIONS: Array<{
     ] },
 ];
 
+/** Municipality ids an enclave definition covers, from the `op:<mun>:` segment of its OSIDs. */
+function enclaveMunicipalityIds(def: (typeof ENCLAVE_UI_DEFINITIONS)[number]): string[] {
+    const ids = new Set<string>();
+    for (const osid of [...(def.osid_prefixes ?? []), ...(def.osid_list ?? [])]) {
+        const mun = osid.split(':')[1];
+        if (mun) ids.add(mun);
+    }
+    return [...ids].sort();
+}
+
+/**
+ * Ledger line 2 (A5; s6_ledger12_ruling.md): this week's "unable to leave" stock for the player's
+ * own side, per municipality. Display only, read verbatim from the write-only state field; an
+ * entry counts only when its turn stamp equals the current turn, so a skipped week never shows a
+ * stale figure. Never summed across weeks.
+ */
+export function readUnableToLeaveThisWeekByMun(
+    displacementState: unknown,
+    playerFaction: string | null | undefined,
+    currentTurn: number,
+): Record<string, number> {
+    const out: Record<string, number> = {};
+    if (!playerFaction || !displacementState || typeof displacementState !== 'object' || Array.isArray(displacementState)) return out;
+    for (const munId of Object.keys(displacementState).sort()) {
+        const row = (displacementState as Record<string, { unable_to_leave_by_side?: Record<string, { amount?: unknown; turn?: unknown }> }>)[munId];
+        const own = row?.unable_to_leave_by_side?.[playerFaction];
+        if (!own || own.turn !== currentTurn) continue;
+        const amount = finiteNumber(own.amount);
+        if (amount >= 1) out[munId] = amount;
+    }
+    return out;
+}
+
 function deriveEnclaveSupplyState(
     enclaveId: string,
     rawSupplyStateByOsid: Record<string, unknown> | undefined,
@@ -2492,13 +2525,41 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             }
             refugeesByTurn.sort((a, b) => a.turn - b.turn);
         }
+        // Ledger line 1 (A4): cumulative people moved on at a capture, by people (write-only field).
+        const movedOnAtCaptureByPeople: Record<string, number> = {};
+        const rawMovedOn = state.displacement?.moved_on_at_capture_by_people;
+        if (rawMovedOn && typeof rawMovedOn === 'object' && !Array.isArray(rawMovedOn)) {
+            for (const [people, value] of Object.entries(rawMovedOn as Record<string, unknown>).sort((a, b) => a[0].localeCompare(b[0]))) {
+                const n = finiteNumber(value);
+                if (n >= 1) movedOnAtCaptureByPeople[people] = n;
+            }
+        }
+        // Ledger line 2 (A5): the player's own side, this week only.
+        const unableByMun = readUnableToLeaveThisWeekByMun(
+            state.displacement?.displacement_state,
+            playerFaction,
+            finiteNumber(state.meta?.turn),
+        );
+        const unableMunIds = Object.keys(unableByMun);
+        const unableToLeaveThisWeek = unableMunIds.length > 0
+            ? unableMunIds.reduce((sum, munId) => sum + unableByMun[munId], 0)
+            : undefined;
         if (
             Object.keys(civilianCasualtiesByEthnicity).length > 0 ||
             Object.keys(humanitarianAggregates).length > 0 ||
             refugeesByTurn.length > 0 ||
-            humanitarianAggregatesRecorded
+            humanitarianAggregatesRecorded ||
+            Object.keys(movedOnAtCaptureByPeople).length > 0 ||
+            unableToLeaveThisWeek !== undefined
         ) {
-            nationalDisplacement = { civilianCasualtiesByEthnicity, humanitarianAggregates, refugeesByTurn, humanitarianAggregatesRecorded };
+            nationalDisplacement = {
+                civilianCasualtiesByEthnicity,
+                humanitarianAggregates,
+                refugeesByTurn,
+                humanitarianAggregatesRecorded,
+                movedOnAtCaptureByPeople,
+                ...(unableToLeaveThisWeek !== undefined ? { unableToLeaveThisWeek } : {}),
+            };
         }
     }
 
@@ -2782,6 +2843,18 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                     display_name: enclaveDef?.display_name ?? humanizeMunicipalitySlug(key.replace(/_/g, '-')),
                 };
             }
+        }
+        // Ledger line 2 (A5): this week's "unable to leave" stock on the player's own enclave cards.
+        const unableByMun = readUnableToLeaveThisWeekByMun(
+            state.displacement?.displacement_state,
+            playerFaction,
+            finiteNumber(state.meta?.turn),
+        );
+        for (const key of Object.keys(out)) {
+            const enclaveDef = ENCLAVE_UI_DEFINITIONS.find((enclave) => enclave.id === key);
+            if (!enclaveDef || !playerFaction || enclaveDef.faction !== playerFaction) continue;
+            const amount = enclaveMunicipalityIds(enclaveDef).reduce((sum, munId) => sum + (unableByMun[munId] ?? 0), 0);
+            if (amount >= 1) out[key] = { ...out[key], unable_to_leave_this_week: amount };
         }
         if (Object.keys(out).length > 0) enclaveResilience = out;
     }

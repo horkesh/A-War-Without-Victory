@@ -826,6 +826,14 @@ function routeDisplacedCohort(
                 reason: options.reportReason,
                 group: faction
             });
+            // Ledger line 1 (A4): write-only display counter, never an event (s6_ledger12_ruling.md).
+            if (options.reportReason === 'capture_pass_through') {
+                const moved = Math.max(0, Math.floor(routed));
+                if (moved > 0) {
+                    const byPeople = (state.displacement.moved_on_at_capture_by_people ??= {});
+                    byPeople[faction] = (byPeople[faction] ?? 0) + moved;
+                }
+            }
         }
 
         remaining -= routed;
