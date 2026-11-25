@@ -16,8 +16,10 @@ const ROOT = process.cwd();
 
 /** Files (src, tools, scripts) allowed to name `pocket_fall_records`. Sorted; extend for the display pass. */
 const RECORDS_ALLOWED_FILES = [
+    'src/desktop/player_visible_state.cjs', // display projection, own side only
     'src/state/game_state.ts',
     'src/state/pocket_fall.ts',
+    'src/ui/map/data/GameStateAdapter.ts', // display read model (Ledger and enclave card)
 ] as const;
 
 /** Files allowed to name the booked-once marker. Only the step and the state type. */

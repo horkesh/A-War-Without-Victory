@@ -155,11 +155,12 @@ export function HumanitarianLedgerPanel({ state, open, onClose }: HumanitarianLe
     return { rows, total: rows.reduce((sum, r) => sum + r.movedOnAgain, 0) };
   }, [nd?.movedOnAtCaptureByPeople]);
   const unableThisWeek = nd?.unableToLeaveThisWeek;
+  const pocketFalls = nd?.pocketFalls ?? [];
 
   if (!open) return null;
 
   const hasAny = byPeople.rows.length > 0 || bySide.length > 0 || overTime.length > 0
-    || movedOn.rows.length > 0 || unableThisWeek !== undefined;
+    || movedOn.rows.length > 0 || unableThisWeek !== undefined || pocketFalls.length > 0;
 
   return (
     <SurfaceModalLayer>
@@ -250,6 +251,40 @@ export function HumanitarianLedgerPanel({ state, open, onClose }: HumanitarianLe
                             </p>
                           )}
                           <p className="m-0 mt-3 text-[14px] italic leading-relaxed text-[#b9ad94]">{t('humanitarianLedger.note.movedOnAtCapture')}</p>
+                        </div>
+                      </SurfacePanel>
+                    </SurfaceSection>
+                  )}
+
+                  {/* Pocket falls of the player's own side (A9 P0-A): left the enclave, and killed (null = not recorded, never 0) */}
+                  {pocketFalls.length > 0 && (
+                    <SurfaceSection label={t('humanitarianLedger.section.pocketFall')}>
+                      <SurfacePanel>
+                        <div data-testid="humanitarian-ledger-pocket-fall" className="overflow-x-auto">
+                          <p className="m-0 mb-3 text-[14px] italic leading-relaxed text-[#b9ad94]">{t('humanitarianLedger.note.pocketFall')}</p>
+                          <table className="w-full border-collapse">
+                            <thead>
+                              <tr className="border-b border-[#262b35]">
+                                <th className={`${TH} text-left`}>{t('humanitarianLedger.col.pocketEnclave')}</th>
+                                <th className={`${TH} px-3 text-left`}>{t('humanitarianLedger.col.pocketTakenBy')}</th>
+                                <th className={`${TH} px-3 text-right`}>{t('humanitarianLedger.col.leftEnclave')}</th>
+                                <th className={`${TH} text-right`}>{t('humanitarianLedger.col.killed')}</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {pocketFalls.map((r) => (
+                                <tr key={`${r.turn}|${r.munId}`} className="border-b border-[#262b35]/60 last:border-b-0">
+                                  <td className={`${TD} text-left text-[#f1e6c8]`}>{r.name}</td>
+                                  <td className={`${TD} px-3 text-left text-[#f1e6c8]`}>{sideLabel(r.captor)}</td>
+                                  <td className={`${TD} ${NUM} px-3 text-right text-amber-300`}>{fmt(r.left)}</td>
+                                  <td data-testid="humanitarian-ledger-pocket-fall-killed" className={`${TD} ${r.killed === null ? 'text-right italic text-[#b9ad94]' : `${NUM} text-right text-red-300`}`}>
+                                    {r.killed === null ? t('humanitarianLedger.label.notRecorded') : fmt(r.killed)}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                          <p className="m-0 mt-3 text-[14px] italic leading-relaxed text-[#b9ad94]">{t('humanitarianLedger.note.verbatim')}</p>
                         </div>
                       </SurfacePanel>
                     </SurfaceSection>

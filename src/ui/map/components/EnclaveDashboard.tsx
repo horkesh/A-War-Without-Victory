@@ -55,6 +55,14 @@ const SUPPLY_LABEL_KEYS: Record<'adequate' | 'strained' | 'critical', MessageKey
   critical: 'enclave.supplyState.critical',
 };
 
+/** The captor named as forces, the same wording the Humanitarian Ledger uses. */
+function captorForces(captor: string): string {
+  if (captor === 'RBiH') return t('humanitarianLedger.side.RBiH');
+  if (captor === 'RS') return t('humanitarianLedger.side.RS');
+  if (captor === 'HRHB') return t('humanitarianLedger.side.HRHB');
+  return t('humanitarianLedger.side.notRecorded');
+}
+
 function getEnclaveRisk(enclave: EnclaveResilienceView) {
   if (enclave.supply_state === 'critical' || enclave.resilience <= 8) {
     return {
@@ -175,6 +183,23 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
                       {enclave.unable_to_leave_this_week !== undefined && (
                         <p data-testid="enclave-unable-to-leave" className="m-0 text-[15px] text-[#f1e6c8]">
                           {t('enclave.unableToLeaveThisWeek', { count: formatLocaleNumber(Math.round(enclave.unable_to_leave_this_week)) })}
+                        </p>
+                      )}
+                      {/* A9 P0-A: the enclave's fall. Killed reads "not recorded" when unrecorded, never 0 */}
+                      {enclave.pocket_fall && (
+                        <p data-testid="enclave-pocket-fall" className="m-0 text-[15px] leading-relaxed text-[#f1e6c8]">
+                          {enclave.pocket_fall.negotiated
+                            ? t('enclave.fall.negotiated', {
+                              forces: captorForces(enclave.pocket_fall.captor),
+                              left: formatLocaleNumber(Math.round(enclave.pocket_fall.left)),
+                            })
+                            : t('enclave.fall.assaulted', {
+                              forces: captorForces(enclave.pocket_fall.captor),
+                              left: formatLocaleNumber(Math.round(enclave.pocket_fall.left)),
+                              killed: enclave.pocket_fall.killed === null
+                                ? t('humanitarianLedger.label.notRecorded')
+                                : formatLocaleNumber(Math.round(enclave.pocket_fall.killed)),
+                            })}
                         </p>
                       )}
                     </SurfacePanel>

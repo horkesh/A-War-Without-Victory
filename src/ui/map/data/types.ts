@@ -359,6 +359,20 @@ export interface FogOfWarView {
     visibleEnemySectorIds: string[];
 }
 
+/** One pocket fall of the player's own side, as shown in the Ledger and on the enclave card. */
+export interface PocketFallView {
+    turn: number;
+    munId: string;
+    /** Enclave or municipality name. */
+    name: string;
+    captor: string;
+    /** People who left the enclave (routed plus fled abroad). */
+    left: number;
+    /** `null` = not recorded (a negotiated fall). Never rendered as 0. */
+    killed: number | null;
+    negotiated: boolean;
+}
+
 export interface EnclaveResilienceView {
     resilience: number;
     isolation_turns: number;
@@ -368,6 +382,8 @@ export interface EnclaveResilienceView {
     display_name?: string;
     /** Ledger line 2 (A5): people unable to leave this enclave THIS WEEK (player's own side only); absent when none. */
     unable_to_leave_this_week?: number;
+    /** The enclave's fall, when it has a pocket-fall record (player's own side only). */
+    pocket_fall?: PocketFallView;
 }
 
 export interface SectorEntrenchmentSummaryView {
@@ -1374,6 +1390,8 @@ export interface LoadedGameState {
         movedOnAtCaptureByPeople?: Record<string, number>;
         /** Ledger line 2 (A5): the player's own side, THIS WEEK only (a stock, never a total); absent when none. */
         unableToLeaveThisWeek?: number;
+        /** Pocket falls of the player's own side (display only); `killed` null = not recorded (negotiated), never 0. */
+        pocketFalls?: PocketFallView[];
     };
     /** Presidential command authority (Level 3 override resource). */
     commandAuthority?: {

@@ -840,6 +840,15 @@ function stripUnableToLeaveToPlayer(displacementState, playerFaction) {
   }
 }
 
+/**
+ * Pocket-fall record (A9 P0-A, SD13; display only): keep only the falls of the player's own side
+ * (`side` is the people taken). With no player faction every record is dropped. Order is preserved.
+ */
+function projectPocketFallRecords(records, playerFaction) {
+  if (!Array.isArray(records) || !playerFaction) return [];
+  return records.filter((row) => isRecord(row) && row.side === playerFaction).map((row) => cloneJson(row));
+}
+
 function projectDisplacement(displacement, controllers, playerFaction) {
   const projected = copyKeys(displacement, [
     'civilian_casualties',
@@ -851,6 +860,8 @@ function projectDisplacement(displacement, controllers, playerFaction) {
     'moved_on_at_capture_by_people',
   ]);
   stripUnableToLeaveToPlayer(projected.displacement_state, playerFaction);
+  const ownPocketFalls = projectPocketFallRecords(isRecord(displacement) ? displacement.pocket_fall_records : undefined, playerFaction);
+  if (ownPocketFalls.length > 0) projected.pocket_fall_records = ownPocketFalls;
   projected.sustainability_state = projectSustainabilityState(
     isRecord(displacement) ? displacement.sustainability_state : undefined,
     controllers,

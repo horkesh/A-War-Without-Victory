@@ -36,7 +36,7 @@ import { municipalityDisplayName, restoreBosnianPlaceNames } from '../../shared/
 import type {
     AoROrderView, AttackOrderView,
     CorpsFrontSectorView, EnclaveResilienceView, FactionId, FogOfWarView, FormationView, FrictionEventView, LoadedGameState,
-    MilitiaPoolView, MobilizationSummaryView, MovementOrderSettlementView, NamedOfficerStateView, NamedOfficerView,
+    MilitiaPoolView, MobilizationSummaryView, PocketFallView, MovementOrderSettlementView, NamedOfficerStateView, NamedOfficerView,
     OperationView, RepositionOrderView, RecruitmentView,
     StanceHoldView, StanceMatterReceiptView, StanceMatterView,
     ArmyClashView, ArmyClashReceiptView,
@@ -947,6 +947,33 @@ export function readUnableToLeaveThisWeekByMun(
         if (amount >= 1) out[munId] = amount;
     }
     return out;
+}
+
+/**
+ * Pocket falls of the player's own side (A9 P0-A, SD13): display only, read verbatim from the
+ * write-only state field. `side` is the people taken, so a record counts only when it equals the
+ * player faction. `killed` stays null when not recorded. Rows are in (turn, municipality) order.
+ */
+export function readPocketFalls(records: unknown, playerFaction: string | null | undefined): PocketFallView[] {
+    if (!playerFaction || !Array.isArray(records)) return [];
+    const out: PocketFallView[] = [];
+    for (const raw of records) {
+        if (!raw || typeof raw !== 'object') continue;
+        const r = raw as Record<string, unknown>;
+        if (r.side !== playerFaction || typeof r.mun_id !== 'string') continue;
+        const munId = r.mun_id;
+        const def = ENCLAVE_UI_DEFINITIONS.find((e) => enclaveMunicipalityIds(e).includes(munId));
+        out.push({
+            turn: finiteNumber(r.turn),
+            munId,
+            name: def?.display_name ?? humanizeMunicipalitySlug(munId.replace(/_/g, '-')),
+            captor: typeof r.captor === 'string' ? r.captor : '',
+            left: finiteNumber(r.left),
+            killed: typeof r.killed === 'number' && Number.isFinite(r.killed) ? r.killed : null,
+            negotiated: r.negotiated === true,
+        });
+    }
+    return out.sort((a, b) => a.turn - b.turn || (a.munId < b.munId ? -1 : a.munId > b.munId ? 1 : 0));
 }
 
 function deriveEnclaveSupplyState(
@@ -2544,7 +2571,9 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         const unableToLeaveThisWeek = unableMunIds.length > 0
             ? unableMunIds.reduce((sum, munId) => sum + unableByMun[munId], 0)
             : undefined;
+        const pocketFalls = readPocketFalls(state.displacement?.pocket_fall_records, playerFaction);
         if (
+            pocketFalls.length > 0 ||
             Object.keys(civilianCasualtiesByEthnicity).length > 0 ||
             Object.keys(humanitarianAggregates).length > 0 ||
             refugeesByTurn.length > 0 ||
@@ -2559,6 +2588,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 humanitarianAggregatesRecorded,
                 movedOnAtCaptureByPeople,
                 ...(unableToLeaveThisWeek !== undefined ? { unableToLeaveThisWeek } : {}),
+                ...(pocketFalls.length > 0 ? { pocketFalls } : {}),
             };
         }
     }
@@ -2855,6 +2885,15 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             if (!enclaveDef || !playerFaction || enclaveDef.faction !== playerFaction) continue;
             const amount = enclaveMunicipalityIds(enclaveDef).reduce((sum, munId) => sum + (unableByMun[munId] ?? 0), 0);
             if (amount >= 1) out[key] = { ...out[key], unable_to_leave_this_week: amount };
+        }
+        // Pocket fall (A9 P0-A): the enclave's latest fall on its own card.
+        const falls = readPocketFalls(state.displacement?.pocket_fall_records, playerFaction);
+        for (const key of Object.keys(out)) {
+            const enclaveDef = ENCLAVE_UI_DEFINITIONS.find((enclave) => enclave.id === key);
+            if (!enclaveDef) continue;
+            const munIds = enclaveMunicipalityIds(enclaveDef);
+            const own = falls.filter((f) => munIds.includes(f.munId));
+            if (own.length > 0) out[key] = { ...out[key], pocket_fall: own[own.length - 1] };
         }
         if (Object.keys(out).length > 0) enclaveResilience = out;
     }
