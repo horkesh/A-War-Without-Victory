@@ -1915,6 +1915,17 @@ export interface DisplacementState {
      * neither trigger holds, nobody remains); the field is absent when no side has a carry.
      */
     siege_outflow_carry_by_side?: Partial<Record<FactionId, number>>;
+    /**
+     * Ledger line 2 (A5; §6 + §4 panels 2026-11-24, `s6_ledger12_ruling.md`). WRITE-ONLY, display
+     * only: no simulation code reads it. Per side holding a besieged pocket here, this week's STOCK
+     * of people the siege outflow would have moved who had no supplied, connected destination
+     * (`trapped` = wanted - routed), stamped with the turn it was written (`state.meta.turn`).
+     * Cleared from every municipality at the start of each `updateDisplacement`, then rewritten;
+     * never summed across weeks. Only `amount >= 1` is stored; the field is absent when none.
+     * The UI shows an entry only when its `turn` equals the current `meta.turn`, and the
+     * projection keeps only the player's own side.
+     */
+    unable_to_leave_by_side?: Partial<Record<FactionId, { amount: number; turn: number }>>;
 }
 
 /** Per-event displacement record for tracking and reporting. Sorted by (turn, origin_mun). */
@@ -3819,6 +3830,15 @@ settlement_displacement_started_turn: Record<SettlementId, number>;
 municipality_displacement: Record<MunicipalityId, number>;
 /** Cumulative civilian displacement casualties (killed, fled_abroad) by ethnicity-aligned faction. */
 civilian_casualties: CivilianCasualtiesByFaction;
+/**
+ * Ledger line 1 (A4; §6 + §4 panels 2026-11-24, `s6_ledger12_ruling.md`). WRITE-ONLY, display only:
+ * no simulation code reads it (source-scan test `ledger_lines_write_only`). The cumulative
+ * number of sheltered refugees moved on when the place sheltering them was taken (the
+ * `capture_pass_through` routing), keyed by the people's own ethnicity-aligned faction bucket.
+ * Written only by `routeDisplacedCohort`, never via `appendDisplacementEvent`. Absent until the
+ * first such move; old saves load without it.
+ */
+moved_on_at_capture_by_people?: Partial<Record<FactionId, number>>;
 /**
  * Per-faction cumulative humanitarian aggregates (LANE D-PRE substrate).
  * Bounded ~3 factions x 3 ethnicities x 3 numbers = 27 numbers total
