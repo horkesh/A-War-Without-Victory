@@ -977,7 +977,7 @@ export function processOfficerSuccession(
         if (existingCommander) {
             // C.3: HVO acting commanders get replaced once their delay is served
             if (existingCommander.state.acting_commander) {
-                // The schedule never retires the President's appointee here; he keeps the
+                // The schedule never retires the President's appointee here; they keep the
                 // pre-existing pool path.
                 const scheduleMayAct = !isPresidentialAppointee(state, corpsFormId, existingCommander.data.id);
                 const scheduledReplacement = scheduleMayAct

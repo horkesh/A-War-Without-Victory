@@ -1978,10 +1978,10 @@ export function applyBotOpportunityDecisions(
         if (isFactionBoundByOct1995Ceasefire(state, p.approver_faction)) continue;
         const def = catalog.find(d => d.opportunity_id === p.opportunity_id);
         if (!def) continue;
-        // A live president's staff decides his opportunities on the turn headless decides them,
+        // A live president's staff decides their opportunities on the turn headless decides them,
         // at every autonomy level (player-override model, owner 2026-11-25, §14.10a; lane C s8
-        // ruling, H-15): silence is `defaultBotDecisionForOpportunity`. His explicit decision on a
-        // review row (an opportunity the staff could not apply stays pending and is put to him at
+        // ruling, H-15): silence is `defaultBotDecisionForOpportunity`. Their explicit decision on a
+        // review row (an opportunity the staff could not apply stays pending and is put to them at
         // Levels 0/1) is consumed first, by apply-resolved-opportunity-decisions at the start of
         // the next turn. Only a headless run with an authored player faction keeps the older
         // review-then-auto-resolve timing below Level 2, so its baselines stay byte-identical.

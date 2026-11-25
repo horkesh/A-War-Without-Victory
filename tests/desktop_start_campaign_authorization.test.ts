@@ -46,7 +46,7 @@ function controlCounts(state: any): Record<string, number> {
 
 describe('desktop startNewCampaign historical operation authorization', () => {
   // Amended 2026-11-25, player-override model (§14.10a): the staff runs for the player faction at
-  // every autonomy level, 0 included (Level 0 used to drop him from bot order selection).
+  // every autonomy level, 0 included (Level 0 used to drop them from bot order selection).
   it('includes the player faction in bot order selection at every autonomy level', () => {
     const baseState = {
       factions: [{ id: 'RBiH' }, { id: 'RS' }, { id: 'HRHB' }],

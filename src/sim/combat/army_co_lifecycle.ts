@@ -430,7 +430,7 @@ export function processArmyCommanderLifecycle(
     const engagedFactions = engagedFactionsForCorps(state, engagedCorpsIds);
     // The authored tenure schedule changes army command for every faction, the player's included,
     // at every autonomy level (player-override model, owner 2026-11-25, §14.10a; lane C s8 ruling,
-    // H-13). The President's explicit command choice overrides it: an army commander he appointed
+    // H-13). The President's explicit command choice overrides it: an army commander they appointed
     // or kept (`isPresidentialAppointee` on the Main Staff seat) is not displaced by the schedule.
     for (const faction of [...CANONICAL_FACTIONS].sort(strictCompare)) {
         const commander = findActiveArmyCommander(state, faction);

@@ -79,7 +79,7 @@ export function recordSilenceReceipt(state: GameState, receipt: SilenceReceipt, 
 
 /**
  * A surfaced review the player let pass its turn (apply-autonomy-transition; ruling Q3, H-6):
- * stamp it resolved as the staff's choice, never as his refusal. Record-only for every kind: the
+ * stamp it resolved as the staff's choice, never as their refusal. Record-only for every kind: the
  * staff already acted on the headless turn. An op plan (`APPROVE_OP:`) launched on the staff's
  * clock, so it reads adopted; a stance proposal left the staff's stance standing, so it reads not
  * adopted; an opportunity review stages no decision at all (the staff decides that opportunity

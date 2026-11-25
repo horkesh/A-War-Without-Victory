@@ -410,7 +410,7 @@ export async function startNewCampaign(
         // player's faction at every autonomy level, so a hands-off game at any level
         // plays the headless war; the level only decides what is put to the
         // president. The historical reason for Level 2 (Level 0 dropped the player
-        // from the staff pipeline and Level 1 held his plans at 'ready') is retired;
+        // from the staff pipeline and Level 1 held their plans at 'ready') is retired;
         // the shipped default stays Level 2 (Political) until the owner changes it.
         state.meta.autonomy_level = 2;
     }

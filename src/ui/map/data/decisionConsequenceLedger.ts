@@ -688,7 +688,7 @@ export function buildDecisionConsequenceLedger(
     const resolvedTurn = proposal.resolved_turn;
     const identitySource = { id: proposal.id, resolved_turn: resolvedTurn };
     const detailToken = proposalDetailToken(proposal, formationDisplayMaps);
-    // Player-override model (§14.10a): a decision left unanswered is the staff's, not his.
+    // Player-override model (§14.10a): a decision left unanswered is the staff's, not their.
     const bySilence = (proposal as { resolved_by?: unknown }).resolved_by === 'silence';
     const titleKey = bySilence
       ? 'decisionConsequences.title.autonomyProposal.staffProceeded'

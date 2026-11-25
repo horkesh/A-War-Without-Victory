@@ -172,7 +172,7 @@ describe('runTurn determinism', () => {
     };
 
     // Player-override model (§14.10a, 2026-11-25): a decision left unanswered is resolved in-turn as
-    // the bot's choice, so the President gives his hard line in the pause on the turn the card fires.
+    // the bot's choice, so the President gives their hard line in the pause on the turn the card fires.
     const pausedOn: number[] = [];
     while (state.meta.turn < 184) {
       const result = await runTurn(state, {

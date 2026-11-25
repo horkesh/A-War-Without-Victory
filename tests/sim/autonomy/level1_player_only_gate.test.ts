@@ -10,7 +10,7 @@
  *
  * Contract pinned here (amended 2026-11-25, player-override model, Engine Invariants §14.10a-b):
  *   - No level holds a plan for anyone: a silent player's staff plan launches on the headless turn,
- *     exactly as a bot corps' does. Only his explicit staged refusal for that plan stops it.
+ *     exactly as a bot corps' does. Only their explicit staged refusal for that plan stops it.
  *   - Bot corps are never read for a player answer.
  *   - Headless auto-control (no human player): nothing is held, even at Level 1.
  */

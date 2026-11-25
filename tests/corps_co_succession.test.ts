@@ -236,7 +236,7 @@ describe('scheduled handover', () => {
     });
 
     // Amended 2026-11-25, player-override model (§14.10a, H-13): Full Control follows the schedule
-    // as headless (it used to raise a matter instead of the swap); his appointee is still never rotated out.
+    // as headless (it used to raise a matter instead of the swap); their appointee is still never rotated out.
     it('a Full Control player corps swaps on the schedule exactly as headless, with no matter', () => {
         const build = (meta?: Record<string, unknown>) => state(22, data(), {
             fallback: os('fallback', { status: 'active', assigned_corps_id: 'c3' }),

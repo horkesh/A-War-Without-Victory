@@ -170,7 +170,7 @@ export function resolveCounterOffers(state: GameState): CounterOfferResolutionRe
     const envelope = getCounterOfferEnvelopeForPlan(planId);
     if (!envelope) return { created_counter_offer_ids: [] };
 
-    // Only the seated player's own counter is his to submit (`submitPlayerCounterOffer`); every
+    // Only the seated player's own counter is their to submit (`submitPlayerCounterOffer`); every
     // other side's staff counters here. No default seat: the pointer this answers exists only
     // with a player (player-override model, §14.10a, H-19).
     const playerFaction = state.meta.player_faction ?? null;

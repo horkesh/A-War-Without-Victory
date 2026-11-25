@@ -356,7 +356,7 @@ describe('Army commander emergent lifecycle', () => {
             cause: 'authored_schedule',
         }]);
         // Player-override model (§14.10a, H-13, 2026-11-25): a Full Control player's army command
-        // follows the authored schedule as headless; no replacement matter waits on him.
+        // follows the authored schedule as headless; no replacement matter waits on them.
         expect(playerReport.army_replacements).toEqual(botReport.army_replacements);
         expect(playerState.military.named_officers).toEqual(botState.military.named_officers);
         expect(playerState.military.pending_officer_events ?? []).not.toContainEqual(expect.objectContaining({

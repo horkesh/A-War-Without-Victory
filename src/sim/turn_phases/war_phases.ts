@@ -1014,7 +1014,7 @@ function getRoutineEquipmentOperationalFloor(state: GameState, formation: Format
 
 
 /**
- * Attack orders the President staged for his own brigades before this Advance, at Level 0 (Full
+ * Attack orders the President staged for their own brigades before this Advance, at Level 0 (Full
  * Control): the per-unit override of the staff's brigade orders (player-override model, §14.10a;
  * lane C s8 ruling Q2). Read before the staff pass replaces the order maps. Empty unless a manual
  * player staged an order, so headless and hands-off live runs never carry one.
@@ -1033,7 +1033,7 @@ export function snapshotStagedPresidentialAttackOrders(state: GameState): Array<
     return staged;
 }
 
-/** Per turn: the President's staged attack orders, for check-truce-break (his orders only break a truce). */
+/** Per turn: the President's staged attack orders, for check-truce-break (their orders only break a truce). */
 const stagedPresidentialAttackOrdersByContext = new WeakMap<object, ReadonlyArray<readonly [FormationId, SettlementId]>>();
 
 /** Write the staged presidential orders over the staff's for those brigades only. */
@@ -2837,9 +2837,9 @@ export const warPhases: NamedPhase[] = [
                 // pass as bot staff (owner calibration directive 2026-11-05; the former merge
                 // pass let last turn's orders beat fresh staff output and was the root of the live
                 // Goražde divergence). At Level 0 an attack order the President staged for one of
-                // his brigades before this Advance overrides the staff's order for that brigade
+                // their brigades before this Advance overrides the staff's order for that brigade
                 // only (ruling Q2). Attack orders are cleared by attack resolution every turn, so
-                // the only player-faction orders on the map here are ones he staged.
+                // the only player-faction orders on the map here are ones they staged.
                 const stagedPresidentialAttackOrders = snapshotStagedPresidentialAttackOrders(context.state);
 
                 const botOrderDiagnostics = generateAllBotOrdersOsid(context.state, factions, osidCtx);
@@ -3017,7 +3017,7 @@ export const warPhases: NamedPhase[] = [
             if (!playerFaction) return;
             // Staff-issued orders never break truces in the player's name, exactly as headless
             // (which never runs this; owner calibration directive 2026-11-05). Only the attack
-            // orders the President staged himself (Level 0, the per-unit override) can.
+            // orders the President staged themselves (Level 0, the per-unit override) can.
             const staged = stagedPresidentialAttackOrdersByContext.get(context) ?? [];
             if (staged.length === 0) return;
             const pc = context.state.political.political_controllers ?? {};

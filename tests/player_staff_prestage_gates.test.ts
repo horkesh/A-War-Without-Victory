@@ -190,7 +190,7 @@ describe('player staff prestage gate: preplanned concentration march', () => {
     });
 
     // Amended 2026-11-25, player-override model (§14.10a, ruling Q2): prestage has no 1.0 surface,
-    // so at autonomy 0 it runs for the player faction as the bot (it used to skip him).
+    // so at autonomy 0 it runs for the player faction as the bot (it used to skip them).
     it('moves the player-faction authored concentration at autonomy 0 too, as the bot does', () => {
         const state = makeCircleState({ playerFaction: 'RBiH', autonomyLevel: 0 });
 

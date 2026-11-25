@@ -578,7 +578,7 @@ describe('desktop player-visible state projection', () => {
     const canonicalJson = serializeState(advanced.state);
     const hydrated = deserializeState(canonicalJson);
     // The Advance also writes the player's own record-only "staff proceeded" receipts for decisions
-    // left unanswered (player-override model, §14.10a); they are his faction's and survive the projection.
+    // left unanswered (player-override model, §14.10a); they are their faction's and survive the projection.
     const answered = (rows: Array<{ id: string; resolved_by?: string }> | undefined) =>
       (rows ?? []).filter((record) => record.resolved_by !== 'silence').map((record) => record.id);
     expect(answered(hydrated.meta.proposal_decision_history)).toEqual(['rbih_receipt', 'rs_receipt']);

@@ -140,7 +140,7 @@ describe('override: staff op plan (H-1..H-6)', () => {
         expect(state.military.corps_command![CORPS.RBiH]!.player_op_response).toBeUndefined();
     });
 
-    it('an explicit backing launches the plan and clears his hold; a silent launch never clears a hold', () => {
+    it('an explicit backing launches the plan and clears their hold; a silent launch never clears a hold', () => {
         const backed = corpsState(1, 'RBiH');
         recordLevel1StanceAnswerHold(backed, CORPS.RBiH, 'defensive', 'PROP_10_military_0');
         expect(corpsHoldForbidsNewPlans(backed, CORPS.RBiH, 10)).toBe(true);
@@ -172,7 +172,7 @@ describe('override: staff op plan (H-1..H-6)', () => {
     });
 });
 
-// ─── Level 0: the staff pipeline runs for the player; his brigade order overrides per unit ──
+// ─── Level 0: the staff pipeline runs for the player; their brigade order overrides per unit ──
 
 describe('override: Level-0 brigade order (H-8..H-12)', () => {
     function ordersState(autonomy: number): GameState {
@@ -196,7 +196,7 @@ describe('override: Level-0 brigade order (H-8..H-12)', () => {
         }
     });
 
-    it('an attack order he staged at Level 0 replaces the staff order for that brigade only', () => {
+    it('an attack order they staged at Level 0 replaces the staff order for that brigade only', () => {
         const state = ordersState(0);
         const staged = snapshotStagedPresidentialAttackOrders(state);
         expect(staged).toEqual([['rbih_b1', 'op:test:president_target']]);
@@ -226,7 +226,7 @@ describe('override: Level-0 brigade order (H-8..H-12)', () => {
 // ─── Recruitment hold (H-8) ─────────────────────────────────────────────────────────────────
 
 describe('override: recruitment hold (H-8)', () => {
-    it('silence: the staff raise for the player at Level 0 as headless; his hold keeps that brigade back', () => {
+    it('silence: the staff raise for the player at Level 0 as headless; their hold keeps that brigade back', () => {
         const state = {
             meta: { turn: 5, seed: 'r', phase: 'war', autonomy_level: 0, player_faction: 'RBiH' },
             factions: FACTIONS.map((id) => ({ id })),
@@ -447,7 +447,7 @@ describe('override: Dayton (H-19)', () => {
 
     it('an explicit proposal wins: it is signed for the President\'s own seat and the close-out never overrides it', () => {
         const explicit = daytonState('RS');
-        // His proposal is computed for his seat; only silence uses the default seat.
+        // Their proposal is computed for their seat; only silence uses the default seat.
         expect(daytonProposerFaction(explicit)).toBe('RS');
         expect(daytonProposerFaction(daytonState(null))).toBe(DAYTON_DEFAULT_PROPOSER);
         const signed = resolveDaytonNegotiation(explicit, buildHistoricalDefaultDaytonProposal());
@@ -508,7 +508,7 @@ describe('override: officer appointment (H-13)', () => {
         expect((live.military.pending_officer_events ?? []).filter((e) => e.type === 'replacement_suggested')).toEqual([]);
     });
 
-    it('his explicit appointment wins: the appointee is not rotated out, the other corps still is', () => {
+    it('their explicit appointment wins: the appointee is not rotated out, the other corps still is', () => {
         const live = officerState(true);
         (live.military.corps_command as any).c4.co_replacement_record = [{ relieved_officer_id: 'x', replacement_officer_id: 'appointee4', turn: 10 }];
         processOfficerSuccession(live, new Set(), roster());

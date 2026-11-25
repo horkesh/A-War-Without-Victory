@@ -3,11 +3,11 @@
  * §14.10a; lane C s8 ruling Q7b, H-16).
  *
  * A player-respondent event at autonomy 0-2 is queued for the President when it fires. The desktop
- * pauses the turn right after `evaluate-events` (PAUSE BEFORE COMBAT, turn_pipeline.ts) so his
- * answer lands in-turn, where a bot's answer lands. Whatever he leaves unanswered when the turn
+ * pauses the turn right after `evaluate-events` (PAUSE BEFORE COMBAT, turn_pipeline.ts) so their
+ * answer lands in-turn, where a bot's answer lands. Whatever they leave unanswered when the turn
  * resumes is resolved HERE, in the same step boundary, as the bot's choice: `selectBotEventResponse`
  * on the options the card offers, applied through the same applier as the bot path and logged as the
- * bot's answer (`bot_ai_default`/`bot_political`, `answeredBy: 'automatic'`). His explicit answer, a
+ * bot's answer (`bot_ai_default`/`bot_political`, `answeredBy: 'automatic'`). Their explicit answer, a
  * filed answer ahead of firing, or the Observer answer at Level 3 always wins because each of those
  * is applied first.
  *

@@ -246,7 +246,7 @@ export function applyCommanderOutput(
     //    launches it, at every autonomy level: silence stages nothing and the plan runs as the
     //    bot's. Only an explicit answer the President staged for THIS plan (player_op_response)
     //    overrides it: a refusal abandons the plan before launch; a backing (accept, force-launch)
-    //    launches it as his act, tags a force-launch, and clears his own presidential hold on the
+    //    launches it as their act, tags a force-launch, and clears their own presidential hold on the
     //    corps (§14.10c). An op that launched by silence never clears a hold. An approved plan
     //    whose emission comes out empty is cleared as headless clears it (residue A retired).
     const corpsFaction = corpsFactionHint ?? state.military.formations?.[corpsId]?.faction;
@@ -311,8 +311,8 @@ export function applyCommanderOutput(
                 operation.was_force_launched = true;
             }
         }
-        // The President's own backing supersedes his stance hold on this corps (§14.10c, ruling
-        // Q5), as his authored op and op directive do. Inert without a hold.
+        // The President's own backing supersedes their stance hold on this corps (§14.10c, ruling
+        // Q5), as their authored op and op directive do. Inert without a hold.
         if (activatedOperations.length > 0) {
             clearCorpsHoldsForPresidentialOperation(state, corpsId, state.meta?.turn ?? 0);
         }

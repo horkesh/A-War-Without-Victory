@@ -283,8 +283,8 @@ export function selectAutomaticRecruitmentFactions(state: GameState): FactionId[
     // Every faction's staff raises its brigades, the player's included, at every autonomy level
     // (player-override model, owner 2026-11-25, §14.10a; lane C s8 ruling Q2, H-8). HISTORY IF
     // LEFT ALONE, AGENCY IF PLAYED: the staff of a human faction raise the historical brigades
-    // unless the president acts. His levers are overrides: the Recruit modal (a raise there
-    // applies at once, before the next Advance runs this staff pass, so he picks first) and the
+    // unless the president acts. Their levers are overrides: the Recruit modal (a raise there
+    // applies at once, before the next Advance runs this staff pass, so they pick first) and the
     // per-brigade hold (`selectPlayerHeldBrigadeIds`), which keeps the staff from raising that
     // brigade at any level. See tests/recruitment_turn.test.ts.
     return sortedFactionIds(state);

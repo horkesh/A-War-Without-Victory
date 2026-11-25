@@ -159,7 +159,7 @@ export function evaluatePeacePlans(state: GameState, eventDefinitions: readonly 
             // Player-override model (owner 2026-11-25, §14.10a; lane C s8 ruling Q7b, H-18): a
             // live President who left the plan unanswered by its close week gets the plan owner's
             // answer, exactly as headless gives that seat (no `forceHistorical`), on the close
-            // week. His explicit answer is the routed card (on the log above) or a pending
+            // week. Their explicit answer is the routed card (on the log above) or a pending
             // fallback modal from an older save. Only a headless run with an authored player
             // faction keeps the fallback pointer below, so its baselines stay byte-identical.
             const silentHuman = humanFaction != null && selectLivePlayerFaction(state) === humanFaction

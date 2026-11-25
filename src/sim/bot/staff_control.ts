@@ -5,9 +5,9 @@ import {strictCompare} from '../../state/validateGameState.js';
  * The factions the staff (bot) pipeline runs for: every faction, the player's included, at
  * every autonomy level (player-override model, owner 2026-11-25: "There should be no drift
  * between live and headless games"; Engine Invariants §14.10a). A live game the human leaves
- * alone is the bot playing his faction. His explicit orders override the staff's choice per
+ * alone is the bot playing their faction. Their explicit orders override the staff's choice per
  * decision (a staged brigade order, a recruitment hold, a refusal, a hold); the autonomy level
- * only decides what is surfaced to him, never whether the decision is made.
+ * only decides what is surfaced to them, never whether the decision is made.
  */
 export function selectStaffControlledFactions(state: GameState): FactionId[] {
     return (state.factions ?? [])
@@ -17,7 +17,7 @@ export function selectStaffControlledFactions(state: GameState): FactionId[] {
 
 /**
  * True when a commander plan can be put to the President for Level-1 review: it names at least
- * one target OSID (`generateLevel1OpProposals`). Surfacing only: a plan that cannot be put to him
+ * one target OSID (`generateLevel1OpProposals`). Surfacing only: a plan that cannot be put to them
  * launches on the staff's clock like any other (player-override model, §14.10a).
  */
 export function isLevel1ProposablePlan(plan: { readonly target_osids?: readonly string[] } | null | undefined): boolean {
@@ -27,7 +27,7 @@ export function isLevel1ProposablePlan(plan: { readonly target_osids?: readonly 
 /**
  * True when this faction's staff op plans are SURFACED to the President for review: autonomy is
  * exactly 1 AND the faction is the human player's. Surfacing only (player-override model,
- * §14.10a): the plan launches on the headless turn unless he explicitly refuses it. Headless
+ * §14.10a): the plan launches on the headless turn unless they explicitly refuses it. Headless
  * auto-control runs have no human player, so this is always false there.
  */
 export function isLevel1PlayerApprovalFaction(state: GameState, faction: FactionId | null | undefined): boolean {
@@ -41,8 +41,8 @@ export function isLevel1PlayerApprovalFaction(state: GameState, faction: Faction
 /**
  * The player faction while the game is at autonomy 0 (Full Control); null when there is no
  * player or the level is 1-3. Since the player-override model (§14.10a) the staff pipeline runs
- * for the player at every level, so this decides only what is surfaced to him at Level 0 (a
- * brigade order he stages there overrides the staff's for that unit). The §6 paramilitary
+ * for the player at every level, so this decides only what is surfaced to them at Level 0 (a
+ * brigade order they stages there overrides the staff's for that unit). The §6 paramilitary
  * request path still keys on it until its own panel rules (lane C s8 ruling Q7c).
  */
 export function selectManualPlayerFaction(state: GameState): FactionId | null {

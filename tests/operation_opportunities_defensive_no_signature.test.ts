@@ -171,7 +171,7 @@ describe('L3: defensive operations are never put to the President', () => {
 
     // Amended 2026-11-25, player-override model (§14.10a, H-15): a live president's staff decide a
     // T1 corps operation on the headless turn too; silence is the staff decision, with a receipt.
-    // Only an opportunity still pending after the staff pass (shown before it) is put to him.
+    // Only an opportunity still pending after the staff pass (shown before it) is put to them.
     it.each([0, 1] as const)('at level %i a T1 corps operation is staff-decided on the headless turn (silence), with a receipt', (level) => {
         const state = evaluate(level, t1());
         expect(generateOpportunityProposalReviews(state, 'RBiH', [t1()])).toHaveLength(1);

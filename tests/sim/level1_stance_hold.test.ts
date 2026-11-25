@@ -138,7 +138,7 @@ describe('Level-1 stance answer hold: writers (source scan)', () => {
         expect(trig).not.toContain('clearCorpsHoldsForPresidentialOperation');
     });
 
-    it('only the President\'s own operation orders clear a hold (war_phases op directive and authored ops; his explicit backing of a staff plan)', () => {
+    it('only the President\'s own operation orders clear a hold (war_phases op directive and authored ops; their explicit backing of a staff plan)', () => {
         const hits: string[] = [];
         const walk = (dir: string) => {
             for (const name of readdirSync(resolve(root, dir)).sort()) {

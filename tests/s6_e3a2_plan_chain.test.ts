@@ -282,7 +282,7 @@ describe('§6 E3a2 item 1: answers from the decision log, one resolver', () => {
         ]);
     });
 
-    it('close-week fallback for a silent human player side: the plan owner answers his seat as headless does (§14.10a)', () => {
+    it('close-week fallback for a silent human player side: the plan owner answers their seat as headless does (§14.10a)', () => {
         // Player-override model (2026-11-25): a live RS president who left the plan unanswered
         // by its close week gets the answer headless gives RS; no pointer (modal) opens.
         const state = makeState({ turn: 58, player_faction: 'RS' });

@@ -1059,7 +1059,7 @@ describe('commander emission overlap guards', () => {
         }],
         ['a presidential hold', (harness) => {
             // Player-override model (§14.10a, 2026-11-25): Level 1 itself no longer withholds the
-            // player's local occupation; his own hold that forbids new plans does.
+            // player's local occupation; their own hold that forbids new plans does.
             harness.state.meta.autonomy_level = 1;
             harness.state.meta.player_faction = FACTION;
             harness.state.meta.headless_scenario_auto_control = false;
@@ -2029,7 +2029,7 @@ describe('commander emission overlap guards', () => {
         doesNotSelectBoundedTarget(guardedBrigadeBriefing({ tags: ['enclave'] }));
 
         // Player-override model (§14.10a, residue B retired, 2026-11-25): at Level 1 the player's corps
-        // keeps local occupation as a bot's does; only his own hold that forbids new plans withholds it.
+        // keeps local occupation as a bot's does; only their own hold that forbids new plans withholds it.
         doesNotSelectBoundedTarget({
             ...briefing,
             state_ref: {

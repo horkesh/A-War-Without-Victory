@@ -376,8 +376,8 @@ describe('commander_handover', () => {
     }
 
     // Amended 2026-11-25, player-override model (§14.10a, H-13): Full Control follows the authored
-    // handover as headless (it used to put a matter to him); his explicit "kept" still makes it lapse.
-    it('a Full Control player follows the handover as headless; a commander he explicitly kept is never displaced', () => {
+    // handover as headless (it used to put a matter to them); their explicit "kept" still makes it lapse.
+    it('a Full Control player follows the handover as headless; a commander they explicitly kept is never displaced', () => {
         const state = presidentState({ player_faction: 'RBiH', autonomy_level: 0 });
         const headless = presidentState({});
         processCorpsReorganisationEvents(state, [HANDOVER]);
@@ -388,7 +388,7 @@ describe('commander_handover', () => {
         expect(state.military.formation_lifecycle_events_fired).toEqual(headless.military.formation_lifecycle_events_fired);
         expect(state.military.pending_officer_events ?? []).toEqual([]);
 
-        // He kept the incumbent explicitly (an answered matter on record): the handover lapses and is receipted.
+        // They kept the incumbent explicitly (an answered matter on record): the handover lapses and is receipted.
         const kept = presidentState({ player_faction: 'RBiH', autonomy_level: 0 });
         kept.military.officer_decision_history = [{ event_type: 'replacement_suggested', decision: 'acknowledged', corps_id: 'arbih_7th_corps', outgoing_officer_id: 'generic_7th', officer_id: 'arbih_alagic' }] as any;
         const report = processCorpsReorganisationEvents(kept, [HANDOVER])!;
