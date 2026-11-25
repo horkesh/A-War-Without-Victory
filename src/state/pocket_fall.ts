@@ -22,7 +22,6 @@
  */
 
 import type { EdgeRecord, SettlementRecord } from '../map/settlements.js';
-import { ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from '../sim/combat/enclave_resilience.js';
 import {
     buildMainBodySuppliedDestinations,
     buildPassThroughDestinationResolver,
@@ -42,6 +41,7 @@ import {
     type MunicipalityId,
     type PocketFallRecord,
 } from './game_state.js';
+import { containsOwnEnclaveSettlement, ownEnclaveSettlements } from './own_enclave_settlements.js';
 import type { MunicipalityPopulation1991Map } from './population_share.js';
 import { strictCompare } from './validateGameState.js';
 
@@ -70,22 +70,6 @@ function munOfOsid(sid: string): MunicipalityId | undefined {
     return parts.length >= 3 && parts[0] === 'op' ? parts[1] : undefined;
 }
 
-/** Does M contain a settlement of one of `side`'s ENCLAVE_DEFINITIONS enclaves (optionally one id)? */
-function containsOwnEnclaveSettlement(osidsInMun: readonly string[], side: FactionId, enclaveId?: string): boolean {
-    for (const enclave of ENCLAVE_DEFINITIONS) {
-        if (enclave.faction !== side) continue;
-        if (enclaveId !== undefined && enclave.id !== enclaveId) continue;
-        if (osidsInMun.some((sid) => osidBelongsToEnclave(sid, enclave))) return true;
-    }
-    return false;
-}
-
-/** M's settlements that belong to one of `side`'s ENCLAVE_DEFINITIONS enclaves, in id order. */
-function ownEnclaveSettlements(osidsInMun: readonly string[], side: FactionId): string[] {
-    return osidsInMun.filter((sid) =>
-        ENCLAVE_DEFINITIONS.some((enclave) => enclave.faction === side && osidBelongsToEnclave(sid, enclave))
-    );
-}
 
 /** A takeover timer for `side`'s people in M that is still pending (not matured) or dormant. */
 function hasBlockingTakeoverTimer(state: GameState, munId: MunicipalityId, side: FactionId): boolean {

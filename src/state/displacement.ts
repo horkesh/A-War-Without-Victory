@@ -17,6 +17,7 @@ import type {
 } from './game_state.js';
 import { CANONICAL_FACTIONS } from './game_state.js';
 import { NEGOTIATED_EVACUATION_CONVOY_MAX, NEGOTIATED_EVACUATION_EPISODE_CAP } from './displacement_loss_constants.js';
+import { ownEnclaveSettlements } from './own_enclave_settlements.js';
 
 import { buildAdjacencyMapCached } from '../map/adjacency_map.js';
 import { computeFrontEdges, type FrontEdge } from '../map/front_edges.js';
@@ -357,16 +358,23 @@ export interface NegotiatedEvacuationPredicateRow {
     separate: boolean;
     /** (b) the A5 siege trigger: under front pressure and unsupplied for UNSUPPLIED_PRESSURE_TURNS turns. */
     siege: boolean;
-    /** (c) the municipality is at its receiving capacity (§4.3). */
+    /** (c) the municipality is at its receiving capacity (§4.3). Opens an episode only. */
     at_capacity: boolean;
-    /** (d) a pressing side took a settlement of the pocket within the last UNSUPPLIED_PRESSURE_TURNS turns. */
+    /**
+     * (d) a pressing side took one of the pocket's own Ring 1 enclave cells (an ENCLAVE_DEFINITIONS settlement of
+     * the side's enclave in this municipality) within the last UNSUPPLIED_PRESSURE_TURNS turns.
+     */
     squeeze: boolean;
+    /** The enclave cells captured from the side in the window, as `osid@turn`, in (turn, osid) order. */
+    squeeze_cells: string[];
     /** The pressing side named by `resolvePressingFactions` whose capture gives (d); null when none. */
     besieger: FactionId | null;
     /** Besieger intent: a takeover timer of the besieger against the side's people with people displaced, or the side's people are present here. */
     intent: boolean;
-    /** (a)-(d) and intent all hold. */
+    /** (a)-(d) and intent all hold: the predicate that opens an episode. */
     open: boolean;
+    /** An episode is open and (a), (b), (d) and intent hold this week: a convoy may run ((c) is not re-checked). */
+    convoy_week: boolean;
     /** A human RBiH president's refusal stands for this episode. */
     refused: boolean;
     /** The episode has moved NEGOTIATED_EVACUATION_EPISODE_CAP people. */
@@ -929,10 +937,10 @@ export function recordNegotiatedEvacuationRefusal(state: GameState, munId: Munic
     return true;
 }
 
-/** A9 P1 (d): one capture of the window: `from` lost settlement `sid` (in `mun`) to `to`. */
+/** A9 P1 (d): one capture of the window: `from` lost settlement `sid` to `to` on `turn`. */
 interface RecentCapture {
+    turn: number;
     sid: string;
-    mun: MunicipalityId | undefined;
     from: FactionId;
     to: FactionId;
 }
@@ -942,20 +950,17 @@ interface RecentCapture {
  * persisted control-change log (`political.control_events`). Setup writes and non-faction controllers are not
  * captures. Sorted (turn, settlement, from, to), so every reader walks them in one order.
  */
-function collectRecentCaptures(state: GameState, settlements: Map<string, SettlementRecord>): RecentCapture[] {
+function collectRecentCaptures(state: GameState): RecentCapture[] {
     const turn = state.meta.turn;
-    const rows: Array<RecentCapture & { turn: number }> = [];
+    const rows: RecentCapture[] = [];
     for (const ev of state.political?.control_events ?? []) {
         if (!ev || ev.mechanism === 'setup_control') continue;
         if (ev.turn > turn || turn - ev.turn >= UNSUPPLIED_PRESSURE_TURNS) continue;
         if (!isCanonicalFaction(ev.from) || !isCanonicalFaction(ev.to) || ev.from === ev.to) continue;
-        const rec = settlements.get(ev.settlement_id);
-        const parts = ev.settlement_id.split(':');
-        const mun = (rec?.mun1990_id ?? rec?.mun_code ?? ev.mun_id ?? (parts[0] === 'op' ? parts[1] : undefined)) as MunicipalityId | undefined;
-        rows.push({ turn: ev.turn, sid: ev.settlement_id, mun, from: ev.from, to: ev.to });
+        rows.push({ turn: ev.turn, sid: ev.settlement_id, from: ev.from, to: ev.to });
     }
     rows.sort((a, b) => a.turn - b.turn || strictCompare(a.sid, b.sid) || strictCompare(a.from, b.from) || strictCompare(a.to, b.to));
-    return rows.map(({ sid, mun, from, to }) => ({ sid, mun, from, to }));
+    return rows;
 }
 
 /**
@@ -1070,7 +1075,7 @@ export function updateDisplacement(
     }
 
     // A9 P1 (ruling D9): the negotiated-evacuation convoy rule's inputs, read once from state.
-    const recentCaptures = collectRecentCaptures(state, settlements);
+    const recentCaptures = collectRecentCaptures(state);
     const takeoverIntentPairs = collectTakeoverIntentPairs(state);
     const evacuationRows: NegotiatedEvacuationPredicateRow[] = [];
     const evacuationRecords: NegotiatedEvacuationRecord[] = [];
@@ -1282,21 +1287,17 @@ export function updateDisplacement(
             let episode: NegotiatedEvacuationEpisode | undefined = episodes[side];
             if (!separate && !episode) continue;
 
-            // (d) the squeeze: a pressing side took a settlement of the pocket (in this municipality, or next to
-            // the pocket's own bodies) from this side within the window.
-            const pocketBodies = new Set<number>();
-            for (const sid of sideSids) {
-                const b = body?.bodyOf.get(sid);
-                if (b !== undefined) pocketBodies.add(b);
-            }
+            // (d) the squeeze (orchestrator ruling 2026-11-25, how D9's text is met): within the window a pressing
+            // side took from this side one of the pocket's own Ring 1 enclave cells, the settlements of M that belong
+            // to an ENCLAVE_DEFINITIONS enclave of this side (the same static test as the pocket fall). A municipality
+            // with no such cell never meets (d); a capture next to the pocket's body does not count.
+            const enclaveCells = new Set(ownEnclaveSettlements(munSids, side));
             const squeezers = new Set<FactionId>();
+            const squeezeCells: string[] = [];
             for (const cap of recentCaptures) {
-                if (cap.from !== side || squeezers.has(cap.to)) continue;
-                const ofPocket = cap.mun === munId || (neighbours.get(cap.sid) ?? []).some((nb) => {
-                    const b = controllerOf.get(nb) === side ? body?.bodyOf.get(nb) : undefined;
-                    return b !== undefined && pocketBodies.has(b);
-                });
-                if (ofPocket) squeezers.add(cap.to);
+                if (cap.from !== side || !enclaveCells.has(cap.sid)) continue;
+                squeezers.add(cap.to);
+                squeezeCells.push(`${cap.sid}@${cap.turn}`);
             }
             // The besieger: the pressing sides `resolvePressingFactions` names, by weight (ties in canonical
             // order), that took ground of the pocket; the first one with intent, else the first one.
@@ -1314,9 +1315,15 @@ export function updateDisplacement(
             const siege = (siegeTurnsBySide.get(side) ?? 0) >= UNSUPPLIED_PRESSURE_TURNS;
             const current = dispState.original_population + dispState.displaced_in - dispState.displaced_out - dispState.lost_population;
             const atCapacity = current >= Math.floor(dispState.original_population * getReceivingCapacityFraction(munId));
-            const open = separate && siege && atCapacity && squeeze && intent;
+            // Orchestrator ruling 2026-11-25 (how D9's text is met): (c) only OPENS an episode. D9 closes an episode
+            // only when (d) fails or the cap is reached, and a convoy itself drops the pocket below its line. Each
+            // convoy week of an open episode re-checks (a), (b), (d) and intent; a week where (a) or (b) fails runs
+            // no convoy but keeps the episode.
+            const convoyWeek = separate && siege && squeeze && intent;
+            const open = convoyWeek && atCapacity;
 
-            // The episode closes when the squeeze ends; a new squeeze is a new episode.
+            // The episode closes when the squeeze ends (a new squeeze is a new episode). At the cap it runs no more
+            // convoys and stays on record until the squeeze ends, so a continuing squeeze cannot open a second one.
             if (!squeeze) {
                 delete episodes[side];
                 episode = undefined;
@@ -1331,7 +1338,7 @@ export function updateDisplacement(
             // capacity. Sheltered people board first, then residents. Only people with a place to go board: the
             // rest stay in the pocket, so people leaving = people arriving (no kill, no flight abroad, no overflow).
             let convoy = 0;
-            if (open && episode && besieger !== null && !refused && episode.last_convoy_turn !== currentTurn &&
+            if (convoyWeek && episode && besieger !== null && !refused && episode.last_convoy_turn !== currentTurn &&
                 episode.people < NEGOTIATED_EVACUATION_EPISODE_CAP) {
                 const sheltered = Math.max(0, Math.floor(dispState.displaced_in_by_faction?.[side] ?? 0));
                 const sidePop = sideSids.reduce((s, sid) => s + (popOf.get(sid) ?? 0), 0);
@@ -1378,8 +1385,8 @@ export function updateDisplacement(
             }
 
             evacuationRows.push({
-                mun_id: munId, faction_id: side, separate, siege, at_capacity: atCapacity, squeeze, besieger, intent, open,
-                refused, cap_reached: episode !== undefined && episode.people >= NEGOTIATED_EVACUATION_EPISODE_CAP,
+                mun_id: munId, faction_id: side, separate, siege, at_capacity: atCapacity, squeeze, squeeze_cells: squeezeCells,
+                besieger, intent, open, convoy_week: episode !== undefined && convoyWeek, refused, cap_reached: episode !== undefined && episode.people >= NEGOTIATED_EVACUATION_EPISODE_CAP,
                 convoy, episode_people: episode?.people ?? 0,
             });
         }

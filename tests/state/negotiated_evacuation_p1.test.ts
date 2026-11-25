@@ -3,9 +3,11 @@
  *
  * The convoy opens for side X's pocket in municipality M only from state: (a) X's ground in M is a body separate
  * from X's main body (B3's test), (b) the A5 siege trigger holds, (c) M is at its receiving capacity, (d) the
- * besieger took a settlement of the pocket within the last UNSUPPLIED_PRESSURE_TURNS turns, and the besieger's
- * intent holds. At most one convoy a week, at most NEGOTIATED_EVACUATION_CONVOY_MAX people, at most
- * NEGOTIATED_EVACUATION_EPISODE_CAP people an episode, to X's supplied main body only, within capacity.
+ * besieger took one of the pocket's own Ring 1 enclave cells within the last UNSUPPLIED_PRESSURE_TURNS turns, and
+ * the besieger's intent holds. (c) only opens an episode; each convoy week re-checks (a), (b), (d) and intent, and
+ * the episode ends when (d) fails (orchestrator rulings 2026-11-25). At most one convoy a week, at most
+ * NEGOTIATED_EVACUATION_CONVOY_MAX people, at most NEGOTIATED_EVACUATION_EPISODE_CAP people an episode, to X's
+ * supplied main body only, within capacity.
  *
  * The predicate tests come first (the ruling's required first step): a Goražde-shaped state, a held RBiH pocket
  * cut off from the main body and squeezed by RS, with its predicate recorded.
@@ -23,41 +25,65 @@ interface World {
     settlements: Map<string, SettlementRecord>;
     edges: EdgeRecord[];
     census: MunicipalityPopulation1991Map;
+    /** The pocket's municipality. */
+    pocket: string;
+    /** The settlement RS takes from RBiH in each capture event of the fixture. */
+    captureSid: string;
 }
 
 interface WorldOpts {
+    /** The pocket's municipality. Default `gorazde`; `srebrenica` and `pale` give the other shapes. */
+    pocket?: 'gorazde' | 'srebrenica' | 'pale';
+    /**
+     * Which RS-held settlement of the pocket municipality the capture events name: `enclave` (default), the RS-held
+     * cell that is one of RBiH's own Ring 1 ENCLAVE_DEFINITIONS cells there; or `outside`, an RS-held settlement of
+     * the municipality outside the enclave cells.
+     */
+    capture?: 'enclave' | 'outside';
     /** People sheltering in the pocket (RBiH). Default 20,000: the pocket is at twice its 1.5x line. */
     sheltered?: number;
     /** Consecutive unsupplied turns already counted before this turn. Default 2, so this turn is the 3rd. */
     priorUnsupplied?: number;
-    /** Turn of RS's capture of `op:gorazde:z`; null for no capture. Default 9 (this turn is 10). */
+    /** Turn of RS's capture; null for no capture. Default 9 (this turn is 10). */
     captureTurn?: number | null;
     /** Original population of the main-body destination. Default 100,000 (room for 50,000). */
     homeOriginal?: number;
-    /** Add `srebrenica`: a second, separate RBiH pocket with its own supply source and room to receive. */
+    /** Add `tesanj`: a second, separate RBiH pocket with its own supply source and room to receive. */
     otherPocket?: boolean;
 }
 
 /**
- * Goražde-shaped: three RBiH settlements of `gorazde` (a, b, c) and one (z) RS took from RBiH, ringed by RS-held
- * `foca` (r1, r2); RBiH's main body is `zenica` (14 settlements, its supply source at h1), reached only across
- * RS ground. The pocket is unsupplied and under front pressure.
+ * The RS-held cell of each shape: Goražde's `kola` and Srebrenica's `luka_2` are RBiH Ring 1 ENCLAVE_DEFINITIONS
+ * cells; Pale has no RBiH enclave cell, so `op:pale:kola` is an ordinary settlement.
+ */
+const ENCLAVE_CELL: Record<'gorazde' | 'srebrenica' | 'pale', string> = { gorazde: 'kola', srebrenica: 'luka_2', pale: 'kola' };
+
+/**
+ * Goražde-shaped: three RBiH settlements of the pocket municipality (a, b, c), and two settlements RS took from
+ * RBiH there (z, outside the enclave cells; and the enclave cell), ringed by RS-held `foca` (r1, r2); RBiH's main
+ * body is `zenica` (14 settlements, its supply source at h1), reached only across RS ground. The pocket is
+ * unsupplied and under front pressure.
  */
 function world(opts: WorldOpts = {}): World {
+    const m = opts.pocket ?? 'gorazde';
+    const cell = `op:${m}:${ENCLAVE_CELL[m]}`;
     const controllers: Record<string, string> = {
-        'op:gorazde:a': 'RBiH',
-        'op:gorazde:b': 'RBiH',
-        'op:gorazde:c': 'RBiH',
-        'op:gorazde:z': 'RS',
+        [`op:${m}:a`]: 'RBiH',
+        [`op:${m}:b`]: 'RBiH',
+        [`op:${m}:c`]: 'RBiH',
+        [`op:${m}:z`]: 'RS',
+        [cell]: 'RS',
         'op:foca:r1': 'RS',
         'op:foca:r2': 'RS',
     };
     const edges: EdgeRecord[] = [
-        { a: 'op:gorazde:a', b: 'op:gorazde:b' },
-        { a: 'op:gorazde:b', b: 'op:gorazde:c' },
-        { a: 'op:gorazde:c', b: 'op:gorazde:z' },
-        { a: 'op:gorazde:z', b: 'op:foca:r1' },
-        { a: 'op:gorazde:a', b: 'op:foca:r1' },
+        { a: `op:${m}:a`, b: `op:${m}:b` },
+        { a: `op:${m}:b`, b: `op:${m}:c` },
+        { a: `op:${m}:c`, b: `op:${m}:z` },
+        { a: `op:${m}:c`, b: cell },
+        { a: `op:${m}:z`, b: 'op:foca:r1' },
+        { a: cell, b: 'op:foca:r1' },
+        { a: `op:${m}:a`, b: 'op:foca:r1' },
         { a: 'op:foca:r1', b: 'op:foca:r2' },
         { a: 'op:foca:r2', b: 'op:zenica:h1' },
     ];
@@ -66,20 +92,21 @@ function world(opts: WorldOpts = {}): World {
         if (i > 1) edges.push({ a: `op:zenica:h${i - 1}`, b: `op:zenica:h${i}` });
     }
     if (opts.otherPocket) {
-        controllers['op:srebrenica:s1'] = 'RBiH';
-        edges.push({ a: 'op:srebrenica:s1', b: 'op:foca:r1' });
+        controllers['op:tesanj:s1'] = 'RBiH';
+        edges.push({ a: 'op:tesanj:s1', b: 'op:foca:r1' });
     }
     const settlements = new Map<string, SettlementRecord>();
     for (const sid of Object.keys(controllers)) {
         const mun = sid.split(':')[1];
         settlements.set(sid, { sid, source_id: sid, mun_code: mun, mun, mun1990_id: mun, properties: { population_total: 100 } });
     }
+    const captureSid = opts.capture === 'outside' ? `op:${m}:z` : cell;
     const sheltered = opts.sheltered ?? 20_000;
-    const row = (m: string, pop: number) => ({ mun_id: m, original_population: pop, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 9 });
-    const gorazde = { ...row('gorazde', 10_000), displaced_in: sheltered, displaced_in_by_faction: sheltered > 0 ? { RBiH: sheltered } : undefined } as Record<string, unknown>;
+    const row = (mun: string, pop: number) => ({ mun_id: mun, original_population: pop, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 9 });
+    const pocketRow = { ...row(m, 10_000), displaced_in: sheltered, displaced_in_by_faction: sheltered > 0 ? { RBiH: sheltered } : undefined } as Record<string, unknown>;
     const prior = opts.priorUnsupplied ?? 2;
-    if (prior > 0) gorazde.unsupplied_pressure_by_side = { RBiH: { turns: prior, last_turn: 9 } };
-    if (gorazde.displaced_in_by_faction === undefined) delete gorazde.displaced_in_by_faction;
+    if (prior > 0) pocketRow.unsupplied_pressure_by_side = { RBiH: { turns: prior, last_turn: 9 } };
+    if (pocketRow.displaced_in_by_faction === undefined) delete pocketRow.displaced_in_by_faction;
     const captureTurn = opts.captureTurn === undefined ? 9 : opts.captureTurn;
     const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
@@ -95,30 +122,30 @@ function world(opts: WorldOpts = {}): World {
             formations: {},
             front_segments: {},
             front_pressure: {},
-            militia_pools: { 'gorazde:RBiH': { mun_id: 'gorazde', faction: 'RBiH', available: 1000, committed: 0, exhausted: 0, updated_turn: 9 } },
+            militia_pools: { [`${m}:RBiH`]: { mun_id: m, faction: 'RBiH', available: 1000, committed: 0, exhausted: 0, updated_turn: 9 } },
         },
         political: {
             political_controllers: controllers,
             control_events: captureTurn === null
                 ? []
-                : [{ turn: captureTurn, settlement_id: 'op:gorazde:z', mechanism: 'combat', from: 'RBiH', to: 'RS', mun_id: 'gorazde' }],
+                : [{ turn: captureTurn, settlement_id: captureSid, mechanism: 'combat', from: 'RBiH', to: 'RS', mun_id: m }],
         },
         displacement: {
             displacement_state: {
-                gorazde,
+                [m]: pocketRow,
                 foca: row('foca', 10_000),
                 zenica: row('zenica', opts.homeOriginal ?? 100_000),
-                ...(opts.otherPocket ? { srebrenica: row('srebrenica', 100_000) } : {}),
+                ...(opts.otherPocket ? { tesanj: row('tesanj', 100_000) } : {}),
             },
         },
     } as unknown as GameState;
     const census = {
-        gorazde: { total: 10_000, bosniak: 7_000, serb: 3_000, croat: 0, other: 0 },
+        [m]: { total: 10_000, bosniak: 7_000, serb: 3_000, croat: 0, other: 0 },
         foca: { total: 10_000, bosniak: 0, serb: 10_000, croat: 0, other: 0 },
         zenica: { total: 100_000, bosniak: 100_000, serb: 0, croat: 0, other: 0 },
-        srebrenica: { total: 100_000, bosniak: 100_000, serb: 0, croat: 0, other: 0 },
+        tesanj: { total: 100_000, bosniak: 100_000, serb: 0, croat: 0, other: 0 },
     } as MunicipalityPopulation1991Map;
-    return { state, settlements, edges, census };
+    return { state, settlements, edges, census, pocket: m, captureSid };
 }
 
 const run = (w: World, crossings: Parameters<typeof updateDisplacement>[5] = []) =>
@@ -150,6 +177,18 @@ describe('A9 P1 predicate: a Goražde-shaped pocket (recorded first)', () => {
             open: true,
             refused: false,
         });
+        // (d) holds through RS's capture of an own Ring 1 enclave cell (Goražde's `kola`), at t9.
+        expect(row!.squeeze_cells).toEqual(['op:gorazde:kola@9']);
+    });
+
+    it('(d) is false when the only capture in the window is outside the enclave cells (orchestrator ruling 2026-11-25)', () => {
+        const row = predicateOf(run(world({ capture: 'outside' })))!;
+        expect(row.separate && row.siege && row.at_capacity).toBe(true);
+        expect(row.squeeze).toBe(false);
+        expect(row.squeeze_cells).toEqual([]);
+        expect(row.besieger).toBeNull();
+        expect(row.open).toBe(false);
+        expect(row.convoy).toBe(0);
     });
 
     it('reports no row for a side whose ground is in its main body (RS in the same municipality)', () => {
@@ -214,12 +253,12 @@ describe('A9 P1 predicate: a Goražde-shaped pocket (recorded first)', () => {
 
 const ds = (w: World) => w.state.displacement.displacement_state;
 
-/** Next week: advance the turn and, unless `capture` is false, book another RS capture of pocket ground. */
+/** Next week: advance the turn and, unless `capture` is false, book another RS capture of the fixture's cell. */
 function nextWeek(w: World, capture = true): void {
     w.state.meta.turn += 1;
     if (capture) {
         w.state.political.control_events!.push({
-            turn: w.state.meta.turn, settlement_id: 'op:gorazde:z', mechanism: 'combat', from: 'RBiH', to: 'RS', mun_id: 'gorazde',
+            turn: w.state.meta.turn, settlement_id: w.captureSid, mechanism: 'combat', from: 'RBiH', to: 'RS', mun_id: w.pocket,
         });
     }
 }
@@ -289,14 +328,74 @@ describe('A9 P1 convoy', () => {
         expect(records.map((r) => [r.turn, r.convoy, r.episode_people])).toEqual([[10, 1, 3_000], [11, 2, 6_000], [12, 3, 9_000]]);
     });
 
-    it('stops when the pocket falls below its capacity line', () => {
-        // 10,000 + 7,000 sheltered = 17,000 >= 15,000: one convoy (3,000 sheltered), then 14,000 < 15,000.
-        const w = world({ sheltered: 7_000 });
-        expect(predicateOf(run(w))!.convoy).toBe(3_000);
-        nextWeek(w);
-        const row = predicateOf(run(w))!;
-        expect(row.at_capacity).toBe(false);
-        expect(row.convoy).toBe(0);
+    it('(c) only opens: a pocket below its capacity line never opens an episode', () => {
+        // 10,000 + 4,000 = 14,000 < 15,000, every other term holds, for three weeks.
+        const w = world({ sheltered: 4_000 });
+        for (let week = 0; week < 3; week++) {
+            if (week > 0) nextWeek(w);
+            const row = predicateOf(run(w))!;
+            expect(row.at_capacity).toBe(false);
+            expect(row.convoy_week).toBe(false);
+            expect(row.convoy).toBe(0);
+        }
+        expect(ds(w).gorazde.negotiated_evacuation_by_side).toBeUndefined();
+        expect(w.state.displacement.negotiated_evacuation_records).toBeUndefined();
+    });
+
+    it('a Srebrenica-shaped episode: (c) true only in the first week, three convoys, ending at exactly 9,000', () => {
+        // 10,000 + 6,000 sheltered = 16,000 >= 15,000 at t10 only; RS takes the enclave cell luka_2 every week.
+        const w = world({ pocket: 'srebrenica', sheltered: 6_000 });
+        const rows: NegotiatedEvacuationPredicateRow[] = [];
+        for (let week = 0; week < 5; week++) {
+            if (week > 0) nextWeek(w);
+            rows.push(predicateOf(run(w), 'srebrenica')!);
+        }
+        expect(rows.map((r) => r.at_capacity)).toEqual([true, false, false, false, false]);
+        expect(rows.map((r) => r.convoy)).toEqual([3_000, 3_000, 3_000, 0, 0]);
+        // t11's window (t9-t11) holds the t9 and t11 captures.
+        expect(rows[1].squeeze_cells).toEqual(['op:srebrenica:luka_2@9', 'op:srebrenica:luka_2@11']);
+        expect(rows.slice(3).every((r) => r.cap_reached)).toBe(true);
+        const ep = ds(w).srebrenica.negotiated_evacuation_by_side!.RBiH!;
+        expect(ep).toMatchObject({ opened_turn: 10, convoys: 3, people: NEGOTIATED_EVACUATION_EPISODE_CAP });
+        // Sheltered first (6,000), then residents (3,000).
+        const recs = w.state.displacement.negotiated_evacuation_records!;
+        expect(recs.map((r) => [r.from_sheltered, r.from_residents])).toEqual([[3_000, 0], [3_000, 0], [0, 3_000]]);
+        expect(ds(w).zenica.displaced_in).toBe(NEGOTIATED_EVACUATION_EPISODE_CAP);
+    });
+
+    it('a week with (b) false skips the convoy but keeps the episode', () => {
+        const w = world({ sheltered: 30_000 });
+        expect(predicateOf(run(w))!.convoy).toBe(3_000); // t10
+        // The pocket is supplied for a week: the siege count restarts, so (b) fails at t11 and t12.
+        delete ds(w).gorazde.unsupplied_pressure_by_side;
+        const moved: number[] = [];
+        const siege: boolean[] = [];
+        for (let week = 0; week < 3; week++) {
+            nextWeek(w);
+            const row = predicateOf(run(w))!;
+            moved.push(row.convoy);
+            siege.push(row.siege);
+            expect(ds(w).gorazde.negotiated_evacuation_by_side?.RBiH?.opened_turn).toBe(10);
+        }
+        expect(siege).toEqual([false, false, true]);
+        expect(moved).toEqual([0, 0, 3_000]);
+        expect(ds(w).gorazde.negotiated_evacuation_by_side?.RBiH).toMatchObject({ opened_turn: 10, convoys: 2, people: 6_000 });
+    });
+
+    it('a Pale-shaped municipality (no own enclave cell) never opens', () => {
+        const w = world({ pocket: 'pale', sheltered: 30_000 });
+        for (let week = 0; week < 4; week++) {
+            if (week > 0) nextWeek(w);
+            const row = predicateOf(run(w), 'pale')!;
+            expect(row.separate && row.siege && row.at_capacity).toBe(true);
+            // RS took ground of the municipality every week, but none of it is an RBiH enclave cell.
+            expect(row.squeeze).toBe(false);
+            expect(row.besieger).toBeNull();
+            expect(row.open).toBe(false);
+            expect(row.convoy).toBe(0);
+        }
+        expect(ds(w).pale.negotiated_evacuation_by_side).toBeUndefined();
+        expect(w.state.displacement.negotiated_evacuation_records).toBeUndefined();
     });
 
     it('boards residents once the sheltered stock is gone', () => {
@@ -373,7 +472,7 @@ describe('A9 P1 convoy', () => {
     });
 
     it('goes to the supplied main body only, within its receiving capacity', () => {
-        // zenica: 10,000 original, line 15,000: room for 5,000. srebrenica: a separate supplied pocket, never a destination.
+        // zenica: 10,000 original, line 15,000: room for 5,000. tesanj: a separate supplied pocket, never a destination.
         const w = world({ sheltered: 30_000, homeOriginal: 10_000, otherPocket: true });
         const moved: number[] = [];
         for (let week = 0; week < 3; week++) {
@@ -382,7 +481,7 @@ describe('A9 P1 convoy', () => {
         }
         expect(moved).toEqual([3_000, 2_000, 0]);
         expect(ds(w).zenica.displaced_in).toBe(5_000);
-        expect(ds(w).srebrenica.displaced_in).toBe(0);
+        expect(ds(w).tesanj.displaced_in).toBe(0);
         expect(w.state.displacement.negotiated_evacuation_records!.map((r) => r.people)).toEqual([3_000, 2_000]);
     });
 
