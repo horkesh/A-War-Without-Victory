@@ -32,7 +32,6 @@ import {
     type CorpsCoRoster,
 } from './corps_co_roster.js';
 import { CANONICAL_CORPS_CO_ROSTER } from './corps_co_roster_data.js';
-import { selectManualPlayerFaction } from '../bot/staff_control.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -712,26 +711,16 @@ export function processOfficerSuccession(
 
     const turn = state.meta?.turn ?? 0;
     const playerFaction = state.meta?.player_faction ?? null;
-    // Only a manually controlled player decides its own corps successions; a staff-controlled
-    // player (autonomy >= 1) retires on the authored schedule exactly like a bot faction.
-    const manualPlayerFaction = selectManualPlayerFaction(state);
+    // Every faction's corps successions follow the authored schedule, the player's included, at
+    // every autonomy level (player-override model, owner 2026-11-25, §14.10a; lane C s8 ruling,
+    // H-13). The President's explicit appointment overrides it: a presidential appointee is never
+    // displaced by the schedule (`isPresidentialAppointee`).
 
     // Ensure pending_officer_events array exists
     if (!state.military.pending_officer_events) {
         state.military.pending_officer_events = [];
     }
     const pendingEvents = state.military.pending_officer_events;
-
-    /**
-     * A manually controlled player decides his own corps successions: a scheduled
-     * change becomes a replacement matter (deduplicated against pending and resolved
-     * matters), never an automatic swap. Used only by the schedule paths (§5E).
-     */
-    function suggestScheduledReplacement(outgoing: NamedOfficer, corpsId: string, proposed?: NamedOfficer | null): void {
-        const successor = proposed ?? findHistoricalSuccessor(outgoing, officerData!, officers!, turn, corpsRoster, corpsId);
-        if (!successor) return;
-        queueReplacementMatter(state, outgoing.faction, outgoing.id, corpsId, successor.id, turn);
-    }
 
     // 1. Historical departures
     for (const data of officerData) {
@@ -745,44 +734,6 @@ export function processOfficerSuccession(
         // step 3b applies it (status, operation release, casualty). Inert with an empty schedule.
         if (scheduledDeathBy(corpsRoster, data.id, turn)) continue;
         if (data.available_until_turn !== undefined && turn >= data.available_until_turn) {
-            // Manual player faction: don't auto-retire, create a replacement_suggested event instead
-            if (data.faction === manualPlayerFaction && os.status === 'active' && os.assigned_corps_id) {
-                // Find the suggested replacement (next officer for this corps by tier)
-                const suggestedReplacement = findHistoricalSuccessor(data, officerData, officers, turn, corpsRoster, os.assigned_corps_id);
-                if (suggestedReplacement) {
-                    const corpsId = os.assigned_corps_id;
-                    const matterKey = officerReplacementMatterKey(data.id, corpsId, suggestedReplacement.id);
-                    const alreadyPending = pendingEvents.some(event => replacementMatterMatches(
-                        event,
-                        matterKey,
-                        data.id,
-                        corpsId,
-                        suggestedReplacement.id,
-                    ));
-                    const alreadyResolved = (state.military.officer_decision_history ?? []).some(record => replacementMatterMatches(
-                        record as typeof record & { matter_key?: string },
-                        matterKey,
-                        data.id,
-                        corpsId,
-                        suggestedReplacement.id,
-                    ));
-                    if (!alreadyPending && !alreadyResolved) {
-                        pendingEvents.push({
-                            event_id: matterKey,
-                            type: 'replacement_suggested',
-                            faction: data.faction,
-                            turn,
-                            officer_id: suggestedReplacement.id,
-                            current_commander_id: data.id,
-                            corps_id: corpsId,
-                            acknowledged: false,
-                        });
-                    }
-                }
-                // Don't retire — player decides
-                continue;
-            }
-
             os.status = 'retired';
             if (os.assigned_corps_id) {
                 os.assigned_corps_id = null;
@@ -894,10 +845,6 @@ export function processOfficerSuccession(
         const seatedTurn = turn - os.turns_in_command - 1;
         if (tenure.tenure_end !== null && seatedTurn >= tenure.tenure_end) continue;
         if (isPresidentialAppointee(state, corpsId, data.id)) continue;
-        if (data.faction === manualPlayerFaction) {
-            suggestScheduledReplacement(data, corpsId);
-            continue;
-        }
         const servesLater = (corpsRoster.rosters ? Object.values(corpsRoster.rosters) : [])
             .some(entry => entry.schedule.some(t => t.officer_id === data.id && t.tenure_start >= turn));
         os.status = servesLater ? 'reserve' : 'retired';
@@ -990,8 +937,8 @@ export function processOfficerSuccession(
     // 5a. Scheduled handovers (§5E). When a scheduled tenure is in force and its holder
     // is free, the fallback holder steps aside (a generic acting commander retires; a
     // named one returns to the reserve). The President's own appointee is never rotated
-    // out, and a manually controlled player gets a replacement matter instead of an
-    // automatic swap. Runs over every corps before vacancies are filled, so a corps the
+    // out; every other corps, the player's included, swaps on the schedule (§14.10a).
+    // Runs over every corps before vacancies are filled, so a corps the
     // holder leaves is refilled in the same turn. Inert with an empty schedule.
     for (const corpsFormId of corpsFormationIds) {
         const corpsFormation = formations[corpsFormId]!;
@@ -1006,14 +953,6 @@ export function processOfficerSuccession(
         if (!incumbent && holderState0.status === 'reserve') continue;
         if (incumbent && incumbent.data.id === holder.id) continue;
         if (incumbent && isPresidentialAppointee(state, corpsFormId, incumbent.data.id)) continue;
-        // A manually controlled player is never overruled: no automatic swap and no pull of
-        // a holder out of another of his corps. With an incumbent he gets a replacement
-        // matter; an empty corps is filled by the vacancy pass (schedule reserve first,
-        // then the pool), and the matter follows on a later turn once there is an incumbent.
-        if (corpsFormation.faction === manualPlayerFaction) {
-            if (incumbent) suggestScheduledReplacement(incumbent.data, corpsFormId, holder);
-            continue;
-        }
         if (incumbent) {
             incumbent.state.status = incumbent.data.id.startsWith('generic_') ? 'retired' : 'reserve';
             incumbent.state.assigned_corps_id = null;
@@ -1038,10 +977,9 @@ export function processOfficerSuccession(
         if (existingCommander) {
             // C.3: HVO acting commanders get replaced once their delay is served
             if (existingCommander.state.acting_commander) {
-                // The schedule never retires the President's appointee nor overrules a
-                // manually controlled player here; those keep the pre-existing pool path.
-                const scheduleMayAct = faction !== manualPlayerFaction
-                    && !isPresidentialAppointee(state, corpsFormId, existingCommander.data.id);
+                // The schedule never retires the President's appointee here; he keeps the
+                // pre-existing pool path.
+                const scheduleMayAct = !isPresidentialAppointee(state, corpsFormId, existingCommander.data.id);
                 const scheduledReplacement = scheduleMayAct
                     ? scheduledHolderForCorps(state, corpsRoster, officerData, officers, corpsFormId, turn, false)
                     : null;

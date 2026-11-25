@@ -235,21 +235,21 @@ describe('scheduled handover', () => {
         expect(s.military.named_officers!.hadz!.status).toBe('reserve');
     });
 
-    it('a manually controlled player gets a replacement matter, not a swap', () => {
-        const s = state(22, data(), {
+    // Amended 2026-11-25, player-override model (§14.10a, H-13): Full Control follows the schedule
+    // as headless (it used to raise a matter instead of the swap); his appointee is still never rotated out.
+    it('a Full Control player corps swaps on the schedule exactly as headless, with no matter', () => {
+        const build = (meta?: Record<string, unknown>) => state(22, data(), {
             fallback: os('fallback', { status: 'active', assigned_corps_id: 'c3' }),
             hadz: os('hadz'),
             other: os('other'),
-        }, ['c3'], { player_faction: 'RBiH', autonomy_level: 0 });
+        }, ['c3'], meta as never);
+        const s = build({ player_faction: 'RBiH', autonomy_level: 0 });
+        const headless = build();
         processOfficerSuccession(s, new Set(), roster({ c3: { schedule: [tenure('hadz', 22, 82)] } }));
-        expect(s.military.named_officers!.fallback).toMatchObject({ status: 'active', assigned_corps_id: 'c3' });
-        expect(s.military.pending_officer_events).toContainEqual(expect.objectContaining({
-            type: 'replacement_suggested', corps_id: 'c3', current_commander_id: 'fallback', officer_id: 'hadz',
-        }));
-        // Deduplicated on the next turn.
-        s.meta.turn = 23;
-        processOfficerSuccession(s, new Set(), roster({ c3: { schedule: [tenure('hadz', 22, 82)] } }));
-        expect(s.military.pending_officer_events!.filter((e) => e.type === 'replacement_suggested')).toHaveLength(1);
+        processOfficerSuccession(headless, new Set(), roster({ c3: { schedule: [tenure('hadz', 22, 82)] } }));
+        expect(s.military.named_officers!.hadz).toMatchObject({ status: 'active', assigned_corps_id: 'c3' });
+        expect(s.military.named_officers).toEqual(headless.military.named_officers);
+        expect((s.military.pending_officer_events ?? []).filter((e) => e.type === 'replacement_suggested')).toEqual([]);
     });
 
     it('a generic acting commander retires when the scheduled holder takes over', () => {
@@ -314,14 +314,17 @@ describe('scheduled relief', () => {
 });
 
 describe('panel conditions (populated schedule)', () => {
-    it('a manually controlled player is never pulled: a holder commanding his corps is not moved into a vacant corps', () => {
-        const s = state(82, [officer('h', { home_corps_id: 'c3' }), officer('pool', { home_corps_id: 'c3' })], {
+    it('a Full Control player\'s scheduled holder is moved into the vacant corps exactly as headless (player-override model)', () => {
+        const build = (meta?: Record<string, unknown>) => state(82, [officer('h', { home_corps_id: 'c3' }), officer('pool', { home_corps_id: 'c3' })], {
             h: os('h', { status: 'active', assigned_corps_id: 'c4' }),
             pool: os('pool'),
-        }, ['c3', 'c4'], { player_faction: 'RBiH', autonomy_level: 0 });
+        }, ['c3', 'c4'], meta as never);
+        const s = build({ player_faction: 'RBiH', autonomy_level: 0 });
+        const headless = build();
         processOfficerSuccession(s, new Set(), roster({ c3: { schedule: [tenure('h', 82, null)] } }));
-        expect(s.military.named_officers!.h).toMatchObject({ status: 'active', assigned_corps_id: 'c4' });
-        expect(s.military.named_officers!.pool).toMatchObject({ status: 'active', assigned_corps_id: 'c3' }); // vacancy filled the normal way
+        processOfficerSuccession(headless, new Set(), roster({ c3: { schedule: [tenure('h', 82, null)] } }));
+        expect(s.military.named_officers!.h).toMatchObject({ status: 'active', assigned_corps_id: 'c3' });
+        expect(s.military.named_officers).toEqual(headless.military.named_officers);
     });
 
     it('a replacement the President accepted, or a commander he kept, is never rotated out after he delegates', () => {

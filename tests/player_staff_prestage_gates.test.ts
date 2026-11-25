@@ -1,10 +1,11 @@
 /**
  * Player-faction prestage gates must follow staff control, not raw player ownership.
  *
- * At autonomy >= 1 the player's staff executes already-authorized historical
- * plans, so the three authored-concentration gates must not skip merely because
- * the operation belongs to the player faction. They skip only when the faction
- * is not staff-controlled, i.e. a manually played faction at autonomy 0.
+ * The player's staff executes already-authorized historical plans, so the three
+ * authored-concentration gates must not skip merely because the operation belongs
+ * to the player faction. Since the player-override model (2026-11-25) the staff
+ * controls every faction at every autonomy level, so no level skips (until then a
+ * manually played faction at autonomy 0 was skipped).
  */
 
 import { describe, expect, it } from 'vitest';
@@ -188,13 +189,23 @@ describe('player staff prestage gate: preplanned concentration march', () => {
         });
     });
 
-    it('still skips the player-faction authored concentration at autonomy 0', () => {
+    // Amended 2026-11-25, player-override model (§14.10a, ruling Q2): prestage has no 1.0 surface,
+    // so at autonomy 0 it runs for the player faction as the bot (it used to skip him).
+    it('moves the player-faction authored concentration at autonomy 0 too, as the bot does', () => {
         const state = makeCircleState({ playerFaction: 'RBiH', autonomyLevel: 0 });
 
         prestageDeferredPrePlannedElites(state);
 
-        expect(state.military.brigade_movement_orders?.arbih_801st_light).toBeUndefined();
-        expect(state.military.brigade_movement_orders?.arbih_802nd_light).toBeUndefined();
+        expect(state.military.brigade_movement_orders?.arbih_801st_light).toEqual({
+            destination_sids: [CIRCLE_STAGING],
+            stance: 'column',
+            owner: 'authored_preplanned',
+        });
+        expect(state.military.brigade_movement_orders?.arbih_802nd_light).toEqual({
+            destination_sids: [CIRCLE_STAGING],
+            stance: 'column',
+            owner: 'authored_preplanned',
+        });
     });
 
     it('keeps concentrating a non-player faction at autonomy 0', () => {
@@ -232,10 +243,14 @@ describe('player staff prestage gate: queued-head reservation', () => {
         }
     });
 
-    it('still skips the player-faction queued head at autonomy 0', () => {
+    it('reserves the player-faction queued head at autonomy 0 too (player-override model)', () => {
         const state = makeQueuedCircleState({ playerFaction: 'RBiH', autonomyLevel: 0 });
 
-        expect([...getQueuedDatedPrestageBrigadeIds(state)]).toEqual([]);
+        const reserved = getQueuedDatedPrestageBrigadeIds(state);
+
+        for (const brigadeId of CIRCLE_BRIGADES) {
+            expect(reserved.has(brigadeId)).toBe(true);
+        }
     });
 
     it('keeps reserving a non-player faction queued head at autonomy 0', () => {
@@ -266,13 +281,16 @@ describe('player staff prestage gate: triggered elite prestage', () => {
         }
     });
 
-    it('still skips player-faction triggered elites at autonomy 0', () => {
+    it('marches player-faction triggered elites at autonomy 0 too (player-override model)', () => {
         const state = makeTriggeredState({ playerFaction: 'RS', autonomyLevel: 0 });
 
         checkTriggeredOperations(state);
 
         for (const brigadeId of ELITES) {
-            expect(state.military.brigade_movement_orders?.[brigadeId]).toBeUndefined();
+            expect(state.military.brigade_movement_orders?.[brigadeId]).toEqual({
+                destination_sids: [CERSKA_STAGING],
+                stance: 'column',
+            });
         }
     });
 

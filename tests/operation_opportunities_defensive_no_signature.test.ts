@@ -169,11 +169,17 @@ describe('L3: defensive operations are never put to the President', () => {
         expect(generateOpportunityProposalReviews(state, 'RBiH', [t3()])).toEqual([]);
     });
 
-    it.each([0, 1] as const)('at level %i a T1 corps operation still reaches the President', (level) => {
+    // Amended 2026-11-25, player-override model (§14.10a, H-15): a live president's staff decide a
+    // T1 corps operation on the headless turn too; silence is the staff decision, with a receipt.
+    // Only an opportunity still pending after the staff pass (shown before it) is put to him.
+    it.each([0, 1] as const)('at level %i a T1 corps operation is staff-decided on the headless turn (silence), with a receipt', (level) => {
         const state = evaluate(level, t1());
-        applyBotOpportunityDecisions(state, 175, 'RBiH', [t1()]);
-        expect(state.military.operation_opportunities![0]!.status).toBe('eligible_pending_review');
         expect(generateOpportunityProposalReviews(state, 'RBiH', [t1()])).toHaveLength(1);
+        applyBotOpportunityDecisions(state, 175, 'RBiH', [t1()]);
+        expect(state.military.operation_opportunities![0]!.status).toBe('approved');
+        expect(generateOpportunityProposalReviews(state, 'RBiH', [t1()])).toEqual([]);
+        expect(state.meta.proposal_decision_history?.map((row) => [row.proposed_action.startsWith('OPPORTUNITY:'), row.resolved_by]))
+            .toEqual([[true, 'silence']]);
     });
 
     it('at level 2 (Delegated) both are staff-decided, as before', () => {

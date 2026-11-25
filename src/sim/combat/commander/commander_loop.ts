@@ -38,7 +38,8 @@ import { assembleBeliefState } from './belief.js';
 import type { CorpsOperation } from '../../../state/game_state.js';
 import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
 import { assignOperationCommander } from '../officer_system.js';
-import { isLevel1PlayerApprovalFaction, isLevel1ProposablePlan } from '../../bot/staff_control.js';
+import { selectLivePlayerFaction } from '../../player_override.js';
+import { clearCorpsHoldsForPresidentialOperation } from '../stance_matters.js';
 import { isCorpsBoundByOct1995Ceasefire, isOffensiveOperationType } from '../oct1995_ceasefire.js';
 
 function operationsConflict(
@@ -203,21 +204,6 @@ export function runCommanderForCorps(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * True when the Level-1 approval proposal for this exact plan was expired unanswered:
- * `apply-autonomy-transition` stamps an unanswered review `accepted: false` with a
- * `resolved_turn` but stages no `player_op_response` (an explicit accept or decline does).
- * Callers check the staged response first, so this only sees silence.
- */
-function planProposalExpiredUnanswered(state: GameState, corpsId: FormationId, planId: string): boolean {
-    const action = `APPROVE_OP:${corpsId}:${planId}`;
-    return (state.meta?.pending_proposal_reviews ?? []).some((review) => (
-        review.proposed_action === action
-        && review.accepted === false
-        && review.resolved_turn != null
-    ));
-}
-
-/**
  * Apply commander output to game state.
  * Writes CorpsDirective, operations, sector stances back to GameState.
  * Writes CorpsDirective, operations, and sector stances back to GameState.
@@ -227,7 +213,7 @@ export function applyCommanderOutput(
     corpsId: FormationId,
     output: CommanderOutput,
     /** The corps' faction as the caller knows it. Corps that exist only in `corps_command`
-     *  (no formation entry) still resolve, so a player corps can never skip the Level-1 hold. */
+     *  (no formation entry) still resolve, so a player corps' staged answer is always read. */
     corpsFactionHint?: FactionId,
 ): void {
     const corps = state.military.corps_command?.[corpsId];
@@ -255,19 +241,16 @@ export function applyCommanderOutput(
         }
     }
 
-    // 4. Gate Level-1 execution before admitting commander operations.
-    //    v0.8.4 Phase D — Level 1 plan-launch guard:
-    //    If autonomy_level === 1, block plan from advancing to 'executing' unless
-    //    player_op_response exists and approved === true for this plan.
-    //    If player rejected → abandon the plan (set to null in updated_state).
-    //    If no response yet → hold the plan at 'ready' (do not emit the operation).
-    //    Guard against headless/test states where meta may be absent.
-    //    PLAYER FACTION ONLY (2026-11-14, PK1, R8 run m): the approval can only come from the human
-    //    player, so holding a bot faction's plan held every non-player commander-generated plan for
-    //    as long as Level 1 was in force (run m: zero bot-generated RS operations after week 20).
-    //    Bot corps plan and launch as at Level 0/2. Engine Invariants §14.10b.
+    // 4. Player override on a staff op plan (player-override model, owner 2026-11-25; lane C s8
+    //    ruling Q1/Q4; Engine Invariants §14.10a-b). The staff plan launches on the turn headless
+    //    launches it, at every autonomy level: silence stages nothing and the plan runs as the
+    //    bot's. Only an explicit answer the President staged for THIS plan (player_op_response)
+    //    overrides it: a refusal abandons the plan before launch; a backing (accept, force-launch)
+    //    launches it as his act, tags a force-launch, and clears his own presidential hold on the
+    //    corps (§14.10c). An op that launched by silence never clears a hold. An approved plan
+    //    whose emission comes out empty is cleared as headless clears it (residue A retired).
     const corpsFaction = corpsFactionHint ?? state.military.formations?.[corpsId]?.faction;
-    const level1ApprovalApplies = isLevel1PlayerApprovalFaction(state, corpsFaction);
+    const livePlayerCorps = corpsFaction != null && corpsFaction === selectLivePlayerFaction(state);
     const updatedPlan = output.updated_state.current_plan;
     const playerOpResp = corps.player_op_response;
     const activatedOperations: Array<typeof corps.active_operations[number]> = [];
@@ -302,76 +285,40 @@ export function applyCommanderOutput(
             }
         }
     };
-    if (level1ApprovalApplies) {
-        if (updatedPlan && updatedPlan.status === 'executing') {
-            const planApproved =
-                playerOpResp !== undefined &&
-                playerOpResp.plan_id === updatedPlan.plan_id &&
-                playerOpResp.approved === true;
-            const planRejected =
-                playerOpResp !== undefined &&
-                playerOpResp.plan_id === updatedPlan.plan_id &&
-                playerOpResp.approved === false;
-
-            if (planRejected) {
-                // Player rejected — abandon plan, emit no new operations from it this turn.
-                corps.commander_state = { ...output.updated_state, current_plan: null };
-                corps.status_reason = 'plan abandoned: player rejected op proposal at Level 1';
-                corps.player_op_response = undefined;
-                return;
-            } else if (!planApproved && !isLevel1ProposablePlan(updatedPlan)) {
-                // L3c: a plan with no target cannot be put to the President (generateLevel1OpProposals
-                // skips it) and, being a non-opportunity plan without targets, would emit no operation
-                // even if approved. Holding it waits for an answer that can never be asked, so it was
-                // held at 'ready' for the rest of the war and blocked every new plan. Release it, as a
-                // bot corps' identical plan is cleared after its no-op launch. Player faction only.
-                corps.commander_state = { ...output.updated_state, current_plan: null };
-                corps.status_reason = 'plan released: no objective to put to the president at Level 1';
-                return;
-            } else if (!planApproved && planProposalExpiredUnanswered(state, corpsId, updatedPlan.plan_id)) {
-                // L3b (command-loop proposal §5C, Council L8): the President let this plan's
-                // proposal expire unanswered (apply-autonomy-transition stamps it declined but stages
-                // no response). Release the plan so the commander replans, instead of holding it at
-                // 'ready' forever with the force-launch card as its only way out. Silence lets his
-                // staff's reading stand. An explicit answer is still the staged player_op_response
-                // above (#633 B11 unchanged). Player faction only; headless never reaches this branch.
-                corps.commander_state = { ...output.updated_state, current_plan: null };
-                corps.status_reason = 'plan released: op proposal expired unanswered at Level 1';
-                return;
-            } else if (!planApproved) {
-                // No player response yet — hold plan at 'ready', emit no new operations.
-                const heldPlan = { ...updatedPlan, status: 'ready' as const };
-                corps.commander_state = { ...output.updated_state, current_plan: heldPlan };
-                corps.status_reason = 'plan held at ready: awaiting player approval at Level 1';
-                return;
-            }
-            admitCommanderOperations();
-            if (activatedOperations.length === 0) {
-                const heldPlan = { ...updatedPlan, status: 'ready' as const };
-                corps.commander_state = { ...output.updated_state, current_plan: heldPlan };
-                corps.status_reason = 'approved plan held at ready: operation emission blocked';
-                return;
-            }
-            // planApproved === true → fall through, apply output normally.
-            //
-            // Mark the emitted operation(s) as force-launched ONLY for a proactive/
-            // override force-launch (Direct Intervention), signalled by
-            // player_op_response.force_launched. An ordinary Commit (accept-proposal)
-            // also stages player_op_response.approved === true but is NOT a force-launch
-            // and must not be tagged (downstream command-strain/history treats
-            // was_force_launched as Direct Intervention).
-            //
-            // Headless/bot runs never set player_op_response and stay at autonomy
-            // level 0, so this branch is never taken outside human play — baseline
-            // stays byte-identical. No clock / RNG used.
-            if (playerOpResp?.force_launched === true) {
-                for (const operation of activatedOperations) {
-                    operation.force_launch = true;
-                    operation.was_force_launched = true;
-                }
-            }
+    if (
+        livePlayerCorps
+        && updatedPlan
+        && updatedPlan.status === 'executing'
+        && playerOpResp !== undefined
+        && playerOpResp.plan_id === updatedPlan.plan_id
+    ) {
+        if (playerOpResp.approved === false) {
+            // Explicit refusal: abandon the plan, emit no new operations from it this turn.
+            corps.commander_state = { ...output.updated_state, current_plan: null };
+            corps.status_reason = 'plan abandoned: the President refused the staff op plan';
             corps.player_op_response = undefined;
+            return;
         }
+        admitCommanderOperations();
+        // Mark the emitted operation(s) as force-launched ONLY for a proactive/override
+        // force-launch (Direct Intervention), signalled by player_op_response.force_launched. An
+        // ordinary backing (accept-proposal) also stages approved === true but is NOT a
+        // force-launch and must not be tagged (downstream command-strain/history treats
+        // was_force_launched as Direct Intervention).
+        if (playerOpResp.force_launched === true) {
+            for (const operation of activatedOperations) {
+                operation.force_launch = true;
+                operation.was_force_launched = true;
+            }
+        }
+        // The President's own backing supersedes his stance hold on this corps (§14.10c, ruling
+        // Q5), as his authored op and op directive do. Inert without a hold.
+        if (activatedOperations.length > 0) {
+            clearCorpsHoldsForPresidentialOperation(state, corpsId, state.meta?.turn ?? 0);
+        }
+        corps.player_op_response = undefined;
+        // Headless/bot runs never stage player_op_response, so they never reach this branch:
+        // baseline stays byte-identical. No clock / RNG used.
     }
     if (!operationsAdmitted) admitCommanderOperations();
     // 5. Persist commander state for next turn's continuity.

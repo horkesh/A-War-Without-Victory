@@ -54,7 +54,7 @@
 
 import type { GameState, FactionId } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { selectManualPlayerFaction } from '../bot/staff_control.js';
+import { isPresidentialAppointee } from './officer_system.js';
 import type {
     NamedOfficer,
     NamedOfficerState,
@@ -408,30 +408,6 @@ function engagedFactionsForCorps(state: GameState, engagedCorpsIds: Set<string>)
     return engagedFactions;
 }
 
-function emitArmyCommanderScheduleSuggestion(
-    state: GameState,
-    roster: ArmyCoRoster,
-    faction: FactionId,
-    commander: { data: NamedOfficer; state: NamedOfficerState },
-): void {
-    const replacement = selectArmyCommanderReplacement(state, roster, faction, commander.data.id);
-    if (!replacement) return;
-    if (!state.military.pending_officer_events) state.military.pending_officer_events = [];
-    const entry = rosterEntryForOfficer(roster, faction, commander.data.id);
-    const tenureEnd = entry ? resolveTenureEnd(entry, commander.data) : null;
-    const eventId = `army_replacement_${commander.data.id}_t${tenureEnd ?? state.meta?.turn ?? 0}`;
-    if (state.military.pending_officer_events.some((event) => event.event_id === eventId)) return;
-    state.military.pending_officer_events.push({
-        event_id: eventId,
-        type: 'replacement_suggested',
-        faction,
-        turn: state.meta?.turn ?? 0,
-        officer_id: replacement.id,
-        current_commander_id: commander.data.id,
-        corps_id: roster.rosters[faction]?.main_staff_formation_id,
-        acknowledged: false,
-    });
-}
 
 /**
  * Resolve army-command departures after combat. Cause precedence is fixed:
@@ -452,9 +428,10 @@ export function processArmyCommanderLifecycle(
 
     const turn = state.meta?.turn ?? 0;
     const engagedFactions = engagedFactionsForCorps(state, engagedCorpsIds);
-    // The authored tenure schedule waits on a human only for a manually controlled player; a
-    // staff-controlled player (autonomy >= 1) changes army command on schedule like a bot.
-    const manualPlayerFaction = selectManualPlayerFaction(state);
+    // The authored tenure schedule changes army command for every faction, the player's included,
+    // at every autonomy level (player-override model, owner 2026-11-25, §14.10a; lane C s8 ruling,
+    // H-13). The President's explicit command choice overrides it: an army commander he appointed
+    // or kept (`isPresidentialAppointee` on the Main Staff seat) is not displaced by the schedule.
     for (const faction of [...CANONICAL_FACTIONS].sort(strictCompare)) {
         const commander = findActiveArmyCommander(state, faction);
         if (!commander) continue;
@@ -472,12 +449,15 @@ export function processArmyCommanderLifecycle(
                 && entry.turn <= turn).length;
         const botAutoRelief = state.meta?.player_faction !== faction
             && recentOverrides >= ARMY_CO_AUTO_RELIEF_OVERRIDE_THRESHOLD;
-        const authoredScheduleDue = typeof tenureEnd === 'number' && turn >= tenureEnd;
+        const mainStaffSeat = roster.rosters[faction]?.main_staff_formation_id;
+        const presidentialChoice = mainStaffSeat != null
+            && isPresidentialAppointee(state, mainStaffSeat, commander.data.id);
+        const authoredScheduleDue = typeof tenureEnd === 'number' && turn >= tenureEnd && !presidentialChoice;
 
         let cause: ArmyCommanderDepartureCause | null = null;
         if (combatDeath) cause = 'combat_death';
         else if (explicitRelief || botAutoRelief) cause = 'political_relief';
-        else if (authoredScheduleDue && manualPlayerFaction !== faction) cause = 'authored_schedule';
+        else if (authoredScheduleDue) cause = 'authored_schedule';
 
         if (cause) {
             const change = executeArmyCommanderTransition(state, roster, faction, commander, cause);
@@ -487,9 +467,6 @@ export function processArmyCommanderLifecycle(
             continue;
         }
 
-        if (authoredScheduleDue && manualPlayerFaction === faction) {
-            emitArmyCommanderScheduleSuggestion(state, roster, faction, commander);
-        }
         commander.state.turns_in_command += 1;
         if (commander.state.penalty_turns_remaining > 0) {
             commander.state.penalty_turns_remaining -= 1;

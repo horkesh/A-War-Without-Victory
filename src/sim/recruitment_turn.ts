@@ -258,7 +258,7 @@ export function selectPlayerHeldBrigadeIds(state: GameState): ReadonlySet<string
 
 /**
  * Set or clear the president's hold on one of his faction's brigades (lane C s6 design sitting,
- * 2026-11-24). A hold keeps the staff from raising that brigade at autonomy 1+; it costs nothing
+ * 2026-11-24). A hold keeps the staff from raising that brigade at any autonomy level; it costs nothing
  * but the brigade itself. Mutates state; keeps the list strictCompare-sorted and unique, and
  * removes the field when the list empties so a save that never held stays byte-identical.
  */
@@ -280,24 +280,14 @@ export function setPlayerRecruitmentHold(
 }
 
 export function selectAutomaticRecruitmentFactions(state: GameState): FactionId[] {
-    const playerFaction = state.meta.headless_scenario_auto_control === true
-        ? null
-        : state.meta.player_faction ?? null;
-    // Level 1 (Assisted) and above delegate force generation; only Level 0 (Full
-    // Control) keeps recruitment with the player. HISTORY IF LEFT ALONE, AGENCY IF
-    // PLAYED (owner 2026-11-22; lane C s6 design sitting, game-designer and
-    // operations-expert unanimous, 2026-11-24): the staff of a human faction raise
-    // the historical brigades unless the president acts. With the old `>= 2`
-    // threshold a hands-off Level-1 president raised nothing, and live HRHB at
-    // Level 1 left the headless war from turn 2 (three HVO brigades never formed).
-    // The president keeps the Recruit modal: a raise there applies at once, before
-    // the next Advance runs this staff pass, so he picks first. Saving a brigade for
-    // later is Full Control's lever: at Level 0 the staff raise nothing for him.
-    // See tests/recruitment_turn.test.ts, which pins both halves.
-    const delegatesRecruitment = (state.meta.autonomy_level ?? 0) >= 1;
-    return sortedFactionIds(state).filter(
-        (factionId) => playerFaction == null || delegatesRecruitment || factionId !== playerFaction,
-    );
+    // Every faction's staff raises its brigades, the player's included, at every autonomy level
+    // (player-override model, owner 2026-11-25, §14.10a; lane C s8 ruling Q2, H-8). HISTORY IF
+    // LEFT ALONE, AGENCY IF PLAYED: the staff of a human faction raise the historical brigades
+    // unless the president acts. His levers are overrides: the Recruit modal (a raise there
+    // applies at once, before the next Advance runs this staff pass, so he picks first) and the
+    // per-brigade hold (`selectPlayerHeldBrigadeIds`), which keeps the staff from raising that
+    // brigade at any level. See tests/recruitment_turn.test.ts.
+    return sortedFactionIds(state);
 }
 
 function applyRsMandatoryMobilizationAccrual(state: GameState, oobBrigades: OobBrigade[]): void {

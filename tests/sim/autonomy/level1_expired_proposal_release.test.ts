@@ -81,37 +81,40 @@ async function advanceAndExpire(state: GameState): Promise<void> {
     await step.run({ state } as never);
 }
 
-describe('L3b: an unanswered Level-1 plan proposal releases the plan', () => {
-    it('control: while the proposal is still open (this turn) the plan is held at ready', () => {
+// Amended 2026-11-25, player-override model (Engine Invariants §14.10a-b; lane C s8 ruling Q1/Q3):
+// silence applies the staff's plan on the headless turn. The L3b release and the hold at `ready`
+// it repaired are both retired; the lapse is stamped as the staff's choice, never as a refusal.
+describe('an unanswered Level-1 plan proposal: the staff proceed, on the headless turn', () => {
+    it('while the proposal is still open (this turn) the plan launches as the bot plan would', () => {
         const state = makeState();
         state.meta.pending_proposal_reviews = [proposal(10)];
         applyExecutingPlan(state, PLAYER);
-        expect(launched(state, PLAYER)).toEqual([]);
-        expect(cmd(state, PLAYER).commander_state?.current_plan?.status).toBe('ready');
-        expect(cmd(state, PLAYER).status_reason).toBe('plan held at ready: awaiting player approval at Level 1');
+        expect(launched(state, PLAYER)).toEqual([`op_${PLAYER}`]);
+        expect(cmd(state, PLAYER).commander_state?.current_plan?.status).toBe('executing');
     });
 
-    it('after Advance expires it unanswered, the plan is released and no operation is admitted', async () => {
+    it('at Advance the lapse is stamped as the staff proceeding (silence), with no staged response', async () => {
         const state = makeState();
         state.meta.pending_proposal_reviews = [proposal(10)];
         await advanceAndExpire(state);
-        // The expiry step stamps the review declined but stages no response.
-        expect(state.meta.pending_proposal_reviews).toEqual([expect.objectContaining({ accepted: false, resolved_turn: 11 })]);
+        expect(state.meta.pending_proposal_reviews).toEqual([
+            expect.objectContaining({ accepted: true, resolved_turn: 11, resolved_by: 'silence' }),
+        ]);
+        expect(state.meta.proposal_decision_history).toEqual([
+            expect.objectContaining({ id: 'PROP_10_ops_0', accepted: true, resolved_turn: 11, resolved_by: 'silence' }),
+        ]);
         expect(cmd(state, PLAYER).player_op_response).toBeUndefined();
 
         applyExecutingPlan(state, PLAYER);
-        expect(launched(state, PLAYER)).toEqual([]);
-        expect(cmd(state, PLAYER).commander_state?.current_plan).toBeNull();
-        expect(cmd(state, PLAYER).status_reason).toBe('plan released: op proposal expired unanswered at Level 1');
+        expect(launched(state, PLAYER)).toEqual([`op_${PLAYER}`]);
     });
 
-    it('a plan held since an earlier expiry (old save) is released on its next pass', async () => {
+    it('a plan an older save held at ready after a decline-stamped lapse launches on its next pass', () => {
         const state = makeState();
-        state.meta.pending_proposal_reviews = [proposal(10)];
-        await advanceAndExpire(state);
+        state.meta.pending_proposal_reviews = [{ ...proposal(10), accepted: false, resolved_turn: 11 }];
         state.meta.turn = 30;
         applyExecutingPlan(state, PLAYER);
-        expect(cmd(state, PLAYER).commander_state?.current_plan).toBeNull();
+        expect(launched(state, PLAYER)).toEqual([`op_${PLAYER}`]);
     });
 
     it('an explicit decline still abandons the plan, and an explicit accept still launches it', async () => {
@@ -119,8 +122,9 @@ describe('L3b: an unanswered Level-1 plan proposal releases the plan', () => {
         declined.meta.pending_proposal_reviews = [{ ...proposal(10), accepted: false, resolved_turn: 10 }];
         cmd(declined, PLAYER).player_op_response = { plan_id: PLAN(PLAYER), approved: false, turn: 10 };
         applyExecutingPlan(declined, PLAYER);
+        expect(launched(declined, PLAYER)).toEqual([]);
         expect(cmd(declined, PLAYER).commander_state?.current_plan).toBeNull();
-        expect(cmd(declined, PLAYER).status_reason).toBe('plan abandoned: player rejected op proposal at Level 1');
+        expect(cmd(declined, PLAYER).status_reason).toBe('plan abandoned: the President refused the staff op plan');
 
         const accepted = makeState();
         accepted.meta.pending_proposal_reviews = [{ ...proposal(10), accepted: true, resolved_turn: 10 }];
@@ -129,15 +133,14 @@ describe('L3b: an unanswered Level-1 plan proposal releases the plan', () => {
         expect(launched(accepted, PLAYER)).toEqual([`op_${PLAYER}`]);
     });
 
-    it('an expired proposal for a different plan does not release this one', async () => {
+    it('a refusal staged for a different plan does not stop this one', () => {
         const state = makeState();
-        state.meta.pending_proposal_reviews = [{ ...proposal(10), proposed_action: `APPROVE_OP:${PLAYER}:plan_other` }];
-        await advanceAndExpire(state);
+        cmd(state, PLAYER).player_op_response = { plan_id: 'plan_other', approved: false, turn: 10 };
         applyExecutingPlan(state, PLAYER);
-        expect(cmd(state, PLAYER).commander_state?.current_plan?.status).toBe('ready');
+        expect(launched(state, PLAYER)).toEqual([`op_${PLAYER}`]);
     });
 
-    it('bot corps and headless auto-control are unchanged: plans launch, nothing is released', async () => {
+    it('bot corps and headless auto-control are unchanged: plans launch', async () => {
         const state = makeState();
         state.meta.pending_proposal_reviews = [proposal(10)];
         await advanceAndExpire(state);

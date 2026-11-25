@@ -355,17 +355,30 @@ describe('Army commander emergent lifecycle', () => {
             new_officer: 'arbih_delic',
             cause: 'authored_schedule',
         }]);
-        expect(playerState.military.named_officers!.arbih_halilovic!.status).toBe('active');
-        expect(playerReport.army_replacements).toEqual([]);
-        expect(playerState.military.pending_officer_events).toContainEqual(expect.objectContaining({
+        // Player-override model (§14.10a, H-13, 2026-11-25): a Full Control player's army command
+        // follows the authored schedule as headless; no replacement matter waits on him.
+        expect(playerReport.army_replacements).toEqual(botReport.army_replacements);
+        expect(playerState.military.named_officers).toEqual(botState.military.named_officers);
+        expect(playerState.military.pending_officer_events ?? []).not.toContainEqual(expect.objectContaining({
             type: 'replacement_suggested',
-            current_commander_id: 'arbih_halilovic',
-            officer_id: 'arbih_delic',
-            corps_id: 'arbih_general_staff',
         }));
-        expect(playerState.military.pending_officer_events).not.toContainEqual(expect.objectContaining({
-            type: 'officer_available',
-            officer_id: 'arbih_delic',
-        }));
+    });
+
+    it('an army commander the President explicitly kept is not displaced by the schedule', () => {
+        const data = [
+            officer({ id: 'arbih_halilovic', faction: 'RBiH', available_until_turn: 60, is_historical_start: true }),
+            officer({ id: 'arbih_delic', faction: 'RBiH', available_from_turn: 60 }),
+        ];
+        const playerState = stateWith(60, data.map((entry) => ({ ...entry })), {
+            arbih_halilovic: officerState({ officer_id: 'arbih_halilovic' }),
+        }, 'RBiH');
+        playerState.military.officer_decision_history = [{
+            id: 'kept', turn: 59, faction: 'RBiH', event_id: 'army_replacement_arbih_halilovic_t60',
+            event_type: 'replacement_suggested', decision: 'acknowledged',
+            corps_id: 'arbih_general_staff', current_commander_id: 'arbih_halilovic', officer_id: 'arbih_delic',
+        } as never];
+        const report = processOfficerSuccession(playerState, new Set());
+        expect(report.army_replacements).toEqual([]);
+        expect(playerState.military.named_officers!.arbih_halilovic!.status).toBe('active');
     });
 });
