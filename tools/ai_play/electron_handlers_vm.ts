@@ -27,6 +27,7 @@ export type Handler = (event: object, payload: unknown) => Promise<Record<string
 /** channel -> text that follows its handler in electron-main.cjs */
 export const HANDLER_SLICES: Record<string, string> = {
     'stage-opsec-toggle': "ipcMain.handle('stage-municipality-support-order'",
+    'refuse-negotiated-evacuation': '// Serves the PARKED operation planner',
     'stabilize-command-relationship': '// ── Presidential FRONT VISIT',
     'stage-assign-operation-commander': '// NOTE: the legacy `assign-commander`',
 };

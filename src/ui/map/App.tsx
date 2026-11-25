@@ -2118,6 +2118,7 @@ function App() {
             state={loadedGameState}
             open={enclaveDashboardOpen}
             onClose={() => setEnclaveDashboardOpen(false)}
+            onRefuseEvacuation={(munId) => ipc.refuseNegotiatedEvacuation(munId)}
           />
         </Suspense>
       )}

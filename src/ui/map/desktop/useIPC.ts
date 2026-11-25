@@ -259,6 +259,8 @@ interface WindowAwwv {
     respondToEventDecision: (eventId: string, responseId: string) => Promise<{ ok: boolean; error?: string }>;
     stageOpsecToggle: (sectorId: string, active: boolean) => Promise<{ ok: boolean; error?: string }>;
     stageMunicipalitySupportOrder: (payload: { faction: 'RS' | 'RBiH' | 'HRHB'; munId: string; type: 'weapons_shipment' | 'staff_priority' | 'croatian_support_package' }) => Promise<{ ok: boolean; error?: string }>;
+    /** A9 P1: the RBiH president refuses the negotiated evacuations of one pocket (municipality) for its episode. */
+    refuseNegotiatedEvacuation: (munId: string) => Promise<{ ok: boolean; error?: string }>;
     assignBrigadeToSector: (brigadeId: string, sectorId: string | null) => Promise<{ ok: boolean; error?: string }>;
     queryMovementRange: (brigadeId: string) => Promise<IpcMovementRangeResult>;
     queryMovementPath: (brigadeId: string, destinationSid: string) => Promise<IpcMovementPathResult>;
@@ -590,6 +592,10 @@ export function useIPC() {
             stageMunicipalitySupportOrder: awwv
                 ? (payload: { faction: 'RS' | 'RBiH' | 'HRHB'; munId: string; type: 'weapons_shipment' | 'staff_priority' | 'croatian_support_package' }) => awwv.stageMunicipalitySupportOrder(payload)
                 : (_payload: { faction: 'RS' | 'RBiH' | 'HRHB'; munId: string; type: 'weapons_shipment' | 'staff_priority' | 'croatian_support_package' }) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
+
+            refuseNegotiatedEvacuation: awwv
+                ? (munId: string) => awwv.refuseNegotiatedEvacuation(munId)
+                : (_munId: string) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
 
             assignBrigadeToSector: awwv
                 ? (brigadeId: string, sectorId: string | null) => awwv.assignBrigadeToSector(brigadeId, sectorId)

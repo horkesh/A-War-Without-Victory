@@ -10,14 +10,15 @@
  * with the supply-reserve economy (Fable consult 6): airdrops only ever fed the retired
  * faction reserve, and nothing read the staged allocation.
  */
-import { useMemo } from 'react';
-import type { EnclaveResilienceView, LoadedGameState } from '../data/types';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { EnclaveResilienceView, LoadedGameState, NegotiatedEvacuationView } from '../data/types';
 import { getPlayerSafeEnclaveName, getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { t, type MessageKey } from '../i18n';
 import { formatLocaleNumber } from '../utils/formatters';
 import { strictCompare } from '../../../state/validateGameState';
 import {
   SURFACE_CHIP,
+  SURFACE_SECONDARY_BUTTON,
   SURFACE_TONE,
   SurfaceCloseButton,
   SurfaceColumns,
@@ -39,6 +40,11 @@ interface EnclaveDashboardProps {
   state: LoadedGameState;
   open: boolean;
   onClose: () => void;
+  /**
+   * A9 P1: the RBiH president refuses the negotiated evacuations of one pocket (municipality). Absent = no decision is
+   * offered (read-only views). Silence = allow: nothing is written unless the president confirms.
+   */
+  onRefuseEvacuation?: (munId: string) => Promise<{ ok: boolean; error?: string }>;
 }
 
 const SUPPLY_CLASSES: Record<'adequate' | 'strained' | 'critical', string> = {
@@ -63,6 +69,150 @@ function captorForces(captor: string): string {
   return t('humanitarianLedger.side.notRecorded');
 }
 
+/**
+ * A9 P1 (8-seat §6 ruling D9; orchestrator P1 ruling 5): one open negotiated-evacuation episode and the president's
+ * decision. The historical default is allow; refusing stops the episode's later convoys and keeps the siege cost (the
+ * people stay in the pocket). The copy states that cost and never shows a saved or prevented figure.
+ */
+/**
+ * Historical copy note only (historian seat, s19 sitting, rounds 1-2): the government's opposition (Krstić TJ para 16;
+ * A/54/549 paras 39, 52) and the defied local ban (A/54/549 para 40: Srebrenica's local authorities announced on
+ * 2 April 1993 that no more evacuations would take place, and later convoys left anyway) are sourced for the 1993
+ * Srebrenica evacuations only, so the note is shown for that municipality alone. Another pocket gets no note, never
+ * one by analogy. No rule reads this.
+ */
+const HISTORY_NOTE_MUN_IDS: readonly string[] = ['srebrenica'];
+
+function NegotiatedEvacuationSection({
+  evacuation,
+  onRefuse,
+}: {
+  evacuation: NegotiatedEvacuationView;
+  onRefuse?: (munId: string) => Promise<{ ok: boolean; error?: string }>;
+}) {
+  const [confirming, setConfirming] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  // Focus (ui-ux seat, s19): Cancel is the safe default on entering the confirm step; back to Refuse on cancel or
+  // failure; to the stopped line once the decision taken here comes back in the state.
+  const [focusTarget, setFocusTarget] = useState<'cancel' | 'refuse' | null>(null);
+  const decidedHere = useRef(false);
+  const refuseRef = useRef<HTMLButtonElement>(null);
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const stoppedRef = useRef<HTMLParagraphElement>(null);
+  const titleId = `enclave-evacuation-title-${evacuation.munId}`;
+  const costId = `enclave-evacuation-cost-${evacuation.munId}`;
+  const canDecide = Boolean(onRefuse) && !evacuation.refused && !evacuation.capReached;
+  useEffect(() => {
+    if (focusTarget === 'cancel') cancelRef.current?.focus();
+    if (focusTarget === 'refuse') refuseRef.current?.focus();
+  }, [focusTarget, confirming]);
+  useEffect(() => {
+    if (evacuation.refused && decidedHere.current) stoppedRef.current?.focus();
+  }, [evacuation.refused]);
+  const refuse = async () => {
+    if (!onRefuse) return;
+    setPending(true);
+    setError(null);
+    let ok = false;
+    try {
+      ok = (await onRefuse(evacuation.munId)).ok;
+    } catch {
+      ok = false;
+    } finally {
+      setPending(false);
+      setConfirming(false);
+    }
+    if (ok) {
+      decidedHere.current = true;
+      setFocusTarget(null);
+    } else {
+      setError(t('enclave.evacuation.refuseFailed'));
+      setFocusTarget('refuse');
+    }
+  };
+  return (
+    <div
+      role="group"
+      aria-labelledby={titleId}
+      data-testid="enclave-negotiated-evacuation"
+      data-mun-id={evacuation.munId}
+      data-refused={evacuation.refused ? 'true' : 'false'}
+      className="flex flex-col gap-2 border-t border-[#3a4150] pt-3"
+    >
+      <span id={titleId} className="font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-[#e0c27a]">
+        {t('enclave.evacuation.title')}
+      </span>
+      {/* False zero: the recorded line needs a recorded convoy (at least 1 person) */}
+      {evacuation.people >= 1 && evacuation.besieger !== null && (
+        <p data-testid="enclave-evacuation-recorded" className="m-0 text-[15px] leading-relaxed text-[#f1e6c8]">
+          {t('enclave.evacuation.recorded', {
+            count: formatLocaleNumber(Math.round(evacuation.people)),
+            forces: captorForces(evacuation.besieger),
+          })}
+        </p>
+      )}
+      {HISTORY_NOTE_MUN_IDS.includes(evacuation.munId) && (
+        <p data-testid="enclave-evacuation-opposition" className="m-0 text-[15px] leading-relaxed text-[#ddd1b3]">
+          {`${t('enclave.evacuation.opposition')} ${t('enclave.evacuation.localBan')}`}
+        </p>
+      )}
+      {evacuation.refused ? (
+        <p
+          ref={stoppedRef}
+          tabIndex={-1}
+          data-testid="enclave-evacuation-stopped"
+          className="m-0 text-[15px] leading-relaxed text-[#f1e6c8]"
+        >
+          {t('enclave.evacuation.stopped')}
+        </p>
+      ) : canDecide && (
+        <>
+          <p id={costId} className="m-0 text-[15px] leading-relaxed text-[#ddd1b3]">{t('enclave.evacuation.cost')}</p>
+          {confirming ? (
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                data-testid="enclave-evacuation-confirm"
+                className={SURFACE_SECONDARY_BUTTON}
+                disabled={pending}
+                aria-busy={pending}
+                aria-describedby={costId}
+                onClick={() => { void refuse(); }}
+              >
+                {t('enclave.evacuation.confirm')}
+              </button>
+              <button
+                ref={cancelRef}
+                type="button"
+                className={SURFACE_SECONDARY_BUTTON}
+                disabled={pending}
+                onClick={() => { setConfirming(false); setFocusTarget('refuse'); }}
+              >
+                {t('enclave.evacuation.cancel')}
+              </button>
+            </div>
+          ) : (
+            <div>
+              <button
+                ref={refuseRef}
+                type="button"
+                data-testid="enclave-evacuation-refuse"
+                className={SURFACE_SECONDARY_BUTTON}
+                aria-describedby={costId}
+                onClick={() => { setConfirming(true); setFocusTarget('cancel'); }}
+              >
+                {t('enclave.evacuation.refuse')}
+              </button>
+            </div>
+          )}
+        </>
+      )}
+      {error && <p role="alert" className="m-0 text-[15px] text-red-200">{error}</p>}
+    </div>
+  );
+}
+
 function getEnclaveRisk(enclave: EnclaveResilienceView) {
   if (enclave.supply_state === 'critical' || enclave.resilience <= 8) {
     return {
@@ -85,7 +235,7 @@ function getEnclaveRisk(enclave: EnclaveResilienceView) {
   };
 }
 
-export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps) {
+export function EnclaveDashboard({ state, open, onClose, onRefuseEvacuation }: EnclaveDashboardProps) {
   useSurfaceEscape(open, onClose);
   const dialogFocus = useDialogFocus(open);
   const enclaves = useMemo(
@@ -202,6 +352,13 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
                             })}
                         </p>
                       )}
+                      {(enclave.negotiated_evacuations ?? []).map((evacuation) => (
+                        <NegotiatedEvacuationSection
+                          key={evacuation.munId}
+                          evacuation={evacuation}
+                          onRefuse={onRefuseEvacuation}
+                        />
+                      ))}
                     </SurfacePanel>
                   );
                 })}
