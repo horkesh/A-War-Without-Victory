@@ -170,7 +170,10 @@ export function resolveCounterOffers(state: GameState): CounterOfferResolutionRe
     const envelope = getCounterOfferEnvelopeForPlan(planId);
     if (!envelope) return { created_counter_offer_ids: [] };
 
-    const playerFaction = state.meta.player_faction ?? 'RBiH';
+    // Only the seated player's own counter is his to submit (`submitPlayerCounterOffer`); every
+    // other side's staff counters here. No default seat: the pointer this answers exists only
+    // with a player (player-override model, §14.10a, H-19).
+    const playerFaction = state.meta.player_faction ?? null;
     const created: CounterOffer[] = [];
     const lastCounterTurn = status.last_counter_turn ?? (status.last_counter_turn = {});
     for (const faction of COUNTER_FACTIONS) {
@@ -191,10 +194,11 @@ export function submitPlayerCounterOffer(state: GameState, payload: PlayerCounte
     const neg = ensureNegotiationState(state);
     const status = ensureNegotiationStatus(state);
     const sourceOffer = neg.pending_counter_offers?.find((candidate) => candidate.id === payload.parentOfferId);
-    const playerFaction = state.meta.player_faction ?? 'RBiH';
-    const faction = COUNTER_FACTIONS.includes(playerFaction as CounterOfferFaction)
-        ? playerFaction as CounterOfferFaction
-        : 'RBiH';
+    const playerFaction = state.meta.player_faction ?? null;
+    if (playerFaction == null || !COUNTER_FACTIONS.includes(playerFaction as CounterOfferFaction)) {
+        throw new Error('A player counter-offer needs a seated player faction');
+    }
+    const faction = playerFaction as CounterOfferFaction;
     if (status.last_counter_turn?.[faction] === state.meta.turn) {
         throw new Error(`Faction ${faction} already submitted a counter-offer on turn ${state.meta.turn}`);
     }

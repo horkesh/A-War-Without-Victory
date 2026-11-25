@@ -282,16 +282,29 @@ describe('§6 E3a2 item 1: answers from the decision log, one resolver', () => {
         ]);
     });
 
-    it('close-week fallback for a human player side: the pointer (modal) opens, holding the recorded and fallback answers', () => {
+    it('close-week fallback for a silent human player side: the plan owner answers his seat as headless does (§14.10a)', () => {
+        // Player-override model (2026-11-25): a live RS president who left the plan unanswered
+        // by its close week gets the answer headless gives RS; no pointer (modal) opens.
         const state = makeState({ turn: 58, player_faction: 'RS' });
         logAnswer(state, 'vance_owen_plan_1993', 'reject', 'RBiH', 39);
+        const headless = makeState({ turn: 58 });
+        logAnswer(headless, 'vance_owen_plan_1993', 'reject', 'RBiH', 39);
         evaluatePeacePlans(state, CATALOG);
-        expect(state.military.negotiation!.pending_peace_plan).toEqual({
+        evaluatePeacePlans(headless, CATALOG);
+        expect(state.military.negotiation!.pending_peace_plan).toBeUndefined();
+        expect(rowsOf(state)).toEqual(rowsOf(headless));
+        expect(rowsOf(state).map((row) => row.responses)).toEqual([{ RBiH: 'rejected', RS: 'rejected', HRHB: 'accepted' }]);
+        expect(state.meta.proposal_decision_history?.map((row) => row.resolved_by)).toEqual(['silence']);
+    });
+
+    it('an explicit answer on a pending fallback (an older save\'s pointer) still wins over the staff', () => {
+        const state = makeState({ turn: 58, player_faction: 'RS' });
+        logAnswer(state, 'vance_owen_plan_1993', 'reject', 'RBiH', 39);
+        state.military.negotiation!.pending_peace_plan = {
             plan_id: 'vance_owen',
             turn_offered: 40,
             bot_responses: { RBiH: 'rejected', HRHB: 'accepted' },
-        });
-        expect(rowsOf(state)).toEqual([]);
+        };
         resolvePeacePlan(state, 'vance_owen', 'accepted');
         expect(rowsOf(state).map((row) => row.responses)).toEqual([{ RBiH: 'rejected', RS: 'accepted', HRHB: 'accepted' }]);
     });
