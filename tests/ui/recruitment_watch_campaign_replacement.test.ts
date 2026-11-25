@@ -64,7 +64,7 @@ describe('recruitment watch across campaign replacements', () => {
 
     // App's effect re-fetches on the bumped campaignViewportEpoch.
     await sync.refresh();
-    expect(currentMatter()?.mode).toBe('decision');
+    expect(currentMatter()?.mode).toBe('notice'); // was: 'decision' (Full Control, before #865)
     expect(currentMatter()?.ready.map((b) => b.id)).toEqual(['a', 'b']);
   });
 
@@ -82,7 +82,8 @@ describe('recruitment watch across campaign replacements', () => {
       reservation,
     );
     await sync.refresh();
-    expect(useGameStore.getState().recruitmentWatch?.setAsideIds).toEqual([]);
+    // was: setAsideIds [] (the decision queue). "Noted" now dismisses the week's notice.
+    expect(useGameStore.getState().recruitmentWatch?.noticeDismissedTurn).toBeNull();
     expect(currentMatter()?.ready.map((b) => b.id)).toEqual(['a', 'b']);
   });
 
@@ -92,7 +93,8 @@ describe('recruitment watch across campaign replacements', () => {
     await sync.refresh();
     useGameStore.getState().setAsideRecruitmentMatter();
     await coordinator.runReplacement(async () => false, (ok) => ok);
-    expect(useGameStore.getState().recruitmentWatch?.setAsideIds).toEqual(['a', 'b']);
+    // was: setAsideIds ['a', 'b'] (the decision queue). "Noted" now dismisses the week's notice.
+    expect(useGameStore.getState().recruitmentWatch?.noticeDismissedTurn).toBe(SAME_TURN);
   });
 
   it('a catalog fetch still in flight when the campaign is replaced is dropped', async () => {
