@@ -909,7 +909,7 @@ function getInitialDisplacementFraction(
  * `buildPassThroughDestinationResolver` (displacement.ts) from this turn's territorial bodies and supply.
  */
 export type PassThroughDestinationResolver = (
-    faction: FactionId,
+    faction: string,
     munId: MunicipalityId
 ) => ReadonlySet<MunicipalityId> | null;
 
@@ -1307,7 +1307,7 @@ export function processDisplacementTakeover(
                     let destinations: Set<MunicipalityId> = friendlyMunsByFaction[fid];
                     if (passThroughReach) {
                         passThroughResolver ??= passThroughReach();
-                        const reachable = passThroughResolver(fid as FactionId, munId);
+                        const reachable = passThroughResolver(fid, munId);
                         if (reachable === null || reachable.size === 0) continue;
                         destinations = new Set([...(destinations ?? [])].filter(m => reachable.has(m)));
                     }

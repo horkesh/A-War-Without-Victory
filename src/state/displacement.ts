@@ -13,7 +13,7 @@ import { buildAdjacencyMapCached } from '../map/adjacency_map.js';
 import { computeFrontEdges, type FrontEdge } from '../map/front_edges.js';
 import { areRbihHrhbAllied, DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN } from '../sim/early_war/alliance_update.js';
 import type { EdgeRecord } from '../map/settlements.js';
-import { getReceivingCapacityFraction } from './displacement_routing_data.js';
+import { getReceivingCapacityFraction, POCKET_CROSSINGS, type PocketCrossing } from './displacement_routing_data.js';
 import { appendDisplacementEvent, UNKNOWN_CAUSER_BUCKET } from './displacement_event_log.js';
 import { getBilateralRoutingOrder, type PassThroughDestinationResolver } from './displacement_takeover.js';
 import { recordCivilianDisplacementCasualties } from './displacement_state_utils.js';
@@ -371,6 +371,65 @@ function buildSiegeDestinationsBySide(
 }
 
 /**
+ * A9 B2/B3 (SD13): the side's territorial bodies linked to a municipality: the bodies of its own settlements
+ * there, and any body next to one of the municipality's settlements. One test serves the capture
+ * pass-through (B2) and the A5 siege route (B3).
+ */
+function linkedBodiesInMunicipality(
+    body: TerritorialBodies,
+    inMun: readonly string[],
+    neighbours: ReadonlyMap<string, readonly string[]>
+): Set<number> {
+    const linked = new Set<number>();
+    for (const sid of inMun) {
+        const b = body.bodyOf.get(sid);
+        if (b !== undefined) linked.add(b);
+    }
+    for (const sid of inMun) {
+        for (const nb of neighbours.get(sid) ?? []) {
+            const b = body.bodyOf.get(nb);
+            if (b !== undefined) linked.add(b);
+        }
+    }
+    return linked;
+}
+
+/**
+ * A9 B3 (SD13, 8-seat §6 ruling D10/D10b, 2026-11-25; DISPLACEMENT_MASTER §10.3): may a side's siege leavers
+ * from this municipality reach A5's main-body destinations? Yes when the municipality is linked to the
+ * main body (the linked-body test above), or when the leavers' own body holds the near end of a sourced
+ * crossing (`POCKET_CROSSINGS`, one entry: the Sarajevo airport). Otherwise the pocket is separate and
+ * its leavers are trapped (recorded for Ledger line 2 only; no kill, no lever).
+ */
+function siegeLeaversReachMainBody(
+    side: FactionId,
+    body: TerritorialBodies | undefined,
+    munSids: readonly string[],
+    sideSids: readonly string[],
+    neighbours: ReadonlyMap<string, readonly string[]>,
+    controllerOf: ReadonlyMap<string, FactionId>,
+    crossings: readonly PocketCrossing[]
+): boolean {
+    if (!body || body.main < 0) return false;
+    const linked = linkedBodiesInMunicipality(body, munSids, neighbours);
+    if (linked.has(body.main)) return true;
+    const ownBodies = new Set<number>();
+    for (const sid of sideSids) {
+        const b = body.bodyOf.get(sid);
+        if (b !== undefined) ownBodies.add(b);
+    }
+    for (const crossing of crossings) {
+        if (crossing.side !== side) continue;
+        for (const near of crossing.near_settlements) {
+            if (controllerOf.get(near) !== side) continue;
+            const b = body.bodyOf.get(near);
+            if (b !== undefined && ownBodies.has(b)) return true;
+        }
+    }
+    return false;
+}
+
+/**
  * A9 B2 (SD13, owner rulings 2-3 of 2026-11-24; the §6 broader panel round 1 A5b shape; DISPLACEMENT_MASTER
  * §10.6): where a group sheltered in a captured municipality may be moved on. The answer is read from the
  * same territorial bodies and supply as the siege route, at the moment the pass-through fires.
@@ -415,25 +474,17 @@ export function buildPassThroughDestinationResolver(
     const bodies = computeTerritorialBodies(controllerOf, neighbours, rbihHrhbAtWar(state));
     const none: ReadonlySet<string> = new Set<string>();
 
-    return (faction: FactionId, munId: MunicipalityId): ReadonlySet<MunicipalityId> | null => {
-        const body = bodies.get(faction);
-        const supplied = suppliedByFaction.get(faction) ?? none;
+    return (faction: string, munId: MunicipalityId): ReadonlySet<MunicipalityId> | null => {
         const allowed = new Set<MunicipalityId>();
+        const side = CANONICAL_FACTIONS.find((f) => f === faction);
+        const body = side === undefined ? undefined : bodies.get(side);
+        const supplied = suppliedByFaction.get(faction) ?? none;
         if (!body) return allowed;
         const inMun = osidsByMun.get(munId) ?? [];
-        const linked = new Set<number>();
         for (const sid of inMun) {
-            const b = body.bodyOf.get(sid);
-            if (b === undefined) continue;
-            if (supplied.has(sid)) return null;
-            linked.add(b);
+            if (body.bodyOf.has(sid) && supplied.has(sid)) return null;
         }
-        for (const sid of inMun) {
-            for (const nb of neighbours.get(sid) ?? []) {
-                const b = body.bodyOf.get(nb);
-                if (b !== undefined) linked.add(b);
-            }
-        }
+        const linked = linkedBodiesInMunicipality(body, inMun, neighbours);
         if (linked.size === 0) return allowed;
         for (const [sid, b] of body.bodyOf) {
             if (!linked.has(b) || !supplied.has(sid)) continue;
@@ -758,7 +809,9 @@ export function updateDisplacement(
     settlements: Map<string, SettlementRecord>,
     settlementEdges: EdgeRecord[],
     population1991ByMun?: MunicipalityPopulation1991Map,
-    pressure?: DisplacementPressureInputs
+    pressure?: DisplacementPressureInputs,
+    /** A9 B3 (D10b): the sourced crossings out of a separate pocket. Routing data; fixtures may pass their own. */
+    pocketCrossings: readonly PocketCrossing[] = POCKET_CROSSINGS
 ): DisplacementStepReport {
     // Ledger line 2 (A5): the "unable to leave" stock is this week's only. Clear it from every
     // municipality before any early return, then rewrite it below (s6_ledger12_ruling.md).
@@ -949,10 +1002,14 @@ export function updateDisplacement(
             // Kladanj is booked by the takeover writer, not this path. Known limits (understating
             // flight abroad, never the killed): Sarajevo convoy and tunnel leavers often went abroad;
             // Orašje's Sava crossing led to Croatia.
+            // A9 B3 (SD13, D10/D10b): only a pocket linked to its side's main body, or one holding the near end
+            // of the sourced Sarajevo crossing, routes to A5's destinations. A separate pocket's leavers are
+            // trapped: recorded below for Ledger line 2, never moved across the lines.
             const displacementState = state.displacement.displacement_state;
+            const reachesMain = siegeLeaversReachMainBody(side, body, munSids, sideSids, neighbours, controllerOf, pocketCrossings);
             const routing = routeDisplacedPopulation(
                 munId, side, wanted, displacementState, munControl, dominantCauser,
-                siegeDestinations.get(side) ?? new Set<MunicipalityId>()
+                reachesMain ? (siegeDestinations.get(side) ?? new Set<MunicipalityId>()) : new Set<MunicipalityId>()
             );
             const displacementAmount = routing.reduce((s, r) => s + r.amount, 0);
             // A5 (red-team M1): record who could not leave, before the no-route continue.
