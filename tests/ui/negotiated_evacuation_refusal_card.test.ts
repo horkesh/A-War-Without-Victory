@@ -8,7 +8,7 @@
  * - the copy states the cost (the people stay) and never a saved or prevented figure; no "you";
  * - EN and BCS carry the same keys with the same placeholders.
  */
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { createElement } from 'react';
 import { createRequire } from 'node:module';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -131,7 +131,8 @@ describe('refusal card', () => {
 
     it('focus: Cancel on entering the confirm step, back to Refuse on cancel; the group is labelled by its title', () => {
         card(view(), async () => ({ ok: true }));
-        expect(screen.getByRole('group', { name: enMessages['enclave.evacuation.title'] })).toBeTruthy();
+        // was: the bare title key; the heading names the municipality since Codex #868 r4699080430.
+        expect(screen.getByRole('group', { name: "Srebrenica: evacuation with the besieger's consent" })).toBeTruthy();
         fireEvent.click(screen.getByTestId('enclave-evacuation-refuse'));
         expect(document.activeElement?.textContent).toBe(enMessages['enclave.evacuation.cancel']);
         fireEvent.click(screen.getByText(enMessages['enclave.evacuation.cancel']));
@@ -187,6 +188,40 @@ describe('refusal card', () => {
         fireEvent.click(screen.getByTestId('enclave-evacuation-confirm'));
         expect((await screen.findByRole('alert')).textContent).toBe(enMessages['enclave.evacuation.refuseFailed']);
         expect(screen.queryByTestId('enclave-evacuation-stopped')).toBeNull();
+    });
+
+    it('two municipalities of one enclave: each section names its own municipality, and a refusal stops only that one (Codex #868 r4699080430)', async () => {
+        const onRefuse = vi.fn(async () => ({ ok: true }));
+        const twoMuns = (bihacRefused: boolean) => ({
+            player_faction: 'RBiH',
+            enclaveResilience: { bihac: {
+                resilience: 12, isolation_turns: 10, hardening_active: false, faction: 'RBiH', display_name: 'Bihać pocket',
+                negotiated_evacuations: [view({ munId: 'bihac', refused: bihacRefused }), view({ munId: 'cazin' })],
+            } },
+        }) as unknown as LoadedGameState;
+        const { rerender } = render(createElement(EnclaveDashboard, { state: twoMuns(false), open: true, onClose: () => {}, onRefuseEvacuation: onRefuse }));
+        const [bihac, cazin] = screen.getAllByTestId('enclave-negotiated-evacuation');
+        expect(bihac!.getAttribute('data-mun-id')).toBe('bihac');
+        expect(screen.getByRole('group', { name: "Bihać: evacuation with the besieger's consent" })).toBe(bihac);
+        expect(screen.getByRole('group', { name: "Cazin: evacuation with the besieger's consent" })).toBe(cazin);
+        fireEvent.click(within(bihac!).getByTestId('enclave-evacuation-refuse'));
+        expect(within(bihac!).getByTestId('enclave-evacuation-confirm').textContent).toBe('Confirm: stop further convoys from Bihać');
+        expect(within(cazin!).queryByTestId('enclave-evacuation-confirm')).toBeNull();
+        fireEvent.click(within(bihac!).getByTestId('enclave-evacuation-confirm'));
+        await vi.waitFor(() => expect(onRefuse).toHaveBeenCalledWith('bihac'));
+        expect(onRefuse).toHaveBeenCalledTimes(1);
+        rerender(createElement(EnclaveDashboard, { state: twoMuns(true), open: true, onClose: () => {}, onRefuseEvacuation: onRefuse }));
+        const [bihacAfter, cazinAfter] = screen.getAllByTestId('enclave-negotiated-evacuation');
+        expect(bihacAfter!.getAttribute('data-refused')).toBe('true');
+        expect(within(bihacAfter!).getByTestId('enclave-evacuation-stopped')).toBeTruthy();
+        expect(cazinAfter!.getAttribute('data-refused')).toBe('false');
+        expect(within(cazinAfter!).getByTestId('enclave-evacuation-refuse')).toBeTruthy();
+        setLocale('bcs');
+        rerender(createElement(EnclaveDashboard, { state: twoMuns(false), open: true, onClose: () => {}, onRefuseEvacuation: onRefuse }));
+        expect(screen.getByRole('group', { name: 'Cazin: evakuacija uz pristanak opsjedatelja' })).toBeTruthy();
+        const cazinBcs = screen.getAllByTestId('enclave-negotiated-evacuation')[1]!;
+        fireEvent.click(within(cazinBcs).getByTestId('enclave-evacuation-refuse'));
+        expect(within(cazinBcs).getByTestId('enclave-evacuation-confirm').textContent).toBe('Potvrdi: zaustavi daljnje konvoje (Cazin)');
     });
 
     it('renders in BCS', () => {

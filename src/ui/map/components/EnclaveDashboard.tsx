@@ -12,7 +12,7 @@
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { EnclaveResilienceView, LoadedGameState, NegotiatedEvacuationView } from '../data/types';
-import { getPlayerSafeEnclaveName, getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
+import { getPlayerSafeEnclaveName, getPlayerSafeMunicipalityName, getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { t, type MessageKey } from '../i18n';
 import { formatLocaleNumber } from '../utils/formatters';
 import { strictCompare } from '../../../state/validateGameState';
@@ -100,6 +100,9 @@ function NegotiatedEvacuationSection({
   const refuseRef = useRef<HTMLButtonElement>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
   const stoppedRef = useRef<HTMLParagraphElement>(null);
+  // Codex #868 r4699080430: one enclave (Bihać, Sarajevo) can hold several municipalities with open episodes, so the
+  // heading and the confirm name the municipality whose convoys this section stops (existing display names only).
+  const place = getPlayerSafeMunicipalityName(evacuation.munId, evacuation.munId);
   const titleId = `enclave-evacuation-title-${evacuation.munId}`;
   const costId = `enclave-evacuation-cost-${evacuation.munId}`;
   const canDecide = Boolean(onRefuse) && !evacuation.refused && !evacuation.capReached;
@@ -141,7 +144,7 @@ function NegotiatedEvacuationSection({
       className="flex flex-col gap-2 border-t border-[#3a4150] pt-3"
     >
       <span id={titleId} className="font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-[#e0c27a]">
-        {t('enclave.evacuation.title')}
+        {t('enclave.evacuation.title', { place })}
       </span>
       {/* False zero: the recorded line needs a recorded convoy (at least 1 person) */}
       {evacuation.people >= 1 && evacuation.besieger !== null && (
@@ -180,7 +183,7 @@ function NegotiatedEvacuationSection({
                 aria-describedby={costId}
                 onClick={() => { void refuse(); }}
               >
-                {t('enclave.evacuation.confirm')}
+                {t('enclave.evacuation.confirm', { place })}
               </button>
               <button
                 ref={cancelRef}
