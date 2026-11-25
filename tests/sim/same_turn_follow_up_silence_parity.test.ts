@@ -13,7 +13,9 @@
  *  2. the real HRHB t53 chain (hrhb_central_bosnia_defense_1993, then
  *     csq_hvo_april_1993_offensive_orders) from the shipped event data: hands-off live = headless at
  *     autonomy 0, 1 and 2 (fired ids and flags);
- *  3. an explicit answer at the pause is seen by the follow-up, as a bot's fire-time answer is.
+ *  3. an explicit answer at the pause is seen by the follow-up, as a bot's fire-time answer is;
+ *  4. an answer through the desktop path, which swaps the state's contents, keeps the follow-up's
+ *     fired-id receipt.
  *
  * Deterministic: no RNG (the step's rng throws), no wall clock.
  */
@@ -21,6 +23,7 @@ import { describe, expect, it } from 'vitest';
 import { warPhases } from '../../src/sim/turn_phases/war_phases.js';
 import { loadEventDefinitions } from '../../src/sim/events/event_loader.js';
 import { resolveEventDecision } from '../../src/sim/events/resolve_decision.js';
+import { resolveDesktopEventDecisionInPlace } from '../../src/desktop/desktop_sim.js';
 import type { EventDefinition, PendingEventDecision } from '../../src/sim/events/event_types.js';
 import type { TurnContext } from '../../src/sim/turn_pipeline_types.js';
 import { CURRENT_SCHEMA_VERSION, type GameState } from '../../src/state/game_state.js';
@@ -135,5 +138,23 @@ describe('#865 r4693814641: the real HRHB t53 chain', () => {
         expect(live.military.event_flags?.hrhb_central_bosnia_defense).toBe('evacuate');
         expect(live.military.fired_event_ids).toContain('hrhb_central_bosnia_defense_1993');
         expect(live.military.fired_event_ids).not.toContain('csq_hvo_april_1993_offensive_orders');
+    });
+
+    // The desktop's answer path (`resolveDesktopEventDecisionInPlace`) swaps the state's top-level
+    // fields for a resolved copy, so `state.military` is a new object after the pause. The follow-up
+    // receipt must land in the LIVE `fired_event_ids`, not in an array read before the pause: the
+    // first 15-cell parity run lost `nato_deliberate_force_1995` that way (live RS a2 emer, t178), so
+    // its `requires_events` children (Operation Sana, the Federation offensive) never fired.
+    it('an answer through the desktop path (state contents swapped at the pause) keeps the follow-up receipt', async () => {
+        const headless = chainState(null);
+        await runStep(headless, defs);
+        const live = chainState('HRHB', 1);
+        await runStep(live, defs, (working, decisions) => {
+            const card = decisions.find((d) => d.event_id === 'hrhb_central_bosnia_defense_1993')!;
+            resolveDesktopEventDecisionInPlace(working, card.event_id, 'defend_pocket', process.cwd());
+        });
+        expect(live.military.event_flags?.hrhb_central_bosnia_defense).toBe('defend');
+        expect(live.military.fired_event_ids).toEqual(headless.military.fired_event_ids);
+        expect(live.military.event_last_fired_turn).toEqual(headless.military.event_last_fired_turn);
     });
 });

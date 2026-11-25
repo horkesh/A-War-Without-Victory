@@ -780,7 +780,6 @@ export function beginEvaluateEvents(
     if (!state.military.fired_event_ids) {
         state.military.fired_event_ids = [];
     }
-    const firedIds = state.military.fired_event_ids;
     const playerFaction = state.meta.player_faction;
 
     const events = registry;
@@ -1099,7 +1098,10 @@ export function beginEvaluateEvents(
             }
         }
 
-        recordFiringReceipts(state, def, currentTurn, firedIds);
+        // Read the array at write time, never once before the primary pass: `finish()` runs after the
+        // pause, and the desktop's answer path swaps the state's contents for a resolved copy, so an
+        // array captured earlier is no longer `state.military.fired_event_ids` (#865 r4693814641).
+        recordFiringReceipts(state, def, currentTurn, (state.military.fired_event_ids ??= []));
     };
 
     for (const def of toFire) {
