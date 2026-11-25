@@ -70,6 +70,22 @@ export const FLEE_ABROAD_FRACTION_RBIH = 0.20;
 // Orašje's Sava crossing led to Croatia, and Abdić's followers left the Bihać pocket for
 // Croatia in 1994 and 1995 (Batnoga, Kupljensko). It understates flight abroad only.
 
+/**
+ * A9 P0-A (SD13): killed share of the people taken when an enclave falls to assault (8-seat §6 ruling D3,
+ * 2026-11-25; DISPLACEMENT_MASTER §10.1). Read by the pocket-fall step (`pocket_fall.ts`, which
+ * re-exports it) and, as `ENCLAVE_OVERRUN_KILL_FRACTION`, by the takeover writer's combat overrun of an
+ * enclave. It lives in this leaf module so neither writer imports the other (no import cycle).
+ *
+ * Derived from Srebrenica: the Trial Chamber's 7,000-8,000 killed (Krstić TJ IT-98-33-T para 84) over
+ * about 40,000 people, where 40,000 is a PARTY figure (prosecution 38,000-42,000, para 592; defence
+ * 40,000, para 593). 7,500 / 40,000 is about 0.19.
+ *
+ * It is a modelled consequence, not a body count. It is attributed to the captor's forces and feeds no
+ * score, no §2a flag and no `war_cost_index`. The 7,000-8,000 band is a sanity check on a run, never a
+ * target to calibrate towards.
+ */
+export const ASSAULTED_POCKET_FALL_KILL_RATIO = 0.19;
+
 /** Flee-abroad fraction for an ethnicity-aligned faction. */
 export function getFactionFleeAbroadFraction(faction: FactionId): number {
     if (faction === 'RS') return FLEE_ABROAD_FRACTION_RS;

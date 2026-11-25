@@ -121,7 +121,7 @@ Runs every turn. The war step (`update-displacement` in `war_phases.ts`) feeds i
 
 ### 3.1 Hostile Takeover (OSID-Based) — **PRIMARY TRIGGER**
 
-The primary displacement trigger since 2026-03-01: capture displacement flows through this path. The other live writers are the siege path (§3.3, live since 2026-11-14), paramilitary sweeps and the policy expulsion (§3.4, RF-5B; a human HRHB can halt it, RB5). As of 2026-03-05, sustained displacement is active: initial wave = 70% of minority, sustained trickle = 3%/turn on remaining 30% until < 10 people remain.
+The primary displacement trigger since 2026-03-01: capture displacement flows through this path. The other live writers are the siege path (§3.3, live since 2026-11-14), paramilitary sweeps, the policy expulsion (§3.4, RF-5B; a human HRHB can halt it, RB5) and the pocket-fall step (§3.5, A9 P0-A). As of 2026-03-05, sustained displacement is active: initial wave = 70% of minority, sustained trickle = 3%/turn on remaining 30% until < 10 people remain.
 
 **Two trigger sources:**
 
@@ -197,7 +197,7 @@ The larger of the two applies. Departures are booked to the pressing side with k
 
 **Siege outflow carry (batch A row A6, SD9, 2026-11-24).** The weekly outflow is computed in integer parts per million (`SIEGE_OUTFLOW_PPM_SCALE`): `total = heldPeople * ppm + carry`, `wanted = min(floor(total / 1e6), heldPeople)`, `carry = total % 1e6`, with `ppm = round(fraction * 1e6)` (1,000 at 0.1%). Before A6, `floor(heldPeople * 0.001)` was 0 every week for any pocket under 1,000 people, so Žepa (about 764 held) lost nobody in 107 weeks of encirclement. The carry lives in `DisplacementState.siege_outflow_carry_by_side` per side, always in [0, 1e6), absent when zero. It is updated right after `heldPeople` is known, before the `wanted <= 0` continue, and advances on the attempted outflow (`wanted`), not on the routed count, so trapped weeks build no debt and capacity opening later releases no burst. It is deleted when the side no longer holds settlements in the municipality (holder change, enclave fall), when neither trigger holds, and when nobody remains. Tests: `tests/state/siege_outflow_carry.test.ts`.
 
-**Ledger line 2, "unable to leave" (§6 + §4 panels, `s6_ledger12`, 2026-11-25).** A write-only display stock: `DisplacementState.unable_to_leave_by_side[side] = { amount, turn }`, written from each week's A5 trapped record (`wanted - routed`, integer, only when at least 1) with `turn = meta.turn`, and cleared from every municipality as the first statement of `updateDisplacement`. It is never summed across weeks and nothing in the simulation reads it (source-scan test). The desktop projection keeps only the player's own side (none without a player); the Ledger and the player's own enclave cards show it only when its stamp is the current turn and hide it otherwise (never a "0"). Known limit (measured, hands-off 188w on post-B1 main): A5 trapped is 0 in every week, because the side's supplied destinations always have room for the 0.1% weekly outflow, so the line reads empty in a hands-off historical run. Enclave residents historically could not freely leave Srebrenica, Žepa or Goražde; that model gap is lane B's B3 (after B2), not this line. Tests: `tests/state/siege_destination_a5.test.ts`, `tests/s6_ledger_lines_write_only.test.ts`, `tests/ui/ledger_line2_render.test.ts`.
+**Ledger line 2, "unable to leave" (§6 + §4 panels, `s6_ledger12`, 2026-11-25).** A write-only display stock: `DisplacementState.unable_to_leave_by_side[side] = { amount, turn }`, written from each week's A5 trapped record (`wanted - routed`, integer, only when at least 1) with `turn = meta.turn`, and cleared from every municipality as the first statement of `updateDisplacement`. It is never summed across weeks and nothing in the simulation reads it (source-scan test). The desktop projection keeps only the player's own side (none without a player); the Ledger and the player's own enclave cards show it only when its stamp is the current turn and hide it otherwise (never a "0"). Live since B3 (measured on the B3 188w pair): line 2 carries a trapped stock in Bihać in all 188 weeks, Srebrenica t2-t170, Goražde t70-t188, Žepa (Rogatica) t70-t171, Orašje, and the HRHB Lašva/Kiseljak pocket t41-t97; weekly stocks are at most 48 people. Before B3 (hands-off 188w on post-B1 main) A5 trapped was 0 in every week, because the side's supplied destinations always had room for the 0.1% weekly outflow and nothing checked what lay between. Tests: `tests/state/siege_destination_a5.test.ts`, `tests/s6_ledger_lines_write_only.test.ts`, `tests/ui/ledger_line2_render.test.ts`.
 
 The consecutive-turn counter is saved state: `DisplacementState.unsupplied_pressure_by_side` holds it per side, with the turn it was last counted. It replaces the old module-level cache (`pressureStateCache` and `resetDisplacementPressureCache()`), which is deleted, so the counter now survives save and load. `applyDisplacementFromFlips` and the `displacement-apply` step are also deleted; they were never reached.
 
@@ -223,6 +223,26 @@ Owner: `processDisplacementTakeover` step 0b (`src/state/displacement_takeover.t
 - **Bright line:** the first wave that displaces anyone records one authorized war crime for the faction (`recordWarCrime`, `src/state/war_crimes_record.ts`, sole writer of `war_crimes_events_emergent`), guarded by event flag `hrhb_minority_policy_war_crime_recorded`. §2a condemnation (emergent mode only).
 - **Changing it:** any change to the table, fractions, wave delay or target basis is its own measured change under the RF-5B §6 record; an RBiH entry needs a judicial finding and its own broader panel.
 - **Known limits:** men were historically detained (Heliodrom, Dretelj, Gabela) but are displaced with families here (camps stay unmodelled, Ring 3 #2); no incoming Croats fill vacated homes; Stari Vitez (held out) shares the Vitez town OSID; Žepče fires ~10 weeks early (fighting began late June 1993) and Mostar's first round ~8 weeks late (9 May); Busovača and Gornji Vakuf January 1993 episodes predate the war start; Prozor October 1992 (~5k, outside the JCE) and Vareš (October 1993) are not seeded; flight-abroad shares are not tiered per the Historian (Ljubuški 0.50, west Mostar 0.30, Central Bosnia 0.10); the April wave comes without an HVO attack behind it (the HVO offensive is owner Option C, post-1.0). Survivors are routed by the standing tables, never inside their own municipality and without regard to front lines: West Mostar, Stolac and Čapljina expellees reach Jablanica and Konjic rather than East Mostar and Blagaj; Kiseljak's reach Travnik across HVO-held ground; Ljubuški's reach Zenica rather than going abroad via Croatia. The 3% kill share is applied in Herzegovina, where deaths during removal were about 1%; it stands in for unmodelled detention-camp deaths (Dretelj, Heliodrom, Gabela). The Humanitarian Ledger and `refugees_created` count killed and abroad twice for takeover-path events, policy waves included, because the takeover writer's `displaced` already contains them (pre-existing on main; out-of-scope register). The ledger figure therefore overstates the people moved by about 30%; the run 7 people figure is 27,839. The rule keys on `player_faction`, not the autonomy level: a campaign with a human HRHB, including Observer level 3, has no policy waves, so it shows fewer 1993 HVO expulsions than history and drifts from the calibration line; no surface may present that as restraint or a better outcome. A `player_faction` change mid-campaign leaves timers already seeded in place. Livno's supply population factor rises at t188 (0.91 to 1.00, because its 1992 Krajina refugees are not moved on once east Mostar holds Bosniak expellees); this is inert only because Livno has no production facility, and the B5 no-reward re-run must re-check it if one is added or local production gains another consumer.
+
+### 3.5 Pocket fall (P0-A)
+
+Owner: `processPocketFalls` (`src/state/pocket_fall.ts`), war step `pocket-fall`. Ruling: 8-seat broader bright-line §6 panel, unanimous 8/8 in round 3, 2026-11-25 (D1-D6, D12, D13), with the orchestrator's clarifications (i)-(iii) of 2026-11-25, which implement the ruling's own tests and add no new rule. Record: `SENSITIVE_HISTORY_DESIGN_GATE.md` §6 (P0-A).
+
+- **Slot:** right after `update-displacement`, so after every control writer (battle, takeover, event effects), in the same turn as the control write. A test checks that the firing turn equals the control-write turn. Sides and municipalities are walked in `strictCompare` order.
+- **Trigger (stateless; no GameState counter):** for side X in municipality M, all of: X holds zero settlements in M; a stock exists; the B2 pass-through resolver (with P0-B, §10.6) gives X no destination. If the resolver gives one, the sheltered stock moves there instead: same body, no kill, no record. A body split cannot fire the step while X holds ground in M.
+- **Stock:** X's sheltered people in M (`displaced_in_by_faction[X]`) plus X's original residents (its census share of the remaining residents, original − out − lost). The originals are scoped:
+  - (i) only where M contains a Ring 1 `ENCLAVE_DEFINITIONS` settlement of an enclave whose faction is X (the ruling's own A3 enclave-definition test, applied to the originals). Measured on the B3 188w run at t188: without this scope the originals test matched 25 municipalities where X never held ground and nothing fell (for example Zenica for HRHB; Grude, Posušje and Neum for RBiH; Cazin for RS) and would have deported census-share minorities at t1.
+  - (ii) a takeover timer `osid|X` in M blocks the originals only while it is pending (not yet matured) or dormant; then the takeover writer keeps the originals and the step takes the sheltered stock only. A matured timer does not block, because its wave is already booked in `displaced_out`. So Žepa fires (red-team case X2): Srebrenica and Rogatica both carry matured RBiH timers from the 1992-93 combat captures.
+  - (iii) **booked once per municipality and side; a second turn finds stock 0.** The optional marker `DisplacementState.pocket_fall_originals_booked_by_side[X]` (the turn of the booking; absent until then; old saves load) is written and read only by `pocket_fall.ts`, never by score, credit, the Ledger or any other reader. Without it the census share of the remaining residents would take a new slice every week. Srebrenica's booking never blocks Žepa's.
+  - The captor's own residents and sheltered people are never touched (Rogatica's RS-sheltered stay).
+- **Killed:** only where M contains a Ring 1 `ENCLAVE_DEFINITIONS` settlement of X's enclave: killed = `ASSAULTED_POCKET_FALL_KILL_RATIO` (0.19) × the stock (source and scope in §10.1). Every other firing books killed 0; its stock is "left" and "fled abroad" only.
+- **Negotiated fall:** the authored `zepa_falls_1995` event also sets the flag `zepa_negotiated_evacuation` (authored event data only, never computed; the same mechanism as `srebrenica_fell`; no schema change; it enables no Ring-3 event). The step reads it in the same turn and records killed as "not recorded" (`null`), never 0 (UN A/54/549 para 431: 118 unaccounted for). Without the flag a fall counts as assaulted.
+- **Routing:** the survivors (stock − killed) go to X's supplied main body (A5's destination list, §3.3) within receiving capacity (§4.3). Overflow is booked as `fled_abroad`, never left in place. Conservation: killed + left = the stock taken, where left = routed + fled abroad.
+- **No credit:** the survivors are ordinary displaced people with no recruitment bonus. There is no pacification effect, no score term, no condemnation or penalty input, and no manpower or territory credit to the captor; RS recruitment loses the stock (`VICTORY_AND_PYRRHIC_SCORING.md` §3.2).
+- **Record:** write-only `state.displacement.pocket_fall_records` (`PocketFallRecord`: turn, `mun_id`, side, captor, left, routed, fled_abroad, killed or `null`, negotiated, reason `pocket_fall`), kept sorted by (turn, `mun_id`, side), aggregates attributed to the captor's forces, no age or sex split. Display only: the Humanitarian Ledger column "Left the enclave" and the enclave card. Nothing in the simulation reads it (source-scan test). It does NOT go through `appendDisplacementEvent`, `displacement_humanitarian_aggregates` or `civilian_casualties`, which feed scoring, capital and reconstitution Path B (`displacement_origin_dest_arrivals`).
+- **Formations:** losses stay in `casualty_ledger`. The step touches civilians only, never re-slots formations, and leaves military personnel unchanged; the Žepa formation set stays disbanded.
+- **Firing census:** zero firings before t100 unless each is listed and ruled; every originals-branch firing, and any firing outside Srebrenica and Žepa, is listed and ruled.
+- **Tests:** `tests/state/pocket_fall.test.ts`, `tests/pocket_fall_records_write_only.test.ts`.
 
 ## 4. Routing System
 
@@ -365,7 +385,7 @@ Sources: ICTY OTP demographic report (Tabeau, Bijak et al., 2003, 47 municipalit
 | `BOSNIAK_EXIT_FLEE_ABROAD` | 0.40 | `displacement_takeover.ts` | Bosniaks from Bijeljina, Posavina, Čapljina, Stolac (exits toward Serbia and Croatia): 40% |
 | `BILATERAL_HRHB_FLEE_ABROAD` | 0.35 | `displacement_takeover.ts` | Croats displaced by RBiH: 35% |
 | Drina enclave falls | 0 | `displacement_takeover.ts` | Nobody goes abroad when Srebrenica, Goražde or Žepa falls; those forcibly transferred went to Kladanj and Tuzla (Krstić TJ) |
-| `ENCLAVE_OVERRUN_KILL_FRACTION` | 0.35 | `displacement_takeover.ts` | Srebrenica/Gorazde/Zepa overrun: 35% killed |
+| `ENCLAVE_OVERRUN_KILL_FRACTION` | 0.19 | `displacement_takeover.ts` (= `ASSAULTED_POCKET_FALL_KILL_RATIO`, `displacement_loss_constants.ts`) | Srebrenica/Gorazde/Zepa overrun: 19% killed (was 0.35; sourced and unified with the pocket-fall step, §10.1) |
 
 The former Bosniak border override (0.10) is deleted. Siege-path departures carry no flight abroad at all. No-census municipalities split by the national 1991 sums (`census_fallback_national`); the former `LOST_POPULATION_FRACTION` (0.20) was removed in SC2.
 
@@ -373,7 +393,7 @@ The former Bosniak border override (0.10) is deleted. Siege-path departures carr
 
 For each displacement event:
 1. Compute `displacementAmount` from trigger
-2. `killed = floor(displacementAmount × killFraction)` (per-faction rate via `getDisplacementKillFraction()`, or 35% for enclave overrun)
+2. `killed = floor(displacementAmount × killFraction)` (per-faction rate via `getDisplacementKillFraction()`, or 19% for enclave overrun, §10.1)
 3. `survivors = displacementAmount - killed`
 4. `fledAbroad = floor(survivors × fleeAbroadFraction)` (per people, with regional overrides in §5.2; 0 when a Drina enclave falls)
 5. `routedToCamp = survivors - fledAbroad` (enters camp state machine)
@@ -596,9 +616,15 @@ When RBiH-HRHB are **allied** (alliance > 0.20):
 **Municipalities:** srebrenica, gorazde, zepa
 
 When an enclave municipality is overrun (from_faction = RBiH, to_faction != RBiH):
-- Kill fraction increases from 10% to **35%** (`ENCLAVE_OVERRUN_KILL_FRACTION`)
-- Models the historical high-lethality events (Srebrenica massacre)
+- Kill fraction rises from the standard per-pair fraction (§5.1) to **19%** (`ENCLAVE_OVERRUN_KILL_FRACTION` = `ASSAULTED_POCKET_FALL_KILL_RATIO`, `displacement_loss_constants.ts`)
+- Models the historical high-lethality events (Srebrenica genocide)
 - Flight abroad: **0** (those forcibly transferred went to Kladanj and Tuzla)
+
+**One sourced rate for both writers (A9 P0-A, 8-seat §6 ruling D3, unanimous 8/8, 2026-11-25).** `ASSAULTED_POCKET_FALL_KILL_RATIO` = 0.19 is derived from Srebrenica: the Trial Chamber's 7,000-8,000 killed (Krstić TJ IT-98-33-T para 84) over about 40,000 people, where 40,000 is a PARTY figure (prosecution 38,000-42,000, para 592; defence 40,000, para 593); 7,500 / 40,000 is about 0.19. It is a modelled consequence, not a body count. It is attributed to the captor's forces and feeds no score, no §2a flag and no `war_cost_index`. The 7,000-8,000 band is a sanity check on a run, never a target to calibrate towards. Two writers read it:
+1. **The takeover writer's combat overrun of an enclave** (`getTakeoverKillFraction` with `isEnclaveOverrun`, `displacement_takeover.ts`: a timer maturing in srebrenica, gorazde or zepa, RBiH people taken by a non-RBiH captor), in the initial wave and the sustained drain (§10.7). It was 0.35, with no source, and is unified onto the same constant in the P0-A change, so the same population is never killed at two rates depending on whether it was sheltered or resident.
+2. **The pocket-fall step** (§3.5), on the stock it takes where the municipality contains a Ring 1 `ENCLAVE_DEFINITIONS` settlement of the falling side's enclave, whether the last settlement fell by combat or by an event control write (§10.8). Its overflow beyond receiving capacity is booked as fled abroad (§3.5).
+
+No hands-off run has a combat enclave overrun, so the unification is expected to be hash-neutral; the P0-A pair is the proof.
 
 ### 10.2 Posavina Croats
 
@@ -662,6 +688,8 @@ When a municipality that has received displaced people (`displaced_in > 0`) is i
 
 **Zero ground (A9 P0-B, 8-seat §6 ruling D7, unanimous 2026-11-25).** When the side holds no settlement in the municipality, linked ground qualifies without the supply requirement; receiving capacity still applies. The step runs after every control writer, so a group is never moved onto ground that falls the same turn. It is not booked as an evacuation. Trace (a) found the supply filter alone stranding Kiseljak's group at t74 (15.1k) and Kreševo's at t98 (2.2k). Tests: `tests/displacement_pass_through_reachability.test.ts`.
 
+**Event falls (A9 P0-A).** An event fall (the `control_change` effect of a sensitive-history event, as at the 1995 Srebrenica and Žepa falls) seeds no takeover timer, so the pass-through never runs there. The pocket-fall step (§3.5), which runs after every control writer, handles the zero-ground case: where the resolver gives a destination it moves the sheltered stock there (same body, no kill, no record), and otherwise it takes the stock at the fall.
+
 Known limit (A9): takeover-cohort destinations (the captured municipality's own residents) are not checked for reachability.
 
 **Ledger line 1, "forced to move again" (§6 + §4 panels, `s6_ledger12`, 2026-11-25).** A write-only cumulative counter by people: `displacement.moved_on_at_capture_by_people[group] += floor(routed)` at the `capture_pass_through` report site, never an event, so it equals the sum of the pass-through report rows. Nothing in the simulation reads it (source-scan test); the Humanitarian Ledger shows it. Measured on post-B1 main (188w, both modes): 35 rows, 90,294 people (HRHB 3,101, RBiH 71,837, RS 15,356), with 0 week-level mismatches. B2 will remove the 9 cross-line rows and the line will fall with them; the copy does not change.
@@ -679,7 +707,7 @@ After the initial 4-turn timer fires (Branch A), the OSID enters **sustained dis
 **Mechanic:**
 1. Each turn after `matured_turn`, compute `remainingMinority = initialMinority - cumulative_displaced`
 2. `sustainedAmount = floor(remainingMinority × 0.03)`, capped at municipality remaining population
-3. Standard casualty pipeline: 10% killed (or 35% for enclave overrun), flee-abroad fraction applied
+3. Standard casualty pipeline: 10% killed (or 19% for enclave overrun, §10.1), flee-abroad fraction applied
 4. Survivors route **directly** to friendly municipalities (no camp intermediate — sustained = civilian flight, not organized military evacuation)
 5. 5% of routed population contributes to destination militia pools
 
@@ -690,6 +718,16 @@ After the initial 4-turn timer fires (Branch A), the OSID enters **sustained dis
 - Recapture check uses `from_faction`: timer deleted when displaced faction regains control. Third-faction takeover continues sustained displacement.
 
 **Per-OSID granularity:** Partial municipal control (e.g., Bratunac RS holds 4/8 OSIDs) naturally yields proportional sustained rate. Consistent with initial displacement model.
+
+### 10.8 Enclave falls (Srebrenica, Žepa)
+
+The 1995 Srebrenica and Žepa falls are event control writes (`control_change` effects of sensitive-history events; `SENSITIVE_HISTORY_DESIGN_GATE.md` §1), not combat captures.
+
+**Defect before P0-A (measured).** The event writes control and touches no civilian state, and it seeds no takeover timer, so neither the takeover writer (§3.1) nor the pass-through (§10.6) runs there. On the B2 run Srebrenica kept 55.8k people after its t171 fall: the people of an enclave that had fallen stayed in it on the books.
+
+**Since P0-A (8-seat §6 ruling, unanimous 8/8, 2026-11-25).** The pocket-fall step (§3.5) fires in the same turn as the event's control write, for the side that no longer holds any settlement in the municipality. It takes that side's sheltered stock and, at the side's own Ring 1 enclave, its original residents once (a matured 1992-93 RBiH timer does not block them; §3.5 (ii)). At an assaulted fall it books killed = 0.19 × the stock (§10.1); at the Žepa fall the authored flag `zepa_negotiated_evacuation` makes killed "not recorded", never 0. The survivors go to the side's supplied main body within capacity, overflow abroad, with no credit to the captor. The rupture `srebrenica_genocide_1995` and the `srebrenica_fell` record are unchanged; P0-A writes no control, so FORAWWV is unchanged.
+
+**Pre-registered receipts (D13).** For each fallen pocket, at t(fall)-1, t(fall), +1, +3 and t188, in both modes, t(fall) taken from `control_events`: the component totals; killed + left = the stock taken; exactly one `pocket_fall` record per municipality and side; Rogatica's RS-sheltered stock untouched; military personnel unchanged by P0-A; the hash prefix equal to the previous pair's until the first firing; "not recorded" shown, never 0. Srebrenica stays within 36,000-46,000 at the pinned t170 snapshot (before its fall); Goražde at least 45,000 with 0 P0-A firings; Sarajevo 0 firings.
 
 ---
 

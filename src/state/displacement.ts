@@ -371,6 +371,57 @@ function buildSiegeDestinationsBySide(
 }
 
 /**
+ * A9 P0-A (SD13, 8-seat §6 ruling D4, 2026-11-25): A5's main-body supplied destinations per side, built
+ * from this turn's control, operational edges and supply exactly as `updateDisplacement` builds them for
+ * the siege route (same territorial bodies, same `buildSiegeDestinationsBySide`). The pocket-fall step
+ * routes a fallen pocket's survivors here.
+ */
+export function buildMainBodySuppliedDestinations(
+    state: GameState,
+    settlements: Map<string, SettlementRecord>,
+    settlementEdges: ReadonlyArray<EdgeRecord>,
+    suppliedByFaction: ReadonlyMap<string, ReadonlySet<string>>
+): Map<FactionId, Set<MunicipalityId>> {
+    const pc = state.political.political_controllers ?? {};
+    const controllerOf = new Map<string, FactionId>();
+    for (const sid of [...settlements.keys()].sort(strictCompare)) {
+        const side = pc[sid];
+        if (isCanonicalFaction(side)) controllerOf.set(sid, side);
+    }
+    const neighbourSets = new Map<string, Set<string>>();
+    for (const e of settlementEdges) {
+        if (e.a === e.b) continue;
+        if (!neighbourSets.has(e.a)) neighbourSets.set(e.a, new Set());
+        if (!neighbourSets.has(e.b)) neighbourSets.set(e.b, new Set());
+        neighbourSets.get(e.a)?.add(e.b);
+        neighbourSets.get(e.b)?.add(e.a);
+    }
+    const neighbours = new Map<string, string[]>();
+    for (const [k, v] of neighbourSets) neighbours.set(k, [...v].sort(strictCompare));
+    const bodies = computeTerritorialBodies(controllerOf, neighbours, rbihHrhbAtWar(state));
+    return buildSiegeDestinationsBySide(settlements, bodies, suppliedByFaction);
+}
+
+/**
+ * A9 P0-A (SD13): route one people's group to `allowed` municipalities their side holds, with the same
+ * receiving-capacity rule and route order as the siege path (`routeDisplacedPopulation`). Returns the
+ * routing only; the caller books it. Whatever finds no capacity is left out of the returned rows.
+ */
+export function routeDisplacedWithCapacity(
+    state: GameState,
+    fromMunId: MunicipalityId,
+    people: FactionId,
+    amount: number,
+    causer: FactionId,
+    allowed: ReadonlySet<MunicipalityId>
+): DisplacementRoutingRecord[] {
+    if (amount <= 0 || allowed.size === 0) return [];
+    return routeDisplacedPopulation(
+        fromMunId, people, amount, state.displacement.displacement_state ?? {}, buildMunControlFromOsids(state), causer, allowed
+    );
+}
+
+/**
  * A9 B2/B3 (SD13): the side's territorial bodies linked to a municipality: the bodies of its own settlements
  * there, and any body next to one of the municipality's settlements. One test serves the capture
  * pass-through (B2) and the A5 siege route (B3).
@@ -608,7 +659,7 @@ export const CENSUS_FALLBACK_NATIONAL_REASON = 'census_fallback_national';
  * Split displaced amount by source mun's 1991 ethnic share. Returns { RBiH, RS, HRHB } (other assigned to RBiH).
  * Without a census entry for the municipality, splits by the national sums and reports it.
  */
-function splitDisplacedByEthnicityWithSource(
+export function splitDisplacedByEthnicityWithSource(
     fromMunId: MunicipalityId,
     amount: number,
     population1991ByMun: MunicipalityPopulation1991Map | undefined

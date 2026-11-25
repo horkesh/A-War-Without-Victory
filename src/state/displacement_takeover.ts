@@ -2,6 +2,7 @@ import { initializeMilitiaPoolDefaults } from './militia_pool_defaults.js';
 import type { SettlementRecord } from '../map/settlements.js';
 import type { DisplacementRoutingRecord } from './displacement.js';
 import {
+    ASSAULTED_POCKET_FALL_KILL_RATIO,
     DISPLACEMENT_KILLED_FRACTION,
     getDisplacementKillFraction,
     getFactionFleeAbroadFraction
@@ -218,7 +219,9 @@ const BOSNIAK_EXIT_MUN_IDS = new Set<MunicipalityId>([
 const BOSNIAK_EXIT_FLEE_ABROAD = 0.40;
 
 // Enclave-overrun special case (historical high-lethality second displacement).
-export const ENCLAVE_OVERRUN_KILL_FRACTION = 0.35;
+// A9 P0-A (SD13, 8-seat §6 ruling D3 and DISPLACEMENT_MASTER §10.1, 2026-11-25): the takeover writer's
+// combat overrun of an enclave uses the same sourced ratio as the pocket-fall step (was 0.35, unsourced).
+export const ENCLAVE_OVERRUN_KILL_FRACTION = ASSAULTED_POCKET_FALL_KILL_RATIO;
 
 const REINFORCEMENT_RATE = 0.02;
 /** Besieged enclaves: refugees arrive starving, unarmed, traumatized — far lower militarization rate. */

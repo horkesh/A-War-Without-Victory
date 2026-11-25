@@ -43,6 +43,7 @@ import { applyReplaceCoConsequence, applyForceOpConsequence, applyStopOpConseque
 import { clamp } from '../../utils/math.js';
 import { buildPassThroughDestinationResolver, updateDisplacement, type DisplacementPressureInputs } from '../../state/displacement.js';
 import { processDisplacementTakeover } from '../../state/displacement_takeover.js';
+import { processPocketFalls } from '../../state/pocket_fall.js';
 import { getDoctrineTempoMultiplier, updateDoctrineState } from '../../state/doctrine.js';
 import { updateEmbargoProfiles } from '../../state/embargo.js';
 import { updateEnclaveIntegrity, computeEnclaveResilienceFallbackPressure } from '../../state/enclave_integrity.js';
@@ -4427,6 +4428,25 @@ export const warPhases: NamedPhase[] = [
                 od?.edges?.length ? od.edges : graph.edges,
                 context.input.municipalityPopulation1991,
                 pressure
+            );
+        }
+    },
+    {
+        // A9 P0-A (SD13, 8-seat §6 ruling D1, 2026-11-25): after every control writer of the turn (event
+        // effects, combat, takeover) and after `update-displacement`, so a pocket fall fires the same turn its
+        // side loses its last settlement in the municipality. OSID settlements, edges and supply.
+        name: 'pocket-fall',
+        run: async (context) => {
+            if (!context.input.settlementEdges) return;
+            const od = getOperationalData(context);
+            if (!od?.edges?.length) return;
+            const graph = await getOperationalSettlementGraph(context);
+            context.report.pocket_fall = processPocketFalls(
+                context.state,
+                graph.settlements,
+                od.edges,
+                buildOsidDisplacementPressureInputs(context.state, od).suppliedByFaction,
+                context.input.municipalityPopulation1991
             );
         }
     },

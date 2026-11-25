@@ -340,7 +340,9 @@ describe('war-phase step ordering', () => {
         // -1 from retiring generate-player-stance-recommendations (2026-11-24, lane C s6): a second
         //        stance pass for the player at autonomy 1 that overwrote the staff stance computed in
         //        generate-bot-corps-orders (live RS a1 left the headless war at turn 1).
-        expect(stepNames.length).toBe(191);
+        // +1 from pocket-fall (2026-11-25, 8-seat §6 ruling D1): directly after update-displacement,
+        //        after every control writer; records an enclave fall's civilian outcome (A9 P0-A).
+        expect(stepNames.length).toBe(192);
         expect(stepNames).not.toContain('generate-player-stance-recommendations');
         expect(stepNames).not.toContain('compute-supply-reserves');
         expect(stepNames).not.toContain('update-smuggling-routes');
