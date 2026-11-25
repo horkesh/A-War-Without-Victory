@@ -9,6 +9,12 @@
  *   T's one shared accessor (`hasParamilitaryPolicyCardApplied`), never a second "applied" test.
  * - D1's readers of the standing order read it through M's cap (`readParamilitaryStandingOrder`): F1-B's in-person check
  *   never sees an order above the side's applied card answer, nor above `ask` before it applies.
+ *
+ * Player-override model (owner 2026-11-25; §6 HOW ruling lane C s8, H-21): "sends nothing before the card applies" is
+ * superseded where the player gave no order the cap lets stand: the staff then apply the bot's order, exactly as headless
+ * (`asHeadless`), so RS (historical default Always allow) sweeps before its card applies and RBiH (Refuse) does not. An
+ * Always allow above the cap is still never the player's order (it downgrades to silence, never above the bot), and an
+ * explicit refusal still binds (G1).
  */
 
 import { describe, expect, it } from 'vitest';
@@ -124,6 +130,13 @@ function applyCard(state: GameState, side: Side, answer: string, source: 'player
     state.paramilitary_policy = answer as GameState['paramilitary_policy'];
 }
 
+/** The same state with no human (headless auto-control): the bot's order and sweeps. */
+function asHeadless(state: GameState): GameState {
+    const copy = structuredClone(state);
+    copy.meta.headless_scenario_auto_control = true;
+    return copy;
+}
+
 /** [sweeps spawned, requests pending] for `side` from one pass of the real detect gate. */
 function detect(state: GameState, side: Side): [number, number] {
     const { edges, reverseMap } = graph();
@@ -144,8 +157,11 @@ describe('D1 after T and M: no sweep at autonomy 1-3 before the player\'s own po
                 for (const turn of PRE_APPLY_TURNS[side]) {
                     state.meta.turn = turn;
                     expect(hasParamilitaryPolicyCardApplied(state, side), `t${turn}`).toBe(false);
-                    expect(resolveNonManualParamilitaryPolicy(state, side, CATALOG), `t${turn}`).toBe('always_deny');
-                    expect(detect(state, side), `t${turn}`).toEqual([0, 0]);
+                    // The capped Always allow is no order of the player's: the bot's order (RBiH Refuse, RS Always allow).
+                    expect(resolveNonManualParamilitaryPolicy(state, side, CATALOG), `t${turn}`)
+                        .toBe(resolveNonManualParamilitaryPolicy(asHeadless(state), side, CATALOG));
+                    expect(resolveNonManualParamilitaryPolicy(state, side, CATALOG), `t${turn}`).toBe(side === 'RBiH' ? 'always_deny' : 'always_allow');
+                    expect(detect(structuredClone(state), side), `t${turn}`).toEqual(detect(asHeadless(state), side));
                     expect(state.military.formations, `t${turn}`).toEqual({});
                 }
                 // The card applies its Always allow: from that turn the staff send the sweep, and it is the side's act.
@@ -160,7 +176,9 @@ describe('D1 after T and M: no sweep at autonomy 1-3 before the player\'s own po
             for (const autonomy of [1, 2, 3]) {
                 const state = humanState(side, autonomy, 1);
                 if (side === 'RBiH') fileAnswer(state, side, 'always_allow');
-                expect(detect(state, side), `a${autonomy}`).toEqual([0, 0]);
+                // H-21: the bot's order, as headless (RBiH sends nothing, RS sends its sweep).
+                expect(detect(structuredClone(state), side), `a${autonomy}`).toEqual(detect(asHeadless(state), side));
+                expect(detect(state, side), `a${autonomy}`).toEqual(side === 'RBiH' ? [0, 0] : [1, 0]);
             }
         });
     }
@@ -178,7 +196,7 @@ describe('D1 after T: a filed answer the card has not applied is no answer (T\'s
         expect(detect(state, 'RS')).toEqual([1, 0]);
     });
 
-    it('control: once that other card HAS applied, the earlier human answer counts, and the faction-switch rule holds (no sweep)', () => {
+    it('control: once that other card HAS applied, the earlier human answer counts for that side only; RS follows its own card answer', () => {
         const state = humanState('RS', 3, 5);
         fileAnswer(state, 'RBiH', 'always_deny');
         state.military.fired_event_ids.push(CARD.RBiH);
@@ -186,8 +204,10 @@ describe('D1 after T: a filed answer the card has not applied is no answer (T\'s
         state.military.event_flags[FLAG.RBiH] = 'always_deny';
         applyCard(state, 'RS', 'always_allow', 'bot_ai_default', 1);
         expect(hasParamilitaryPolicyCardApplied(state, 'RBiH')).toBe(true);
-        expect(resolveNonManualParamilitaryPolicy(state, 'RS', CATALOG)).toBe('always_deny');
-        expect(detect(state, 'RS')).toEqual([0, 0]);
+        // H-21 (player-override model; was: no sweep): the refusal was given for RBiH and never carries to RS. RS has no order
+        // of the player's, so its staff apply the bot's order, its card's applied Always allow, as headless.
+        expect(resolveNonManualParamilitaryPolicy(state, 'RS', CATALOG)).toBe('always_allow');
+        expect(detect(state, 'RS')).toEqual([1, 0]);
     });
 
     it('the side\'s own filed answer is no standing order: no in-person order for F1-B, and the staff send nothing', () => {

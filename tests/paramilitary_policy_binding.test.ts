@@ -2,8 +2,8 @@
  * §6 D1 stage 2: the paramilitary standing policy binds every non-manual spawn.
  *
  * Integrated ruling 2026-11-18 §1, §2, §9, with round-2 amendments A1 (a human-controlled faction
- * follows the human's current standing order at every level; unanswered or `ask` sends none at
- * Assisted to Observer) and A3 (march turns pinned at 0; the C4 start-week guard). Bots follow
+ * follows the human's explicit standing order at every level; since the player-override model,
+ * 2026-11-25, an unanswered side, or Review each at Assisted to Observer, follows the bot's order) and A3 (march turns pinned at 0; the C4 start-week guard). Bots follow
  * the decided card flag, else the card's historical default read from the event data.
  *
  * Synthetic matrix: three factions x (bot, autonomy 0-3) x each order plus unanswered, through
@@ -133,6 +133,9 @@ function applyOrder(state: GameState, faction: Faction, controller: Controller, 
         state.military.event_decision_log = [
             { event_id: cardId, response_id: order, decision_source: 'player', faction, turn: 3 },
         ];
+    } else if (order === 'ask') {
+        // The review modal's explicit Review each for a side with no card (a standing-order row, §6 item 2).
+        state.paramilitary_decision_history = [{ kind: 'standing_order', id: `paramilitary_order:3:${faction}`, turn: 3, faction, order: 'ask' }];
     } else {
         state.paramilitary_decision_history = [{
             id: 'paramilitary:3:op:elsewhere:x',
@@ -161,19 +164,17 @@ function expected(faction: Faction, controller: Controller, order: Order): [numb
         }
         return [0, 0]; // always_deny; `ask` with no human asking denies (§2)
     }
-    if (controller === 0) {
-        // Manual path, byte-unchanged: Always allow deploys, Always deny sends none, ask raises a request.
-        if (order === 'always_allow') return [1, 0];
-        if (order === 'always_deny') return [0, 0];
-        // §6 T3 (merged): unanswered, a side with a card raises no request until the card applies an answer.
-        if (order === 'unanswered' && PARAMILITARY_POLICY_CARD_ID_BY_FACTION[faction]) return [0, 0];
-        return [0, 1];
-    }
-    // Assisted, Delegated, Observer: the human's standing order binds; nothing but Always allow sends a sweep.
-    // Round 4s (owner rule 2026-11-22): a side with no card (HRHB) and no own record follows the bot's historical
-    // default (allow); `applyOrder` files an HRHB record for every other order, so those rows keep the standing order.
-    if (order === 'unanswered' && !PARAMILITARY_POLICY_CARD_ID_BY_FACTION[faction]) return [1, 0];
-    return order === 'always_allow' ? [1, 0] : [0, 0];
+    // Player-override model (owner 2026-11-25; §6 HOW ruling lane C s8, H-14 and H-21): a human side that gave no order
+    // follows the bot's order at every level, Full Control included, so it sweeps exactly as the bot does (was: none at
+    // levels 0-3 for a side with a card, a request at Full Control for HRHB).
+    if (order === 'unanswered') return expected(faction, 'bot', 'unanswered');
+    if (order === 'always_allow') return [1, 0];
+    if (order === 'always_deny') return [0, 0];
+    // Review each, chosen by the player: a request at Full Control. At Assisted to Observer it has no surface, so it is
+    // silence and the staff apply the bot's order: a card side's applied `ask` flag denies (§2); HRHB, with no card,
+    // follows the bot's historical default.
+    if (controller === 0) return [0, 1];
+    return PARAMILITARY_POLICY_CARD_ID_BY_FACTION[faction] ? [0, 0] : [1, 0];
 }
 
 function attackerOutcome(state: GameState, faction: Faction, catalog: readonly EventDefinition[] | undefined = CATALOG): [number, number] {
@@ -271,8 +272,9 @@ describe('§6 D1 stage 2: the standing policy binds every non-manual paramilitar
         ];
         expect(attackerOutcome(toRbih, 'RBiH')).toEqual([0, 0]);
 
-        // RBiH human answered Always allow, then switched to RS, whose bot had answered Always allow too:
-        // the value coincides, but the human never answered for RS, so RS staff send none.
+        // RBiH human answered Always allow, then switched to RS, whose bot had answered Always allow too. The human never
+        // answered for RS, so the RBiH order does not count; under the player-override model (H-21) RS staff then apply the
+        // bot's order, the RS card's applied Always allow, and sweep as the RS bot does (was: none).
         const toRs = pocketState('RS', metaFor('RS', 2));
         markCardFired(toRs, 'rbih_paramilitary_policy_1992');
         markCardFired(toRs, 'rs_paramilitary_policy_1992');
@@ -282,7 +284,7 @@ describe('§6 D1 stage 2: the standing policy binds every non-manual paramilitar
             { event_id: 'rbih_paramilitary_policy_1992', response_id: 'always_allow', decision_source: 'player', faction: 'RBiH', turn: 0 },
             { event_id: 'rs_paramilitary_policy_1992', response_id: 'always_allow', decision_source: 'bot_ai_default', faction: 'RS', turn: 2 },
         ];
-        expect(attackerOutcome(toRs, 'RS')).toEqual([0, 0]);
+        expect(attackerOutcome(toRs, 'RS')).toEqual([1, 0]);
 
         // An HRHB human's modal order (filed for HRHB) does not carry to RBiH either.
         const fromHrhb = pocketState('RBiH', metaFor('RBiH', 2));

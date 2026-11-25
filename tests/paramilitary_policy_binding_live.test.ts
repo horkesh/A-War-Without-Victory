@@ -169,7 +169,7 @@ describe('§6 D1 stage 2 live: staff follow the standing order', () => {
         expect(t1.state.military.negotiation?.capital?.RS?.war_crimes_events_emergent ?? 0).toBe(swept.length);
     }, 180_000);
 
-    it('an Observer -> Delegated toggle sends no sweep before the card is answered', async () => {
+    it('an Observer -> Delegated toggle: the card left unanswered is answered by silence in its fire turn and the staff follow it', async () => {
         const opening = resolveDesktopEventDecision(
             (await startNewCampaign(process.cwd(), 'RS', 'apr_1992', 'historical')).state,
             'rs_strategic_goals',
@@ -183,20 +183,20 @@ describe('§6 D1 stage 2 live: staff follow the standing order', () => {
         const t1 = await advanceTurn(opening, process.cwd());
         expect(t1.error).toBeUndefined();
         expect(t1.state.meta.turn).toBe(1);
-        // The RS card fired at t1 and waits for the human; until it is answered, the staff send none.
+        // Player-override model (§6 HOW ruling lane C s8, 2026-11-25; was: the card waited and the staff sent none): the RS
+        // card fired at t1 and, left unanswered, was answered by the staff in that turn with the bot's choice (the card's
+        // historical Always allow), with a "staff proceeded" receipt; the staff then follow it, as the RS bot does.
         expect(t1.state.military.event_last_fired_turn?.[RS_CARD]).toBe(1);
-        expect((t1.state.military.pending_event_decisions ?? []).map((decision) => decision.event_id)).toContain(RS_CARD);
-        expect((t1.state.military.event_decision_log ?? []).some((entry) => entry.event_id === RS_CARD)).toBe(false);
-        expect(t1.state.paramilitary_policy).toBe('ask');
-        expect(paramilitaryCaptures(t1.state, 'RS')).toEqual([]);
-        expect(paramilitaryFormations(t1.state, 'RS')).toEqual([]);
+        expect((t1.state.military.pending_event_decisions ?? []).map((decision) => decision.event_id)).not.toContain(RS_CARD);
+        expect((t1.state.military.event_decision_log ?? []).filter((entry) => entry.event_id === RS_CARD)
+            .map((entry) => [entry.response_id, entry.decision_source, entry.turn])).toEqual([['always_allow', 'bot_ai_default', 1]]);
+        expect((t1.state.meta.proposal_decision_history ?? []).some((row) =>
+            row.id === `EVENT_SILENCE_${RS_CARD}` && row.resolved_by === 'silence')).toBe(true);
+        expect(t1.state.paramilitary_policy).toBe('always_allow');
         const t2 = await advanceTurn(t1.state, process.cwd());
         expect(t2.error).toBeUndefined();
         expect(t2.state.meta.turn).toBe(2);
-        expect((t2.state.military.pending_event_decisions ?? []).map((decision) => decision.event_id)).toContain(RS_CARD);
-        expect((t2.state.military.event_decision_log ?? []).some((entry) => entry.event_id === RS_CARD)).toBe(false);
-        expect(t2.state.paramilitary_policy).toBe('ask');
-        expect(paramilitaryCaptures(t2.state, 'RS')).toEqual([]);
-        expect(paramilitaryFormations(t2.state, 'RS')).toEqual([]);
+        expect((t2.state.military.event_decision_log ?? []).filter((entry) => entry.event_id === RS_CARD)).toHaveLength(1);
+        expect(t2.state.paramilitary_policy).toBe('always_allow');
     }, 180_000);
 });

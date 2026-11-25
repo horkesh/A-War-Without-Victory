@@ -20,7 +20,7 @@ import { resolveParamilitaryReviewRequests } from '../src/desktop/paramilitary_r
 import type { OperationalToCanonicalReverseMap } from '../src/data/operational_data.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
 import {
-    followsNoCardHistoricalDefault,
+    explicitParamilitaryOrder,
     humanStandingParamilitaryOrder,
     resolveNonManualParamilitaryPolicy,
 } from '../src/sim/combat/paramilitary_policy.js';
@@ -134,7 +134,7 @@ function standingRows(state: GameState) {
 describe('§6 item 2: the policy-only review call (the Full Control opener)', () => {
     it('HRHB at Full Control: the opener records Always deny as one standing-order row and ends the historical default', () => {
         const state = pocketState('HRHB', 6, 0);
-        expect(followsNoCardHistoricalDefault(state, 'HRHB')).toBe(true);
+        expect(explicitParamilitaryOrder(state, 'HRHB')).toBeNull();
         const result = order(state, 'always_deny');
         expect(result).toEqual({ ok: true, report: { spawned: [], captured: [], dissolved: [], pending_player_requests: 0 } });
         expect(state.paramilitary_policy).toBe('always_deny');
@@ -145,7 +145,7 @@ describe('§6 item 2: the policy-only review call (the Full Control opener)', ()
         expect(state.paramilitary_decision_history![0]).not.toHaveProperty('decision');
         expect(state.paramilitary_decision_history![0]).not.toHaveProperty('target_osid');
         // Own-record readers count it.
-        expect(followsNoCardHistoricalDefault(state, 'HRHB')).toBe(false);
+        expect(explicitParamilitaryOrder(state, 'HRHB')).toBe('always_deny');
         expect(hasInPersonParamilitaryStandingOrder(state, 'HRHB')).toBe(true);
         // Its staff at Assisted now follow the player's refusal, not the historical default.
         state.meta.autonomy_level = 1;
@@ -157,7 +157,7 @@ describe('§6 item 2: the policy-only review call (the Full Control opener)', ()
         const state = pocketState('HRHB', 6, 1);
         expectRefusedUnchanged(state, 'always_deny', PARAMILITARY_ORDER_NOT_MANUAL, 'HRHB a1');
         expect(state.paramilitary_decision_history).toBeUndefined();
-        expect(followsNoCardHistoricalDefault(state, 'HRHB')).toBe(true);
+        expect(explicitParamilitaryOrder(state, 'HRHB')).toBeNull();
     });
 
     it('RS from Observer to Full Control: refused at Observer, then Always deny is recorded at Full Control', () => {

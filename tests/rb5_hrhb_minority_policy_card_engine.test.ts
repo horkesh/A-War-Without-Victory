@@ -58,7 +58,7 @@ describe('RB5 card through the event engine', () => {
     });
 
     for (const level of [0, 1, 2]) {
-        test(`human HRHB autonomy ${level}: fires after war start, pending, blocks advance, no policy yet`, () => {
+        test(`human HRHB autonomy ${level}: fires after war start, pending, blocks advance; silence would apply the default`, () => {
             const s = state(humanMeta(level), null, WAR_STARTED);
             fire(s);
             expect(s.military.pending_event_decisions).toEqual([]);
@@ -74,7 +74,9 @@ describe('RB5 card through the event engine', () => {
             expect(pending[0].requires_player_response).toBe(true);
             expect(countBlockingPlayerDecisions(s as any, 'HRHB')).toBe(1);
             expect(rows(s)).toEqual([]);
-            expect(hasMinorityExpulsionPolicy(s, 'HRHB')).toBe(false);
+            // Player-override model (H-20, 2026-11-25; was false): while the card waits at the pause, only a halt refuses;
+            // silence is the default, which the staff apply when the turn resumes (tests/sim/player_override_s6.test.ts).
+            expect(hasMinorityExpulsionPolicy(s, 'HRHB')).toBe(true);
         });
     }
 

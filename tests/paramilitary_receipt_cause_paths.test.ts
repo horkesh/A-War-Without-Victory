@@ -185,7 +185,9 @@ describe('§6 D1 stage 2: receipt causes on the panel\'s engine paths', () => {
         const state = rsHumanState();
         // t1: §6 T3 holds the manual player, so no request is raised; an older build's save carries one, and its
         // modal Always allow was filed against it.
-        expect(detectAndMarch(state)).toEqual([0, 0]);
+        // Player-override model (H-14, 2026-11-25): with no order of the player's, the held side sends the bot's sweep, as
+        // headless does that week (was: none). Checked on a copy, so the older build's save below stays as it was built.
+        expect(detectAndMarch(structuredClone(state))).toEqual([1, 0]);
         restoreLegacyRequest(state);
         modalAlwaysAllow(state);
         expect(state.paramilitary_decision_history?.map((record) => [record.faction, record.decision])).toEqual([['RS', 'allow']]);
@@ -221,7 +223,9 @@ describe('§6 D1 stage 2: receipt causes on the panel\'s engine paths', () => {
         const state = rsHumanState();
         // t1, Full Control: T3 raises no request; on the request an older build's save carries, the human picks Always
         // allow in the modal, then answers the goals card.
-        expect(detectAndMarch(state)).toEqual([0, 0]);
+        // Player-override model (H-14, 2026-11-25): with no order of the player's, the held side sends the bot's sweep, as
+        // headless does that week (was: none). Checked on a copy, so the older build's save below stays as it was built.
+        expect(detectAndMarch(structuredClone(state))).toEqual([1, 0]);
         restoreLegacyRequest(state);
         modalAlwaysAllow(state);
         answerGoalsInPerson(state);

@@ -6,6 +6,11 @@
  * fired, with a receipt on record, and a valid policy flag. A filed answer is not an applied one.
  * There is no turn test: a card that never applies holds the player until the sweeps fade.
  * HRHB has no card and is never held; staff-controlled players and headless runs are never held.
+ *
+ * Player-override model (owner 2026-11-25; §6 HOW ruling lane C s8, H-14): the gate still holds every REQUEST
+ * (none made, none kept, none approved), but a held side whose player gave no order is no longer idle: its staff
+ * send the bot's sweeps, exactly as headless does in the same week (`sameAsHeadless`). An explicit refusal or a
+ * Review each chosen ahead sends none while the gate holds.
  */
 
 import { readFileSync } from 'node:fs';
@@ -135,6 +140,15 @@ function ownRequests(state: GameState, faction: FactionId) {
     return (state.pending_paramilitary_requests ?? []).filter((request) => request.faction === faction);
 }
 
+/** The faction's sweep targets from one detect pass on a copy, and on a headless copy of the same state (the bot). */
+function sameAsHeadless(state: GameState, faction: FactionId): { live: string[]; headless: string[] } {
+    const live = structuredClone(state);
+    const headless = structuredClone(state);
+    headless.meta.headless_scenario_auto_control = true;
+    const targets = (copy: GameState) => detect(copy).spawned.filter((spawn) => spawn.faction === faction).map((spawn) => spawn.target_osid);
+    return { live: targets(live), headless: targets(headless) };
+}
+
 describe('T3 manual paramilitary gate (released only by the applied card answer)', () => {
     it('fixture check: a released manual player gets the pocket as a request', () => {
         for (const faction of ['RBiH', 'RS'] as const) {
@@ -147,9 +161,11 @@ describe('T3 manual paramilitary gate (released only by the applied card answer)
     });
 
     it('manual_gate_rbih_holds_until_card_applied', () => {
-        // Filed Refuse at t0 (the opening lane), the card enabled at t3 by the identity answer, fired at t4.
+        // Filed Review each at t0 (the opening lane), the card enabled at t3 by the identity answer, fired at t4. The filed
+        // answer is the player's explicit choice, so while the gate holds nothing is sent either (no request may be made).
+        // (A filed Refuse holds the same way and never lapses: tests/sim/player_override_s6.test.ts, G1.)
         const state = pocketState('RBiH', 1);
-        fileAnswer(state, 'RBiH', 'always_deny', 0);
+        fileAnswer(state, 'RBiH', 'ask', 0);
         state.pending_paramilitary_requests = [staleRequest('RBiH')];
         for (const turn of [1, 2, 3]) {
             state.meta.turn = turn;
@@ -188,9 +204,12 @@ describe('T3 manual paramilitary gate (released only by the applied card answer)
             const state = pocketState(faction, 3);
             state.military.enabled_event_ids.push(CARD[faction]!);
             fileAnswer(state, faction, 'always_allow', 0);
+            // The filed Always allow is clamped to `ask` before the card applies, so it is silence: the staff send the bot's
+            // sweeps, as headless does (H-14), and still no request.
+            const { live, headless } = sameAsHeadless(state, faction);
+            expect(live, faction).toEqual(headless);
             const report = detect(state);
             expect(report.pending_player_requests, faction).toBe(0);
-            expect(report.spawned.filter((spawn) => spawn.faction === faction), faction).toHaveLength(0);
             expect(hasParamilitaryPolicyCardApplied(state, faction), faction).toBe(false);
             expect(appliedParamilitaryPolicyCardAnswer(state, faction), faction).toBeNull();
         }
@@ -206,9 +225,11 @@ describe('T3 manual paramilitary gate (released only by the applied card answer)
             fireCard(state, 'RS', 1);
             if (enabledRecorded) state.military.enabled_event_ids.push(RS_POLICY);
             state.pending_paramilitary_requests = [staleRequest('RS', 'allow')];
+            const { live, headless } = sameAsHeadless(state, 'RS');
+            expect(live, `enabled=${enabledRecorded}`).toEqual(headless);
+            expect(live, `enabled=${enabledRecorded}`).not.toContain('op:stale:target');
             const report = detect(state);
             expect(report.pending_player_requests, `enabled=${enabledRecorded}`).toBe(0);
-            expect(report.spawned.filter((spawn) => spawn.faction === 'RS'), `enabled=${enabledRecorded}`).toHaveLength(0);
             expect(ownRequests(state, 'RS'), `enabled=${enabledRecorded}`).toHaveLength(0);
             expect(state.paramilitary_decision_history ?? [], `enabled=${enabledRecorded}`).toHaveLength(0);
         }
@@ -224,9 +245,11 @@ describe('T3 manual paramilitary gate (released only by the applied card answer)
                 for (let turn = 1; turn <= PARAMILITARY_FADE_WEEK + 2; turn += 1) {
                     state.meta.turn = turn;
                     state.pending_paramilitary_requests = [staleRequest(faction)];
+                    const { live, headless } = sameAsHeadless(state, faction);
+                    expect(live, `${faction} closed=${closed} t${turn}`).toEqual(headless);
+                    expect(live).not.toContain('op:stale:target');
                     const report = detect(state);
                     expect(report.pending_player_requests, `${faction} closed=${closed} t${turn}`).toBe(0);
-                    expect(report.spawned.filter((spawn) => spawn.faction === faction)).toHaveLength(0);
                     expect(ownRequests(state, faction), `${faction} closed=${closed} t${turn}`).toHaveLength(0);
                     expect(state.paramilitary_decision_history ?? []).toHaveLength(0);
                 }
@@ -240,9 +263,11 @@ describe('T3 manual paramilitary gate (released only by the applied card answer)
         const state = pocketState('RBiH', 1);
         state.pending_paramilitary_requests = [staleRequest('RBiH'), { ...staleRequest('RBiH', 'allow'), target_osid: 'op:stale:approved' }];
         expect(isPlayerParamilitaryRequestGateHolding(state)).toBe(true);
+        const { live, headless } = sameAsHeadless(state, 'RBiH');
+        expect(live).toEqual(headless);
+        expect(live).not.toContain('op:stale:approved');
         const report = detect(state);
         expect(report.pending_player_requests).toBe(0);
-        expect(report.spawned.filter((spawn) => spawn.faction === 'RBiH')).toHaveLength(0);
         expect(ownRequests(state, 'RBiH')).toHaveLength(0);
         expect(state.paramilitary_decision_history ?? []).toHaveLength(0);
     });
@@ -266,11 +291,15 @@ describe('T3 manual paramilitary gate (released only by the applied card answer)
         fileAnswer(state, 'RS', 'always_allow', 5);
         state.military.event_flags.rs_paramilitary_policy = 'always_allow';
         state.paramilitary_policy = 'always_allow';
-        const report = detect(state);
-        expect(report.spawned.filter((spawn) => spawn.faction === 'RS').map((spawn) => spawn.target_osid)).toEqual([TARGET]);
+        detect(state);
         const replayed = [...(state.paramilitary_decision_history ?? []).map((row) => row.target_osid),
             ...Object.values(state.military.formations ?? {}).map((formation) => formation.paramilitary_target)];
         expect(replayed.filter((target) => typeof target === 'string' && target.startsWith('op:held:'))).toEqual([]);
+        // H-14: the pocket itself was swept by the staff's default while the card was held (t1, as headless), never by a
+        // held request.
+        expect(Object.values(state.military.formations ?? {})
+            .filter((formation) => formation.faction === 'RS' && formation.kind === 'paramilitary')
+            .map((formation) => [formation.created_turn, formation.paramilitary_target])).toEqual([[1, TARGET]]);
     });
 
     it('releases on an applied answer from any source (Observer included)', () => {
@@ -279,6 +308,14 @@ describe('T3 manual paramilitary gate (released only by the applied card answer)
         fileAnswer(state, 'RBiH', 'ask', 4, 'bot_ai_default');
         state.military.event_flags.rbih_paramilitary_policy = 'ask';
         expect(hasParamilitaryPolicyCardApplied(state, 'RBiH')).toBe(true);
+        expect(isPlayerParamilitaryRequestGateHolding(state)).toBe(false);
+        // H-14: an automatic Review each is not the player's choice, so no request; the staff follow the bot's order,
+        // and an applied `ask` with no human asking sends none (§2), as for the bot.
+        expect(sameAsHeadless(state, 'RBiH')).toEqual({ live: [], headless: [] });
+        expect(detect(structuredClone(state)).pending_player_requests).toBe(0);
+        // The player's own Review each, applied: the request comes to them.
+        state.military.event_decision_log = [];
+        fileAnswer(state, 'RBiH', 'ask', 4, 'player');
         expect(detect(state).pending_player_requests).toBe(1);
     });
 
@@ -294,19 +331,21 @@ describe('T3 manual paramilitary gate (released only by the applied card answer)
     it('never holds HRHB, a staff-controlled player, or a headless run', () => {
         const hrhb = pocketState('HRHB', 3);
         expect(isPlayerParamilitaryRequestGateHolding(hrhb)).toBe(false);
-        expect(detect(hrhb).pending_player_requests).toBe(1);
+        // H-14 (was: a request): with no order of the player's, the HRHB side sends the bot's sweep, as headless.
+        expect(sameAsHeadless(hrhb, 'HRHB')).toEqual({ live: [TARGET], headless: [TARGET] });
+        expect(detect(hrhb).pending_player_requests).toBe(0);
 
-        // Staff control is never held by this gate. Since §6 D1 stage 2 merged onto T, the staff instead follow the
-        // human's standing order (`resolveNonManualParamilitaryPolicy`): with no answer applied they send no sweep,
-        // which closes the staff-sweep hole T's §6 record left open "until D1 lands".
+        // Staff control is never held by this gate. Since §6 D1 stage 2 merged onto T, the staff follow the human's
+        // explicit order (`resolveNonManualParamilitaryPolicy`); with none, H-21 (player-override model, 2026-11-25; was:
+        // no sweep) has them apply the bot's order, as headless does (no catalog here: the unit-test allow).
         for (const autonomy of [1, 2, 3]) {
             for (const faction of ['RBiH', 'RS'] as const) {
                 const staff = pocketState(faction, 3, autonomy);
                 expect(isPlayerParamilitaryRequestGateHolding(staff), `${faction} a${autonomy}`).toBe(false);
+                const { live, headless } = sameAsHeadless(staff, faction);
+                expect(live, `${faction} a${autonomy}`).toEqual(headless);
                 const report = detect(staff);
                 expect(report.pending_player_requests, `${faction} a${autonomy}`).toBe(0);
-                expect(report.spawned.filter((spawn) => spawn.faction === faction).map((spawn) => spawn.target_osid), `${faction} a${autonomy}`)
-                    .toEqual([]);
             }
         }
 
@@ -322,9 +361,12 @@ describe('T3 manual paramilitary gate (released only by the applied card answer)
         expect('detectOffensiveParamilitaryTargets' in sweepModule).toBe(false);
         const state = pocketState('RS', 3, autonomy);
         state.military.enabled_event_ids.push(RS_POLICY);
+        // H-21 (was: no sweep): before the card applies, with no order of the player's, the RS staff send the bot's sweep,
+        // the RS card's historical default, as headless does.
+        const { live, headless } = sameAsHeadless(state, 'RS');
+        expect(live).toEqual(headless);
         const held = detect(state);
         expect(held.pending_player_requests).toBe(0);
-        expect(held.spawned.filter((spawn) => spawn.faction === 'RS')).toHaveLength(0);
         expect(ownRequests(state, 'RS')).toHaveLength(0);
 
         // The card applied with Review (ask): at Assisted or Delegated no request comes to the player, so none is sent.

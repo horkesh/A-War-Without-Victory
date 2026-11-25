@@ -395,8 +395,9 @@ describe('UI Adapter Boundary Discipline', () => {
     const parsed = parseGameState(rawState);
 
     // No `paramilitary` control event for this target: the action dissolved without taking it, so it books nothing.
+    // Player-override model (2026-11-25): an RS sweep with no card answer by its turn was the staff's historical default.
     expect(parsed.paramilitaryUnrequested).toEqual([
-      { id: 'para_rs_t2_0', turn: 2, target_osid: 'op:srebrenica:obadi', faction: 'RS', captured: false },
+      { id: 'para_rs_t2_0', turn: 2, target_osid: 'op:srebrenica:obadi', faction: 'RS', captured: false, cause: 'historical_default_staff', authored_by: 'staff_default' },
     ]);
     expect(JSON.stringify(rawState)).toBe(before);
     expect(parseGameState({ ...rawState, meta: { turn: 30, phase: 'war' } }).paramilitaryUnrequested).toBeUndefined();
