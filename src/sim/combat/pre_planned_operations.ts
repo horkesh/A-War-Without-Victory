@@ -58,6 +58,7 @@ import { isOperationObjectiveHostile } from './operation_objective_hostility.js'
 import { computeMultiAxisPlanningDuration } from './sector_offensive_axis_helpers.js';
 import { isEliteAuthoredForHistoricalOperation } from './historical_elite_reservations.js';
 import { isCorpsBoundByOct1995Ceasefire, isFactionBoundByOct1995Ceasefire } from './oct1995_ceasefire.js';
+import { corpsHoldForbidsNewPlans } from './stance_matter_holds.js';
 import {
     emitPreplannedEligibilityRecord,
     isReasonCodeTopicEnabled,
@@ -2840,6 +2841,9 @@ export function injectPrePlannedOperations(
             });
             continue;
         }
+        // Engine Invariants §14.10c (override ruling Q5): a standing-authorization op waits,
+        // not consumed, while the President's explicit hold forbids new plans. Inert without a hold.
+        if (corpsHoldForbidsNewPlans(state, def.corps, turn)) continue;
 
         // Skip if not yet available
         if (def.available_from != null && turn < def.available_from) {
@@ -3128,6 +3132,11 @@ export function injectQueuedOperation(
     // October 1995 general ceasefire (council fix 3): the queue is held, not consumed, so the
     // queued operation resumes if the war reopens after a declined Dayton.
     if (isCorpsBoundByOct1995Ceasefire(state, corpsId)) {
+        return false;
+    }
+    // Engine Invariants §14.10c (override ruling Q5): the queue is held, not consumed, while
+    // the President's explicit hold forbids new plans. Inert without a hold.
+    if (corpsHoldForbidsNewPlans(state, corpsId, turn)) {
         return false;
     }
     if (!isSlot0AvailableForQueue(cmd)) {

@@ -577,13 +577,18 @@ describe('desktop player-visible state projection', () => {
 
     const canonicalJson = serializeState(advanced.state);
     const hydrated = deserializeState(canonicalJson);
-    expect(hydrated.meta.proposal_decision_history?.map((record) => record.id))
-      .toEqual(['rbih_receipt', 'rs_receipt']);
+    // The Advance also writes the player's own record-only "staff proceeded" receipts for decisions
+    // left unanswered (player-override model, §14.10a); they are their faction's and survive the projection.
+    const answered = (rows: Array<{ id: string; resolved_by?: string }> | undefined) =>
+      (rows ?? []).filter((record) => record.resolved_by !== 'silence').map((record) => record.id);
+    expect(answered(hydrated.meta.proposal_decision_history)).toEqual(['rbih_receipt', 'rs_receipt']);
+    expect((hydrated.meta.proposal_decision_history ?? [])
+      .filter((record) => record.resolved_by === 'silence')
+      .every((record) => record.faction === 'RS')).toBe(true);
     const projectedJson = projector.projectPlayerVisibleStateJson(serializeState(hydrated));
     const projected = JSON.parse(projectedJson);
 
-    expect(projected.meta.proposal_decision_history.map((record: any) => record.id))
-      .toEqual(['rs_receipt']);
+    expect(answered(projected.meta.proposal_decision_history)).toEqual(['rs_receipt']);
     expect(projectedJson).not.toContain('Foreign durable proposal receipt.');
 
     expect(() => deserializeState(projectedJson)).toThrow();

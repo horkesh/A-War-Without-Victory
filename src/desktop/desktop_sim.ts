@@ -102,6 +102,8 @@ export { declineDaytonNegotiation } from '../sim/negotiation/dayton_negotiation.
 export { parseDaytonProposal } from './dayton_proposal.js';
 // Command loop L7: army clashes are raised and swept only from desktop IPC (never the war pipeline).
 export { raiseArmyClash, sweepLapsedArmyClashes } from '../sim/combat/army_clashes.js';
+// Engine Invariants §14.10c: a Level-1 stance answer writes the 4-turn corps hold (desktop IPC only).
+export { recordLevel1StanceAnswerHold } from '../sim/combat/stance_matters.js';
 
 /** Table a draft for the next Dayton round (DC A2): every other delegation answers; the round is recorded. */
 export function tableDesktopDaytonRound(state: GameState, payload: unknown): TableDaytonRoundResult {
@@ -403,23 +405,13 @@ export async function startNewCampaign(
         // unset states migrate to historical, but new campaigns do not rely on
         // that migration side effect.
         state.meta.decision_mode = decisionMode;
-        // ALL THREE SIDES SIMULATED (owner, 2026-08-31). At Level 0 (Full Control)
-        // `selectBotBrigadeOrderFactions` (war_phases.ts) drops the player faction
-        // from bot brigade orders, corps directives and automatic recruitment, so
-        // the player's army only moves when the player moves it — which leaves one
-        // of three armies idle in any headless/LLM playthrough.
-        //
-        // LEVEL 2, NOT LEVEL 1. Level 1 also restores engine drive, but its
-        // `commander_loop` guard (commander_loop.ts, "block plan from advancing to
-        // 'executing' unless player_op_response … approved") holds every
-        // commander-generated plan of the PLAYER's faction at 'ready' until a human
-        // answers it (bot factions are not held since PK1, 2026-11-14; Engine
-        // Invariants §14.10b). Measured (before PK1) at
-        // t=30 as RS: autonomy 0 → active=3/planning=2/ready=0, autonomy 1 →
-        // active=2/planning=0/ready=2 — two plans stalled, never admitted. With
-        // ops-only attacks that starves the war in any run without a human in the
-        // loop. Level 2 (Political) carries no `=== 1` gate and delegates
-        // recruitment natively, so all three armies both manoeuvre AND fight.
+        // ALL THREE SIDES SIMULATED (owner, 2026-08-31). Since the player-override
+        // model (owner 2026-11-25, Engine Invariants §14.10a-b) the staff runs the
+        // player's faction at every autonomy level, so a hands-off game at any level
+        // plays the headless war; the level only decides what is put to the
+        // president. The historical reason for Level 2 (Level 0 dropped the player
+        // from the staff pipeline and Level 1 held their plans at 'ready') is retired;
+        // the shipped default stays Level 2 (Political) until the owner changes it.
         state.meta.autonomy_level = 2;
     }
     deferUnauthorizedHistoricalOperationsForPlayer(state);

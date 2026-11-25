@@ -96,7 +96,7 @@ import { getStalestSectorIntelConfidence, stableSectorKey } from '../sector_inte
 import { computePlanningDuration } from '../sector_offensive_axis_helpers.js';
 import { canFormationReachAssemblyInTime } from '../sector_offensive_launch_helpers.js';
 import { mayEliteJoinOperation } from '../historical_elite_reservations.js';
-import { isLevel1PlayerApprovalFaction } from '../../bot/staff_control.js';
+import { corpsHoldForbidsNewPlans } from '../stance_matter_holds.js';
 
 export function capOpportunityOperationParticipants(
     participantIds: readonly string[],
@@ -774,12 +774,12 @@ function findLocalOccupationCandidateImpl(
         if (observation) observation.precondition_failure = 'turn_after_20';
         return null;
     }
-    // A standalone local opportunity has no proposal identity for the Level-1
-    // approval flow. Fail closed instead of admitting it around player authority —
-    // for the PLAYER's corps only. Bot corps have no approver, so they keep local
-    // occupation at Level 1 exactly as at Level 0/2 (2026-11-14, R8 run m).
-    if (isLevel1PlayerApprovalFaction(stateRef, briefing.faction)) {
-        if (observation) observation.precondition_failure = 'autonomy_not_level_1';
+    // A local occupation runs for the player's corps exactly as for a bot's, at every autonomy
+    // level (player-override model, §14.10a; lane C s8 ruling Q4, residue B retired). It has no
+    // proposal identity: the President's veto is a hold, a refusal of the plan, or the op halt.
+    // A hold that forbids new plans forbids this one too. Inert without a hold (headless never has one).
+    if (corpsHoldForbidsNewPlans(stateRef, briefing.corps_id, briefing.turn)) {
+        if (observation) observation.precondition_failure = 'presidential_hold';
         return null;
     }
     const queuedHistoricalParticipants = getHeadQueuedPrePlannedBrigadeIds(stateRef);

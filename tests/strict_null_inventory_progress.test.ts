@@ -848,15 +848,18 @@ describe('strict null inventory progress', () => {
             // absent until first written (old saves load): DisplacementDomainState.moved_on_at_capture_by_people
             // (line 1, cumulative by people) and DisplacementState.unable_to_leave_by_side (line 2, this
             // week's stock). Nothing in the sim reads them. No new type escape. 617 -> 619.
+            // Player-override model PR-B (2026-11-25): +1 record-only optional field
+            // `PendingProposalReview.resolved_by` ('silence' receipt; never read by a sim decision,
+            // live-president only, absent on headless runs). No new type escape. 619 -> 620.
             // A9 P0-A pocket fall (8-seat §6 ruling D2/D5, 2026-11-25): +2 optional fields, absent until first
             // written (old saves load): DisplacementDomainState.pocket_fall_records (write-only display record)
             // and DisplacementState.pocket_fall_originals_booked_by_side (booked-once marker, read only by the
-            // step). No new type escape. 619 -> 621.
+            // step). No new type escape. 620 -> 622.
             // A9 P1 negotiated-evacuation convoy (8-seat §6 ruling D9, 2026-11-25): +2 optional fields, absent until
             // first written (old saves load): DisplacementDomainState.negotiated_evacuation_records (write-only
             // display record) and DisplacementState.negotiated_evacuation_by_side (episode state, read only by the
-            // convoy rule). No new type escape. 621 -> 623.
-            optional_fields_game_state: 623,
+            // convoy rule). No new type escape. 622 -> 624.
+            optional_fields_game_state: 624,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
@@ -887,15 +890,16 @@ describe('strict null inventory progress', () => {
         // ParamilitaryStandingOrderRecord.target_osid / decision, the union's discriminating markers).
         // 613 -> 617 / state 228 -> 229 / sim 375 -> 378.
         // Ledger lines 1-2: +2 state (moved_on_at_capture_by_people, unable_to_leave_by_side). 617 -> 619 / state 229 -> 231.
-        // A9 P0-A: +2 state (pocket_fall_records, pocket_fall_originals_booked_by_side). 619 -> 621 / state 231 -> 233.
-        // A9 P1: +2 state (negotiated_evacuation_records, negotiated_evacuation_by_side). 621 -> 623 / state 233 -> 235.
-        expect(current.optional_field_domains.total).toBe(623);
+        // Player-override model PR-B: +1 (PendingProposalReview.resolved_by). 619 -> 620 / state 231 -> 232.
+        // A9 P0-A: +2 state (pocket_fall_records, pocket_fall_originals_booked_by_side). 620 -> 622 / state 232 -> 234.
+        // A9 P1: +2 state (negotiated_evacuation_records, negotiated_evacuation_by_side). 622 -> 624 / state 234 -> 236.
+        expect(current.optional_field_domains.total).toBe(624);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
             sim: 378,
-            state: 235,
+            state: 236, // +1 PendingProposalReview.resolved_by (player-override model PR-B), +2 A9 P0-A, +2 A9 P1
             ui_adapter: 0,
             unknown: 0,
         });

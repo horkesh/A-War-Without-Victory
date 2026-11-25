@@ -2259,6 +2259,12 @@ export interface PendingProposalReview {
     current_value?: string;
     /** The value the AI is proposing (e.g. proposed corps stance). */
     proposed_value?: string;
+    /**
+     * Record-only: 'silence' when the player left the decision unanswered and the staff's choice
+     * was applied (player-override model, Engine Invariants §14.10a; `resolveBySilence` in
+     * sim/player_override.ts). Absent for an explicit answer. Never read by a simulation decision.
+     */
+    resolved_by?: 'silence';
 }
 
 /** Durable receipt for an ordinary player-facing autonomy proposal disposition. */

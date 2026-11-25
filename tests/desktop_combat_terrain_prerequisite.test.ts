@@ -258,8 +258,9 @@ describe('actual desktop smart-bot prepass authority',()=>{
   const original=JSON.stringify(state);const result=await advanceTurn(state,root);
   expect(result.error).toBeUndefined();expect(JSON.stringify(state)).toBe(original);
   expect(vi.mocked(runTurn).mock.lastCall?.[1]).toMatchObject({dataBaseDir:root});
-  expect(result.state.military.formations.manual.assignment).toEqual(level===0?{kind:'sector',sector_id:'manual-sector'}:{kind:'edge',edge_id:'edge'});
-  expect(result.state.military.front_posture?.RS?.assignments.edge.posture).toBe(level===0?'hold':'push');
+  // Player-override model (§14.10a, 2026-11-25): the staff prepass runs for the player at every level, 0 included.
+  expect(result.state.military.formations.manual.assignment).toEqual({kind:'edge',edge_id:'edge'});
+  expect(result.state.military.front_posture?.RS?.assignments.edge.posture).toBe('push');
   expect(result.state.military.formations.npc.assignment).toEqual({kind:'edge',edge_id:'edge'});
  });
 });

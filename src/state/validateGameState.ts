@@ -248,6 +248,9 @@ function validateProposalDecisionHistory(value: unknown, errors: string[]): void
                 errors.push(`${path}.${key} must be a string when present`);
             }
         }
+        if (record.resolved_by !== undefined && record.resolved_by !== 'silence') {
+            errors.push(`${path}.resolved_by must be 'silence' when present`);
+        }
         if (record.opportunity_decision !== undefined && (
             typeof record.opportunity_decision !== 'string'
             || !PROPOSAL_OPPORTUNITY_DECISIONS.includes(

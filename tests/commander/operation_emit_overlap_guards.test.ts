@@ -1057,11 +1057,15 @@ describe('commander emission overlap guards', () => {
                 elite_loan_state: { on_loan: true } as any,
             }));
         }],
-        ['player autonomy', (harness) => {
-            // Level 1 holds the HUMAN PLAYER's corps only; a bot corps is not gated.
+        ['a presidential hold', (harness) => {
+            // Player-override model (§14.10a, 2026-11-25): Level 1 itself no longer withholds the
+            // player's local occupation; their own hold that forbids new plans does.
             harness.state.meta.autonomy_level = 1;
             harness.state.meta.player_faction = FACTION;
             harness.state.meta.headless_scenario_auto_control = false;
+            (harness.state.military as any).stance_matter_state = {
+                holds: [{ matter_id: 'level1_stance:test', faction: FACTION, scope: 'corps', corps_id: harness.briefing.corps_id, mode: 'fixed', stance: 'defensive', effective_from_turn: 0, until_turn: 999 }],
+            };
         }],
         ['friendly controller', (harness) => {
             harness.state.political.political_controllers![OMITTED_TARGET] = FACTION;
@@ -2024,14 +2028,21 @@ describe('commander emission overlap guards', () => {
         doesNotSelectBoundedTarget(guardedBrigadeBriefing({ elite_loan_state: { on_loan: true } as any }));
         doesNotSelectBoundedTarget(guardedBrigadeBriefing({ tags: ['enclave'] }));
 
-        // Level 1 fails closed for the HUMAN PLAYER's corps only.
+        // Player-override model (§14.10a, residue B retired, 2026-11-25): at Level 1 the player's corps
+        // keeps local occupation as a bot's does; only their own hold that forbids new plans withholds it.
         doesNotSelectBoundedTarget({
             ...briefing,
             state_ref: {
                 ...state,
                 meta: { ...state.meta, autonomy_level: 1, player_faction: FACTION, headless_scenario_auto_control: false },
+                military: {
+                    ...state.military,
+                    stance_matter_state: {
+                        holds: [{ matter_id: 'level1_stance:test', faction: FACTION, scope: 'corps', corps_id: briefing.corps_id, mode: 'fixed', stance: 'defensive', effective_from_turn: 0, until_turn: 999 }],
+                    },
+                },
             },
-        } as CommanderBriefing);
+        } as unknown as CommanderBriefing);
         // A bot corps at Level 1 (the player is another faction, or there is no player) has no
         // approver, so it keeps local occupation exactly as at Level 0 (R8 run m, 2026-11-14).
         const selectsBoundedTarget = (candidateBriefing: CommanderBriefing) => {
@@ -2059,6 +2070,14 @@ describe('commander emission overlap guards', () => {
         selectsBoundedTarget({
             ...briefing,
             state_ref: { ...state, meta: { ...state.meta, autonomy_level: 1, player_faction: undefined } },
+        } as CommanderBriefing);
+        // The silent player's own corps at Level 1 keeps it too (no hold).
+        selectsBoundedTarget({
+            ...briefing,
+            state_ref: {
+                ...state,
+                meta: { ...state.meta, autonomy_level: 1, player_faction: FACTION, headless_scenario_auto_control: false },
+            },
         } as CommanderBriefing);
 
         doesNotSelectBoundedTarget({
@@ -2768,7 +2787,9 @@ describe('commander emission overlap guards', () => {
         expect(state.military.corps_command?.[CORPS_ID]?.active_operations?.[0]?.name).toBe('cmd_old');
     });
 
-    it('keeps a Level-1 approval pending when an unrelated live operation blocks emission', () => {
+    // Amended 2026-11-25, player-override model (residue A retired, ruling Q4): an approved plan
+    // whose emission is blocked is consumed and proceeds as headless; it is not held at ready.
+    it('consumes a Level-1 approval and proceeds as headless when an unrelated live operation blocks emission', () => {
         const state = {
             schema_version: CURRENT_SCHEMA_VERSION,
             meta: {
@@ -2834,8 +2855,8 @@ describe('commander emission overlap guards', () => {
 
         const command = state.military.corps_command?.[CORPS_ID];
         expect(command?.active_operations.map((operation) => operation.name)).toEqual(['blocking_probe']);
-        expect(command?.player_op_response).toEqual({ plan_id: 'p1', approved: true, turn: 9 });
-        expect(command?.commander_state?.current_plan?.status).toBe('ready');
+        expect(command?.player_op_response).toBeUndefined();
+        expect(command?.commander_state?.current_plan?.status).toBe('executing');
     });
 
     // Codex P1 regression (#86): at autonomy level 1 the emitted op is tagged

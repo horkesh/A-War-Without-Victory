@@ -102,6 +102,7 @@ import { DAYTON_CONTINUATION_OPPORTUNITIES } from './operation_opportunity_catal
 import { enterOperationRecovery } from './tactical_group_lifecycle.js';
 import { effectiveOperationMinimum } from './operation_minimum_policy.js';
 import { isFactionBoundByOct1995Ceasefire } from './oct1995_ceasefire.js';
+import { resolveBySilence } from '../player_override.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Public types
@@ -1977,9 +1978,15 @@ export function applyBotOpportunityDecisions(
         if (isFactionBoundByOct1995Ceasefire(state, p.approver_faction)) continue;
         const def = catalog.find(d => d.opportunity_id === p.opportunity_id);
         if (!def) continue;
-        // Below level 2 the President reviews his faction's opportunities, except defensive
-        // ones, which his staff decides at every level (§14.10b).
+        // A live president's staff decides their opportunities on the turn headless decides them,
+        // at every autonomy level (player-override model, owner 2026-11-25, §14.10a; lane C s8
+        // ruling, H-15): silence is `defaultBotDecisionForOpportunity`. Their explicit decision on a
+        // review row (an opportunity the staff could not apply stays pending and is put to them at
+        // Levels 0/1) is consumed first, by apply-resolved-opportunity-decisions at the start of
+        // the next turn. Only a headless run with an authored player faction keeps the older
+        // review-then-auto-resolve timing below Level 2, so its baselines stay byte-identical.
         if (playerFaction !== null && p.approver_faction === playerFaction
+            && !hasLivePresident(state)
             && (state.meta.autonomy_level ?? 0) < 2
             && !isStaffDecidedPlayerOpportunity(state, def)) continue;
         targets.push({ proposalId: p.proposal_id, def, proposal: p });
@@ -1989,9 +1996,34 @@ export function applyBotOpportunityDecisions(
     const outcomes: OpportunityDecisionOutcome[] = [];
     for (const t of targets) {
         const decision = defaultBotDecisionForOpportunity(t.proposal, t.def);
-        outcomes.push(applyOpportunityDecisionDetailed(
-            state, turn, t.proposalId, decision, catalog, { adjacency },
-        ));
+        // Below Level 2 this opportunity would have been put to the President: the staff
+        // proceeded by silence, and the record-only receipt says so (ruling Q6).
+        const surfacedToPresident = playerFaction !== null
+            && t.proposal.approver_faction === playerFaction
+            && hasLivePresident(state)
+            && (state.meta.autonomy_level ?? 0) < 2
+            && !isStaffDecidedPlayerOpportunity(state, t.def);
+        resolveBySilence(
+            state,
+            {
+                id: `OPPORTUNITY_SILENCE_${t.proposalId}`,
+                faction: t.proposal.approver_faction,
+                turn,
+                domain: 'ops',
+                description: `${t.def.name} — staff proceeded: ${decision}`,
+                proposed_action: `${OPPORTUNITY_PROPOSAL_ACTION_PREFIX}${t.proposalId}`,
+                adopted: true,
+                proposed_value: decision,
+            },
+            () => {
+                const applied = applyOpportunityDecisionDetailed(
+                    state, turn, t.proposalId, decision, catalog, { adjacency },
+                );
+                outcomes.push(applied);
+                // No receipt unless the President would have seen it and the staff's decision applied.
+                return surfacedToPresident && applied.decision_applied;
+            },
+        );
     }
     return outcomes;
 }

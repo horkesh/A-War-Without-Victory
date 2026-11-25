@@ -93,6 +93,8 @@ function withoutDecisionProvenance(state: GameState): unknown {
     const copy = structuredClone(state) as any;
     delete copy.meta.player_faction;
     delete copy.meta.autonomy_level;
+    // The record-only "staff proceeded" receipt of a decision applied by silence (§14.10a).
+    delete copy.meta.proposal_decision_history;
     delete copy.military.last_briefing;
     for (const row of copy.military.event_decision_log ?? []) delete row.decision_source;
     return copy;
@@ -109,9 +111,10 @@ describe('turn pipeline — pause before combat for player decisions', () => {
         expect(calls).toBe(1);
         expect(withInert.nextState).toEqual(without.nextState);
         expect(withInert.report).toEqual(without.report);
-        // Without an answer the decision stays pending, exactly as before.
-        expect(without.nextState.military.pending_event_decisions?.map((d) => d.event_id))
-            .toEqual(['pause_test_decision']);
+        // Player-override model (§14.10a, 2026-11-25): left unanswered, the decision is resolved
+        // in-turn as the bot's choice (it used to stay pending for a later answer).
+        expect(without.nextState.military.pending_event_decisions).toEqual([]);
+        expect(without.nextState.military.event_flags?.pause_test_answered).toBe('hold');
 
         // No player ⇒ the bot answers in-turn and nothing is ever paused.
         let headlessCalls = 0;
@@ -146,10 +149,11 @@ describe('turn pipeline — pause before combat for player decisions', () => {
             current = result.nextState;
         }
         // Turn 1 fires the once-only event (the older pending decision is not offered again);
-        // turn 2 fires nothing ⇒ no pause.
+        // turn 2 fires nothing ⇒ no pause. The unanswered decision of turn 1 is resolved by
+        // silence in its own turn; one fired on an earlier turn stays on the desk.
         expect(seen).toEqual([{ turn: 1, ids: ['pause_test_decision'] }]);
         expect(current.military.pending_event_decisions?.map((d) => d.event_id).sort())
-            .toEqual(['older_unanswered_decision', 'pause_test_decision']);
+            .toEqual(['older_unanswered_decision']);
     });
 
     it('answering in the pause equals the bot answering in-turn', async () => {
@@ -167,13 +171,23 @@ describe('turn pipeline — pause before combat for player decisions', () => {
         expect(bot.nextState.military.event_decision_log?.map((row) => row.decision_source)).toEqual(['bot_ai_default']);
         expect(withoutDecisionProvenance(player.nextState)).toEqual(withoutDecisionProvenance(bot.nextState));
 
-        // Answered between turns instead, the same response arrives a turn late: this turn ran without it.
-        const late = await runTurn(baseState(PLAYER_META), input);
-        expect(late.nextState.military.event_flags?.pause_test_answered).toBeUndefined();
+        // Left unanswered, the staff's choice lands in-turn too, exactly where the bot's does
+        // (player-override model, §14.10a); only the receipt and the provenance differ.
+        const silent = await runTurn(baseState(PLAYER_META), input);
+        expect(silent.nextState.military.event_flags?.pause_test_answered).toBe('hold');
+        expect(silent.nextState.military.event_decision_log?.map((row) => row.decision_source)).toEqual(['bot_ai_default']);
+        expect(silent.nextState.meta.proposal_decision_history?.map((row) => row.resolved_by)).toEqual(['silence']);
+        expect(withoutDecisionProvenance(silent.nextState)).toEqual(withoutDecisionProvenance(bot.nextState));
     });
 
     it('the desktop in-place resolver writes the desktop resolution into the same object', async () => {
-        const queued = (await runTurn(baseState(PLAYER_META), input)).nextState;
+        let paused: GameState | null = null;
+        await runTurn(baseState(PLAYER_META), {
+            ...input,
+            onPlayerDecisionsPending: (working) => { paused = structuredClone(working); },
+        });
+        if (!paused) throw new Error('expected the turn to pause on the queued decision');
+        const queued: GameState = paused;
         const expected = resolveDesktopEventDecision(queued, 'pause_test_decision', 'yield', process.cwd());
         const target = structuredClone(queued);
         const identity = target;

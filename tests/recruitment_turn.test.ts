@@ -215,7 +215,7 @@ describe('runOngoingRecruitment', () => {
         expect(prioritized.formationIds).not.toContain('arbih_223rd_mountain');
     });
 
-    test('keeps player recruitment manual at autonomy 0 and delegates it at 1-3 or headless', () => {
+    test('the staff recruit for the player faction at every autonomy level, as headless does', () => {
         const state = makeState();
         state.meta.player_faction = 'RBiH';
         state.factions = [
@@ -223,9 +223,10 @@ describe('runOngoingRecruitment', () => {
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
         ];
 
+        // Player-override model (§14.10a, 2026-11-25): Full Control no longer keeps recruitment
+        // manual; the president's levers are the Recruit modal and the per-brigade hold.
         state.meta.autonomy_level = 0;
-        expect(selectAutomaticRecruitmentFactions(state)).toEqual(['RS']);
-        // Level 1 (Assisted) delegates: HISTORY IF LEFT ALONE (lane C s6 design sitting, 2026-11-24).
+        expect(selectAutomaticRecruitmentFactions(state)).toEqual(['RBiH', 'RS']);
         state.meta.autonomy_level = 1;
         expect(selectAutomaticRecruitmentFactions(state)).toEqual(['RBiH', 'RS']);
         state.meta.autonomy_level = 2;
@@ -237,8 +238,9 @@ describe('runOngoingRecruitment', () => {
         expect(selectAutomaticRecruitmentFactions(state)).toEqual(['RBiH', 'RS']);
     });
 
-    test('does not consume a Full Control player formation through ongoing bot recruitment', () => {
-        // The president's "saving a brigade for later" guarantee lives at Level 0 (Full Control).
+    test('a Full Control president saves a brigade for later with the hold; without it the staff raise it', () => {
+        // Player-override model (§14.10a, 2026-11-25): "saving a brigade for later" is the
+        // per-brigade hold at every level, Full Control included (it was Level 0's exclusion).
         const state = makeState();
         state.meta.player_faction = 'RBiH';
         state.meta.autonomy_level = 0;
@@ -258,11 +260,16 @@ describe('runOngoingRecruitment', () => {
             max_personnel: 3000,
         };
 
+        const unheld = structuredClone(state);
+        setPlayerRecruitmentHold(state, brigade.id, true);
         const report = runOngoingRecruitment(state, [], [brigade], new Map([['s1', 'zenica']]), { zenica: 's1' });
 
         expect(report?.actions).toEqual([]);
         expect(state.military.formations[brigade.id]).toBeUndefined();
         expect(state.military.recruitment_state?.recruited_brigade_ids).not.toContain(brigade.id);
+
+        runOngoingRecruitment(unheld, [], [brigade], new Map([['s1', 'zenica']]), { zenica: 's1' });
+        expect(unheld.military.formations[brigade.id]).toBeDefined();
     });
 
     test('raises an Assisted (Level 1) player formation through ongoing staff recruitment, as headless does', () => {

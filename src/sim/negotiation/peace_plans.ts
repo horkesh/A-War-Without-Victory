@@ -25,6 +25,7 @@ import { freezeEndgameSnapshot } from '../endgame/endgame_snapshot.js';
 import { applyPeaceSettlement, isSettlementPlan } from './peace_settlement.js';
 import { warDeadTotals } from './war_dead.js';
 import { getFactionTerritoryAreaPct } from '../osid_areas.js';
+import { recordSilenceReceipt, selectLivePlayerFaction } from '../player_override.js';
 import {
     collectRoutedPeacePlanCards,
     finalizePlanAnswers,
@@ -108,7 +109,9 @@ function isHumanPlayerFaction(state: GameState, faction: FactionId): boolean {
  * - all three answers on the log → one complete, resolved row (the conditional answer is
  *   evaluated here, on the other side's answer in the same set);
  * - at the close week, a bot side with no answer → the plan owner's answer; Observer → the
- *   historical answer; a human player → the `pending_peace_plan` pointer (the modal);
+ *   historical answer; a live human player who left it unanswered → the plan owner's answer as
+ *   headless gives it, by silence (§14.10a); only a headless run with an authored player gets
+ *   the `pending_peace_plan` pointer (the modal);
  * - the fallback never pre-empts the human player's routed card that is still pending: the
  *   window then stays open past the close week until that card is answered (the card blocks
  *   the advance, so this is one turn at most on the desktop).
@@ -153,9 +156,33 @@ export function evaluatePeacePlans(state: GameState, eventDefinitions: readonly 
         if (!complete) {
             if (warWeek < plan.close_week) continue;
             if (humanCardPending) continue;
+            // Player-override model (owner 2026-11-25, §14.10a; lane C s8 ruling Q7b, H-18): a
+            // live President who left the plan unanswered by its close week gets the plan owner's
+            // answer, exactly as headless gives that seat (no `forceHistorical`), on the close
+            // week. Their explicit answer is the routed card (on the log above) or a pending
+            // fallback modal from an older save. Only a headless run with an authored player
+            // faction keeps the fallback pointer below, so its baselines stay byte-identical.
+            const silentHuman = humanFaction != null && selectLivePlayerFaction(state) === humanFaction
+                ? humanFaction
+                : null;
             for (const faction of CANONICAL_FACTIONS) {
-                if (answers[faction] != null || faction === humanFaction) continue;
-                answers[faction] = { plan_id: plan.id, response: planOwnerResponse(state, plan, faction, state.meta.player_faction === faction) };
+                if (answers[faction] != null || (faction === humanFaction && faction !== silentHuman)) continue;
+                const response = planOwnerResponse(
+                    state, plan, faction, faction === silentHuman ? false : state.meta.player_faction === faction,
+                );
+                answers[faction] = { plan_id: plan.id, response };
+                if (faction === silentHuman) {
+                    recordSilenceReceipt(state, {
+                        id: `PEACE_PLAN_SILENCE_${plan.id}`,
+                        faction,
+                        turn: (state.meta.war_start_turn ?? 0) + plan.trigger_week,
+                        domain: 'political',
+                        description: `${plan.name} — staff proceeded: ${response}`,
+                        proposed_action: `PEACE_PLAN:${plan.id}`,
+                        adopted: true,
+                        proposed_value: response,
+                    }, state.meta.turn);
+                }
             }
             if (humanFaction != null && answers[humanFaction] == null) {
                 const final = finalizePlanAnswers(answers);

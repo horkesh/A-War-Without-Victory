@@ -470,7 +470,7 @@ describe('processOfficerSuccession', () => {
         assert.equal(state.military.named_officers!['o1']!.status, 'retired');
     });
 
-    it('does not regenerate a player replacement matter after durable resolution', () => {
+    it('a Full Control player raises no replacement matter: the departure applies on schedule', () => {
         const outgoing = makeOfficer({
             id: 'vrs_sipcic',
             faction: 'RS',
@@ -506,29 +506,11 @@ describe('processOfficerSuccession', () => {
             }),
         };
 
+        // Player-override model (§14.10a, H-13, 2026-11-25): a Full Control player's departure
+        // follows the authored schedule as headless; no replacement matter is raised for it.
         processOfficerSuccession(state, new Set());
-        const firstMatter = state.military.pending_officer_events?.[0];
-        assert.ok(firstMatter);
-        assert.equal(firstMatter.event_id, 'replacement:vrs_sipcic:vrs_sarajevo_romanija:vrs_galic');
-
-        state.military.officer_decision_history = [{
-            id: `officer:18:${firstMatter.event_id}:acknowledged`,
-            turn: 18,
-            faction: 'RS',
-            event_id: firstMatter.event_id,
-            event_type: 'replacement_suggested',
-            officer_id: 'vrs_galic',
-            current_commander_id: 'vrs_sipcic',
-            corps_id: 'vrs_sarajevo_romanija',
-            decision: 'acknowledged',
-        }];
-        state.military.pending_officer_events = [];
-        state.meta!.turn = 35;
-
-        processOfficerSuccession(state, new Set());
-
         assert.deepEqual(state.military.pending_officer_events, []);
-        assert.equal(state.military.named_officers.vrs_sipcic?.status, 'active');
+        assert.equal(state.military.named_officers.vrs_sipcic?.status, 'retired');
     });
 
     it('does not suggest an enclave-locked officer as a corps successor', () => {
@@ -578,16 +560,11 @@ describe('processOfficerSuccession', () => {
 
         processOfficerSuccession(state, new Set());
 
-        assert.deepEqual(state.military.pending_officer_events, [{
-            event_id: 'replacement:arbih_knez:arbih_2nd_corps:arbih_sadic',
-            type: 'replacement_suggested',
-            faction: 'RBiH',
-            turn: 44,
-            officer_id: 'arbih_sadic',
-            current_commander_id: 'arbih_knez',
-            corps_id: 'arbih_2nd_corps',
-            acknowledged: false,
-        }]);
+        // Player-override model (§14.10a, H-13): the schedule applies for the player as headless;
+        // the enclave-locked officer is still never the successor.
+        assert.deepEqual(state.military.pending_officer_events, []);
+        assert.equal(state.military.named_officers.arbih_knez?.status, 'retired');
+        assert.notEqual(state.military.named_officers.arbih_palic?.assigned_corps_id, 'arbih_2nd_corps');
     });
 
     it('adds newly available officers to pool', () => {

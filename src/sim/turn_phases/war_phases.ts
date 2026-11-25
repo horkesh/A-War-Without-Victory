@@ -22,6 +22,8 @@ import {
     isHistoricalOperationAuthorizationReview,
     isUnresolvedHistoricalOperationAuthorizationReview,
 } from '../combat/historical_operation_authorization.js';
+import { selectLivePlayerFaction, stampLapsedReviewAsStaffChoice } from '../player_override.js';
+import { selectManualPlayerFaction } from '../bot/staff_control.js';
 import { snapshotPoliticalControllers } from '../combat/assert_control_events.js';
 import { applyGuerrillaAttrition } from '../combat/guerrilla_attrition.js';
 import { cleanupExpiredEventModifiers } from '../events/active_modifiers.js';
@@ -55,7 +57,7 @@ import { applyFormationCommitment } from '../../state/front_posture_commitment.j
 import { expandRegionPostureToEdges } from '../../state/front_posture_regions.js';
 import { accumulateFrontPressure } from '../../state/front_pressure.js';
 import { syncFrontSegments } from '../../state/front_segments.js';
-import { GameState, type FactionId, type FormationId, type FormationState, type LegacyBrigadeAoRState, type EffectivePostureExposureState, type AuthoredOpDef, type OperationAxis, type CorpsOperation, type CorpsCommandState } from '../../state/game_state.js';
+import { GameState, type FactionId, type FormationId, type FormationState, type SettlementId, type LegacyBrigadeAoRState, type EffectivePostureExposureState, type AuthoredOpDef, type OperationAxis, type CorpsOperation, type CorpsCommandState } from '../../state/game_state.js';
 import { proposalDecisionIdentity } from '../../state/proposal_decision_history.js';
 import { updateHeavyEquipmentState } from '../../state/heavy_equipment.js';
 import { updateLegitimacyState } from '../../state/legitimacy.js';
@@ -194,7 +196,6 @@ import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import {
     checkTriggeredOperations,
     injectArmyHqOperations,
-    isTriggeredHistoricalOperationForFaction,
 } from '../combat/triggered_operations.js';
 import { computeMilitiaGarrisons } from '../combat/militia_garrison.js';
 import { activateOGs, updateOGLifecycle } from '../combat/operational_groups.js';
@@ -1013,41 +1014,45 @@ function getRoutineEquipmentOperationalFloor(state: GameState, formation: Format
 }
 
 
-function isPlayerHistoricalOperationAssistOperation(
-    state: GameState,
-    playerFaction: FactionId,
-    op: CorpsOperation | null | undefined,
-): boolean {
-    if (!op) return false;
-    if (op.phase !== 'planning' && op.phase !== 'execution') return false;
-    if (op.authored_by_player === true || op.requested_by_president === true) return false;
-    if (op.is_pre_planned === true) return true;
-    return state.military.triggered_operations_accepted?.[op.name] != null
-        && isTriggeredHistoricalOperationForFaction(op.name, playerFaction);
+/**
+ * Attack orders the President staged for their own brigades before this Advance, at Level 0 (Full
+ * Control): the per-unit override of the staff's brigade orders (player-override model, §14.10a;
+ * lane C s8 ruling Q2). Read before the staff pass replaces the order maps. Empty unless a manual
+ * player staged an order, so headless and hands-off live runs never carry one.
+ */
+export function snapshotStagedPresidentialAttackOrders(state: GameState): Array<[FormationId, SettlementId]> {
+    const manualFaction = selectManualPlayerFaction(state);
+    if (manualFaction == null) return [];
+    const orders = state.military.brigade_attack_orders ?? {};
+    const staged: Array<[FormationId, SettlementId]> = [];
+    for (const brigadeId of Object.keys(orders).sort(strictCompare)) {
+        const target = orders[brigadeId as FormationId];
+        if (target == null) continue;
+        if (state.military.formations?.[brigadeId]?.faction !== manualFaction) continue;
+        staged.push([brigadeId as FormationId, target]);
+    }
+    return staged;
 }
 
-function isPlayerHistoricalOperationAssistFormation(state: GameState, formation: FormationState): boolean {
-    const playerFaction = state.meta.headless_scenario_auto_control
-        ? null
-        : state.meta.player_faction ?? null;
-    if (!playerFaction || formation.faction !== playerFaction) return false;
-    const found = findBrigadeOperationAnywhere(state, formation.id);
-    return isPlayerHistoricalOperationAssistOperation(state, playerFaction, found?.op);
-}
+/** Per turn: the President's staged attack orders, for check-truce-break (their orders only break a truce). */
+const stagedPresidentialAttackOrdersByContext = new WeakMap<object, ReadonlyArray<readonly [FormationId, SettlementId]>>();
 
-function hasPlayerHistoricalOperationAssistWork(state: GameState): boolean {
-    const playerFaction = state.meta.headless_scenario_auto_control
-        ? null
-        : state.meta.player_faction ?? null;
-    if (!playerFaction) return false;
-    const formations = state.military.formations ?? {};
-    for (const formationId of Object.keys(formations).sort(strictCompare)) {
-        const formation = formations[formationId];
-        if (formation && isPlayerHistoricalOperationAssistFormation(state, formation)) {
-            return true;
+/** Write the staged presidential orders over the staff's for those brigades only. */
+export function applyStagedPresidentialAttackOrders(
+    context: { state: GameState },
+    staged: ReadonlyArray<readonly [FormationId, SettlementId]>,
+): void {
+    stagedPresidentialAttackOrdersByContext.set(context, staged);
+    if (staged.length === 0) return;
+    const military = context.state.military;
+    military.brigade_attack_orders = { ...(military.brigade_attack_orders ?? {}) };
+    for (const [brigadeId, target] of staged) {
+        military.brigade_attack_orders[brigadeId] = target;
+        // A presidential order is not the staff's emitted order: drop any staff ownership row for it.
+        if (military.brigade_attack_order_owners?.[brigadeId] !== undefined) {
+            delete military.brigade_attack_order_owners[brigadeId];
         }
     }
-    return false;
 }
 
 // ---------------------------------------------------------------------------
@@ -1963,9 +1968,10 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.headless_scenario_auto_control === true) return;
             const playerFaction = context.state.meta.player_faction;
             if (!playerFaction) return;
-            // Owner calibration directive 2026-11-05: a staff-controlled player (autonomy >= 1)
-            // keeps its operations exactly as bot staff do; headless injects once at load, so
-            // this per-turn re-injection is for a manual (autonomy 0) player only.
+            // Owner calibration directive 2026-11-05 and the player-override model (§14.10a):
+            // the player's staff keeps its operations exactly as bot staff do at every autonomy
+            // level, and headless injects once at load, so this per-turn re-injection (formerly
+            // for a manual, autonomy 0, player) is inert while the staff runs for the player.
             if (selectBotBrigadeOrderFactions(context.state).includes(playerFaction)) return;
             const hasAcceptedHistoricalOperation = (context.state.meta.pending_proposal_reviews ?? []).some(
                 review => review.faction === playerFaction
@@ -2294,12 +2300,15 @@ export const warPhases: NamedPhase[] = [
             // already ran this turn, so the staff default takes those targets next turn.
             removeNonManualPlayerParamilitaryRequests(context.state);
             meta.autonomy_overrides = undefined;
-            // Expire ordinary unanswered proposals with an explicit negative
-            // disposition before GC. Keeping the disposition for the current turn
-            // lets canonical UI/read models observe a resolved review instead of
-            // having the proposal silently disappear. Historical operation
-            // operation authorization rows are standing presidential records in
-            // every disposition, so accepted/declined plans cannot be re-prompted.
+            // Resolve ordinary unanswered proposals as the staff's choice before GC
+            // (player-override model, §14.10a; lane C s8 ruling Q3, H-6): a lapse is never
+            // the President's refusal. The staff already acted on the headless turn (an op
+            // plan launched, a stance stood); the stamp is the record-only "staff proceeded"
+            // receipt (`resolved_by: 'silence'`). Keeping the disposition for the current
+            // turn lets canonical UI/read models observe a resolved review instead of having
+            // the proposal silently disappear. Historical operation authorization rows are
+            // standing presidential records in every disposition, so accepted/declined plans
+            // cannot be re-prompted.
             if (meta.pending_proposal_reviews) {
                 for (const proposal of meta.pending_proposal_reviews) {
                     const isUnresolved = proposal.accepted === undefined
@@ -2310,8 +2319,7 @@ export const warPhases: NamedPhase[] = [
                         && isUnresolved
                         && !isUnresolvedHistoricalOperationAuthorizationReview(proposal)
                     ) {
-                        proposal.accepted = false;
-                        proposal.resolved_turn = meta.turn;
+                        stampLapsedReviewAsStaffChoice(proposal, meta.turn);
                     }
                 }
                 const existingReceiptKeys = new Set(
@@ -2322,7 +2330,8 @@ export const warPhases: NamedPhase[] = [
                         typeof proposal.accepted === 'boolean'
                         && Number.isInteger(proposal.resolved_turn)
                         && !isHistoricalOperationAuthorizationReview(proposal)
-                        && !proposal.proposed_action.startsWith('APPROVE_OP:')
+                        // An op plan the staff launched by silence leaves its receipt here too.
+                        && (!proposal.proposed_action.startsWith('APPROVE_OP:') || proposal.resolved_by === 'silence')
                         && !proposal.proposed_action.startsWith('OPPORTUNITY:')
                     ))
                     .sort((left, right) => (
@@ -2687,10 +2696,10 @@ export const warPhases: NamedPhase[] = [
         },
     },
     {
-        // LANE B Phase 2: bot factions decide their own opportunities synchronously
-        // — they never sit in the player review queue. Player faction's opportunities
-        // are protected at levels 0/1 and surfaced via the review step below.
-        // Levels 2/3 delegate these military decisions through the same bot path.
+        // LANE B Phase 2: every faction's staff decides its opportunities synchronously, a live
+        // player's included at every level (player-override model, §14.10a, H-15): silence is
+        // the staff's decision on the headless turn. Only an opportunity the staff could not
+        // apply stays pending and is surfaced via the review step below at levels 0/1.
         name: 'apply-bot-opportunity-decisions',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -2824,34 +2833,19 @@ export const warPhases: NamedPhase[] = [
                     ethnicCompositionByOsid,
                     osidPopulationMap
                 };
-                const playerFaction = context.state.meta.headless_scenario_auto_control
-                    ? null
-                    : context.state.meta.player_faction ?? null;
-                // Owner calibration directive 2026-11-05: live must reproduce headless. A
-                // staff-controlled player faction (autonomy >= 1) is in `factions` and gets its
-                // orders in the same replace-mode pass as bot staff; the former separate
-                // merge pass let last turn's orders beat fresh staff output and was the root
-                // of the live Goražde divergence. Only a manual (autonomy 0) player keeps the
-                // historical-operation assist below.
-                const playerAssistedExecutionActive =
-                    playerFaction != null && factions.includes(playerFaction);
+                // Player-override model (owner 2026-11-25, §14.10a): the player faction is in
+                // `factions` at every autonomy level and gets its orders in the same replace-mode
+                // pass as bot staff (owner calibration directive 2026-11-05; the former merge
+                // pass let last turn's orders beat fresh staff output and was the root of the live
+                // Goražde divergence). At Level 0 an attack order the President staged for one of
+                // their brigades before this Advance overrides the staff's order for that brigade
+                // only (ruling Q2). Attack orders are cleared by attack resolution every turn, so
+                // the only player-faction orders on the map here are ones they staged.
+                const stagedPresidentialAttackOrders = snapshotStagedPresidentialAttackOrders(context.state);
 
                 const botOrderDiagnostics = generateAllBotOrdersOsid(context.state, factions, osidCtx);
                 context.report.bot_order_diagnostics = createBotOrderDiagnosticsSnapshot(context.state, botOrderDiagnostics);
-
-                if (playerFaction && !playerAssistedExecutionActive && hasPlayerHistoricalOperationAssistWork(context.state)) {
-                    const assistDiagnostics = generateAllBotOrdersOsid(
-                        context.state,
-                        [playerFaction],
-                        osidCtx,
-                        {
-                            brigadeFilter: (formation) =>
-                                isPlayerHistoricalOperationAssistFormation(context.state, formation),
-                            mergeWithExistingOrders: true,
-                        },
-                    );
-                    context.report.player_historical_operation_assist = assistDiagnostics;
-                }
+                applyStagedPresidentialAttackOrders(context, stagedPresidentialAttackOrders);
 
                 // P3 mismatch rider, fix B: confirm this turn's launches against the orders just
                 // emitted. Only factions this pass emitted for (`factions`) are judged; a manual
@@ -3020,16 +3014,15 @@ export const warPhases: NamedPhase[] = [
         name: 'check-truce-break',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            const playerFaction = context.state.meta.player_faction ?? null;
+            const playerFaction = selectLivePlayerFaction(context.state);
             if (!playerFaction) return;
-            // Owner calibration directive 2026-11-05: staff-issued orders (autonomy >= 1) do not
-            // break truces in the player's name, exactly as headless (which never runs this).
-            if (selectBotBrigadeOrderFactions(context.state).includes(playerFaction)) return;
-            // Check if player has any attack orders targeting a truce-partner OSID
-            const orders = context.state.military.brigade_attack_orders;
-            if (!orders) return;
+            // Staff-issued orders never break truces in the player's name, exactly as headless
+            // (which never runs this; owner calibration directive 2026-11-05). Only the attack
+            // orders the President staged themselves (Level 0, the per-unit override) can.
+            const staged = stagedPresidentialAttackOrdersByContext.get(context) ?? [];
+            if (staged.length === 0) return;
             const pc = context.state.political.political_controllers ?? {};
-            for (const targetOsid of Object.values(orders)) {
+            for (const [, targetOsid] of staged) {
                 if (!targetOsid) continue;
                 const controller = pc[targetOsid];
                 if (!controller) continue;

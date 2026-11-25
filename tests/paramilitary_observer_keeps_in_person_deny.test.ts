@@ -217,9 +217,14 @@ describe('§6 D1 stage 2 A1: Observer\'s automatic card answer keeps the human\'
     });
 
     it('live desktop path: the card fires at t1 and waits on the manual desk; modal Always deny at t1 (on an older build\'s request), goals answered in person, Observer; the card is drained at t2 with the Always deny and no RS sweep follows', async () => {
-        const opening = (await startNewCampaign(process.cwd(), 'RS', 'apr_1992', 'historical')).state;
-        opening.meta.autonomy_level = 0;
-        expect(opening.paramilitary_policy).toBe('ask');
+        const birth = (await startNewCampaign(process.cwd(), 'RS', 'apr_1992', 'historical')).state;
+        birth.meta.autonomy_level = 0;
+        expect(birth.paramilitary_policy).toBe('ask');
+        // Goals answered in person at campaign birth (answer ahead of firing). Player-override model
+        // (§14.10a, 2026-11-25): an opening card left unanswered when its event fires (t1) is answered
+        // by silence as the bot's choice, so the in-person answer is given in its window, before t1.
+        // The §6 policy card is outside that rule and still waits on the manual desk below.
+        const opening = resolveDesktopEventDecision(birth, RS_GOALS_ID, 'all_six', process.cwd());
         const t1 = await advanceTurn(opening, process.cwd());
         expect(t1.error).toBeUndefined();
         expect(t1.state.meta.turn).toBe(1);
@@ -234,7 +239,9 @@ describe('§6 D1 stage 2 A1: Observer\'s automatic card answer keeps the human\'
         restoreLegacyRequest(t1.state);
 
         modalAlwaysDeny(t1.state);
-        const answered = resolveDesktopEventDecision(t1.state, RS_GOALS_ID, 'all_six', process.cwd());
+        const answered = t1.state;
+        expect((answered.military.event_decision_log ?? []).some((row) =>
+            row.event_id === RS_GOALS_ID && row.response_id === 'all_six' && row.decision_source === 'player')).toBe(true);
         expect(answered.military.enabled_event_ids ?? []).not.toContain(RS_CARD_ID);
         answered.meta.autonomy_level = 3;
 
