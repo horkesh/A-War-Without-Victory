@@ -438,6 +438,8 @@ function siegeLeaversReachMainBody(
  * - Otherwise: the municipalities where the side holds a supplied settlement in a body linked to the source
  *   (the body of its own settlements there, or a body next to the municipality's settlements). An empty set
  *   means no reachable destination, and the group stays.
+ * - A9 P0-B (D7): when the side holds no settlement in the municipality, any settlement it holds in a linked
+ *   body qualifies, supplied or not.
  * Bodies are built once per call of this builder; the caller builds it lazily, on the first pass-through.
  */
 export function buildPassThroughDestinationResolver(
@@ -486,8 +488,13 @@ export function buildPassThroughDestinationResolver(
         }
         const linked = linkedBodiesInMunicipality(body, inMun, neighbours);
         if (linked.size === 0) return allowed;
+        // A9 P0-B (SD13, 8-seat §6 ruling D7, 2026-11-25): when the side holds ZERO ground in the municipality,
+        // a destination in a linked body qualifies without the supply requirement (capacity still applies in
+        // the router). The step order runs after every control writer, so no group is moved onto ground that
+        // falls the same turn. The held-and-supplied `null` above is untouched.
+        const holdsGround = inMun.some((sid) => body.bodyOf.has(sid));
         for (const [sid, b] of body.bodyOf) {
-            if (!linked.has(b) || !supplied.has(sid)) continue;
+            if (!linked.has(b) || (holdsGround && !supplied.has(sid))) continue;
             const mun = munOf(sid);
             if (mun && mun !== munId) allowed.add(mun);
         }

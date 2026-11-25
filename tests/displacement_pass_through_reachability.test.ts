@@ -143,6 +143,31 @@ test('once the whole municipality is taken, the group moves to supplied ground n
     expect(g.displaced_in_by_faction.RBiH ?? 0).toBe(900 - moved);
 });
 
+test('P0-B (D7): with zero ground in the municipality, linked ground qualifies without supply', () => {
+    const state = baseState(30);
+    state.political.political_controllers = {
+        'op:gorazde:sopotnica': 'RS', 'op:gorazde:gorazde': 'RS', 'op:gorazde:kopaci': 'RS',
+        'op:zenica:zenica': 'RBiH', 'op:foca:foca': 'RS'
+    } as any;
+    const sup = (ids: string[]) => new Map<string, ReadonlySet<string>>([['RBiH', new Set(ids)]]);
+    const linked = [...pocketEdges, edge('op:gorazde:kopaci', 'op:zenica:zenica')];
+    // Zenica is linked but unsupplied: before P0-B the group stayed; now it may go there.
+    expect([...buildPassThroughDestinationResolver(state, linked, sup([]))('RBiH', 'gorazde')!]).toEqual(['zenica']);
+    // Not linked: still nothing, supplied or not.
+    expect([...buildPassThroughDestinationResolver(state, pocketEdges, sup(['op:zenica:zenica']))('RBiH', 'gorazde')!]).toEqual([]);
+});
+
+test('P0-B (D7): while the side still holds ground there, unsupplied linked ground does not qualify', () => {
+    const state = baseState(30);
+    state.political.political_controllers = {
+        'op:gorazde:sopotnica': 'RS', 'op:gorazde:gorazde': 'RBiH', 'op:gorazde:kopaci': 'RS',
+        'op:zenica:zenica': 'RBiH', 'op:foca:foca': 'RS'
+    } as any;
+    const sup = (ids: string[]) => new Map<string, ReadonlySet<string>>([['RBiH', new Set(ids)]]);
+    const linked = [...pocketEdges, edge('op:gorazde:kopaci', 'op:zenica:zenica')];
+    expect([...buildPassThroughDestinationResolver(state, linked, sup([]))('RBiH', 'gorazde')!]).toEqual([]);
+});
+
 test('the resolver: held and supplied stays (null); linked supplied ground is listed; unlinked is not', () => {
     const state = baseState(30);
     state.political.political_controllers = {
