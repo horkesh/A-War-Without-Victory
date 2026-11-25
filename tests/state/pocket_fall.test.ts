@@ -172,6 +172,22 @@ describe('P0-A: an enclave fall tests the link from the enclave, not the whole m
         expect(ds(w, 'gorazde').displaced_in).toBe(0);
         expect(ds(w, 'rogatica').displaced_in_by_faction?.RS).toBe(20000);
     });
+
+    it('Srebrenica-shaped: a listed enclave cell RS took earlier touches the Žepa pocket; the fall fires that turn', () => {
+        const w = world({
+            turn: 171,
+            controllers: { 'op:srebrenica:srebrenica_2': 'RS', 'op:srebrenica:luka_2': 'RS', 'op:rogatica:zepa_2': 'RBiH' },
+            extraEdges: [{ a: 'op:srebrenica:luka_2', b: 'op:rogatica:zepa_2' }],
+            disp: {
+                srebrenica: { original_population: 37000, displaced_out: 20000, lost_population: 1000, displaced_in: 9000, by_faction: { RBiH: 9000 } },
+                rogatica: { original_population: 21800 },
+            },
+        });
+        const report = run(w);
+        expect(report.same_body_moves).toHaveLength(0);
+        expect(report.firings.map((f) => f.mun_id)).toEqual(['srebrenica']);
+        expect(ds(w, 'rogatica').displaced_in).toBe(0);
+    });
 });
 
 describe('P0-A: assaulted enclave fall (Srebrenica-shaped)', () => {

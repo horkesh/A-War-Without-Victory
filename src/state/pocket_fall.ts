@@ -201,14 +201,17 @@ export function processPocketFalls(
             const sheltered = Math.max(0, Math.floor(entry.displaced_in_by_faction?.[side] ?? 0));
 
             // (c) the B2 resolver (with P0-B). A destination means a same-body move of the sheltered stock (D7).
-            // At a fall of one of the side's own enclaves, the link is tested from the enclave's own settlements
-            // (the ground the side held last), not from every settlement of a large municipality: measured on
-            // the 188w pair, Rogatica's RS-held cells touch the Goražde pocket and Srebrenica's touch Žepa, so the
-            // whole-municipality test found a "destination" in another besieged pocket across RS-held ground,
-            // which delayed Srebrenica's booking from t171 to t173 and kept Žepa from firing at all.
+            // At a fall of one of the side's own enclaves, the link is tested from the enclave ground the side
+            // still holds there, which by (a) is none: an enclave is a separate pocket, so no linked body is
+            // reachable and its people go to the main body or abroad (D4). Measured on the 188w pairs: testing
+            // from every settlement of the municipality (or from every listed enclave cell, some taken by RS in
+            // 1993) found a "destination" in another besieged pocket across RS-held ground (Srebrenica's cells
+            // touch Žepa, Rogatica's touch Goražde), which delayed Srebrenica's booking from t171 to t173 and
+            // kept Žepa from firing at all.
             resolver ??= buildPassThroughDestinationResolver(state, edges, suppliedByFaction);
             const enclaveSids = ownEnclaveSettlements(osidsInMun, side);
-            const reachable = resolver(side, munId, enclaveSids.length > 0 ? enclaveSids : undefined);
+            const heldEnclaveSids = enclaveSids.filter((sid) => pc[sid] === side);
+            const reachable = resolver(side, munId, enclaveSids.length > 0 ? heldEnclaveSids : undefined);
             if (reachable !== null && reachable.size > 0) {
                 if (sheltered <= 0) continue;
                 const moves = routeDisplacedWithCapacity(state, munId, side, sheltered, captor, reachable);
