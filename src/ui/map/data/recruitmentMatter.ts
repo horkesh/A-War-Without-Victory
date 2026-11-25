@@ -80,14 +80,9 @@ export const RECRUITMENT_MATTER_ID_PREFIX = 'recruitment:';
 export const RECRUITMENT_DECISION_MATTER_ID = 'recruitment:decision';
 export const RECRUITMENT_NOTICE_MATTER_ID = 'recruitment:notice';
 
-/**
- * Whether recruitment waits for the president. Never, since the player-override model (owner
- * 2026-11-25, Engine Invariants §14.10a): the staff raise the player's brigades at every autonomy
- * level (`selectAutomaticRecruitmentFactions`), so every level shows the notice with the
- * per-brigade hold, and the president's raise in the Recruit modal still comes first.
- */
-export function recruitmentStaysWithPresident(_autonomyLevel: number): boolean {
-  return false;
+/** Only autonomy 0 keeps recruitment with the president (Rulebook §10; `selectAutomaticRecruitmentFactions`). */
+export function recruitmentStaysWithPresident(autonomyLevel: number): boolean {
+  return autonomyLevel < 1;
 }
 
 export function isRecruitmentMatterId(id: string): boolean {

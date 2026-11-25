@@ -3024,10 +3024,10 @@ describe('pre-planned operations', () => {
             assert.equal(state.military.brigade_movement_orders?.[brigadeId], undefined);
         }
 
-        // A manual player faction is never implicitly reserved: the real prestage helper
-        // returns early for it, so this reservation must not appear either.
+        // Player-override model (§14.10a, 2026-11-25): the staff run the player faction at every
+        // autonomy level, so a Full Control player's queue is reserved exactly as a bot's.
         state.meta.player_faction = 'RBiH';
-        assert.deepEqual([...getQueuedDatedPrestageBrigadeIds(state)].sort(), []);
+        assert.deepEqual([...getQueuedDatedPrestageBrigadeIds(state)].sort(), [...arrived].sort());
         state.meta.player_faction = 'RS';
         assert.deepEqual([...getQueuedDatedPrestageBrigadeIds(state)].sort(), [...arrived].sort());
 
@@ -4042,9 +4042,11 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         assert.equal(support.location_osid, supportApproachOsid);
         assert.equal(state.political.political_controllers![objectiveOsid], 'RS');
 
+        // Player-override model (§14.10a, 2026-11-25): a Full Control RBiH player's queue is
+        // reserved as the staff reserve it with no player (it was skipped for a manual player).
         state.meta.player_faction = 'RBiH';
-        assert.ok(!getQueuedDatedPrestageBrigadeIds(state).has(brigadeId));
-        assert.ok(!getQueuedDatedPrestageBrigadeIds(state).has(supportBrigadeId));
+        assert.ok(getQueuedDatedPrestageBrigadeIds(state).has(brigadeId));
+        assert.ok(getQueuedDatedPrestageBrigadeIds(state).has(supportBrigadeId));
 
         state.meta.player_faction = 'RS';
         assert.ok(getQueuedDatedPrestageBrigadeIds(state).has(brigadeId));
@@ -4408,23 +4410,30 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         );
     });
 
-    it('generates no queued prestage orders for a selected RBiH player on the fresh fixture', () => {
+    // Amended 2026-11-25, player-override model (§14.10a, ruling Q2): prestage has no 1.0 surface,
+    // so a selected Full Control RBiH player's staff prestage exactly as with no player.
+    it('generates the same queued prestage orders for a selected RBiH player as with no player', () => {
         const { state, main, support } = makeQueuedHeadFixture([name, 'Operation Circle'], mainApproachOsid);
+        const { state: bot, main: botMain, support: botSupport } = makeQueuedHeadFixture([name, 'Operation Circle'], mainApproachOsid);
         state.meta.player_faction = 'RBiH' as FactionId;
 
-        assert.deepEqual([...getQueuedDatedPrestageBrigadeIds(state)].sort(), []);
+        assert.deepEqual(
+            [...getQueuedDatedPrestageBrigadeIds(state)].sort(),
+            [...getQueuedDatedPrestageBrigadeIds(bot)].sort(),
+        );
 
         prestageDeferredPrePlannedElites(state);
+        prestageDeferredPrePlannedElites(bot);
 
         for (const authoredId of [brigadeId, supportBrigadeId, ...circleBrigadeIds]) {
-            assert.equal(
+            assert.deepEqual(
                 state.military.brigade_movement_orders?.[authoredId],
-                undefined,
-                `${authoredId} must not be implicitly ordered for a selected player`,
+                bot.military.brigade_movement_orders?.[authoredId],
+                `${authoredId} is ordered for a selected player as for the staff with no player`,
             );
         }
-        assert.equal(main.location_osid, mainApproachOsid);
-        assert.equal(support.location_osid, supportStagingOsid);
+        assert.equal(main.location_osid, botMain.location_osid);
+        assert.equal(support.location_osid, botSupport.location_osid);
     });
 
     it('releases the 831st to the normal Osjecani march when the head leaves the queue', () => {

@@ -848,7 +848,10 @@ describe('strict null inventory progress', () => {
             // absent until first written (old saves load): DisplacementDomainState.moved_on_at_capture_by_people
             // (line 1, cumulative by people) and DisplacementState.unable_to_leave_by_side (line 2, this
             // week's stock). Nothing in the sim reads them. No new type escape. 617 -> 619.
-            optional_fields_game_state: 619,
+            // Player-override model PR-B (2026-11-25): +1 record-only optional field
+            // `PendingProposalReview.resolved_by` ('silence' receipt; never read by a sim decision,
+            // live-president only, absent on headless runs). No new type escape. 619 -> 620.
+            optional_fields_game_state: 620,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
@@ -879,13 +882,14 @@ describe('strict null inventory progress', () => {
         // ParamilitaryStandingOrderRecord.target_osid / decision, the union's discriminating markers).
         // 613 -> 617 / state 228 -> 229 / sim 375 -> 378.
         // Ledger lines 1-2: +2 state (moved_on_at_capture_by_people, unable_to_leave_by_side). 617 -> 619 / state 229 -> 231.
-        expect(current.optional_field_domains.total).toBe(619);
+        // Player-override model PR-B: +1 (PendingProposalReview.resolved_by). 619 -> 620.
+        expect(current.optional_field_domains.total).toBe(620);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
             sim: 378,
-            state: 231,
+            state: 232, // +1 PendingProposalReview.resolved_by (player-override model PR-B)
             ui_adapter: 0,
             unknown: 0,
         });

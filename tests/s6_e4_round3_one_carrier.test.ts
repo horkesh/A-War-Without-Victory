@@ -425,9 +425,14 @@ describe('§6 E4 round 3, Q3: Belgrade\'s break has one carrier', () => {
 
     it('a pending CG fallback cannot persist past its turn: it blocks the advance (modal gate); the break waits for the answer', () => {
         // §6 E3a2: the pointer exists only as the close-week fallback (RS's card never answered).
+        // Player-override model (§14.10a, 2026-11-25): a live silent seat is now answered at the
+        // close week, so the pointer is built here as an older save carries it (the authored-player
+        // headless lens still opens it), then the campaign is live again for the gate and break.
         const state = makeState({ turn: 120, player_faction: 'RS' });
         const neg = state.military.negotiation!;
+        state.meta.headless_scenario_auto_control = true;
         evaluatePeacePlans(state);
+        delete state.meta.headless_scenario_auto_control;
         expect(neg.pending_peace_plan?.plan_id).toBe('contact_group');
         const blocking = listBlockingPlayerDecisions(state as never, 'RS');
         expect(blocking.map((item) => [item.familyId, item.id, item.gatePolicy])).toContainEqual(['peace_plan', 'contact_group', 'modal_required']);
