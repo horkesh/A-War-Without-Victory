@@ -127,7 +127,7 @@ function applyCorpsDecisionToState(state: GameState, corpsId: string, decision: 
     // §14.10c: the President's order this turn and his corps hold outrank the AI commander
     // (inert without either, so bot and headless runs are unchanged).
     if (cc.player_ordered_stance == null) {
-        const faction = state.military.formations?.[corpsId]?.faction as FactionId | undefined;
+        const faction = state.military.formations?.[corpsId]?.faction;
         cc.stance = faction
             ? applyCorpsHoldToStance(state, faction, corpsId, derivedStance, state.meta?.turn ?? 0)
             : derivedStance;

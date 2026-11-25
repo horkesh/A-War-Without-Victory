@@ -391,8 +391,8 @@ export function recordLevel1StanceAnswerHold(
 ): boolean {
     if (!isLivePresident(state) || state.meta.autonomy_level !== 1) return false;
     if (!isCorpsStance(stance)) return false;
-    const faction = state.meta.player_faction as FactionId;
-    if (state.military.formations?.[corpsId]?.faction !== faction) return false;
+    const faction = state.military.formations?.[corpsId]?.faction;
+    if (!faction || faction !== state.meta.player_faction) return false;
     if (!state.military.corps_command?.[corpsId]) return false;
     const turn = state.meta.turn;
     const ms = ensureMatterState(state);
