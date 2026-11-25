@@ -86,9 +86,14 @@ interface CliOptions {
      * run with `meta.decision_mode = 'emergent'`, the setting the emergent 188w scenario adds
      * (`apr1992_definitive_188w_emergent_local.json` differs from the historical scenario only in it).
      * Needs `--event-policy bot_equivalent`, so the player answers as the emergent bot does. Unset keeps
-     * today's behaviour: headless historical, player mode from the event policy.
+     * today's behaviour: headless historical, player mode from the event policy (so `defer` and
+     * `staff_recommended` put the player in the desktop's default, emergent: a different war from the
+     * historical headless twin, never a parity run).
+     * `--decision-mode historical` (lane C s10, orchestrator ruling 2026-11-25): BOTH branches historical,
+     * with any event policy. This is how a hands-off `defer` (every decision left to silence) is a parity
+     * run. Before this it was accepted and ignored, so `defer` still ran the player emergent.
      */
-    decisionMode?: 'emergent';
+    decisionMode?: 'emergent' | 'historical';
     /** When set, write `<dir>/{headless,player}/final_save.json` so each branch can be scored
      *  per-OSID with `tools/compare_painted_vs_sim.cjs <dir>/<branch> --target <checkpoint>`. */
     finalSaveDir?: string;
@@ -353,7 +358,7 @@ function parseArgs(argv: string[]): CliOptions {
             const raw = values.get('--decision-mode');
             if (raw === undefined) return {};
             const mode = parseEnum(raw, ['historical', 'emergent'] as const, '--decision-mode');
-            if (mode === 'historical') return {};
+            if (mode === 'historical') return { decisionMode: 'historical' as const };
             if ((values.get('--event-policy') ?? 'defer') !== 'bot_equivalent') {
                 throw new Error('--decision-mode emergent needs --event-policy bot_equivalent');
             }
@@ -1094,8 +1099,8 @@ async function runComparison(baseDir: string, options: CliOptions) {
     // backward compatibility with existing artifacts.
     if (options.autonomyLevel !== 'production') playerState.meta.autonomy_level = options.autonomyLevel;
     const playerAutonomyLevel = playerState.meta.autonomy_level;
-    playerState.meta.decision_mode = options.decisionMode === 'emergent'
-        ? 'emergent'
+    playerState.meta.decision_mode = options.decisionMode != null
+        ? options.decisionMode
         : options.eventPolicy === 'historical_default' || options.eventPolicy === 'bot_equivalent'
             ? 'historical'
             : 'emergent';

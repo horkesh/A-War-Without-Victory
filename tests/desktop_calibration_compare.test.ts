@@ -206,6 +206,22 @@ describe('desktop calibration comparison provenance', () => {
     });
   });
 
+  // Lane C s10 (orchestrator ruling 2026-11-25): `--decision-mode historical` was accepted and ignored, so a
+  // hands-off `defer` run still put the player in emergent against a historical headless twin (a different war).
+  it('honours --decision-mode historical for a defer comparison (hands-off silence is a parity run)', () => {
+    const result = runComparison([
+      '--turns', '0', '--faction', 'RS', '--event-policy', 'defer', '--paramilitary-policy', 'defer',
+      '--historical-operation-policy', 'accept', '--decision-mode', 'historical',
+    ]);
+
+    expect(result.status, result.stderr).toBe(0);
+    const output = JSON.parse(result.stdout);
+    expect(output.player_policy).toMatchObject({
+      event_decisions: 'defer',
+      non_player_event_mode: 'historical',
+    });
+  });
+
   it('distinguishes standing same-turn authorization from between-turn request approval', () => {
     const result = runZeroTurnComparison('historical_default', 'standing_allow');
 

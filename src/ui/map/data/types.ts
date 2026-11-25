@@ -738,6 +738,14 @@ export interface ParamilitaryUnrequestedView {
      * stage-2 rule sweeps under, so the save comes from the stage-1 rule and the receipt keeps the stage-1 cause.
      */
     cause?: 'standing_order' | 'standing_order_automatic' | 'neutral' | 'historical_default_staff';
+    /**
+     * H-17 (§6 HOW ruling, lane C s8, G5): display-only attribution of a war-crime row. `'staff_default'` when the act ran
+     * under the side's standing default with no order of the player's: the staff answered or acted for the side (silence,
+     * or Observer's automatic answer). The cost stays booked to the side either way (command responsibility; the penalty is
+     * keyed on the seat, never exempted). The copy names the side's forces and says the refusal was available; it never
+     * says the player ordered the act.
+     */
+    authored_by?: 'staff_default';
 }
 
 /**
@@ -755,6 +763,14 @@ export interface MinorityPolicyReceiptView {
     automatic: boolean;
     /** True when the policy's first wave was recorded as a war crime. */
     warCrime: boolean;
+    /**
+     * H-17 (§6 HOW ruling, lane C s8, G5): display-only attribution of a war-crime row. `'staff_default'` when the act ran
+     * under the side's standing default with no order of the player's: the staff answered or acted for the side (silence,
+     * or Observer's automatic answer). The cost stays booked to the side either way (command responsibility; the penalty is
+     * keyed on the seat, never exempted). The copy names the side's forces and says the refusal was available; it never
+     * says the player ordered the act.
+     */
+    authored_by?: 'staff_default';
 }
 
 export interface OfficerDecisionRecordView {

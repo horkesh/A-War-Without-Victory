@@ -18,6 +18,10 @@
  * Round 4a (b), 2026-11-22: the RS card fires at t1 (after the goals card, no longer enabled by its answer), so the legacy
  * in-person Always deny now meets the card in the same week: the fire-time case fires it at t1, the drain case fires it at t1 at
  * Full Control and drains it at t2, and the live card waits on the manual desk from t1.
+ *
+ * Player-override model (2026-11-25, §6 HOW ruling lane C s8): in the live desktop path an unanswered card no longer waits;
+ * the staff answer it in its fire turn, so the live case now gives the in-person order before the card (the policy-only
+ * opener) and pins that silence answers the card with it (F1-B).
  */
 
 import { describe, expect, it } from 'vitest';
@@ -36,6 +40,7 @@ import type { EventDefinition } from '../src/sim/events/event_types.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
 import type { OperationalToCanonicalReverseMap } from '../src/data/operational_data.js';
 import { advanceTurn, resolveDesktopEventDecision, startNewCampaign } from '../src/desktop/desktop_sim.js';
+import { resolveParamilitaryReviewRequests } from '../src/desktop/paramilitary_review_ipc.js';
 
 const CATALOG = loadEventDefinitions(0);
 const RS_CARD_ID = 'rs_paramilitary_policy_1992';
@@ -136,7 +141,12 @@ function restoreLegacyRequest(state: GameState): void {
  */
 function inPersonDenyBeforeTheCard(): GameState {
     const state = rsHumanState();
-    expect(rsOutcome(state)).toEqual([0, 0]);
+    // Player-override model (H-14, 2026-11-25): before the card applies, the Full Control side with no order sends the
+    // bot's sweep, as headless does that week, and no request (the T3 gate). Checked on copies (was: nothing sent).
+    const headless = structuredClone(state);
+    headless.meta.headless_scenario_auto_control = true;
+    expect(rsOutcome(structuredClone(state))).toEqual([1, 0]);
+    expect(rsOutcome(headless)).toEqual([1, 0]);
     restoreLegacyRequest(state);
     modalAlwaysDeny(state);
     expect(state.paramilitary_policy).toBe('always_deny');
@@ -216,42 +226,32 @@ describe('§6 D1 stage 2 A1: Observer\'s automatic card answer keeps the human\'
         expect(rsOutcome(state)).toEqual([1, 0]);
     });
 
-    it('live desktop path: the card fires at t1 and waits on the manual desk; modal Always deny at t1 (on an older build\'s request), goals answered in person, Observer; the card is drained at t2 with the Always deny and no RS sweep follows', async () => {
+    // Player-override model (§6 HOW ruling lane C s8, 2026-11-25): an RS card left unanswered when it fires is answered by
+    // the staff (silence) in its fire turn, so it no longer waits on the manual desk. The in-person order is now given the
+    // way a new campaign gives it before the card: the policy-only opener at Full Control. Silence then answers the card with
+    // that order (F1-B: an explicit act outranks silence), and Observer keeps it.
+    it('live desktop path: a standing Always deny given in person at Full Control before the card; the card fires at t1 and silence answers it with the Always deny; Observer from t2; no RS sweep', async () => {
         const birth = (await startNewCampaign(process.cwd(), 'RS', 'apr_1992', 'historical')).state;
         birth.meta.autonomy_level = 0;
         expect(birth.paramilitary_policy).toBe('ask');
-        // Goals answered in person at campaign birth (answer ahead of firing). Player-override model
-        // (§14.10a, 2026-11-25): an opening card left unanswered when its event fires (t1) is answered
-        // by silence as the bot's choice, so the in-person answer is given in its window, before t1.
-        // The §6 policy card is outside that rule and still waits on the manual desk below.
         const opening = resolveDesktopEventDecision(birth, RS_GOALS_ID, 'all_six', process.cwd());
+        expect(resolveParamilitaryReviewRequests(opening, { decisions: [], policy: 'always_deny' })).toMatchObject({ ok: true });
+        expect(opening.paramilitary_policy).toBe('always_deny');
+
         const t1 = await advanceTurn(opening, process.cwd());
         expect(t1.error).toBeUndefined();
         expect(t1.state.meta.turn).toBe(1);
-        // §6 T3: no request reaches the manual RS player before the RS card applies.
-        expect((t1.state.pending_paramilitary_requests ?? []).filter((request) => request.faction === 'RS')).toEqual([]);
-        // Round 4a (b): the card fired at t1 and waits, unanswered, on the manual desk; nothing was sent in the side's name.
         expect(t1.state.military.event_last_fired_turn?.[RS_CARD_ID]).toBe(1);
-        expect((t1.state.military.pending_event_decisions ?? []).map((pending) => pending.event_id)).toContain(RS_CARD_ID);
-        expect(cardDecision(t1.state)).toBeUndefined();
-        expect((t1.state.political.control_events ?? [])
-            .filter((event) => event.mechanism === 'paramilitary' && event.to === 'RS')).toEqual([]);
-        restoreLegacyRequest(t1.state);
+        expect((t1.state.military.pending_event_decisions ?? []).map((pending) => pending.event_id)).not.toContain(RS_CARD_ID);
+        expect(cardDecision(t1.state)).toMatchObject({ response_id: 'always_deny', decision_source: 'bot_ai_default', faction: 'RS' });
+        expect(t1.state.military.event_flags?.rs_paramilitary_refused).toBe(true);
+        expect(t1.state.military.event_flags).not.toHaveProperty('rs_paramilitary_authorized');
+        expect(t1.state.paramilitary_policy).toBe('always_deny');
 
-        modalAlwaysDeny(t1.state);
-        const answered = t1.state;
-        expect((answered.military.event_decision_log ?? []).some((row) =>
-            row.event_id === RS_GOALS_ID && row.response_id === 'all_six' && row.decision_source === 'player')).toBe(true);
-        expect(answered.military.enabled_event_ids ?? []).not.toContain(RS_CARD_ID);
-        answered.meta.autonomy_level = 3;
-
-        const t2 = await advanceTurn(answered, process.cwd());
+        t1.state.meta.autonomy_level = 3;
+        const t2 = await advanceTurn(t1.state, process.cwd());
         expect(t2.error).toBeUndefined();
         expect(t2.state.meta.turn).toBe(2);
-        expect(cardDecision(t2.state)).toMatchObject({ response_id: 'always_deny', decision_source: 'bot_ai_default', faction: 'RS' });
-        expect(t2.state.military.event_flags?.rs_paramilitary_refused).toBe(true);
-        expect(t2.state.military.event_flags).not.toHaveProperty('rs_paramilitary_authorized');
-        expect(t2.state.paramilitary_policy).toBe('always_deny');
         expect(resolveNonManualParamilitaryPolicy(t2.state, 'RS', CATALOG)).toBe('always_deny');
         const rsSweeps = (t2.state.political.control_events ?? [])
             .filter((event) => event.mechanism === 'paramilitary' && event.to === 'RS');

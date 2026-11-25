@@ -65,8 +65,9 @@ export const BILATERAL_HRHB_FLEE_ABROAD = 0.35;
 // once, when the open bilateral war has begun, a timer for the other community in every OSID it
 // holds inside the municipalities where the record finds the policy applied
 // (POLICY_EXPULSION_SCOPE). A bot applies it; a human-controlled faction's staff apply it as the
-// side's historical default once the halt card's decision is on record, and the player's own
-// halt order refuses it (RB5, owner rule 2026-11-22). Each timer fires one bounded wave and never drains further.
+// side's historical default on the turn a bot would (silence is the default: H-20, player-override
+// model 2026-11-25), and only the player's own halt order refuses it (RB5, owner rule 2026-11-22).
+// Each timer fires one bounded wave and never drains further.
 // Control is never changed: an OSID the faction no longer holds is not seeded, and a
 // recapture before the wave clears the timer.
 export interface PolicyExpulsionScopeEntry {
@@ -150,9 +151,11 @@ function getPolicyExpulsionEntry(faction: FactionId, munId: MunicipalityId): Pol
 /**
  * The human's halt-card decision for the faction: 'none' while no decision is on record (the card
  * has not fired, or it is unanswered), 'refused' when the player ordered a halt, 'default' when the
- * historical default stands (answered in person, or by Observer's automatic answer). Fails closed:
- * the halt flag, or any player row for the card other than the default (a malformed row included),
- * is a refusal; an automatic (non-player) row is never one.
+ * historical default stands (answered in person, by Observer's automatic answer, or by the staff
+ * when the player left the card unanswered). Fails closed (RB5 item 1): the halt flag, or any player
+ * row for the card other than the default (a malformed row included), is a refusal; an automatic
+ * (non-player) row is never one. A filed, unapplied halt is not a decision: a player row filed
+ * before the card fired (answer-ahead is disabled for this card, so such a row never applied).
  */
 function minorityPolicyCardDecision(state: GameState, faction: FactionId): 'none' | 'default' | 'refused' {
     const cardId = MINORITY_POLICY_CARD_ID_BY_FACTION[faction];
@@ -160,10 +163,19 @@ function minorityPolicyCardDecision(state: GameState, faction: FactionId): 'none
     if (!cardId || !haltFlag) return 'none';
     const flags = state.military?.event_flags ?? {};
     if (flags[haltFlag] !== undefined && flags[haltFlag] !== false) return 'refused';
+    const military = state.military;
+    const fired = (military?.fired_event_ids ?? []).includes(cardId) || (military?.event_fire_counts?.[cardId] ?? 0) > 0;
+    const firedTurnRaw = military?.event_last_fired_turn?.[cardId];
+    const firedTurn = typeof firedTurnRaw === 'number' && Number.isFinite(firedTurnRaw) ? firedTurnRaw : null;
     let onRecord = false;
-    for (const row of state.military?.event_decision_log ?? []) {
+    for (const row of military?.event_decision_log ?? []) {
         if (row?.event_id !== cardId) continue;
-        if (row.decision_source === 'player' && row.response_id !== MINORITY_POLICY_DEFAULT_RESPONSE_ID) return 'refused';
+        if (row.decision_source === 'player' && row.response_id !== MINORITY_POLICY_DEFAULT_RESPONSE_ID) {
+            const rowTurn = Number(row.turn);
+            const filedUnapplied = !fired || (firedTurn !== null && Number.isFinite(rowTurn) && rowTurn < firedTurn);
+            if (filedUnapplied) continue;
+            return 'refused';
+        }
         onRecord = true;
     }
     return onRecord ? 'default' : 'none';
@@ -172,14 +184,23 @@ function minorityPolicyCardDecision(state: GameState, faction: FactionId): 'none
 /**
  * True when the faction follows an expulsion policy: BOT_MINORITY_EXPULSION_POLICY records one,
  * and either a bot holds the side (no player_faction, or the headless harness), or the side is
- * human-controlled at any autonomy level, the halt card's decision is on record and the player did
- * not order a halt. The human check is inlined: the state layer does not import sim/combat.
+ * human-controlled at any autonomy level and the player's own halt is not on record.
+ *
+ * H-20 (player-override model, owner 2026-11-25 "There should be no drift between live and headless
+ * games"; §6 HOW ruling, lane C s8; RB5 9/9 as the broader panel of record for the HOW; orchestrator
+ * settlement 2026-11-25): for a human side the read is `!== 'refused'`. Silence ('none') and the
+ * default both apply the side's historical default on the turn headless applies it; only the
+ * player's halt refuses it. This is the state-layer instance of the override rule
+ * (`staffChoiceUnlessExplicit`, src/sim/player_override.ts), written inline because the state layer
+ * does not import sim code. The halt outranks and persists (G1): it is a saved flag and log row,
+ * level-free, never clamped, and it also retires a policy wave seeded before it was on record
+ * (`processDisplacementTakeover`).
  */
 export function hasMinorityExpulsionPolicy(state: GameState, faction: FactionId): boolean {
     if (BOT_MINORITY_EXPULSION_POLICY[faction] !== true) return false;
     const humanControlled = state.meta.player_faction === faction && state.meta.headless_scenario_auto_control !== true;
     if (!humanControlled) return true;
-    return minorityPolicyCardDecision(state, faction) === 'default';
+    return minorityPolicyCardDecision(state, faction) !== 'refused';
 }
 
 /** Krajina Bosniaks: ~55% ended abroad, largely via ICRC/UNHCR convoys to Croatia (Karlovac transit camp).
@@ -1009,7 +1030,7 @@ export function processDisplacementTakeover(
     //     when RBiH and HRHB are allied, so it never seeds this pair. Once the open bilateral
     //     war has begun (rbih_hrhb_state.war_started_turn) and while the pair is at war, a
     //     faction with an expulsion policy (hasMinorityExpulsionPolicy: a bot, or a human side
-    //     whose halt-card decision is on record and is not a halt) seeds (once per faction) the
+    //     whose player has not ordered the halt) seeds (once per faction) the
     //     other community in every OSID it holds inside its POLICY_EXPULSION_SCOPE municipalities.
     //     Wave B timers start POLICY_WAVE_B_DELAY_TURNS later.
     const bilateralWarStarted = typeof state.political.rbih_hrhb_state?.war_started_turn === 'number';
@@ -1132,6 +1153,15 @@ export function processDisplacementTakeover(
         // RF-5B: a policy wave belongs to the faction whose policy it is. If that faction no
         // longer holds the OSID (e.g. RS took it), the wave never fires and books nothing.
         if (timer.cause === 'policy_expulsion' && currentController !== timer.to_faction) {
+            retireTimer(state, timerMap, timerKey, currentTurn, currentController);
+            continue;
+        }
+        // H-20 (G1): the player's own halt outranks the policy and persists. A policy wave of a human
+        // side that has not fired yet never fires once the halt is on record (seeded before the halt
+        // only when the card came after the seed: an old save, or a turn whose decision cap held the
+        // card back). A bot, headless and a hands-off side never have a halt, so nothing changes there.
+        if (timer.cause === 'policy_expulsion' && timer.matured_turn === undefined
+            && !hasMinorityExpulsionPolicy(state, timer.to_faction)) {
             retireTimer(state, timerMap, timerKey, currentTurn, currentController);
             continue;
         }

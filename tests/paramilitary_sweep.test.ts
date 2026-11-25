@@ -298,15 +298,22 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const beforePolicy = detectParamilitaryTargets(state, edges, reverseMap, undefined);
+            // The held passes run on copies: while the gate holds, a side with no order sends the bot's sweep (the
+            // player-override model, H-14: as headless does that week), which would take the pocket in the copy.
+            const held = structuredClone(state);
+            const beforePolicy = detectParamilitaryTargets(held, edges, reverseMap, undefined);
 
             expect(beforePolicy.pending_player_requests).toBe(0);
-            expect(state.pending_paramilitary_requests ?? []).toHaveLength(0);
+            expect(held.pending_paramilitary_requests ?? []).toHaveLength(0);
+            expect(beforePolicy.spawned.filter((spawn) => spawn.faction === 'RS')).toHaveLength(1);
 
-            // §6 design T3: a receipt with the card unfired (an answer filed ahead) does not release.
-            state.military.event_decision_log = [{ event_id: 'rs_paramilitary_policy_1992', response_id: 'ask' }] as any;
-            const filedOnly = detectParamilitaryTargets(state, edges, reverseMap, undefined);
+            // §6 design T3: a receipt with the card unfired (an answer filed ahead) does not release. The filed Review
+            // each is the player's own choice, so while the gate holds nothing is sent either (no request may be made).
+            const filed = structuredClone(state);
+            filed.military.event_decision_log = [{ event_id: 'rs_paramilitary_policy_1992', response_id: 'ask', decision_source: 'player', turn: 0 }] as any;
+            const filedOnly = detectParamilitaryTargets(filed, edges, reverseMap, undefined);
             expect(filedOnly.pending_player_requests).toBe(0);
+            expect(filedOnly.spawned.filter((spawn) => spawn.faction === 'RS')).toHaveLength(0);
 
             state.military.event_decision_log = [];
             withAppliedPolicyCard(state, 'ask');
@@ -647,10 +654,20 @@ describe('paramilitary_sweep', () => {
             }));
 
             const first = detectParamilitaryTargets(state, edges, reverseMap, undefined);
-            const second = detectParamilitaryTargets(state, edges, reverseMap, undefined);
-
             expect(first.pending_player_requests).toBe(PARAMILITARY_MAX_REAR_DEPLOYMENTS_PER_FACTION_TURN);
-            expect(second.pending_player_requests).toBe(0);
+            expect(new Set(state.pending_paramilitary_requests?.map((request) => request.target_osid.split(':')[1])).size)
+                .toBe(PARAMILITARY_MAX_REAR_DEPLOYMENTS_PER_FACTION_TURN);
+
+            // Re-entry is the next Advance (detect runs once per turn). H-14 (player-override model): the requests the player
+            // left undecided resolve as the staff's choice, the bot's order under the applied Review each (none sent, §2),
+            // with a receipt and no player history; the turn's fresh requests keep the one-per-municipality cap.
+            state.meta.turn = 6;
+            const second = detectParamilitaryTargets(state, edges, reverseMap, undefined);
+            expect(second.spawned.filter((spawn) => spawn.faction === 'RS')).toHaveLength(0);
+            expect(state.paramilitary_decision_history ?? []).toEqual([]);
+            expect((state.meta.proposal_decision_history ?? []).filter((row) => row.resolved_by === 'silence'))
+                .toHaveLength(PARAMILITARY_MAX_REAR_DEPLOYMENTS_PER_FACTION_TURN);
+            expect(second.pending_player_requests).toBe(PARAMILITARY_MAX_REAR_DEPLOYMENTS_PER_FACTION_TURN);
             expect(state.pending_paramilitary_requests).toHaveLength(
                 PARAMILITARY_MAX_REAR_DEPLOYMENTS_PER_FACTION_TURN
             );

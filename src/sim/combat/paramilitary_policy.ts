@@ -1,17 +1,22 @@
 /**
- * Paramilitary standing policy for every non-manual rear-pocket spawn.
+ * Paramilitary standing policy for every rear-pocket spawn sent in a side's name.
  *
- * §6 D1 stage 2, integrated ruling 2026-11-18 (§1, §2) with round-2 amendments A1 and A3, which
- * bind over §1. One pure resolver; `detectParamilitaryTargets` calls it once per faction per turn,
- * after the manual player's pending skip and before any candidate, so it gates every spawn that
- * is not the manual (autonomy 0) player's own request path. That path is untouched.
+ * §6 D1 stage 2, integrated ruling 2026-11-18 (§1, §2) with round-2 amendments A1 and A3, under the
+ * player-override model (owner 2026-11-25, "There should be no drift between live and headless
+ * games"; §6 HOW ruling, lane C s8, H-14 and H-21 with guards G1-G5). `detectParamilitaryTargets`
+ * calls `resolveNonManualParamilitaryPolicy` once per faction per turn for every side that is not
+ * the manual (autonomy 0) player's, and `resolveManualParamilitaryOrder` for the manual player's.
  *
  * Decision table:
  *
  * | faction | input | result |
  * |---|---|---|
- * | human-controlled (Assisted, Delegated, Observer) | the human's standing order `state.paramilitary_policy` for this faction is Always allow | allow |
- * | | Always deny, `ask` (Review each deployment), unanswered, or another side's order | deny |
+ * | human-controlled, any level | the player's own explicit refusal on record (G1: never lifted by the cap or by another side's newer decision) | deny |
+ * | | the player's own standing order Always allow in force (`humanStandingParamilitaryOrder`) | allow |
+ * | Assisted, Delegated, Observer | anything else: unanswered, Review each (no surface to ask at these levels), an allow the cap clamps | the bot's order, below |
+ * | Full Control | Review each chosen by the player | requests (`detectParamilitaryTargets`) |
+ * | | the request gate holds (card not applied): Review each | none (no request before the card applies) |
+ * | | anything else (unanswered) | the bot's order, below, on the headless clock |
  * | bot (not human-controlled) | the decided card flag `event_flags.<faction>_paramilitary_policy` | that order; `ask` denies (§2) |
  * | | undecided, card in the catalog | the card's historical default, read through `selectAIDefaultResponse` |
  * | | undecided, the faction's card missing from a supplied catalog (start-week filter) | deny (never read as "no card") |
@@ -21,18 +26,25 @@
  * `ask` with no human asking denies (§2, unanimous): it would otherwise buy Always allow's sweeps
  * at Review's price and log a review that never happened.
  *
+ * Silence is the bot's choice through the same function the bot path calls (`botParamilitaryPolicy`),
+ * so a hands-off side sends the sweeps headless sends, on the same turn, through the same candidate
+ * loop (G4) and at the same cost (G5). An explicit act is the player's own: their answer to the
+ * side's card (`decision_source === 'player'`, filed ahead or applied), a standing order given in
+ * the review modal, or requests decided there one by one. A bot or automatic answer (Observer, or the
+ * staff by silence) is never one.
+ *
  * At Observer the card's automatic answer writes the human's order on its fire turn (the
- * player-faction mirror in `applyDefinitionFlags`), so the side follows the historical policy from
- * then on and its acts are charged; before that answer it sends none (A1). An Always allow or
- * Always deny the human already gave in person in the review modal is kept: the automatic answer
- * never replaces it (`hasInPersonParamilitaryStandingOrder`).
+ * player-faction mirror in `applyDefinitionFlags`); an Always allow or Always deny the human already
+ * gave in person in the review modal is kept: the automatic answer never replaces it
+ * (`hasInPersonParamilitaryStandingOrder`).
  *
  * Pure and deterministic: reads persisted state and the loader-sorted catalog; no RNG, no clock,
  * no writes. No new state field and no migration.
  */
 
-import type { FactionId, GameState } from '../../state/game_state.js';
+import { isParamilitaryStandingOrderRecord, type FactionId, type GameState } from '../../state/game_state.js';
 import type { EventDefinition } from '../events/event_types.js';
+import { staffChoiceUnlessExplicit } from '../player_override.js';
 import { selectAIDefaultResponse } from '../events/ai_default_response.js';
 import {
     isParamilitaryPolicy,
@@ -155,9 +167,77 @@ export function humanStandingParamilitaryOrder(state: GameState, faction: Factio
     return order;
 }
 
+/** always_deny < ask < always_allow: on a tie between two own acts of the same turn the refusal wins (G1, fail closed). */
+const OWN_ACT_TIE_RANK: Readonly<Record<ParamilitaryPolicy, number>> = { always_deny: 0, ask: 1, always_allow: 2 };
+
+/**
+ * The player's newest own explicit paramilitary act for `faction`, as the order it gives, or null when none is on
+ * record (§6 HOW ruling, lane C s8: the explicit acts). Read from persisted records only, never from the global
+ * `paramilitary_policy` field, so neither M's cap nor a newer decision for another side can hide it:
+ * - the player's own answer to the side's policy card (`event_decision_log`, `decision_source === 'player'`), filed
+ *   ahead or applied: its response id is the order it writes (pinned by tests/paramilitary_receipt_cause.test.ts);
+ * - a standing order given in the review modal (`paramilitary_decision_history`, `kind: 'standing_order'`);
+ * - a request decided there one by one: Allow is a choice made under Review each, so it reads `ask`; Deny and Regular
+ *   forces refuse the sweep, so they read as a refusal.
+ * A bot or automatic answer (Observer, the staff by silence) is never an explicit act. A malformed row reads as a
+ * refusal. Newest by turn; on a tie the refusal wins, then Review each.
+ */
+export function newestOwnParamilitaryAct(state: GameState, faction: FactionId): ParamilitaryPolicy | null {
+    let newestTurn = Number.NEGATIVE_INFINITY;
+    let newestOrder: ParamilitaryPolicy | null = null;
+    const consider = (rawTurn: unknown, order: ParamilitaryPolicy): void => {
+        const value = Number(rawTurn);
+        const turn = Number.isFinite(value) ? value : Number.NEGATIVE_INFINITY;
+        if (newestOrder === null || turn > newestTurn
+            || (turn === newestTurn && OWN_ACT_TIE_RANK[order] < OWN_ACT_TIE_RANK[newestOrder])) {
+            newestTurn = turn;
+            newestOrder = order;
+        }
+    };
+    const ownCardId = PARAMILITARY_POLICY_CARD_ID_BY_FACTION[faction] ?? null;
+    if (ownCardId) {
+        for (const entry of state.military?.event_decision_log ?? []) {
+            if (entry?.event_id !== ownCardId || entry.decision_source !== 'player') continue;
+            consider(entry.turn, isParamilitaryPolicy(entry.response_id) ? entry.response_id : 'always_deny');
+        }
+    }
+    const history = Array.isArray(state.paramilitary_decision_history) ? state.paramilitary_decision_history : [];
+    for (const record of history) {
+        if (!record || record.faction !== faction) continue;
+        if (isParamilitaryStandingOrderRecord(record)) {
+            consider(record.turn, isParamilitaryPolicy(record.order) ? record.order : 'always_deny');
+        } else {
+            consider(record.turn, (record as { decision?: unknown }).decision === 'allow' ? 'ask' : 'always_deny');
+        }
+    }
+    return newestOrder;
+}
+
+/**
+ * The player's explicit paramilitary order for `faction`: `always_deny`, `always_allow`, `ask` (Review each), or null
+ * when the player has given none (silence: the staff apply the bot's order). Guard G1 (§6 HOW ruling, binding): an
+ * explicit refusal is durable across turns, levels, save/load and faction switches, and is never clamped. So a
+ * refusal is read from the own records (`newestOwnParamilitaryAct`) as well as from the standing order in force;
+ * M's cap and a newer decision for another side can only downgrade an Always allow (to silence), never turn a
+ * refusal into `ask` and so into the bot's allow.
+ */
+export function explicitParamilitaryOrder(state: GameState, faction: FactionId): ParamilitaryPolicy | null {
+    const standing = humanStandingParamilitaryOrder(state, faction);
+    if (standing === 'always_deny') return 'always_deny';
+    const newest = newestOwnParamilitaryAct(state, faction);
+    if (newest === 'always_deny') return 'always_deny';
+    if (standing === 'always_allow') return 'always_allow';
+    return newest === 'ask' ? 'ask' : null;
+}
+
 /**
  * Whether a non-manual faction's staff or bot may send rear-pocket paramilitaries this turn.
- * The manual (autonomy 0) player's request path never reaches here.
+ * The manual (autonomy 0) player's request path never reaches here (`resolveManualParamilitaryOrder`).
+ *
+ * H-21 (§6 HOW ruling, lane C s8): a human side's staff at Assisted, Delegated and Observer follow the player's
+ * explicit Always allow or refusal; otherwise (unanswered, or Review each, which has no surface at these levels)
+ * they apply the bot's order, through the same function the bot path calls, on the headless clock. This also covers
+ * a side with no policy card (HRHB), which earlier had its own branch (round 4s).
  */
 export function resolveNonManualParamilitaryPolicy(
     state: GameState,
@@ -165,36 +245,37 @@ export function resolveNonManualParamilitaryPolicy(
     catalog: readonly EventDefinition[] | undefined,
 ): NonManualParamilitaryDecision {
     if (isHumanControlledFaction(state, faction)) {
-        if (followsNoCardHistoricalDefault(state, faction)) {
-            // Owner rule 2026-11-22 (§6 round 4s H1 + P1): a side with no policy card has no pending decision,
-            // so until the player decides for it, its staff apply the bot's historical default.
-            return botParamilitaryPolicy(state, faction, catalog);
-        }
-        // A1: the human's current standing order decides at Assisted, Delegated and Observer;
-        // unanswered or `ask` sends none.
-        return humanStandingParamilitaryOrder(state, faction) === 'always_allow' ? 'always_allow' : 'always_deny';
+        const explicit = explicitParamilitaryOrder(state, faction);
+        const order = explicit === 'always_allow' || explicit === 'always_deny' ? explicit : null;
+        return staffChoiceUnlessExplicit(order, () => botParamilitaryPolicy(state, faction, catalog));
     }
     return botParamilitaryPolicy(state, faction, catalog);
 }
 
 /**
- * Whether a human side's staff apply the bot's historical default (§6 D1 stage 2 round 4s, under the owner rule
- * of 2026-11-22: staff playing a human faction apply the headless default; the player's own decision refuses or
- * changes it). True only when the side has no registered policy card (keyed on the registry, never on a faction
- * name, so a card authored later moves that side to A1 by itself) AND no paramilitary decision of the player's for
- * it is on record at all. Ruling P1 (G1, fail closed): any own record ends the default for good, even one that a
- * newer decision for another side outranks; `humanStandingParamilitaryOrder` then decides, unchanged. Every record
- * in `paramilitary_decision_history` is the human's own act (its only writer is the manual player's
- * `resolvePlayerParamilitaryDecisions`). The migration default `ask` with no record is not a decision.
+ * The order the manual (Full Control) player's side follows this turn in `detectParamilitaryTargets` (H-14, §6 HOW
+ * ruling, lane C s8). Full Control still surfaces the policy card, the review modal and, under Review each, every
+ * request; silence is the bot's order, sent through the same candidate loop as a bot's (G4):
+ * - an explicit refusal (G1) denies; an explicit Always allow allows;
+ * - Review each (`ask`) chosen by the player makes requests, except while the request gate holds (the side's card
+ *   has not applied an answer, §6 T3), when no request may be made and so none is sent;
+ * - otherwise (the player gave no order) the staff apply the bot's order, as headless does in the same week.
  */
-export function followsNoCardHistoricalDefault(state: GameState, faction: FactionId): boolean {
-    if (PARAMILITARY_POLICY_CARD_ID_BY_FACTION[faction] !== undefined) return false;
-    const history = Array.isArray(state.paramilitary_decision_history) ? state.paramilitary_decision_history : [];
-    return !history.some((record) => record?.faction === faction);
+export function resolveManualParamilitaryOrder(
+    state: GameState,
+    faction: FactionId,
+    catalog: readonly EventDefinition[] | undefined,
+    requestGateHolds: boolean,
+): ParamilitaryPolicy {
+    const explicit = explicitParamilitaryOrder(state, faction);
+    if (explicit === 'always_deny') return 'always_deny';
+    if (explicit === 'ask') return requestGateHolds ? 'always_deny' : 'ask';
+    if (explicit === 'always_allow' && !requestGateHolds) return 'always_allow';
+    return botParamilitaryPolicy(state, faction, catalog);
 }
 
 /** The bot's order: the decided card flag, else the card's historical default read from the event data. */
-function botParamilitaryPolicy(
+export function botParamilitaryPolicy(
     state: GameState,
     faction: FactionId,
     catalog: readonly EventDefinition[] | undefined,

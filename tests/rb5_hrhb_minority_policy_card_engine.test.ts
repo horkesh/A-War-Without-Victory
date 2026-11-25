@@ -5,6 +5,7 @@ import { describe, expect, test } from 'vitest';
 import { evaluateEvents } from '../src/sim/events/evaluate_events.js';
 import { loadEventDefinitions } from '../src/sim/events/event_loader.js';
 import { resolveEventDecisionCore } from '../src/sim/events/resolve_decision_core.js';
+import { resolvePlayerEventDecisionsBySilence } from '../src/sim/events/silence_resolution.js';
 import { initializeStrategicDimensions } from '../src/sim/events/strategic_dimensions.js';
 import { countBlockingPlayerDecisions } from '../src/state/player_decision_manifest.js';
 import {
@@ -58,7 +59,7 @@ describe('RB5 card through the event engine', () => {
     });
 
     for (const level of [0, 1, 2]) {
-        test(`human HRHB autonomy ${level}: fires after war start, pending, blocks advance, no policy yet`, () => {
+        test(`human HRHB autonomy ${level}: fires after war start, pending, blocks advance; silence would apply the default`, () => {
             const s = state(humanMeta(level), null, WAR_STARTED);
             fire(s);
             expect(s.military.pending_event_decisions).toEqual([]);
@@ -74,7 +75,9 @@ describe('RB5 card through the event engine', () => {
             expect(pending[0].requires_player_response).toBe(true);
             expect(countBlockingPlayerDecisions(s as any, 'HRHB')).toBe(1);
             expect(rows(s)).toEqual([]);
-            expect(hasMinorityExpulsionPolicy(s, 'HRHB')).toBe(false);
+            // Player-override model (H-20, 2026-11-25; was false): while the card waits at the pause, only a halt refuses;
+            // silence is the default, which the staff apply when the turn resumes (tests/sim/player_override_s6.test.ts).
+            expect(hasMinorityExpulsionPolicy(s, 'HRHB')).toBe(true);
         });
     }
 
@@ -104,10 +107,16 @@ describe('RB5 card through the event engine', () => {
         expect(hasMinorityExpulsionPolicy(s, 'HRHB')).toBe(true);
     });
 
-    test('Observer (autonomy 3): auto-answered with the historical default, bot_ai_default, policy true', () => {
+    // H-20 (orchestrator call 1, 2026-11-25; was: auto-answered as it fired, never pending): at Observer the card
+    // queues like Levels 0-2, so the halt is reachable before the first wave; silence then applies the same default,
+    // logged the same way, on the same turn.
+    test('Observer (autonomy 3): queued at the pause; silence answers the historical default, bot_ai_default, policy true', () => {
         const s = state(humanMeta(3));
         const before = JSON.parse(JSON.stringify(confidence(s)));
         fire(s);
+        expect(s.military.pending_event_decisions!.map((p) => p.event_id)).toEqual([CARD_ID]);
+        expect(rows(s)).toEqual([]);
+        expect(resolvePlayerEventDecisionsBySilence(s, [CARD], FIRE_TURN)).toEqual([CARD_ID]);
         expect(s.military.pending_event_decisions).toEqual([]);
         expect(rows(s)).toEqual([
             expect.objectContaining({ response_id: 'no_halt', decision_source: 'bot_ai_default', faction: 'HRHB', turn: FIRE_TURN }),

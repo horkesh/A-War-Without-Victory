@@ -481,6 +481,8 @@ export function DecisionConsequenceRecordsPanel({ eventCatalog }: DecisionConseq
           const title = resolveDecisionConsequenceCopy(record, 'title');
           const outcome = resolveDecisionConsequenceCopy(record, 'outcome');
           const detail = resolveDecisionConsequenceCopy(record, 'detail');
+          // H-17: display-only attribution of a war-crime row run under the standing default.
+          const attribution = resolveDecisionConsequenceCopy(record, 'attribution');
           return (
           <article
             key={record.id}
@@ -511,6 +513,9 @@ export function DecisionConsequenceRecordsPanel({ eventCatalog }: DecisionConseq
                   </div>
                 </div>
                 <div className="mt-2 text-[13px] leading-5 text-text-secondary">{detail}</div>
+                {attribution && (
+                  <div data-testid="decision-consequence-attribution" className="mt-1 text-[13px] leading-5 text-text-muted">{attribution}</div>
+                )}
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <span className="rounded border border-panel-border/60 bg-panel-bg/60 px-2 py-1 text-[13px] font-bold uppercase tracking-[0.12em] text-text-secondary">
                     {t('decisionConsequences.filedTo', { route: routeLabel(record) })}

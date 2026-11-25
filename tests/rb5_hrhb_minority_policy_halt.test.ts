@@ -3,9 +3,12 @@
 // player's own decision can order a halt, once, when the decision comes at the start of the war.
 // Gate (ruling item 1): BOT table AND NOT (human-controlled AND refused). Fail closed: a refusal is
 // the halt flag OR any own player row for the card other than the default; a malformed row is a
-// refusal; Observer's automatic answer (bot_ai_default) is never a refusal. For a human faction the
-// seed also requires the card's decision on record. The headless flag with player_faction behaves
-// as a bot. Supersedes the 2026-11-14 bot-only ruling (tests/displacement_policy_expulsion.test.ts).
+// refusal; Observer's automatic answer (bot_ai_default) is never a refusal. The headless flag with
+// player_faction behaves as a bot. Supersedes the 2026-11-14 bot-only ruling (tests/displacement_policy_expulsion.test.ts).
+// Player-override model (owner 2026-11-25; H-20, orchestrator settlement 2026-11-25): the read is `!== 'refused'`,
+// so the earlier "the seed also requires the card's decision on record" is superseded: silence (no decision on
+// record) applies the default on the bot's turn. A filed, unapplied halt (a player row from before the card fired)
+// is not a decision. G1, parity and the halt after the seed: tests/sim/player_override_s6.test.ts.
 import { describe, expect, test } from 'vitest';
 
 import type { SettlementRecord } from '../src/map/settlements.js';
@@ -85,6 +88,13 @@ function human(level: 0 | 1 | 2 | 3): Meta {
 }
 
 type Row = GameState['military']['event_decision_log'][number];
+/** The card has fired (on turn `turn`): a player row then is an applied answer (a row before it is filed, unapplied). */
+function markCardFired(state: GameState, turn = state.meta.turn): void {
+    state.military.fired_event_ids = [...(state.military.fired_event_ids ?? []), CARD];
+    state.military.event_fire_counts = { ...(state.military.event_fire_counts ?? {}), [CARD]: 1 };
+    state.military.event_last_fired_turn = { ...(state.military.event_last_fired_turn ?? {}), [CARD]: turn };
+}
+
 function logRow(state: GameState, row: Partial<Row> & Pick<Row, 'decision_source'>): void {
     state.military.event_decision_log.push({
         event_id: CARD,
@@ -130,15 +140,19 @@ describe('RB5: a human HRHB follows the historical default until the player orde
             }
         });
 
-        test(`autonomy ${level}, no decision on record (card not fired, or fired and unanswered): no seed (fail closed)`, () => {
+        test(`autonomy ${level}, no decision on record (card not fired, or fired and unanswered): seeds like the bot (silence is the default)`, () => {
+            const bot = warState(50);
             const state = warState(50, human(level));
             for (let t = 50; t <= 60; t++) {
+                bot.meta.turn = t;
                 state.meta.turn = t;
+                run(bot);
                 run(state);
             }
-            expect(policyTimerKeys(state)).toEqual([]);
-            expect(state.military.event_flags[minorityPolicyAppliedFlag('HRHB')]).toBeUndefined();
-            expect(hasMinorityExpulsionPolicy(state, 'HRHB')).toBe(false);
+            expect(policyTimerKeys(state)).toEqual(SEEDED);
+            expect(state.displacement.hostile_takeover_timers).toEqual(bot.displacement.hostile_takeover_timers);
+            expect(state.military.event_flags[minorityPolicyAppliedFlag('HRHB')]).toBe(50);
+            expect(hasMinorityExpulsionPolicy(state, 'HRHB')).toBe(true);
         });
 
         test(`autonomy ${level}, the player ordered the halt: no seed, ever`, () => {
@@ -166,22 +180,41 @@ describe('RB5: a human HRHB follows the historical default until the player orde
     test('any own player row other than the default is a refusal; a malformed row is a refusal', () => {
         for (const response_id of [MINORITY_POLICY_HALT_RESPONSE_ID, 'something_else', '', undefined as unknown as string]) {
             const state = warState(50, human(2));
+            markCardFired(state);
             logRow(state, { decision_source: 'bot_ai_default' });
             logRow(state, { decision_source: 'player', response_id });
             run(state);
             expect(policyTimerKeys(state), String(response_id)).toEqual([]);
         }
         const nullFaction = warState(50, human(2));
+        markCardFired(nullFaction);
         logRow(nullFaction, { decision_source: 'player', response_id: MINORITY_POLICY_HALT_RESPONSE_ID, faction: null });
         run(nullFaction);
         expect(policyTimerKeys(nullFaction)).toEqual([]);
     });
 
-    test('rows for other events never count as the card decision', () => {
+    test('rows for other events never count as the card decision (never a refusal)', () => {
         const state = warState(50, human(2));
+        markCardFired(state);
         logRow(state, { decision_source: 'player', event_id: 'hrhb_political_goal', response_id: 'croat_republic' });
         run(state);
-        expect(policyTimerKeys(state)).toEqual([]);
+        expect(policyTimerKeys(state)).toEqual(SEEDED);
+    });
+
+    test('a filed, unapplied halt is not a decision: a player halt row from before the card fired does not refuse', () => {
+        for (const fired of [false, true]) {
+            const state = warState(50, human(1));
+            logRow(state, { decision_source: 'player', response_id: MINORITY_POLICY_HALT_RESPONSE_ID, turn: 48 });
+            if (fired) markCardFired(state, 50);
+            run(state);
+            expect(policyTimerKeys(state), `fired ${fired}`).toEqual(SEEDED);
+        }
+        // The same row once the card has fired and it applied (on or after the fire turn): a refusal.
+        const applied = warState(50, human(1));
+        markCardFired(applied, 50);
+        logRow(applied, { decision_source: 'player', response_id: MINORITY_POLICY_HALT_RESPONSE_ID, turn: 50 });
+        run(applied);
+        expect(policyTimerKeys(applied)).toEqual([]);
     });
 
     test('Observer: the automatic answer is never a refusal', () => {
@@ -207,17 +240,18 @@ describe('RB5: a human HRHB follows the historical default until the player orde
         expect(policyTimerKeys(bot)).toEqual(SEEDED);
     });
 
-    test('war start at a turn other than t49: seeds on the turn the decision is on record, not before', () => {
+    test('war start at a turn other than t49: seeds on the bot turn, the first pass after the war began, not before', () => {
+        const before = warState(69, human(1));
+        (before.political as any).rbih_hrhb_state = {};
+        run(before);
+        expect(policyTimerKeys(before)).toEqual([]);
+        const bot = warState(70, {}, 69);
         const state = warState(70, human(1), 69);
-        run(state);
-        expect(policyTimerKeys(state)).toEqual([]);
-        state.meta.turn = 71;
-        logRow(state, { decision_source: 'player', turn: 71 });
+        run(bot);
         run(state);
         expect(policyTimerKeys(state)).toEqual(SEEDED);
-        expect(state.military.event_flags[minorityPolicyAppliedFlag('HRHB')]).toBe(71);
-        const row = state.military.event_decision_log.find((r) => r.event_id === CARD)!;
-        expect(row.turn).toBe(state.military.event_flags[minorityPolicyAppliedFlag('HRHB')]);
+        expect(state.displacement.hostile_takeover_timers).toEqual(bot.displacement.hostile_takeover_timers);
+        expect(state.military.event_flags[minorityPolicyAppliedFlag('HRHB')]).toBe(70);
     });
 
     test('a human RBiH is untouched: RBiH has no policy and no card', () => {

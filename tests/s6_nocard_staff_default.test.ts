@@ -16,6 +16,12 @@
  * - H2: RS and RBiH keep A1 exactly; the manual (autonomy 0) path is untouched; headless is untouched.
  * The RED proof runs on a fixture: hands-off HRHB has no rear-pocket candidate in t0-t20, so a live
  * harness comparison reads 0 = 0 (scenario-tester, operations, historian, game-designer).
+ *
+ * Player-override model (owner 2026-11-25, "There should be no drift between live and headless games"; §6 HOW
+ * ruling lane C s8, H-14 and H-21, which fold `followsNoCardHistoricalDefault` into one rule for every side):
+ * silence is the bot's order at every level, Full Control included, for RS and RBiH too; an explicit refusal
+ * is durable (G1); Review each (requests decided one by one) has no surface at levels 1-3, so it is silence
+ * there, except that a refusal among them is a refusal. Superseded pins below say "was:".
  */
 
 import { describe, expect, it } from 'vitest';
@@ -149,13 +155,15 @@ describe('§6 D1 stage 2 round 4s: a no-card human side follows the historical d
             expect(outcome(allow).spawns.length).toBe(1);
         });
 
-        it(`T4 HRHB requests decided one by one at Full Control under ask refuse at autonomy ${level}, ALLOW records included`, () => {
+        it(`T4 HRHB requests decided one by one at Full Control under ask, at autonomy ${level}: a refusal binds (G1); allows leave silence, the bot's sweep`, () => {
+            // Was: none for both (Review each sent nothing at levels 1-3).
             for (const decision of ['allow', 'deny'] as const) {
                 const state = hrhbPocket(human(level));
                 state.paramilitary_policy = 'ask';
                 state.paramilitary_decision_history = [hrhbRecord(2, decision), hrhbRecord(3, decision)];
-                expect(outcome(state).spawns, decision).toEqual([]);
-                expect(outcome(state).pending, decision).toBe(0);
+                const result = outcome(state);
+                expect(result.spawns.length, decision).toBe(decision === 'deny' ? 0 : 1);
+                expect(result.pending, decision).toBe(0);
             }
         });
     }
@@ -197,14 +205,23 @@ describe('§6 D1 stage 2 round 4s: a no-card human side follows the historical d
             expect(outcome(state).spawns).toEqual([]);
         });
 
-        it('P1: an older own HRHB record plus another side\'s Always allow in the global field: none', () => {
+        it('an older own HRHB allow plus another side\'s Always allow in the global field: the other order never counts; silence, the bot\'s sweep', () => {
+            // Was (P1): none. H-21 folds the no-card default in: an own allow is no refusal, so the staff apply the bot's order.
             const state = hrhbPocket(human(2));
             state.paramilitary_policy = 'always_allow';
             state.paramilitary_decision_history = [
                 hrhbRecord(3, 'allow'),
                 { id: 'paramilitary:5:op:elsewhere:y', turn: 5, target_osid: 'op:elsewhere:y', faction: 'RBiH', strength: 150, decision: 'allow' },
             ];
-            expect(outcome(state).spawns).toEqual([]);
+            expect(outcome(state)).toEqual(outcome(hrhbPocket({ ...human(2), headless_scenario_auto_control: true })));
+            // The G1 contrast: an own refusal under another side's newer Always allow still binds.
+            const refused = hrhbPocket(human(2));
+            refused.paramilitary_policy = 'always_allow';
+            refused.paramilitary_decision_history = [
+                hrhbRecord(3, 'deny'),
+                { id: 'paramilitary:5:op:elsewhere:y', turn: 5, target_osid: 'op:elsewhere:y', faction: 'RBiH', strength: 150, decision: 'allow' },
+            ];
+            expect(outcome(refused).spawns).toEqual([]);
         });
 
         it('tie pin: an own HRHB record on the same turn as another side\'s decision counts as HRHB\'s own', () => {
@@ -219,20 +236,30 @@ describe('§6 D1 stage 2 round 4s: a no-card human side follows the historical d
     });
 
     describe('scope guards (H2, T6, T7)', () => {
-        it('HRHB at Full Control with no record raises a request, as before (manual path untouched)', () => {
+        it('HRHB at Full Control with no record: the bot\'s sweep, as headless (H-14; was: a request)', () => {
             const state = hrhbPocket(human(0));
-            expect(outcome(state)).toEqual({ spawns: [], pending: 1 });
+            const headless = outcome(hrhbPocket({ ...human(0), headless_scenario_auto_control: true }));
+            expect(outcome(state)).toEqual(headless);
+            expect(headless.spawns.length).toBe(1);
+            // Review each, chosen by the player (a standing-order row): the request comes to them.
+            const review = hrhbPocket(human(0));
+            review.paramilitary_decision_history = [{ kind: 'standing_order', id: 'paramilitary_order:3:HRHB', turn: 3, faction: 'HRHB', order: 'ask' }];
+            expect(outcome(review)).toEqual({ spawns: [], pending: 1 });
         });
 
         it('the HRHB bot keeps its allow', () => {
             expect(outcome(hrhbPocket({})).spawns.length).toBe(1);
         });
 
-        it('RS and RBiH humans with no card answer at levels 1-3 still send nothing (A1)', () => {
+        it('RS and RBiH humans with no card answer at levels 1-3 follow the bot\'s order (H-21; was: nothing sent)', () => {
             for (const faction of ['RS', 'RBiH'] as const) {
                 for (const level of LEVELS) {
                     const state = hrhbPocket({ player_faction: faction, autonomy_level: level, headless_scenario_auto_control: false });
-                    expect(resolveNonManualParamilitaryPolicy(state, faction, CATALOG), `${faction} a${level}`).toBe('always_deny');
+                    const headless = hrhbPocket({ player_faction: faction, autonomy_level: level, headless_scenario_auto_control: true });
+                    expect(resolveNonManualParamilitaryPolicy(state, faction, CATALOG), `${faction} a${level}`)
+                        .toBe(resolveNonManualParamilitaryPolicy(headless, faction, CATALOG));
+                    expect(resolveNonManualParamilitaryPolicy(state, faction, CATALOG), `${faction} a${level}`)
+                        .toBe(faction === 'RS' ? 'always_allow' : 'always_deny');
                 }
             }
         });
