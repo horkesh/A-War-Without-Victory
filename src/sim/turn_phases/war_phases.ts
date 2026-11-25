@@ -43,8 +43,9 @@ import { recomputeDimensionBases, applyDimensionShift } from '../events/strategi
 import { relieveOfficer, recordPresidentialOverride } from '../combat/order_interpretation.js';
 import { applyReplaceCoConsequence, applyForceOpConsequence, applyStopOpConsequence } from '../combat/command_lever_consequences.js';
 import { clamp } from '../../utils/math.js';
-import { updateDisplacement, type DisplacementPressureInputs } from '../../state/displacement.js';
+import { buildPassThroughDestinationResolver, updateDisplacement, type DisplacementPressureInputs } from '../../state/displacement.js';
 import { processDisplacementTakeover } from '../../state/displacement_takeover.js';
+import { processPocketFalls } from '../../state/pocket_fall.js';
 import { getDoctrineTempoMultiplier, updateDoctrineState } from '../../state/doctrine.js';
 import { updateEmbargoProfiles } from '../../state/embargo.js';
 import { updateEnclaveIntegrity, computeEnclaveResilienceFallbackPressure } from '../../state/enclave_integrity.js';
@@ -3482,12 +3483,24 @@ export const warPhases: NamedPhase[] = [
                 }
             } catch { /* fallback: no OSID census data */ }
 
+            // A9 B2 (SD13): the capture pass-through reads this turn's territorial bodies and supply, in
+            // the OSID id space, built only if a pass-through fires.
+            const takeoverOd = getOperationalData(context);
+            const passThroughReach = takeoverOd?.edges?.length
+                ? () => buildPassThroughDestinationResolver(
+                    context.state,
+                    takeoverOd.edges,
+                    buildOsidDisplacementPressureInputs(context.state, takeoverOd).suppliedByFaction
+                )
+                : undefined;
+
             context.report.takeover_displacement = processDisplacementTakeover(
                 context.state,
                 graph.settlements,
                 combinedReport,
                 context.input.municipalityPopulation1991,
-                osidSettlements
+                osidSettlements,
+                passThroughReach
             );
         }
     },
@@ -4408,6 +4421,25 @@ export const warPhases: NamedPhase[] = [
                 od?.edges?.length ? od.edges : graph.edges,
                 context.input.municipalityPopulation1991,
                 pressure
+            );
+        }
+    },
+    {
+        // A9 P0-A (SD13, 8-seat §6 ruling D1, 2026-11-25): after every control writer of the turn (event
+        // effects, combat, takeover) and after `update-displacement`, so a pocket fall fires the same turn its
+        // side loses its last settlement in the municipality. OSID settlements, edges and supply.
+        name: 'pocket-fall',
+        run: async (context) => {
+            if (!context.input.settlementEdges) return;
+            const od = getOperationalData(context);
+            if (!od?.edges?.length) return;
+            const graph = await getOperationalSettlementGraph(context);
+            context.report.pocket_fall = processPocketFalls(
+                context.state,
+                graph.settlements,
+                od.edges,
+                buildOsidDisplacementPressureInputs(context.state, od).suppliedByFaction,
+                context.input.municipalityPopulation1991
             );
         }
     },

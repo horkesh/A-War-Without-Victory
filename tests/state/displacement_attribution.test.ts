@@ -21,6 +21,9 @@ import { appendDisplacementEvent, UNKNOWN_CAUSER_BUCKET } from '../../src/state/
 import { CURRENT_SCHEMA_VERSION, type GameState } from '../../src/state/game_state.js';
 import type { MunicipalityPopulation1991Map } from '../../src/state/population_share.js';
 
+// A9 B3 (D10b): the pocket routes to the main body because this fixture declares a crossing at its near end.
+const FIXTURE_CROSSING = [{ id: 'fixture_crossing', side: 'RBiH' as const, near_settlements: ['op:pocket:a'], source: 'test fixture: stands in for a sourced crossing (D10b)' }];
+
 type Edge = { a: string; b: string; side_a: string | null; side_b: string | null };
 
 function stateWith(controllers: Record<string, string>, extra: Partial<GameState['political']> = {}, turn = 10): GameState {
@@ -161,7 +164,7 @@ describe('updateDisplacement pressure path (SC1 end to end)', () => {
 
     it('books an encircled pocket\'s departures to the besieger, its own people only, none killed', () => {
         const { state, settlements, edges, census } = encircledPocketFixture();
-        updateDisplacement(state, settlements, edges, census);
+        updateDisplacement(state, settlements, edges, census, undefined, FIXTURE_CROSSING);
         const agg = state.displacement.displacement_humanitarian_aggregates ?? {};
         const causers = Object.keys(agg).filter((c) =>
             Object.values(agg[c] ?? {}).some((s) => s.refugees_created > 0 || s.civilian_casualties_caused > 0)
@@ -177,7 +180,7 @@ describe('updateDisplacement pressure path (SC1 end to end)', () => {
     it('A5: with no supplied main-body destination the pocket\'s people are trapped, booked nowhere, and reported', () => {
         const { state, settlements, edges, census } = encircledPocketFixture();
         for (const f of state.factions as unknown as Array<{ supply_sources: string[] }>) f.supply_sources = [];
-        const report = updateDisplacement(state, settlements, edges, census);
+        const report = updateDisplacement(state, settlements, edges, census, undefined, FIXTURE_CROSSING);
         expect(state.displacement.displacement_humanitarian_aggregates ?? {}).toEqual({});
         expect(state.displacement.civilian_casualties?.RBiH?.killed ?? 0).toBe(0);
         const wanted = Math.floor(6000 * ENCIRCLEMENT_DISPLACEMENT_FRACTION);
@@ -215,7 +218,7 @@ describe('no-census fallback (SC2)', () => {
 
     it('sizes a pocket without a census entry by the national sums, tags it, and books no killed', () => {
         const { state, settlements, edges } = encircledPocketFixture();
-        const report = updateDisplacement(state, settlements, edges, {} as MunicipalityPopulation1991Map);
+        const report = updateDisplacement(state, settlements, edges, {} as MunicipalityPopulation1991Map, undefined, FIXTURE_CROSSING);
         const rec = report.by_municipality.find((r) => r.mun_id === 'pocket');
         expect(rec?.reason).toContain(CENSUS_FALLBACK_NATIONAL_REASON);
         // Held population 10,000 split nationally: Serbs floor(10000*1366013/4360093)=3132,
@@ -248,7 +251,7 @@ describe('the two ledger "Killed" figures agree by construction (SC3 invariant)'
 
     it('pressure path, census split across three peoples with different flee-abroad rates', () => {
         const { state, settlements, edges, census } = encircledPocketFixture();
-        updateDisplacement(state, settlements, edges, census);
+        updateDisplacement(state, settlements, edges, census, undefined, FIXTURE_CROSSING);
         const { casualties, aggregates } = killedBothWays(state);
         expect(aggregates).toEqual(casualties);
         // Only the holder's people leave (DA1 P3): no Serb or Croat rows.
@@ -266,7 +269,7 @@ describe('the two ledger "Killed" figures agree by construction (SC3 invariant)'
         (state.military as unknown as Record<string, Record<string, unknown>>).front_segments['op:pocket:a__op:pocket:b'] =
             { edge_id: 'op:pocket:a__op:pocket:b', active: true };
         delete (census as Record<string, unknown>).pocket;
-        updateDisplacement(state, settlements, edges, census);
+        updateDisplacement(state, settlements, edges, census, undefined, FIXTURE_CROSSING);
         const { casualties, aggregates } = killedBothWays(state);
         expect(aggregates).toEqual(casualties);
     });

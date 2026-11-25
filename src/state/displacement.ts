@@ -6,16 +6,26 @@
  */
 
 import type { SettlementRecord } from '../map/settlements.js';
-import type { DisplacementState, FactionId, GameState, MilitiaPoolState, MunicipalityId } from './game_state.js';
+import type {
+    DisplacementState,
+    FactionId,
+    GameState,
+    MilitiaPoolState,
+    MunicipalityId,
+    NegotiatedEvacuationEpisode,
+    NegotiatedEvacuationRecord,
+} from './game_state.js';
 import { CANONICAL_FACTIONS } from './game_state.js';
+import { NEGOTIATED_EVACUATION_CONVOY_MAX, NEGOTIATED_EVACUATION_EPISODE_CAP } from './displacement_loss_constants.js';
+import { ownEnclaveSettlements } from './own_enclave_settlements.js';
 
 import { buildAdjacencyMapCached } from '../map/adjacency_map.js';
 import { computeFrontEdges, type FrontEdge } from '../map/front_edges.js';
 import { areRbihHrhbAllied, DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN } from '../sim/early_war/alliance_update.js';
 import type { EdgeRecord } from '../map/settlements.js';
-import { getReceivingCapacityFraction } from './displacement_routing_data.js';
+import { getReceivingCapacityFraction, POCKET_CROSSINGS, type PocketCrossing } from './displacement_routing_data.js';
 import { appendDisplacementEvent, UNKNOWN_CAUSER_BUCKET } from './displacement_event_log.js';
-import { getBilateralRoutingOrder } from './displacement_takeover.js';
+import { getBilateralRoutingOrder, getDynamicHostileShare, type PassThroughDestinationResolver } from './displacement_takeover.js';
 import { recordCivilianDisplacementCasualties } from './displacement_state_utils.js';
 import { strictCompare } from './validateGameState.js';
 import type { MunicipalityPopulation1991Map } from './population_share.js';
@@ -28,11 +38,13 @@ export const UNSUPPLIED_PRESSURE_TURNS = 3;
 /**
  * Share of the holder's own people leaving per turn (week) once the siege trigger fires.
  * DA1 P3 calibration (Historian seat, 2026-11-13): after the 1992 departures (which the
- * takeover writer books), outflow from besieged pockets ran about 0.05-0.2% a week:
- * Srebrenica's 8,000-9,000 UNHCR evacuees of spring 1993 (Krstić TJ ¶16) average about
- * 0.1% a week over the siege; government-held Sarajevo about 0.05-0.1% a week after 1992
- * (UNCOE S/1994/674/Add.2 Annex VI; Tabeau, Galić demographic report 2002). The dormant
- * 5% (and 10% encircled) per week were 50-500 times higher than any source supports.
+ * takeover writer books), background outflow from besieged pockets ran about 0.05-0.2% a
+ * week: government-held Sarajevo about 0.05-0.1% a week after 1992 (UNCOE S/1994/674/Add.2
+ * Annex VI; Tabeau, Galić demographic report 2002). The dormant 5% (and 10% encircled) per
+ * week were 50-500 times higher than any source supports.
+ * A9 B2 (Historian seat, 2026-11-24): this rate is a steady trickle. It does NOT model the
+ * spring 1993 UNHCR convoy evacuations from Srebrenica, which moved several thousand people
+ * within a few weeks; no rate of this scale can reproduce a concentrated event like that.
  */
 export const UNSUPPLIED_DISPLACEMENT_FRACTION = 0.001;
 /**
@@ -330,6 +342,47 @@ export interface DisplacementStepReport {
      * pools or integrity; no player surface reads it yet (registered follow-up). Absent when empty.
      */
     trapped?: DisplacementTrappedRecord[];
+    /**
+     * A9 P1 (ruling D9): this turn's negotiated-evacuation predicate, one row per separate pocket (municipality
+     * and side whose ground there is a body cut off from its main body) and per pocket with an open episode.
+     * Turn report only, never GameState. Absent when empty.
+     */
+    negotiated_evacuation?: NegotiatedEvacuationPredicateRow[];
+}
+
+/** One pocket-side row of the A9 P1 convoy predicate (see `DisplacementStepReport.negotiated_evacuation`). */
+export interface NegotiatedEvacuationPredicateRow {
+    mun_id: MunicipalityId;
+    faction_id: FactionId;
+    /** (a) B3's test: the side's ground here is a body separate from its main body (no sourced crossing). */
+    separate: boolean;
+    /** (b) the A5 siege trigger: under front pressure and unsupplied for UNSUPPLIED_PRESSURE_TURNS turns. */
+    siege: boolean;
+    /** (c) the municipality is at its receiving capacity (§4.3). Opens an episode only. */
+    at_capacity: boolean;
+    /**
+     * (d) a pressing side took one of the pocket's own Ring 1 enclave cells (an ENCLAVE_DEFINITIONS settlement of
+     * the side's enclave in this municipality) within the last UNSUPPLIED_PRESSURE_TURNS turns.
+     */
+    squeeze: boolean;
+    /** The enclave cells captured from the side in the window, as `osid@turn`, in (turn, osid) order. */
+    squeeze_cells: string[];
+    /** The pressing side named by `resolvePressingFactions` whose capture gives (d); null when none. */
+    besieger: FactionId | null;
+    /** Besieger intent: a takeover timer of the besieger against the side's people with people displaced, or the side's people are present here. */
+    intent: boolean;
+    /** (a)-(d) and intent all hold: the predicate that opens an episode. */
+    open: boolean;
+    /** An episode is open and (a), (b), (d) and intent hold this week: a convoy may run ((c) is not re-checked). */
+    convoy_week: boolean;
+    /** A human RBiH president's refusal stands for this episode. */
+    refused: boolean;
+    /** The episode has moved NEGOTIATED_EVACUATION_EPISODE_CAP people. */
+    cap_reached: boolean;
+    /** People moved by this week's convoy (0 when none ran). */
+    convoy: number;
+    /** People moved this episode, after this week's convoy (0 when no episode). */
+    episode_people: number;
 }
 
 /** One pocket-side row of the A5 trapped stock (see `DisplacementStepReport.trapped`). */
@@ -366,6 +419,189 @@ function buildSiegeDestinationsBySide(
         out.set(side, allowed);
     }
     return out;
+}
+
+/**
+ * A9 P0-A (SD13, 8-seat §6 ruling D4, 2026-11-25): A5's main-body supplied destinations per side, built
+ * from this turn's control, operational edges and supply exactly as `updateDisplacement` builds them for
+ * the siege route (same territorial bodies, same `buildSiegeDestinationsBySide`). The pocket-fall step
+ * routes a fallen pocket's survivors here.
+ */
+export function buildMainBodySuppliedDestinations(
+    state: GameState,
+    settlements: Map<string, SettlementRecord>,
+    settlementEdges: ReadonlyArray<EdgeRecord>,
+    suppliedByFaction: ReadonlyMap<string, ReadonlySet<string>>
+): Map<FactionId, Set<MunicipalityId>> {
+    const pc = state.political.political_controllers ?? {};
+    const controllerOf = new Map<string, FactionId>();
+    for (const sid of [...settlements.keys()].sort(strictCompare)) {
+        const side = pc[sid];
+        if (isCanonicalFaction(side)) controllerOf.set(sid, side);
+    }
+    const neighbourSets = new Map<string, Set<string>>();
+    for (const e of settlementEdges) {
+        if (e.a === e.b) continue;
+        if (!neighbourSets.has(e.a)) neighbourSets.set(e.a, new Set());
+        if (!neighbourSets.has(e.b)) neighbourSets.set(e.b, new Set());
+        neighbourSets.get(e.a)?.add(e.b);
+        neighbourSets.get(e.b)?.add(e.a);
+    }
+    const neighbours = new Map<string, string[]>();
+    for (const [k, v] of neighbourSets) neighbours.set(k, [...v].sort(strictCompare));
+    const bodies = computeTerritorialBodies(controllerOf, neighbours, rbihHrhbAtWar(state));
+    return buildSiegeDestinationsBySide(settlements, bodies, suppliedByFaction);
+}
+
+/**
+ * A9 P0-A (SD13): route one people's group to `allowed` municipalities their side holds, with the same
+ * receiving-capacity rule and route order as the siege path (`routeDisplacedPopulation`). Returns the
+ * routing only; the caller books it. Whatever finds no capacity is left out of the returned rows.
+ */
+export function routeDisplacedWithCapacity(
+    state: GameState,
+    fromMunId: MunicipalityId,
+    people: FactionId,
+    amount: number,
+    causer: FactionId,
+    allowed: ReadonlySet<MunicipalityId>
+): DisplacementRoutingRecord[] {
+    if (amount <= 0 || allowed.size === 0) return [];
+    return routeDisplacedPopulation(
+        fromMunId, people, amount, state.displacement.displacement_state ?? {}, buildMunControlFromOsids(state), causer, allowed
+    );
+}
+
+/**
+ * A9 B2/B3 (SD13): the side's territorial bodies linked to a municipality: the bodies of its own settlements
+ * there, and any body next to one of the municipality's settlements. One test serves the capture
+ * pass-through (B2) and the A5 siege route (B3).
+ */
+function linkedBodiesInMunicipality(
+    body: TerritorialBodies,
+    inMun: readonly string[],
+    neighbours: ReadonlyMap<string, readonly string[]>
+): Set<number> {
+    const linked = new Set<number>();
+    for (const sid of inMun) {
+        const b = body.bodyOf.get(sid);
+        if (b !== undefined) linked.add(b);
+    }
+    for (const sid of inMun) {
+        for (const nb of neighbours.get(sid) ?? []) {
+            const b = body.bodyOf.get(nb);
+            if (b !== undefined) linked.add(b);
+        }
+    }
+    return linked;
+}
+
+/**
+ * A9 B3 (SD13, 8-seat §6 ruling D10/D10b, 2026-11-25; DISPLACEMENT_MASTER §10.3): may a side's siege leavers
+ * from this municipality reach A5's main-body destinations? Yes when the municipality is linked to the
+ * main body (the linked-body test above), or when the leavers' own body holds the near end of a sourced
+ * crossing (`POCKET_CROSSINGS`, one entry: the Sarajevo airport). Otherwise the pocket is separate and
+ * its leavers are trapped (recorded for Ledger line 2 only; no kill, no lever).
+ */
+function siegeLeaversReachMainBody(
+    side: FactionId,
+    body: TerritorialBodies | undefined,
+    munSids: readonly string[],
+    sideSids: readonly string[],
+    neighbours: ReadonlyMap<string, readonly string[]>,
+    controllerOf: ReadonlyMap<string, FactionId>,
+    crossings: readonly PocketCrossing[]
+): boolean {
+    if (!body || body.main < 0) return false;
+    const linked = linkedBodiesInMunicipality(body, munSids, neighbours);
+    if (linked.has(body.main)) return true;
+    const ownBodies = new Set<number>();
+    for (const sid of sideSids) {
+        const b = body.bodyOf.get(sid);
+        if (b !== undefined) ownBodies.add(b);
+    }
+    for (const crossing of crossings) {
+        if (crossing.side !== side) continue;
+        for (const near of crossing.near_settlements) {
+            if (controllerOf.get(near) !== side) continue;
+            const b = body.bodyOf.get(near);
+            if (b !== undefined && ownBodies.has(b)) return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * A9 B2 (SD13, owner rulings 2-3 of 2026-11-24; the §6 broader panel round 1 A5b shape; DISPLACEMENT_MASTER
+ * §10.6): where a group sheltered in a captured municipality may be moved on. The answer is read from the
+ * same territorial bodies and supply as the siege route, at the moment the pass-through fires.
+ * - The group's side still holds a supplied settlement in the municipality: `null`, the group stays. A
+ *   pocket that is still held and supplied is never emptied because the enemy holds most of the municipality.
+ * - Otherwise: the municipalities where the side holds a supplied settlement in a body linked to the source
+ *   (the body of its own settlements there, or a body next to the municipality's settlements). An empty set
+ *   means no reachable destination, and the group stays.
+ * - A9 P0-B (D7): when the side holds no settlement in the municipality, any settlement it holds in a linked
+ *   body qualifies, supplied or not.
+ * Bodies are built once per call of this builder; the caller builds it lazily, on the first pass-through.
+ */
+export function buildPassThroughDestinationResolver(
+    state: GameState,
+    settlementEdges: ReadonlyArray<EdgeRecord>,
+    suppliedByFaction: ReadonlyMap<string, ReadonlySet<string>>
+): PassThroughDestinationResolver {
+    const pc = state.political.political_controllers ?? {};
+    const controllerOf = new Map<string, FactionId>();
+    const osidsByMun = new Map<MunicipalityId, string[]>();
+    const munOf = (sid: string): MunicipalityId | undefined => {
+        const parts = sid.split(':');
+        return parts.length >= 3 && parts[0] === 'op' ? (parts[1] as MunicipalityId) : undefined;
+    };
+    for (const sid of Object.keys(pc).sort(strictCompare)) {
+        const mun = munOf(sid);
+        if (!mun) continue;
+        const list = osidsByMun.get(mun) ?? [];
+        list.push(sid);
+        osidsByMun.set(mun, list);
+        const side = pc[sid];
+        if (isCanonicalFaction(side)) controllerOf.set(sid, side);
+    }
+    const neighbourSets = new Map<string, Set<string>>();
+    for (const e of settlementEdges) {
+        if (e.a === e.b) continue;
+        if (!neighbourSets.has(e.a)) neighbourSets.set(e.a, new Set());
+        if (!neighbourSets.has(e.b)) neighbourSets.set(e.b, new Set());
+        neighbourSets.get(e.a)!.add(e.b);
+        neighbourSets.get(e.b)!.add(e.a);
+    }
+    const neighbours = new Map<string, string[]>();
+    for (const [k, v] of neighbourSets) neighbours.set(k, [...v].sort(strictCompare));
+    const bodies = computeTerritorialBodies(controllerOf, neighbours, rbihHrhbAtWar(state));
+    const none: ReadonlySet<string> = new Set<string>();
+
+    return (faction: string, munId: MunicipalityId, linkFrom?: readonly string[]): ReadonlySet<MunicipalityId> | null => {
+        const allowed = new Set<MunicipalityId>();
+        const side = CANONICAL_FACTIONS.find((f) => f === faction);
+        const body = side === undefined ? undefined : bodies.get(side);
+        const supplied = suppliedByFaction.get(faction) ?? none;
+        if (!body) return allowed;
+        const inMun = osidsByMun.get(munId) ?? [];
+        for (const sid of inMun) {
+            if (body.bodyOf.has(sid) && supplied.has(sid)) return null;
+        }
+        const linked = linkedBodiesInMunicipality(body, linkFrom ?? inMun, neighbours);
+        if (linked.size === 0) return allowed;
+        // A9 P0-B (SD13, 8-seat §6 ruling D7, 2026-11-25): when the side holds ZERO ground in the municipality,
+        // a destination in a linked body qualifies without the supply requirement (capacity still applies in
+        // the router). The step order runs after every control writer, so no group is moved onto ground that
+        // falls the same turn. The held-and-supplied `null` above is untouched.
+        const holdsGround = inMun.some((sid) => body.bodyOf.has(sid));
+        for (const [sid, b] of body.bodyOf) {
+            if (!linked.has(b) || (holdsGround && !supplied.has(sid))) continue;
+            const mun = munOf(sid);
+            if (mun && mun !== munId) allowed.add(mun);
+        }
+        return allowed;
+    };
 }
 
 /**
@@ -474,7 +710,7 @@ export const CENSUS_FALLBACK_NATIONAL_REASON = 'census_fallback_national';
  * Split displaced amount by source mun's 1991 ethnic share. Returns { RBiH, RS, HRHB } (other assigned to RBiH).
  * Without a census entry for the municipality, splits by the national sums and reports it.
  */
-function splitDisplacedByEthnicityWithSource(
+export function splitDisplacedByEthnicityWithSource(
     fromMunId: MunicipalityId,
     amount: number,
     population1991ByMun: MunicipalityPopulation1991Map | undefined
@@ -677,12 +913,94 @@ function writeUnableToLeaveStock(dispState: DisplacementState, side: FactionId, 
     (dispState.unable_to_leave_by_side ??= {})[side] = { amount, turn };
 }
 
+/**
+ * A9 P1 (ruling D9): only a human RBiH president may refuse the evacuations. Bots, staff and headless runs keep
+ * the historical default (allow), so a refusal on record is read only while this holds.
+ */
+function canRefuseNegotiatedEvacuation(state: GameState, side: FactionId): boolean {
+    if (side !== 'RBiH') return false;
+    if (state.meta?.headless_scenario_auto_control) return false;
+    return (state.meta?.player_faction ?? null) === side;
+}
+
+/**
+ * A9 P1 (ruling D9): the refusal hook. A human RBiH president's decision writes it for one pocket (municipality)
+ * while that pocket's evacuation episode is open; the convoy rule then runs no convoy for the rest of the episode.
+ * It carries the siege cost (the people stay trapped) and earns nothing. Returns false, writing nothing, when the
+ * side may not refuse or no episode is open. Idempotent: the first refusal turn is kept.
+ */
+export function recordNegotiatedEvacuationRefusal(state: GameState, munId: MunicipalityId, side: FactionId): boolean {
+    if (!canRefuseNegotiatedEvacuation(state, side)) return false;
+    const episode = state.displacement?.displacement_state?.[munId]?.negotiated_evacuation_by_side?.[side];
+    if (!episode) return false;
+    if (episode.refused_turn === null) episode.refused_turn = state.meta.turn;
+    return true;
+}
+
+/** A9 P1 (d): one capture of the window: `from` lost settlement `sid` to `to` on `turn`. */
+interface RecentCapture {
+    turn: number;
+    sid: string;
+    from: FactionId;
+    to: FactionId;
+}
+
+/**
+ * A9 P1 (d): the captures of the last UNSUPPLIED_PRESSURE_TURNS turns (this turn and the two before), from the
+ * persisted control-change log (`political.control_events`). Setup writes and non-faction controllers are not
+ * captures. Sorted (turn, settlement, from, to), so every reader walks them in one order.
+ */
+function collectRecentCaptures(state: GameState): RecentCapture[] {
+    const turn = state.meta.turn;
+    const rows: RecentCapture[] = [];
+    for (const ev of state.political?.control_events ?? []) {
+        if (!ev || ev.mechanism === 'setup_control') continue;
+        if (ev.turn > turn || turn - ev.turn >= UNSUPPLIED_PRESSURE_TURNS) continue;
+        if (!isCanonicalFaction(ev.from) || !isCanonicalFaction(ev.to) || ev.from === ev.to) continue;
+        rows.push({ turn: ev.turn, sid: ev.settlement_id, from: ev.from, to: ev.to });
+    }
+    rows.sort((a, b) => a.turn - b.turn || strictCompare(a.sid, b.sid) || strictCompare(a.from, b.from) || strictCompare(a.to, b.to));
+    return rows;
+}
+
+/**
+ * A9 P1 intent: the pairs (people X, besieger P) for which P holds a takeover timer against X's people that has
+ * displaced anyone (`cumulative_displaced` > 0), anywhere. Keys `${X}|${P}`.
+ */
+function collectTakeoverIntentPairs(state: GameState): Set<string> {
+    const out = new Set<string>();
+    const timers = state.displacement?.hostile_takeover_timers ?? {};
+    for (const key of Object.keys(timers).sort(strictCompare)) {
+        const t = timers[key];
+        if (t && (t.cumulative_displaced ?? 0) > 0) out.add(`${t.from_faction}|${t.to_faction}`);
+    }
+    return out;
+}
+
+/** The people of `side` held in its settlements of a municipality: the siege path's census share. */
+function heldPeopleOfSide(
+    munId: MunicipalityId,
+    side: FactionId,
+    dispState: DisplacementState,
+    sidePop: number,
+    munPop: number,
+    population1991ByMun: MunicipalityPopulation1991Map | undefined
+): number {
+    const remaining = dispState.original_population - dispState.displaced_out - dispState.lost_population;
+    if (remaining <= 0) return 0;
+    const held = munPop > 0 ? Math.floor((remaining * sidePop) / munPop) : remaining;
+    const { split } = splitDisplacedByEthnicityWithSource(munId, held, population1991ByMun);
+    return Math.max(0, side === 'RS' ? split.RS : side === 'HRHB' ? split.HRHB : split.RBiH);
+}
+
 export function updateDisplacement(
     state: GameState,
     settlements: Map<string, SettlementRecord>,
     settlementEdges: EdgeRecord[],
     population1991ByMun?: MunicipalityPopulation1991Map,
-    pressure?: DisplacementPressureInputs
+    pressure?: DisplacementPressureInputs,
+    /** A9 B3 (D10b): the sourced crossings out of a separate pocket. Routing data; fixtures may pass their own. */
+    pocketCrossings: readonly PocketCrossing[] = POCKET_CROSSINGS
 ): DisplacementStepReport {
     // Ledger line 2 (A5): the "unable to leave" stock is this week's only. Clear it from every
     // municipality before any early return, then rewrite it below (s6_ledger12_ruling.md).
@@ -756,6 +1074,12 @@ export function updateDisplacement(
         if (settlements.has(osid) && isCanonicalFaction(side)) initialTotal.set(side, (initialTotal.get(side) ?? 0) + 1);
     }
 
+    // A9 P1 (ruling D9): the negotiated-evacuation convoy rule's inputs, read once from state.
+    const recentCaptures = collectRecentCaptures(state);
+    const takeoverIntentPairs = collectTakeoverIntentPairs(state);
+    const evacuationRows: NegotiatedEvacuationPredicateRow[] = [];
+    const evacuationRecords: NegotiatedEvacuationRecord[] = [];
+
     for (const munId of munIds) {
         const munSids = sidsByMun.get(munId) ?? [];
         if (munSids.length === 0) continue;
@@ -764,6 +1088,8 @@ export function updateDisplacement(
         const counters = dispState.unsupplied_pressure_by_side ?? {};
         // A6 (SD9): integer ppm remainder of the siege outflow per side (reset points below).
         const carries = dispState.siege_outflow_carry_by_side ?? {};
+        // A9 P1 (b): this turn's consecutive unsupplied-under-pressure count per side (the A5 siege trigger).
+        const siegeTurnsBySide = new Map<FactionId, number>();
 
         // DA1 P6 (Red-team): one pass per side holding settlements here, so a pocket that is
         // a minority of its municipality (Žepa is one of Rogatica's settlements) is still
@@ -805,6 +1131,7 @@ export function updateDisplacement(
             } else {
                 delete counters[side];
             }
+            siegeTurnsBySide.set(side, unsuppliedTurns);
 
             const reasons: string[] = [];
             let fraction = 0;
@@ -873,10 +1200,14 @@ export function updateDisplacement(
             // Kladanj is booked by the takeover writer, not this path. Known limits (understating
             // flight abroad, never the killed): Sarajevo convoy and tunnel leavers often went abroad;
             // Orašje's Sava crossing led to Croatia.
+            // A9 B3 (SD13, D10/D10b): only a pocket linked to its side's main body, or one holding the near end
+            // of the sourced Sarajevo crossing, routes to A5's destinations. A separate pocket's leavers are
+            // trapped: recorded below for Ledger line 2, never moved across the lines.
             const displacementState = state.displacement.displacement_state;
+            const reachesMain = siegeLeaversReachMainBody(side, body, munSids, sideSids, neighbours, controllerOf, pocketCrossings);
             const routing = routeDisplacedPopulation(
                 munId, side, wanted, displacementState, munControl, dominantCauser,
-                siegeDestinations.get(side) ?? new Set<MunicipalityId>()
+                reachesMain ? (siegeDestinations.get(side) ?? new Set<MunicipalityId>()) : new Set<MunicipalityId>()
             );
             const displacementAmount = routing.reduce((s, r) => s + r.amount, 0);
             // A5 (red-team M1): record who could not leave, before the no-route continue.
@@ -940,6 +1271,128 @@ export function updateDisplacement(
             });
         }
 
+        // A9 P1 (SD13, 8-seat §6 ruling D9, 2026-11-25; DISPLACEMENT_MASTER §3.6): the negotiated-evacuation
+        // convoy. After the siege trickle of every side here, so the trickle is unchanged. Per side, in canonical
+        // order: the predicate (a)-(d) and the besieger's intent, all from state; the episode; at most one convoy.
+        const episodes = dispState.negotiated_evacuation_by_side ?? {};
+        for (const side of CANONICAL_FACTIONS) {
+            const sideSids = munSids.filter((sid) => controllerOf.get(sid) === side);
+            if (sideSids.length === 0) {
+                delete episodes[side];
+                continue;
+            }
+            const body = bodies.get(side);
+            // (a) B3's test: no link to the main body and no sourced crossing.
+            const separate = !siegeLeaversReachMainBody(side, body, munSids, sideSids, neighbours, controllerOf, pocketCrossings);
+            let episode: NegotiatedEvacuationEpisode | undefined = episodes[side];
+            if (!separate && !episode) continue;
+
+            // (d) the squeeze (orchestrator ruling 2026-11-25, how D9's text is met): within the window a pressing
+            // side took from this side one of the pocket's own Ring 1 enclave cells, the settlements of M that belong
+            // to an ENCLAVE_DEFINITIONS enclave of this side (the same static test as the pocket fall). A municipality
+            // with no such cell never meets (d); a capture next to the pocket's body does not count.
+            const enclaveCells = new Set(ownEnclaveSettlements(munSids, side));
+            const squeezers = new Set<FactionId>();
+            const squeezeCells: string[] = [];
+            for (const cap of recentCaptures) {
+                if (cap.from !== side || !enclaveCells.has(cap.sid)) continue;
+                squeezers.add(cap.to);
+                squeezeCells.push(`${cap.sid}@${cap.turn}`);
+            }
+            // The besieger: the pressing sides `resolvePressingFactions` names, by weight (ties in canonical
+            // order), that took ground of the pocket; the first one with intent, else the first one.
+            const causers = resolvePressingFactions(state, munId, side, new Set(munSids), frontEdges, side).causers
+                .filter((c) => c.faction !== UNKNOWN_CAUSER_BUCKET && squeezers.has(c.faction))
+                .map((c, i) => ({ ...c, i }))
+                .sort((a, b) => b.weight - a.weight || a.i - b.i);
+            const presentShare = getDynamicHostileShare(munId, side, dispState, population1991ByMun) > 0;
+            const hasIntent = (p: FactionId): boolean => takeoverIntentPairs.has(`${side}|${p}`) || presentShare;
+            const besieger = causers.find((c) => hasIntent(c.faction))?.faction ?? causers[0]?.faction ?? null;
+            const squeeze = besieger !== null;
+            const intent = besieger !== null && hasIntent(besieger);
+
+            // (b) the A5 siege trigger; (c) the municipality at its receiving capacity (§4.3).
+            const siege = (siegeTurnsBySide.get(side) ?? 0) >= UNSUPPLIED_PRESSURE_TURNS;
+            const current = dispState.original_population + dispState.displaced_in - dispState.displaced_out - dispState.lost_population;
+            const atCapacity = current >= Math.floor(dispState.original_population * getReceivingCapacityFraction(munId));
+            // Orchestrator ruling 2026-11-25 (how D9's text is met): (c) only OPENS an episode. D9 closes an episode
+            // only when (d) fails or the cap is reached, and a convoy itself drops the pocket below its line. Each
+            // convoy week of an open episode re-checks (a), (b), (d) and intent; a week where (a) or (b) fails runs
+            // no convoy but keeps the episode.
+            const convoyWeek = separate && siege && squeeze && intent;
+            const open = convoyWeek && atCapacity;
+
+            // The episode closes when the squeeze ends (a new squeeze is a new episode). At the cap it runs no more
+            // convoys and stays on record until the squeeze ends, so a continuing squeeze cannot open a second one.
+            if (!squeeze) {
+                delete episodes[side];
+                episode = undefined;
+            } else if (open && !episode) {
+                episode = { opened_turn: currentTurn, convoys: 0, people: 0, last_convoy_turn: null, refused_turn: null };
+                episodes[side] = episode;
+            }
+            const refused = episode !== undefined && episode.refused_turn !== null && canRefuseNegotiatedEvacuation(state, side);
+
+            // The convoy: at most one a week, at most NEGOTIATED_EVACUATION_CONVOY_MAX people and what is left of
+            // the episode cap, to the side's supplied main body only (A5's destinations), within receiving
+            // capacity. Sheltered people board first, then residents. Only people with a place to go board: the
+            // rest stay in the pocket, so people leaving = people arriving (no kill, no flight abroad, no overflow).
+            let convoy = 0;
+            if (convoyWeek && episode && besieger !== null && !refused && episode.last_convoy_turn !== currentTurn &&
+                episode.people < NEGOTIATED_EVACUATION_EPISODE_CAP) {
+                const sheltered = Math.max(0, Math.floor(dispState.displaced_in_by_faction?.[side] ?? 0));
+                const sidePop = sideSids.reduce((s, sid) => s + (popOf.get(sid) ?? 0), 0);
+                const residents = heldPeopleOfSide(munId, side, dispState, sidePop, munPop, population1991ByMun);
+                const load = Math.min(NEGOTIATED_EVACUATION_CONVOY_MAX, NEGOTIATED_EVACUATION_EPISODE_CAP - episode.people, sheltered + residents);
+                const routing = load > 0
+                    ? routeDisplacedPopulation(munId, side, load, state.displacement.displacement_state, munControl, besieger,
+                        siegeDestinations.get(side) ?? new Set<MunicipalityId>())
+                    : [];
+                for (const route of routing) {
+                    const destState = getOrInitDisplacementState(
+                        state, route.to_mun, state.displacement.displacement_state[route.to_mun]?.original_population ?? defaultOriginalPopulation
+                    );
+                    destState.displaced_in += route.amount;
+                    const destByFaction = (destState.displaced_in_by_faction ??= {});
+                    destByFaction[side] = (destByFaction[side] ?? 0) + route.amount;
+                    destState.last_updated_turn = currentTurn;
+                    routingRecords.push({ ...route, reason: 'negotiated_evacuation' });
+                    convoy += route.amount;
+                }
+                if (convoy > 0) {
+                    const fromSheltered = Math.min(sheltered, convoy);
+                    const fromResidents = convoy - fromSheltered;
+                    if (fromSheltered > 0) {
+                        dispState.displaced_in = Math.max(0, dispState.displaced_in - fromSheltered);
+                        const byFaction = dispState.displaced_in_by_faction;
+                        if (byFaction) {
+                            const rest = (byFaction[side] ?? 0) - fromSheltered;
+                            if (rest > 0) byFaction[side] = rest;
+                            else delete byFaction[side];
+                        }
+                    }
+                    dispState.displaced_out += fromResidents;
+                    dispState.last_updated_turn = currentTurn;
+                    episode.convoys += 1;
+                    episode.people += convoy;
+                    episode.last_convoy_turn = currentTurn;
+                    evacuationRecords.push({
+                        turn: currentTurn, mun_id: munId, side, besieger, people: convoy, from_sheltered: fromSheltered,
+                        from_residents: fromResidents, convoy: episode.convoys, episode_people: episode.people,
+                        reason: 'negotiated_evacuation',
+                    });
+                }
+            }
+
+            evacuationRows.push({
+                mun_id: munId, faction_id: side, separate, siege, at_capacity: atCapacity, squeeze, squeeze_cells: squeezeCells,
+                besieger, intent, open, convoy_week: episode !== undefined && convoyWeek, refused, cap_reached: episode !== undefined && episode.people >= NEGOTIATED_EVACUATION_EPISODE_CAP,
+                convoy, episode_people: episode?.people ?? 0,
+            });
+        }
+        if (Object.keys(episodes).length > 0) dispState.negotiated_evacuation_by_side = episodes;
+        else delete dispState.negotiated_evacuation_by_side;
+
         if (Object.keys(counters).length > 0) dispState.unsupplied_pressure_by_side = counters;
         else delete dispState.unsupplied_pressure_by_side;
         if (Object.keys(carries).length > 0) dispState.siege_outflow_carry_by_side = carries;
@@ -959,9 +1412,16 @@ export function updateDisplacement(
     enforceRecruitmentCeilings(state);
 
     trappedRecords.sort((a, b) => strictCompare(a.mun_id, b.mun_id) || strictCompare(a.faction_id, b.faction_id));
-    return trappedRecords.length > 0
-        ? { by_municipality: records, routing: routingRecords, trapped: trappedRecords }
-        : { by_municipality: records, routing: routingRecords };
+    // A9 P1: the convoy records are display only (append, keep sorted; nothing in the sim reads them).
+    if (evacuationRecords.length > 0) {
+        const list = (state.displacement.negotiated_evacuation_records ??= []);
+        list.push(...evacuationRecords);
+        list.sort((a, b) => a.turn - b.turn || strictCompare(a.mun_id, b.mun_id) || strictCompare(a.side, b.side));
+    }
+    const report: DisplacementStepReport = { by_municipality: records, routing: routingRecords };
+    if (trappedRecords.length > 0) report.trapped = trappedRecords;
+    if (evacuationRows.length > 0) report.negotiated_evacuation = evacuationRows;
+    return report;
 }
 
 /**

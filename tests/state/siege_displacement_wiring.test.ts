@@ -23,6 +23,8 @@ import { warPhases } from '../../src/sim/turn_phases/war_phases.js';
 
 const STEP = warPhases.find((p) => p.name === 'update-displacement')!;
 
+// A9 B3 (D10b): the pocket municipality is 'novi_grad_sarajevo' and one pocket settlement is the real Sarajevo
+// airport crossing's near end, so its leavers route to the main body through the sourced crossing.
 /** Extra home settlements so the pocket (2) is under POCKET_MAX_SHARE of RBiH's held settlements. */
 const HOME_EXTRA = 12;
 
@@ -41,8 +43,8 @@ interface World {
  */
 function world(opts: { linked: boolean; supplied: boolean; splitPocket?: boolean; turn?: number }): World {
     const controllers: Record<string, string> = {
-        'op:pocket:a': 'RBiH',
-        'op:pocket:b': opts.splitPocket ? 'RS' : 'RBiH',
+        'op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo': 'RBiH',
+        'op:novi_grad_sarajevo:b': opts.splitPocket ? 'RS' : 'RBiH',
         'op:ring:c': 'RS',
         'op:ring:d': 'RS',
         'op:home:e': 'RBiH',
@@ -50,15 +52,15 @@ function world(opts: { linked: boolean; supplied: boolean; splitPocket?: boolean
         'op:home:g': 'RBiH',
     };
     const edges: EdgeRecord[] = [
-        { a: 'op:pocket:a', b: 'op:pocket:b' },
-        { a: 'op:pocket:a', b: 'op:ring:c' },
-        { a: 'op:pocket:b', b: 'op:ring:d' },
+        { a: 'op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo', b: 'op:novi_grad_sarajevo:b' },
+        { a: 'op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo', b: 'op:ring:c' },
+        { a: 'op:novi_grad_sarajevo:b', b: 'op:ring:d' },
         { a: 'op:ring:c', b: 'op:ring:d' },
         { a: 'op:ring:d', b: 'op:home:e' },
         { a: 'op:home:e', b: 'op:home:f' },
         { a: 'op:home:f', b: 'op:home:g' },
     ];
-    if (opts.linked) edges.push({ a: 'op:pocket:b', b: 'op:home:g' });
+    if (opts.linked) edges.push({ a: 'op:novi_grad_sarajevo:b', b: 'op:home:g' });
     // The home body must be large enough that the two-settlement pocket is a pocket (P5).
     for (let i = 1; i <= HOME_EXTRA; i++) {
         controllers[`op:home:x${i}`] = 'RBiH';
@@ -85,19 +87,19 @@ function world(opts: { linked: boolean; supplied: boolean; splitPocket?: boolean
             formations: {},
             front_segments: {
                 // The old gate read these legacy-keyed records; production never has any.
-                'op:pocket:a__op:ring:c': { edge_id: 'op:pocket:a__op:ring:c', active: true },
+                'op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo__op:ring:c': { edge_id: 'op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo__op:ring:c', active: true },
             },
             front_pressure: {},
             militia_pools: {
-                'pocket:HRHB': pool('pocket', 'HRHB'),
-                'pocket:RBiH': pool('pocket', 'RBiH'),
-                'pocket:RS': pool('pocket', 'RS'),
+                'novi_grad_sarajevo:HRHB': pool('novi_grad_sarajevo', 'HRHB'),
+                'novi_grad_sarajevo:RBiH': pool('novi_grad_sarajevo', 'RBiH'),
+                'novi_grad_sarajevo:RS': pool('novi_grad_sarajevo', 'RS'),
             },
         },
         political: { political_controllers: controllers },
         displacement: {
             displacement_state: Object.fromEntries(
-                ['pocket', 'ring', 'home'].map((m) => [
+                ['novi_grad_sarajevo', 'ring', 'home'].map((m) => [
                     m,
                     { mun_id: m, original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 9 },
                 ])
@@ -105,7 +107,7 @@ function world(opts: { linked: boolean; supplied: boolean; splitPocket?: boolean
         },
     } as unknown as GameState;
     const census = {
-        pocket: { total: 10000, bosniak: 6000, serb: 3000, croat: 1000, other: 0 },
+        novi_grad_sarajevo: { total: 10000, bosniak: 6000, serb: 3000, croat: 1000, other: 0 },
         ring: { total: 10000, bosniak: 0, serb: 10000, croat: 0, other: 0 },
         home: { total: 10000, bosniak: 10000, serb: 0, croat: 0, other: 0 },
     } as MunicipalityPopulation1991Map;
@@ -143,8 +145,8 @@ describe('update-displacement war step reads the campaign front (DA1)', () => {
         const w = world({ linked: false, supplied: true });
         await runWarStep(w);
         expect(causersWithHarm(w.state)).toEqual(['RS']);
-        expect(w.state.displacement.displacement_state.pocket.displaced_out
-            + w.state.displacement.displacement_state.pocket.lost_population).toBeGreaterThan(0);
+        expect(w.state.displacement.displacement_state.novi_grad_sarajevo.displaced_out
+            + w.state.displacement.displacement_state.novi_grad_sarajevo.lost_population).toBeGreaterThan(0);
     });
 
     it('a pocket joined to its side\'s main body and supplied does not displace', async () => {
@@ -166,7 +168,7 @@ describe('one pass per municipality (binding condition: no per-pool triple proce
             w.state.meta.turn = t;
             report = updateDisplacement(w.state, w.settlements, w.edges, w.census);
         }
-        const pocketRecords = report.by_municipality.filter((r) => r.mun_id === 'pocket');
+        const pocketRecords = report.by_municipality.filter((r) => r.mun_id === 'novi_grad_sarajevo');
         expect(pocketRecords).toHaveLength(1);
         expect(pocketRecords[0].faction_id).toBe('RBiH');
         expect(pocketRecords[0].reason.some((r) => r.startsWith('unsupplied_pressure_'))).toBe(true);
@@ -179,7 +181,7 @@ describe('the siege counter lives in GameState (survives a save round trip)', ()
         updateDisplacement(w.state, w.settlements, w.edges, w.census);
         w.state.meta.turn = 11;
         updateDisplacement(w.state, w.settlements, w.edges, w.census);
-        expect(w.state.displacement.displacement_state.pocket.unsupplied_pressure_by_side?.RBiH?.turns).toBe(2);
+        expect(w.state.displacement.displacement_state.novi_grad_sarajevo.unsupplied_pressure_by_side?.RBiH?.turns).toBe(2);
         expect(causersWithHarm(w.state)).toEqual([]);
 
         const restored = JSON.parse(JSON.stringify(w.state)) as GameState;
@@ -187,8 +189,8 @@ describe('the siege counter lives in GameState (survives a save round trip)', ()
         const report = updateDisplacement(restored, w.settlements, w.edges, w.census);
         // The trigger fires on the third turn. A5: the whole side is unsupplied here, so no settlement is a
         // supplied main-body destination and the leavers stay; the turn report names them (red-team M1).
-        expect(report.trapped?.filter((r) => r.mun_id === 'pocket').map((r) => r.faction_id)).toEqual(['RBiH']);
-        expect(report.trapped?.find((r) => r.mun_id === 'pocket')?.wanted).toBeGreaterThan(0);
+        expect(report.trapped?.filter((r) => r.mun_id === 'novi_grad_sarajevo').map((r) => r.faction_id)).toEqual(['RBiH']);
+        expect(report.trapped?.find((r) => r.mun_id === 'novi_grad_sarajevo')?.wanted).toBeGreaterThan(0);
         expect(report.by_municipality).toEqual([]);
         expect(causersWithHarm(restored)).toEqual([]);
     });
@@ -196,12 +198,12 @@ describe('the siege counter lives in GameState (survives a save round trip)', ()
     it('clears the counter once the municipality is supplied again', async () => {
         const w = world({ linked: true, supplied: false });
         await runWarStep(w);
-        expect(w.state.displacement.displacement_state.pocket.unsupplied_pressure_by_side?.RBiH?.turns).toBe(1);
+        expect(w.state.displacement.displacement_state.novi_grad_sarajevo.unsupplied_pressure_by_side?.RBiH?.turns).toBe(1);
         w.state.meta.turn = 11;
         (w.state.factions as unknown as Array<{ id: string; supply_sources: string[] }>)
             .find((f) => f.id === 'RBiH')!.supply_sources = ['S_home'];
         await runWarStep(w);
-        expect(w.state.displacement.displacement_state.pocket.unsupplied_pressure_by_side).toBeUndefined();
+        expect(w.state.displacement.displacement_state.novi_grad_sarajevo.unsupplied_pressure_by_side).toBeUndefined();
     });
 });
 
@@ -225,7 +227,7 @@ describe('sourced rate (DA1 P3)', () => {
             w.state.meta.turn = t;
             report = updateDisplacement(w.state, w.settlements, w.edges, w.census);
         }
-        const rec = report.by_municipality.find((r) => r.mun_id === 'pocket')!;
+        const rec = report.by_municipality.find((r) => r.mun_id === 'novi_grad_sarajevo')!;
         expect(rec.reason).toEqual(expect.arrayContaining(['encircled', 'unsupplied_pressure_3_turns']));
         // The pocket's 6,000 Bosniaks (holder's people) at the larger of the two rates.
         // A6 (SD9, batch A round 2): the sub-person remainder carries as integer ppm. Held RBiH people
@@ -235,7 +237,7 @@ describe('sourced rate (DA1 P3)', () => {
         const rate = Math.max(UNSUPPLIED_DISPLACEMENT_FRACTION, ENCIRCLEMENT_DISPLACEMENT_FRACTION);
         const ppm = Math.round(rate * 1_000_000);
         expect(rec.displacement_this_turn).toBe(Math.floor((5995 * ppm + 997_000) / 1_000_000));
-        expect(w.state.displacement.displacement_state.pocket.siege_outflow_carry_by_side?.RBiH).toBe(992_000);
+        expect(w.state.displacement.displacement_state.novi_grad_sarajevo.siege_outflow_carry_by_side?.RBiH).toBe(992_000);
         // Never the sum: two rates added would take about 12 a week.
         expect(rec.displacement_this_turn).toBeLessThan(Math.floor(5995 * (UNSUPPLIED_DISPLACEMENT_FRACTION + ENCIRCLEMENT_DISPLACEMENT_FRACTION)));
         expect(w.state.displacement.civilian_casualties?.RBiH?.killed ?? 0).toBe(0);
@@ -259,7 +261,7 @@ describe('who leaves, and where they go', () => {
         const split = world({ linked: false, supplied: true, splitPocket: true });
         await runWarStep(split);
         const out = (w: World) => {
-            const s = w.state.displacement.displacement_state.pocket;
+            const s = w.state.displacement.displacement_state.novi_grad_sarajevo;
             return s.displaced_out + s.lost_population;
         };
         expect(out(split)).toBeGreaterThan(0);
@@ -353,30 +355,30 @@ describe('panel round 1 (DA1 P6)', () => {
         updateDisplacement(w.state, w.settlements, w.edges, w.census);
         w.state.meta.turn = 12; // turn 11 skipped
         updateDisplacement(w.state, w.settlements, w.edges, w.census);
-        expect(w.state.displacement.displacement_state.pocket.unsupplied_pressure_by_side?.RBiH).toEqual({ turns: 1, last_turn: 12 });
+        expect(w.state.displacement.displacement_state.novi_grad_sarajevo.unsupplied_pressure_by_side?.RBiH).toEqual({ turns: 1, last_turn: 12 });
         w.state.meta.turn = 13;
-        w.state.political.political_controllers!['op:pocket:a'] = 'RS';
-        w.state.political.political_controllers!['op:pocket:b'] = 'RS';
+        w.state.political.political_controllers!['op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo'] = 'RS';
+        w.state.political.political_controllers!['op:novi_grad_sarajevo:b'] = 'RS';
         updateDisplacement(w.state, w.settlements, w.edges, w.census);
-        expect(w.state.displacement.displacement_state.pocket.unsupplied_pressure_by_side?.RBiH).toBeUndefined();
+        expect(w.state.displacement.displacement_state.novi_grad_sarajevo.unsupplied_pressure_by_side?.RBiH).toBeUndefined();
     });
 
     it('an ally links a pocket to the main body before the RBiH-HRHB war, not after (Engine 9)', () => {
-        const controllers: Record<string, string> = { 'op:pocket:a': 'RBiH', 'op:pocket:b': 'RBiH', 'op:ring:c': 'RS', 'op:hvo:h': 'HRHB' };
+        const controllers: Record<string, string> = { 'op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo': 'RBiH', 'op:novi_grad_sarajevo:b': 'RBiH', 'op:ring:c': 'RS', 'op:hvo:h': 'HRHB' };
         const edges: EdgeRecord[] = [
-            { a: 'op:pocket:a', b: 'op:pocket:b' }, { a: 'op:pocket:a', b: 'op:ring:c' },
-            { a: 'op:pocket:b', b: 'op:hvo:h' }, { a: 'op:hvo:h', b: 'op:home:e' },
+            { a: 'op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo', b: 'op:novi_grad_sarajevo:b' }, { a: 'op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo', b: 'op:ring:c' },
+            { a: 'op:novi_grad_sarajevo:b', b: 'op:hvo:h' }, { a: 'op:hvo:h', b: 'op:home:e' },
         ];
         homeBody(controllers, edges);
-        const census = { pocket: { total: 10000, bosniak: 10000, serb: 0, croat: 0, other: 0 } } as MunicipalityPopulation1991Map;
-        const allied = custom(controllers, edges, ['pocket:RBiH'], census);
+        const census = { novi_grad_sarajevo: { total: 10000, bosniak: 10000, serb: 0, croat: 0, other: 0 } } as MunicipalityPopulation1991Map;
+        const allied = custom(controllers, edges, ['novi_grad_sarajevo:RBiH'], census);
         const before = updateDisplacement(allied.state, allied.settlements, allied.edges, census);
         expect(before.by_municipality.filter((r) => r.reason.includes('encircled'))).toEqual([]);
-        const atWar = custom(controllers, edges, ['pocket:RBiH'], census);
+        const atWar = custom(controllers, edges, ['novi_grad_sarajevo:RBiH'], census);
         atWar.state.meta.turn = 60;
         (atWar.state.political as unknown as Record<string, unknown>).war_alliance_rbih_hrhb = -1;
         const after = updateDisplacement(atWar.state, atWar.settlements, atWar.edges, census);
-        expect(after.by_municipality.find((r) => r.mun_id === 'pocket')?.reason).toContain('encircled');
+        expect(after.by_municipality.find((r) => r.mun_id === 'novi_grad_sarajevo')?.reason).toContain('encircled');
     });
 
     it('people with nowhere to go stay in the pocket: nothing is booked or lost (Engine 5, Canon 11)', async () => {
@@ -384,7 +386,7 @@ describe('panel round 1 (DA1 P6)', () => {
         // Fill the only friendly destination to capacity.
         w.state.displacement.displacement_state.home.displaced_in = 1_000_000;
         await runWarStep(w);
-        const pocket = w.state.displacement.displacement_state.pocket;
+        const pocket = w.state.displacement.displacement_state.novi_grad_sarajevo;
         expect(pocket.displaced_out).toBe(0);
         expect(pocket.lost_population).toBe(0);
         expect(causersWithHarm(w.state)).toEqual([]);
@@ -405,17 +407,17 @@ describe('panel round 1 (DA1 P6)', () => {
         // RBiH started with 18 settlements; RS now holds the home body. What is left is the two-settlement
         // pocket (now RBiH's LARGEST body, 2/18 = 0.11) and one cut-off settlement elsewhere ('far').
         const controllers: Record<string, string> = {
-            'op:pocket:a': 'RBiH', 'op:pocket:b': 'RBiH', 'op:ring:c': 'RS', 'op:ring:d': 'RS', 'op:far:z': 'RBiH',
+            'op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo': 'RBiH', 'op:novi_grad_sarajevo:b': 'RBiH', 'op:ring:c': 'RS', 'op:ring:d': 'RS', 'op:far:z': 'RBiH',
         };
         const edges: EdgeRecord[] = [
-            { a: 'op:pocket:a', b: 'op:pocket:b' }, { a: 'op:pocket:a', b: 'op:ring:c' },
-            { a: 'op:pocket:b', b: 'op:ring:d' }, { a: 'op:ring:d', b: 'op:home:e' },
+            { a: 'op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo', b: 'op:novi_grad_sarajevo:b' }, { a: 'op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo', b: 'op:ring:c' },
+            { a: 'op:novi_grad_sarajevo:b', b: 'op:ring:d' }, { a: 'op:ring:d', b: 'op:home:e' },
         ];
         homeBody(controllers, edges, 'RS');
         const initial: Record<string, string> = { ...controllers };
         for (const sid of Object.keys(initial)) if (sid.startsWith('op:home:')) initial[sid] = 'RBiH';
-        const census = { pocket: { total: 10000, bosniak: 10000, serb: 0, croat: 0, other: 0 } } as MunicipalityPopulation1991Map;
-        const w = custom(controllers, edges, ['pocket:RBiH'], census, initial);
+        const census = { novi_grad_sarajevo: { total: 10000, bosniak: 10000, serb: 0, croat: 0, other: 0 } } as MunicipalityPopulation1991Map;
+        const w = custom(controllers, edges, ['novi_grad_sarajevo:RBiH'], census, initial);
         const report = updateDisplacement(w.state, w.settlements, w.edges, census);
         // A5 (SD7) governs the destination (orchestrator ruling 2026-11-23): the pocket IS the side's main
         // body, so no supplied main-body municipality is left to go to; 'far' is cut off and never qualifies.
@@ -423,16 +425,16 @@ describe('panel round 1 (DA1 P6)', () => {
         // cannot be what fired; every leaver is trapped.
         expect(report.trapped).toHaveLength(1);
         const row = report.trapped![0];
-        expect(row).toMatchObject({ mun_id: 'pocket', faction_id: 'RBiH', routed: 0 });
+        expect(row).toMatchObject({ mun_id: 'novi_grad_sarajevo', faction_id: 'RBiH', routed: 0 });
         expect(row.wanted).toBeGreaterThan(0);
         expect(row.trapped).toBe(row.wanted);
         // (b) Nothing is booked for those people: no departure record or route, no Ledger figure.
-        expect(report.by_municipality.filter((r) => r.mun_id === 'pocket')).toEqual([]);
+        expect(report.by_municipality.filter((r) => r.mun_id === 'novi_grad_sarajevo')).toEqual([]);
         expect(report.routing).toEqual([]);
         expect(w.state.displacement.displacement_humanitarian_aggregates ?? {}).toEqual({});
         expect(w.state.displacement.civilian_casualties?.RBiH?.killed ?? 0).toBe(0);
-        expect(w.state.displacement.displacement_state.pocket?.displaced_out ?? 0).toBe(0);
-        expect(w.state.displacement.displacement_state.pocket?.lost_population ?? 0).toBe(0);
+        expect(w.state.displacement.displacement_state.novi_grad_sarajevo?.displaced_out ?? 0).toBe(0);
+        expect(w.state.displacement.displacement_state.novi_grad_sarajevo?.lost_population ?? 0).toBe(0);
         // (c) The cut-off settlement receives nobody.
         expect(w.state.displacement.displacement_state.far?.displaced_in_by_faction?.RBiH ?? 0).toBe(0);
         expect(w.state.displacement.displacement_state.far?.displaced_in ?? 0).toBe(0);
@@ -440,14 +442,14 @@ describe('panel round 1 (DA1 P6)', () => {
 
     it('A7 (SD11): a largest body above 15% of the turn-0 count is a split, not a siege, even under pressure', () => {
         const controllers: Record<string, string> = {
-            'op:pocket:a': 'RBiH', 'op:pocket:b': 'RBiH', 'op:ring:c': 'RS', 'op:ring:d': 'RS', 'op:far:z': 'RBiH',
+            'op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo': 'RBiH', 'op:novi_grad_sarajevo:b': 'RBiH', 'op:ring:c': 'RS', 'op:ring:d': 'RS', 'op:far:z': 'RBiH',
         };
         const edges: EdgeRecord[] = [
-            { a: 'op:pocket:a', b: 'op:pocket:b' }, { a: 'op:pocket:a', b: 'op:ring:c' }, { a: 'op:pocket:b', b: 'op:ring:d' },
+            { a: 'op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo', b: 'op:novi_grad_sarajevo:b' }, { a: 'op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo', b: 'op:ring:c' }, { a: 'op:novi_grad_sarajevo:b', b: 'op:ring:d' },
         ];
         // No turn-0 map: the share falls back to the side's current count (3), so the largest body (2) is 67%.
-        const census = { pocket: { total: 10000, bosniak: 10000, serb: 0, croat: 0, other: 0 } } as MunicipalityPopulation1991Map;
-        const w = custom(controllers, edges, ['pocket:RBiH'], census);
+        const census = { novi_grad_sarajevo: { total: 10000, bosniak: 10000, serb: 0, croat: 0, other: 0 } } as MunicipalityPopulation1991Map;
+        const w = custom(controllers, edges, ['novi_grad_sarajevo:RBiH'], census);
         const report = updateDisplacement(w.state, w.settlements, w.edges, census);
         expect(report.by_municipality.filter((r) => r.reason.includes('encircled'))).toEqual([]);
     });
@@ -470,8 +472,8 @@ describe('panel round 1 (DA1 P6)', () => {
         const pools = w.state.military.militia_pools as Record<string, { available: number }>;
         for (const k of Object.keys(pools)) pools[k].available = 5000; // below the municipality's recruitment ceiling
         await runWarStep(w);
-        expect(pools['pocket:RBiH'].available).toBeLessThan(5000);
-        expect(pools['pocket:RS'].available).toBe(5000);
-        expect(pools['pocket:HRHB'].available).toBe(5000);
+        expect(pools['novi_grad_sarajevo:RBiH'].available).toBeLessThan(5000);
+        expect(pools['novi_grad_sarajevo:RS'].available).toBe(5000);
+        expect(pools['novi_grad_sarajevo:HRHB'].available).toBe(5000);
     });
 });

@@ -57,6 +57,44 @@ export function getReceivingCapacityFraction(munId: MunicipalityId): number {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// A9 B3 (SD13, D10b): sourced crossings out of a separate pocket
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * One sourced crossing that lets a pocket's A5 siege leavers reach their side's main body although the
+ * pocket is a territorial body separate from it. Routing data only: read by the A5 siege router, never
+ * saved, never a lever. `near_settlements` are the pocket-side settlements (sorted); the far end is
+ * always "the side's main body, supplied" (A5's own destination list), never a named settlement.
+ */
+export interface PocketCrossing {
+    readonly id: string;
+    readonly side: FactionId;
+    readonly near_settlements: readonly string[];
+    readonly source: string;
+}
+
+/**
+ * A9 B3 (SD13, 8-seat §6 ruling D10b, unanimous 2026-11-25). Exactly one entry. Every other separate pocket
+ * (Goražde, Srebrenica, Žepa, Bihać) has no sourced civilian exit, so its siege leavers are trapped.
+ * - The Sarajevo airport crossing: the BiH authorities issued permits for civilians to cross the runway,
+ *   80-300 people a night in some periods, under SRK fire (Galić TJ IT-98-29-T paras 411-413, fn 1448). The
+ *   A5 weekly rate is itself sourced to government-held Sarajevo's outflow after 1992 (UNCOE S/1994/674/Add.2
+ *   Annex VI; Tabeau), which left by this crossing; the crossing adds no new number.
+ * - The near end is government-held Novi Grad (Dobrinja, the city end of the runway crossing). It applies
+ *   while RBiH holds that settlement in the leavers' own body. It is keyed by settlement, never by date.
+ * - The Dobrinja-Butmir tunnel is NOT listed: its civilian scale is not sourced (supply only).
+ * Leavers go to the main body (A5's list), so the crossing never feeds the 1st Corps pool in Sarajevo.
+ */
+export const POCKET_CROSSINGS: readonly PocketCrossing[] = [
+    {
+        id: 'sarajevo_airport_crossing',
+        side: 'RBiH',
+        near_settlements: ['op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo'],
+        source: 'Galić TJ IT-98-29-T paras 411-413'
+    }
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Per-region routing tables
 // ═══════════════════════════════════════════════════════════════════════════
 

@@ -1926,6 +1926,82 @@ export interface DisplacementState {
      * projection keeps only the player's own side.
      */
     unable_to_leave_by_side?: Partial<Record<FactionId, { amount: number; turn: number }>>;
+    /**
+     * A9 P0-A (SD13, 8-seat §6 ruling D2, 2026-11-25): booked-once marker of the pocket-fall step. Per side
+     * (the people), the turn on which the step took that side's ORIGINAL residents here at a pocket fall,
+     * so they are never taken a second time. Written and read ONLY by `src/state/pocket_fall.ts`
+     * (source-scan test `pocket_fall_records_write_only`). Absent until the first such booking; old saves
+     * load without it.
+     */
+    pocket_fall_originals_booked_by_side?: Partial<Record<FactionId, number>>;
+    /**
+     * A9 P1 (SD13, 8-seat §6 ruling D9, 2026-11-25; DISPLACEMENT_MASTER §3.6): per side (the people), the
+     * negotiated-evacuation episode open for that side's besieged pocket here. Written and read only by the
+     * convoy rule in `updateDisplacement` (`src/state/displacement.ts`) and its refusal writer
+     * `recordNegotiatedEvacuationRefusal`. Created when the convoy predicate first opens; deleted when the
+     * squeeze (a recent capture of the pocket's ground by the besieger) ends or the side no longer holds
+     * ground here, so a new squeeze is a new episode. Absent until first written; old saves load without it.
+     */
+    negotiated_evacuation_by_side?: Partial<Record<FactionId, NegotiatedEvacuationEpisode>>;
+}
+
+/**
+ * A9 P1 (ruling D9): one negotiated-evacuation episode of one pocket (municipality and people).
+ */
+export interface NegotiatedEvacuationEpisode {
+    /** Turn the convoy predicate first opened for this episode. */
+    opened_turn: number;
+    /** Convoys run this episode (at most one a week). */
+    convoys: number;
+    /** People moved this episode; never above `NEGOTIATED_EVACUATION_EPISODE_CAP`. */
+    people: number;
+    /** Turn of the last convoy, or null before the first. */
+    last_convoy_turn: number | null;
+    /**
+     * Turn a human RBiH president refused the evacuations for this episode, or null (the historical default:
+     * allow). Read only while the side is human-controlled; bots, staff and headless runs always allow. The
+     * refusal ends with the episode; it has no reward and the people stay trapped.
+     */
+    refused_turn: number | null;
+}
+
+/**
+ * A9 P1 (ruling D9): one convoy, as aggregates only. Display only (the Humanitarian Ledger). `side` is the people
+ * moved; `besieger` the pressing side whose squeeze opened it. `people` = `from_sheltered` + `from_residents`,
+ * every one of them arrived in the side's supplied main body (nobody is killed or sent abroad by a convoy).
+ */
+export interface NegotiatedEvacuationRecord {
+    turn: number;
+    mun_id: MunicipalityId;
+    side: FactionId;
+    besieger: FactionId;
+    people: number;
+    from_sheltered: number;
+    from_residents: number;
+    /** 1-based convoy number within the episode. */
+    convoy: number;
+    /** Episode total after this convoy. */
+    episode_people: number;
+    reason: 'negotiated_evacuation';
+}
+
+/**
+ * A9 P0-A (SD13, 8-seat §6 ruling D5, 2026-11-25): one pocket fall, as aggregates only. Display only.
+ * `side` is the people taken; `captor` the side holding most of the municipality's settlements that
+ * turn, to whose forces the figures are attributed. `left` = `routed` + `fled_abroad` (the people who
+ * left the pocket). `killed` is `null` when not recorded (a negotiated fall, never 0). No age or sex split.
+ */
+export interface PocketFallRecord {
+    turn: number;
+    mun_id: MunicipalityId;
+    side: FactionId;
+    captor: FactionId;
+    left: number;
+    routed: number;
+    fled_abroad: number;
+    killed: number | null;
+    negotiated: boolean;
+    reason: 'pocket_fall';
 }
 
 /** Per-event displacement record for tracking and reporting. Sorted by (turn, origin_mun). */
@@ -3845,6 +3921,22 @@ civilian_casualties: CivilianCasualtiesByFaction;
  * first such move; old saves load without it.
  */
 moved_on_at_capture_by_people?: Partial<Record<FactionId, number>>;
+/**
+ * A9 P0-A (SD13, 8-seat §6 ruling D5, 2026-11-25). WRITE-ONLY, display only: nothing in the
+ * simulation reads it (source-scan test `pocket_fall_records_write_only`). One aggregate record per
+ * pocket fall (municipality and people), appended by `processPocketFalls` (`src/state/pocket_fall.ts`)
+ * and kept sorted by (turn, mun_id, side). It feeds no score, no capital, no condemnation input and no
+ * event log. Absent until the first fall; old saves load without it.
+ */
+pocket_fall_records?: PocketFallRecord[];
+/**
+ * A9 P1 (SD13, 8-seat §6 ruling D9, 2026-11-25). WRITE-ONLY, display only: nothing in the simulation reads
+ * it (source-scan test `negotiated_evacuation_write_only`). One aggregate record per negotiated-evacuation
+ * convoy, appended by the convoy rule in `updateDisplacement` (`src/state/displacement.ts`) and kept sorted by
+ * (turn, mun_id, side). It feeds no score, no capital, no condemnation input and no event log. Absent until
+ * the first convoy; old saves load without it.
+ */
+negotiated_evacuation_records?: NegotiatedEvacuationRecord[];
 /**
  * Per-faction cumulative humanitarian aggregates (LANE D-PRE substrate).
  * Bounded ~3 factions x 3 ethnicities x 3 numbers = 27 numbers total

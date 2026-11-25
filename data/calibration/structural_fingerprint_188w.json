@@ -1,15 +1,15 @@
 {
   "schema_version": 2,
-  "fingerprint": "bebfdd573bb907ed",
+  "fingerprint": "f7cae0a6c5a48f0d",
   "fields": {
     "schema_version": 2,
     "scenario_id": "apr1992_definitive_188w",
     "weeks": 40,
     "final_turn": 40,
     "control_counts": {
-      "HRHB": 86,
+      "HRHB": 87,
       "RBiH": 262,
-      "RS": 364
+      "RS": 363
     },
     "control_flips": [
       {
@@ -334,12 +334,6 @@
         "settlement_id": "op:jajce:kruscica",
         "municipality_id": "jajce",
         "from": "RBiH",
-        "to": "RS"
-      },
-      {
-        "settlement_id": "op:jajce:lupnica",
-        "municipality_id": "jajce",
-        "from": "HRHB",
         "to": "RS"
       },
       {

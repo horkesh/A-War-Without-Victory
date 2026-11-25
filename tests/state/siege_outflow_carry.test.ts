@@ -21,6 +21,8 @@ import {
 import { CURRENT_SCHEMA_VERSION, type GameState } from '../../src/state/game_state.js';
 import type { MunicipalityPopulation1991Map } from '../../src/state/population_share.js';
 
+// A9 B3 (D10b): the pocket routes because the fixture declares a crossing at its near end.
+const FIXTURE_CROSSING = [{ id: 'fixture_crossing', side: 'RBiH' as const, near_settlements: ['op:pocket:a'], source: 'test fixture: stands in for a sourced crossing (D10b)' }];
 const PPM = Math.round(ENCIRCLEMENT_DISPLACEMENT_FRACTION * SIEGE_OUTFLOW_PPM_SCALE);
 
 interface World {
@@ -97,7 +99,7 @@ function world(opts: { population: number; supplied: boolean; linked?: boolean }
 }
 
 function step(w: World) {
-    const report = updateDisplacement(w.state, w.settlements, w.edges, w.census);
+    const report = updateDisplacement(w.state, w.settlements, w.edges, w.census, undefined, FIXTURE_CROSSING);
     w.state.meta.turn += 1;
     return report;
 }

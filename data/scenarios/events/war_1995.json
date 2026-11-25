@@ -529,7 +529,8 @@
       }
     ],
     "sets_flags": {
-      "zepa_fell": true
+      "zepa_fell": true,
+      "zepa_negotiated_evacuation": true
     }
   },
   {

@@ -2,6 +2,7 @@ import { initializeMilitiaPoolDefaults } from './militia_pool_defaults.js';
 import type { SettlementRecord } from '../map/settlements.js';
 import type { DisplacementRoutingRecord } from './displacement.js';
 import {
+    ASSAULTED_POCKET_FALL_KILL_RATIO,
     DISPLACEMENT_KILLED_FRACTION,
     getDisplacementKillFraction,
     getFactionFleeAbroadFraction
@@ -239,7 +240,9 @@ const BOSNIAK_EXIT_MUN_IDS = new Set<MunicipalityId>([
 const BOSNIAK_EXIT_FLEE_ABROAD = 0.40;
 
 // Enclave-overrun special case (historical high-lethality second displacement).
-export const ENCLAVE_OVERRUN_KILL_FRACTION = 0.35;
+// A9 P0-A (SD13, 8-seat §6 ruling D3 and DISPLACEMENT_MASTER §10.1, 2026-11-25): the takeover writer's
+// combat overrun of an enclave uses the same sourced ratio as the pocket-fall step (was 0.35, unsourced).
+export const ENCLAVE_OVERRUN_KILL_FRACTION = ASSAULTED_POCKET_FALL_KILL_RATIO;
 
 const REINFORCEMENT_RATE = 0.02;
 /** Besieged enclaves: refugees arrive starving, unarmed, traumatized — far lower militarization rate. */
@@ -631,7 +634,11 @@ function getPolicyTargetShare(
     return entry && munTotal > 0 ? Math.max(0, Math.min(1, entry.bosniak / munTotal)) : 0;
 }
 
-function getDynamicHostileShare(
+/**
+ * `fromFaction`'s people as a share of the municipality's 1991 census plus incoming displaced (1 when no census).
+ * Exported unchanged for the A9 P1 convoy rule's besieger-intent predicate (`displacement.ts`).
+ */
+export function getDynamicHostileShare(
     munId: MunicipalityId,
     fromFaction: FactionId,
     dispState: DisplacementState,
@@ -923,13 +930,34 @@ function getInitialDisplacementFraction(
     return INITIAL_DISPLACEMENT_FRACTION;
 }
 
+/**
+ * A9 B2 (SD13): where a capture pass-through group of `faction` sheltered in `munId` may be moved on.
+ * `null` means the group stays (its side still holds a supplied settlement there); a set lists the
+ * reachable destinations, and an empty set also means the group stays. Built by
+ * `buildPassThroughDestinationResolver` (displacement.ts) from this turn's territorial bodies and supply.
+ */
+export type PassThroughDestinationResolver = (
+    faction: string,
+    munId: MunicipalityId,
+    /**
+     * A9 P0-A: test the link from these settlements only (a fallen enclave's own settlements), instead of
+     * from every settlement of the municipality. The capture pass-through never passes it.
+     */
+    linkFrom?: readonly string[]
+) => ReadonlySet<MunicipalityId> | null;
+
 export function processDisplacementTakeover(
     state: GameState,
     settlements: Map<string, SettlementRecord>,
     battleReport?: BattleResolutionLike,
     population1991ByMun?: MunicipalityPopulation1991Map,
     /** Optional OSID-keyed settlements with per-OSID census data (population_total, population_bosniaks, etc.). */
-    osidSettlements?: Map<string, SettlementRecord>
+    osidSettlements?: Map<string, SettlementRecord>,
+    /**
+     * A9 B2 (SD13): builds the pass-through reachability on first use (the turn pipeline passes it). Without
+     * it (unit fixtures, legacy harnesses) the pass-through routes as B1 did.
+     */
+    passThroughReach?: () => PassThroughDestinationResolver
 ): TakeoverDisplacementReport {
     if (state.meta.phase !== 'war') {
         return {
@@ -1102,6 +1130,7 @@ export function processDisplacementTakeover(
     }
 
     const friendlyMunsByFaction = buildFriendlyMunicipalitiesByFaction(state, settlements);
+    let passThroughResolver: PassThroughDestinationResolver | undefined;
 
     // 2) Mature timers into camp state (per-OSID displacement).
     // Count OSIDs per municipality once for per-OSID population split.
@@ -1302,6 +1331,10 @@ export function processDisplacementTakeover(
             // A9 (SD13, §6 broader panel round 1, 2026-11-24; DISPLACEMENT_MASTER §10.6): the pass-through
             // runs only when the capture leaves the captor as the municipality's majority holder. Taking an
             // outlying settlement that does not change the municipality's holder moves no sheltered group.
+            // A9 B2 (SD13, owner rulings 2-3 of 2026-11-24, inside the round-1 A5b shape): a group whose side
+            // still holds a supplied settlement in the municipality stays, and any other group goes only to
+            // supplied ground in a territorial body linked to the source; with none reachable it stays.
+            // Pass-through applies only to ground that is actually taken, never across enemy lines.
             if (
                 !isPolicyTimer &&
                 dispState.displaced_in > 0 &&
@@ -1313,9 +1346,16 @@ export function processDisplacementTakeover(
                     if (fid === timer.to_faction) continue;
                     let rem = Math.max(0, Math.floor(byFaction[fid] ?? 0));
                     if (rem <= 0) continue;
+                    let destinations: Set<MunicipalityId> = friendlyMunsByFaction[fid];
+                    if (passThroughReach) {
+                        passThroughResolver ??= passThroughReach();
+                        const reachable = passThroughResolver(fid, munId);
+                        if (reachable === null || reachable.size === 0) continue;
+                        destinations = new Set([...(destinations ?? [])].filter(m => reachable.has(m)));
+                    }
                     const result = routeDisplacedCohort(
                         state, munId, fid, rem,
-                        friendlyMunsByFaction[fid],
+                        destinations,
                         settlements, routedByPoolKey, report,
                         { causedByFaction: timer.to_faction, reportReason: 'capture_pass_through' }
                     );

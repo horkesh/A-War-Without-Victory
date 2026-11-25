@@ -14,6 +14,7 @@ import {
     type OobCorps
 } from '../scenario/oob_loader.js';
 import type { DisplacementStepReport } from '../state/displacement.js';
+import type { PocketFallStepReport } from '../state/pocket_fall.js';
 import type { TakeoverDisplacementReport } from '../state/displacement_takeover.js';
 import type { ExhaustionStats } from '../state/exhaustion.js';
 // REASON-CODE INSTRUMENTATION (topic `formation_refusal`) — see reason_code_debug.ts.
@@ -180,6 +181,8 @@ export interface TurnReport {
     exhaustion?: ExhaustionStats;
     militia_fatigue?: MilitiaFatigueStepReport;
     displacement?: DisplacementStepReport;
+    /** A9 P0-A (SD13): pocket-fall firings and same-body moves this turn (turn report only). */
+    pocket_fall?: PocketFallStepReport;
     sustainability?: SustainabilityStepReport;
     negotiation_pressure?: NegotiationPressureStepReport;
     negotiation_capital?: NegotiationCapitalStepReport;
