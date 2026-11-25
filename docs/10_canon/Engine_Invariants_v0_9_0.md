@@ -505,7 +505,7 @@ An operation AAR may credit an objective as captured only when an attack-backed 
 
 ### 15.1 Officer Succession
 
-Officers depart via `available_until_turn` (`processOfficerSuccession` step 1, `src/sim/combat/officer_system.ts:736`). When an officer's turn arrives (an active or reserve officer; army commanders are roster-owned and skipped, `officer_system.ts:729`), he retires: he leaves his corps and any operation command. This holds for every faction, the player's included, at every autonomy level, because the staff run the player's faction as they run a bot's (player-override model, §14.10a). It is the historical default. The President's lever is the appointment:
+Officers depart via `available_until_turn` (`processOfficerSuccession` step 1, `src/sim/combat/officer_system.ts:736`). When an officer's turn arrives (an active or reserve officer; army commanders are roster-owned and skipped, `officer_system.ts:730`), he retires: he leaves his corps and any operation command. This holds for every faction, the player's included, at every autonomy level, because the staff run the player's faction as they run a bot's (player-override model, §14.10a). It is the historical default. The President's lever is the appointment:
 - **Presidential appointee:** the availability pass never removes an officer from the corps the President appointed, accepted or kept him in (`isPresidentialAppointee`, guard at `officer_system.ts:743`; see "Appointee guard" below), at any level.
 - **Physical loss:** a physical loss still applies, to an appointee as to anyone. A scheduled 'killed' tenure skips the availability pass (`scheduledDeathBy`, `officer_system.ts:735`) and is applied in step 3b (`officer_system.ts:837`). A combat casualty is step 3 (`officer_system.ts:793`).
 
