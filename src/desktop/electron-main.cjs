@@ -3394,6 +3394,27 @@ app.whenReady().then(() => {
     }
   });
 
+  // A9 P1 (8-seat §6 ruling D9; orchestrator P1 ruling 5): the RBiH president refuses the negotiated evacuations for
+  // one pocket (municipality) for the rest of its episode. Only an explicit click writes it; silence = allow. The
+  // engine hook writes nothing for bots, staff, headless runs or a pocket with no open episode.
+  ipcMain.handle('refuse-negotiated-evacuation', async (_event, payload) => {
+    const { munId } = payload || {};
+    if (!currentGameStateJson || typeof munId !== 'string' || munId.length === 0) {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      if (!sim.recordNegotiatedEvacuationRefusal(state, munId, 'RBiH')) {
+        return { ok: false, error: 'No open evacuation to refuse' };
+      }
+      writeCanonicalCurrentState(sim, state, _event.sender);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
   // Serves the PARKED operation planner (`src/ui/map/components/ops_modal/*`, AuthorizePhase), which is
   // unmounted for the DLC on purpose (player planning of operations is post-1.0). Kept, and pointed at
   // the real GameState paths (`military.corps_command`, `military.named_officers`; the root paths it used

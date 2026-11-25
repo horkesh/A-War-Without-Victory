@@ -849,6 +849,28 @@ function projectPocketFallRecords(records, playerFaction) {
   return records.filter((row) => isRecord(row) && row.side === playerFaction).map((row) => cloneJson(row));
 }
 
+/**
+ * A9 P1 (SD13, 8-seat §6 ruling D9; display only): the negotiated-evacuation episode state and the convoy records.
+ * An episode or convoy of another side tells which of its pockets is squeezed, so only the player's own side is
+ * kept, as for `unable_to_leave_by_side`. With no player faction everything is dropped. Works on the cloned
+ * projection; order is preserved.
+ */
+function stripNegotiatedEvacuationToPlayer(displacementState, playerFaction) {
+  if (!isRecord(displacementState)) return;
+  for (const munId of Object.keys(displacementState).sort()) {
+    const row = displacementState[munId];
+    if (!isRecord(row) || !isRecord(row.negotiated_evacuation_by_side)) continue;
+    const own = playerFaction ? row.negotiated_evacuation_by_side[playerFaction] : undefined;
+    if (isRecord(own)) row.negotiated_evacuation_by_side = { [playerFaction]: own };
+    else delete row.negotiated_evacuation_by_side;
+  }
+}
+
+function projectNegotiatedEvacuationRecords(records, playerFaction) {
+  if (!Array.isArray(records) || !playerFaction) return [];
+  return records.filter((row) => isRecord(row) && row.side === playerFaction).map((row) => cloneJson(row));
+}
+
 function projectDisplacement(displacement, controllers, playerFaction) {
   const projected = copyKeys(displacement, [
     'civilian_casualties',
@@ -862,6 +884,12 @@ function projectDisplacement(displacement, controllers, playerFaction) {
   stripUnableToLeaveToPlayer(projected.displacement_state, playerFaction);
   const ownPocketFalls = projectPocketFallRecords(isRecord(displacement) ? displacement.pocket_fall_records : undefined, playerFaction);
   if (ownPocketFalls.length > 0) projected.pocket_fall_records = ownPocketFalls;
+  stripNegotiatedEvacuationToPlayer(projected.displacement_state, playerFaction);
+  const ownConvoys = projectNegotiatedEvacuationRecords(
+    isRecord(displacement) ? displacement.negotiated_evacuation_records : undefined,
+    playerFaction,
+  );
+  if (ownConvoys.length > 0) projected.negotiated_evacuation_records = ownConvoys;
   projected.sustainability_state = projectSustainabilityState(
     isRecord(displacement) ? displacement.sustainability_state : undefined,
     controllers,

@@ -104,6 +104,9 @@ export { parseDaytonProposal } from './dayton_proposal.js';
 export { raiseArmyClash, sweepLapsedArmyClashes } from '../sim/combat/army_clashes.js';
 // Engine Invariants §14.10c: a Level-1 stance answer writes the 4-turn corps hold (desktop IPC only).
 export { recordLevel1StanceAnswerHold } from '../sim/combat/stance_matters.js';
+// A9 P1 (ruling D9): the RBiH president's refusal of the negotiated evacuations for one pocket (desktop IPC only).
+// The hook writes nothing for bots, staff or headless runs, so silence = allow.
+export { recordNegotiatedEvacuationRefusal } from '../state/displacement.js';
 
 /** Table a draft for the next Dayton round (DC A2): every other delegation answers; the round is recorded. */
 export function tableDesktopDaytonRound(state: GameState, payload: unknown): TableDaytonRoundResult {
