@@ -4118,6 +4118,8 @@ app.whenReady().then(() => {
       if (state.military?.corps_command?.[corpsId]) {
         state.military.corps_command[corpsId].stance = stanceValue;
         state.military.corps_command[corpsId].player_ordered_stance = stanceValue;
+        // §14.10c: the acceptance also holds the corps at the chosen stance for 4 turns.
+        if (typeof sim.recordLevel1StanceAnswerHold === 'function') sim.recordLevel1StanceAnswerHold(state, corpsId, stanceValue, proposal.id);
       }
     } else if (proposal.proposed_action.startsWith('APPROVE_OP:')) {
       // v0.8.4 Phase D: Player approves a Level 1 op proposal.
@@ -4164,6 +4166,8 @@ app.whenReady().then(() => {
       if (state.military?.corps_command?.[corpsId]) {
         const currentStance = proposal.current_value ?? state.military.corps_command[corpsId].stance;
         state.military.corps_command[corpsId].player_ordered_stance = currentStance;
+        // §14.10c: the refusal holds the corps at its current stance for 4 turns.
+        if (typeof sim.recordLevel1StanceAnswerHold === 'function') sim.recordLevel1StanceAnswerHold(state, corpsId, currentStance, proposal.id);
       }
     } else if (proposal.proposed_action.startsWith('APPROVE_OP:')) {
       // v0.8.4 Phase D: Player rejects a Level 1 op proposal.

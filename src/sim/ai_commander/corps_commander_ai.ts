@@ -12,6 +12,7 @@ import { buildCorpsPrompt } from './prompt_builder.js';
 import { parseCorpsResponse } from './response_parser.js';
 import { logDecision, getLoggedDecision } from './decision_log.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { applyCorpsHoldToStance } from '../combat/stance_matter_holds.js';
 
 const DEFAULT_ARMY_DIRECTIVE: ArmyCorpsDirective = { stance: 'balanced' };
 
@@ -123,7 +124,14 @@ function applyCorpsDecisionToState(state: GameState, corpsId: string, decision: 
         derivedStance = 'balanced';
     }
 
-    cc.stance = derivedStance;
+    // §14.10c: the President's order this turn and his corps hold outrank the AI commander
+    // (inert without either, so bot and headless runs are unchanged).
+    if (cc.player_ordered_stance == null) {
+        const faction = state.military.formations?.[corpsId]?.faction as FactionId | undefined;
+        cc.stance = faction
+            ? applyCorpsHoldToStance(state, faction, corpsId, derivedStance, state.meta?.turn ?? 0)
+            : derivedStance;
+    }
 
     // Apply sector stance overrides
     const sectors = state.military.corps_front_sectors;
