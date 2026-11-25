@@ -14,6 +14,8 @@ import { warPhases } from '../../src/sim/turn_phases/war_phases.js';
 
 const STEP = warPhases.find((p) => p.name === 'update-displacement')!;
 const HOME_EXTRA = 12;
+// A9 B3 (D10b): the pocket is 'novi_grad_sarajevo' and holds the real Sarajevo airport crossing's near end, so its
+// leavers route to the main body through the sourced crossing (the war step cannot take a fixture crossing).
 
 /**
  * An encircled RBiH pocket (`pocket`, two settlements ringed by RS), a second RBiH pocket (`enclave`, one
@@ -22,8 +24,8 @@ const HOME_EXTRA = 12;
  */
 function world(opts: { homeSupplied: boolean; enclaveSupplied: boolean }) {
     const controllers: Record<string, string> = {
-        'op:pocket:a': 'RBiH',
-        'op:pocket:b': 'RBiH',
+        'op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo': 'RBiH',
+        'op:novi_grad_sarajevo:b': 'RBiH',
         'op:ring:c': 'RS',
         'op:ring:d': 'RS',
         'op:ring:r': 'RS',
@@ -33,9 +35,9 @@ function world(opts: { homeSupplied: boolean; enclaveSupplied: boolean }) {
         'op:home:g': 'RBiH',
     };
     const edges: EdgeRecord[] = [
-        { a: 'op:pocket:a', b: 'op:pocket:b' },
-        { a: 'op:pocket:a', b: 'op:ring:c' },
-        { a: 'op:pocket:b', b: 'op:ring:d' },
+        { a: 'op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo', b: 'op:novi_grad_sarajevo:b' },
+        { a: 'op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo', b: 'op:ring:c' },
+        { a: 'op:novi_grad_sarajevo:b', b: 'op:ring:d' },
         { a: 'op:ring:c', b: 'op:ring:d' },
         { a: 'op:ring:d', b: 'op:home:e' },
         { a: 'op:ring:c', b: 'op:ring:r' },
@@ -58,11 +60,11 @@ function world(opts: { homeSupplied: boolean; enclaveSupplied: boolean }) {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 10, seed: 'siege-a5', phase: 'war' },
         factions: ['HRHB', 'RBiH', 'RS'].map((id) => ({ id, supply_sources: id === 'RBiH' ? sources : [], areasOfResponsibility: [] })),
-        military: { formations: {}, front_segments: {}, front_pressure: {}, militia_pools: { 'pocket:RBiH': pool('pocket', 'RBiH') } },
+        military: { formations: {}, front_segments: {}, front_pressure: {}, militia_pools: { 'novi_grad_sarajevo:RBiH': pool('novi_grad_sarajevo', 'RBiH') } },
         political: { political_controllers: controllers },
         displacement: {
             displacement_state: Object.fromEntries(
-                ['pocket', 'ring', 'enclave', 'home'].map((m) => [
+                ['novi_grad_sarajevo', 'ring', 'enclave', 'home'].map((m) => [
                     m,
                     { mun_id: m, original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 9 },
                 ])
@@ -70,7 +72,7 @@ function world(opts: { homeSupplied: boolean; enclaveSupplied: boolean }) {
         },
     } as unknown as GameState;
     const census = {
-        pocket: { total: 10000, bosniak: 6000, serb: 3000, croat: 1000, other: 0 },
+        novi_grad_sarajevo: { total: 10000, bosniak: 6000, serb: 3000, croat: 1000, other: 0 },
         ring: { total: 10000, bosniak: 0, serb: 10000, croat: 0, other: 0 },
         enclave: { total: 10000, bosniak: 10000, serb: 0, croat: 0, other: 0 },
         home: { total: 10000, bosniak: 10000, serb: 0, croat: 0, other: 0 },
@@ -103,23 +105,23 @@ describe('A5: siege leavers go only to a supplied settlement in the main body', 
     it('a besieged enclave with its own supply source receives nobody; the main body does', async () => {
         const w = world({ homeSupplied: true, enclaveSupplied: true });
         const report = await runWarStep(w);
-        expect(ds(w).pocket.displaced_out).toBeGreaterThan(0);
+        expect(ds(w).novi_grad_sarajevo.displaced_out).toBeGreaterThan(0);
         expect(ds(w).enclave.displaced_in_by_faction?.RBiH ?? 0).toBe(0);
-        expect(ds(w).home.displaced_in_by_faction?.RBiH ?? 0).toBe(ds(w).pocket.displaced_out);
-        const trapped = (report.displacement?.trapped ?? []).filter((r: any) => r.mun_id === 'pocket');
+        expect(ds(w).home.displaced_in_by_faction?.RBiH ?? 0).toBe(ds(w).novi_grad_sarajevo.displaced_out);
+        const trapped = (report.displacement?.trapped ?? []).filter((r: any) => r.mun_id === 'novi_grad_sarajevo');
         expect(trapped.every((r: any) => r.trapped === 0 && r.wanted === r.routed)).toBe(true);
     });
 
     it('with no supplied main-body destination the leavers stay: nothing booked, lost or dropped; the report names them', async () => {
         const w = world({ homeSupplied: false, enclaveSupplied: true });
-        const poolBefore = (w.state.military.militia_pools as any)['pocket:RBiH'].available;
+        const poolBefore = (w.state.military.militia_pools as any)['novi_grad_sarajevo:RBiH'].available;
         const report = await runWarStep(w);
-        expect(ds(w).pocket.displaced_out).toBe(0);
-        expect(ds(w).pocket.lost_population).toBe(0);
+        expect(ds(w).novi_grad_sarajevo.displaced_out).toBe(0);
+        expect(ds(w).novi_grad_sarajevo.lost_population).toBe(0);
         expect(ds(w).home.displaced_in_by_faction?.RBiH ?? 0).toBe(0);
         expect(ds(w).enclave.displaced_in_by_faction?.RBiH ?? 0).toBe(0);
-        expect((w.state.military.militia_pools as any)['pocket:RBiH'].available).toBe(poolBefore);
-        const rows = (report.displacement?.trapped ?? []).filter((r: any) => r.mun_id === 'pocket' && r.faction_id === 'RBiH');
+        expect((w.state.military.militia_pools as any)['novi_grad_sarajevo:RBiH'].available).toBe(poolBefore);
+        const rows = (report.displacement?.trapped ?? []).filter((r: any) => r.mun_id === 'novi_grad_sarajevo' && r.faction_id === 'RBiH');
         expect(rows).toHaveLength(1);
         expect(rows[0].routed).toBe(0);
         expect(rows[0].trapped).toBe(rows[0].wanted);
