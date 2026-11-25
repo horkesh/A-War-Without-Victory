@@ -42,7 +42,9 @@ import type {
     ArmyClashView, ArmyClashReceiptView,
     ParamilitaryUnrequestedView,
     MinorityPolicyReceiptView,
+    NegotiatedEvacuationView,
 } from './types';
+import { NEGOTIATED_EVACUATION_EPISODE_CAP } from '../../../state/displacement_loss_constants.js';
 import { proposalBackingCost } from '../utils/commandAuthority';
 import {
     getPlayerSafeCorpsName,
@@ -974,6 +976,41 @@ export function readPocketFalls(records: unknown, playerFaction: string | null |
         });
     }
     return out.sort((a, b) => a.turn - b.turn || (a.munId < b.munId ? -1 : a.munId > b.munId ? 1 : 0));
+}
+
+/**
+ * A9 P1 (8-seat §6 ruling D9): the open negotiated-evacuation episodes of the RBiH president's pockets, by
+ * municipality, for the enclave card and its refusal decision. Display only: read verbatim from the episode state
+ * and the write-only convoy records (the besieger of the episode's latest convoy). Only a human RBiH president may
+ * refuse, so other player sides get no rows. Rows are in municipality order.
+ */
+export function readNegotiatedEvacuations(
+    displacementState: unknown,
+    records: unknown,
+    playerFaction: string | null | undefined,
+): NegotiatedEvacuationView[] {
+    const out: NegotiatedEvacuationView[] = [];
+    if (playerFaction !== 'RBiH' || !displacementState || typeof displacementState !== 'object' || Array.isArray(displacementState)) return out;
+    const recordList = Array.isArray(records) ? records as Array<Record<string, unknown>> : [];
+    for (const munId of Object.keys(displacementState).sort()) {
+        const row = (displacementState as Record<string, { negotiated_evacuation_by_side?: Record<string, Record<string, unknown>> }>)[munId];
+        const episode = row?.negotiated_evacuation_by_side?.RBiH;
+        if (!episode || typeof episode !== 'object') continue;
+        const openedTurn = finiteNumber(episode.opened_turn);
+        const people = finiteNumber(episode.people);
+        let besieger: string | null = null;
+        for (const r of recordList) {
+            if (r && r.side === 'RBiH' && r.mun_id === munId && finiteNumber(r.turn) >= openedTurn && typeof r.besieger === 'string') besieger = r.besieger;
+        }
+        out.push({
+            munId,
+            people,
+            besieger,
+            refused: typeof episode.refused_turn === 'number',
+            capReached: people >= NEGOTIATED_EVACUATION_EPISODE_CAP,
+        });
+    }
+    return out;
 }
 
 function deriveEnclaveSupplyState(
@@ -2894,6 +2931,19 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             const munIds = enclaveMunicipalityIds(enclaveDef);
             const own = falls.filter((f) => munIds.includes(f.munId));
             if (own.length > 0) out[key] = { ...out[key], pocket_fall: own[own.length - 1] };
+        }
+        // A9 P1: open negotiated-evacuation episodes on the RBiH president's own enclave cards.
+        const evacuations = readNegotiatedEvacuations(
+            state.displacement?.displacement_state,
+            state.displacement?.negotiated_evacuation_records,
+            playerFaction,
+        );
+        for (const key of Object.keys(out)) {
+            const enclaveDef = ENCLAVE_UI_DEFINITIONS.find((enclave) => enclave.id === key);
+            if (!enclaveDef || enclaveDef.faction !== playerFaction) continue;
+            const munIds = enclaveMunicipalityIds(enclaveDef);
+            const own = evacuations.filter((e) => munIds.includes(e.munId));
+            if (own.length > 0) out[key] = { ...out[key], negotiated_evacuations: own };
         }
         if (Object.keys(out).length > 0) enclaveResilience = out;
     }

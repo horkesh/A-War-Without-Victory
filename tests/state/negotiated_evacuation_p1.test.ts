@@ -457,6 +457,23 @@ describe('A9 P1 convoy', () => {
         expect(predicateOf(run(w))!.convoy).toBe(3_000);
     });
 
+    it('G1 (refusal card PR): an explicit refusal holds across weeks and a save/load each week, and is never reset', () => {
+        const w = world({ sheltered: 30_000 });
+        w.state.meta.player_faction = 'RBiH';
+        w.state.meta.headless_scenario_auto_control = false;
+        run(w); // t10: the episode opens and its first convoy runs
+        expect(recordNegotiatedEvacuationRefusal(w.state, 'gorazde', 'RBiH')).toBe(true);
+        for (let week = 0; week < 3; week++) {
+            w.state = JSON.parse(JSON.stringify(w.state)) as GameState; // the save and load between weeks
+            nextWeek(w);
+            const row = predicateOf(run(w))!;
+            expect(row.refused).toBe(true);
+            expect(row.convoy).toBe(0);
+            expect(ds(w).gorazde.negotiated_evacuation_by_side?.RBiH?.refused_turn).toBe(10);
+        }
+        expect(w.state.displacement.negotiated_evacuation_records).toHaveLength(1);
+    });
+
     it('the default allows: bots and headless runs ignore a refusal on record, and cannot write one', () => {
         for (const meta of [{}, { player_faction: 'RBiH', headless_scenario_auto_control: true }, { player_faction: 'RS', headless_scenario_auto_control: false }]) {
             const w = world({ sheltered: 30_000 });

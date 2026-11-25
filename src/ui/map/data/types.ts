@@ -373,6 +373,22 @@ export interface PocketFallView {
     negotiated: boolean;
 }
 
+/**
+ * A9 P1 (8-seat §6 ruling D9): an open negotiated-evacuation episode of one of the RBiH president's pockets, as shown
+ * on the enclave card with the refusal decision. Read from the episode state; no saved or prevented figure exists.
+ */
+export interface NegotiatedEvacuationView {
+    munId: string;
+    /** People evacuated in this episode so far. The recorded line is shown only when at least 1. */
+    people: number;
+    /** The besieging side named on the episode's latest convoy record; `null` before the first convoy. */
+    besieger: string | null;
+    /** The president refused: no convoy runs for the rest of the episode. */
+    refused: boolean;
+    /** The episode cap is reached: no convoy runs anyway, so no decision is offered. */
+    capReached: boolean;
+}
+
 export interface EnclaveResilienceView {
     resilience: number;
     isolation_turns: number;
@@ -384,6 +400,8 @@ export interface EnclaveResilienceView {
     unable_to_leave_this_week?: number;
     /** The enclave's fall, when it has a pocket-fall record (player's own side only). */
     pocket_fall?: PocketFallView;
+    /** A9 P1: open negotiated-evacuation episodes in this enclave's municipalities (RBiH president only), by munId. */
+    negotiated_evacuations?: NegotiatedEvacuationView[];
 }
 
 export interface SectorEntrenchmentSummaryView {

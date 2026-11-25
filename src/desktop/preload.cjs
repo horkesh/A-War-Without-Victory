@@ -89,6 +89,7 @@ contextBridge.exposeInMainWorld('awwv', {
   stageOpDirectiveOrder: (payload) => ipcRenderer.invoke('stage-op-directive-order', payload),
   stageOpsecToggle: (sectorId, active) => ipcRenderer.invoke('stage-opsec-toggle', { sectorId, active }),
   stageMunicipalitySupportOrder: (payload) => ipcRenderer.invoke('stage-municipality-support-order', payload),
+  refuseNegotiatedEvacuation: (munId) => ipcRenderer.invoke('refuse-negotiated-evacuation', { munId }),
   focusWarroom: () => ipcRenderer.invoke('focus-warroom'),
   getMapServerUrl: () => ipcRenderer.invoke('get-map-server-url'),
   // REPLACE-CO presidential lever (Presidential Command Model slice 3/N): costed sack +

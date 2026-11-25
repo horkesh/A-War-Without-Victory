@@ -15,14 +15,21 @@ const ROOT = process.cwd();
 
 /** Files (src, tools, scripts) allowed to name `negotiated_evacuation_records`. Sorted; extend for the display pass. */
 const RECORDS_ALLOWED_FILES = [
+    'src/desktop/player_visible_state.cjs', // the display pass: projects the player's own convoys to the renderer
     'src/state/displacement.ts',
     'src/state/game_state.ts',
+    'src/ui/map/data/GameStateAdapter.ts', // the display pass (refusal card PR): reads the besieger, display only
 ] as const;
 
-/** Files allowed to name the episode state. Only the convoy rule (and its refusal writer) and the state type. */
+/**
+ * Files allowed to name the episode state. Only the convoy rule (and its refusal writer), the state type and the
+ * display adapter (the refusal card PR), which reads it for the enclave card and writes nothing.
+ */
 const EPISODE_ALLOWED_FILES = [
+    'src/desktop/player_visible_state.cjs',
     'src/state/displacement.ts',
     'src/state/game_state.ts',
+    'src/ui/map/data/GameStateAdapter.ts',
 ] as const;
 
 const FORBIDDEN_ROOTS = ['src/sim/negotiation', 'src/sim/endgame', 'src/sim/combat'] as const;
