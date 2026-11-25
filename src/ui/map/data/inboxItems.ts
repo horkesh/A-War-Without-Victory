@@ -729,24 +729,24 @@ export function buildRecruitmentInboxItem(
     currentTurn: number,
 ): InboxItem {
     const copy = buildRecruitmentMatterCopy(matter, municipalityNames);
-    const decision = matter.mode === 'decision';
+    // A notice at every level: the staff raise brigades at every level (§14.10a); the hold is in Recruitment.
     const draft: InboxItemDraft = {
         id: matter.id,
         type: 'recruitment',
-        severity: decision ? 'normal' : 'info',
+        severity: 'info',
         title: copy.title,
         subtitle: copy.summary,
         actionLabel: copy.primaryActionLabel,
         sourceIds: [...matter.ready, ...matter.raised].map((brigade) => brigade.id),
         action: 'recruitment',
         includeInDeskPacket: true,
-        priority: decision ? 30 : 60,
+        priority: 60,
     };
     const priorityModel = buildPresidentialPriorityReadModel({
         id: draft.id,
         required: false,
         recordOnly: false,
-        hasPresidentialLever: decision,
+        hasPresidentialLever: false,
         sourceId: draft.id,
         currentTurn,
         urgency: draft.priority,
