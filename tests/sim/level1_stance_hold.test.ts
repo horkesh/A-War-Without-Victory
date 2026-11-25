@@ -5,7 +5,7 @@
  * stays at autonomy 1, is the last writer over the staff stance writers, and is inert headless.
  */
 
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { CorpsCommandState, CorpsStance, FactionId, GameState } from '../../src/state/game_state.js';
@@ -126,6 +126,31 @@ describe('Level-1 stance answer hold: writers (source scan)', () => {
         const main = read('src/desktop/electron-main.cjs');
         expect(main.match(/sim\.recordLevel1StanceAnswerHold\(state, corpsId, /g)?.length).toBe(2);
         expect(read('src/desktop/desktop_sim.ts')).toContain('recordLevel1StanceAnswerHold');
+    });
+
+    it('standing-authorization op writers wait under a hold that forbids new plans (ruling Q5), and never clear it', () => {
+        const pre = read('src/sim/combat/pre_planned_operations.ts');
+        expect(pre).toContain('if (corpsHoldForbidsNewPlans(state, def.corps, turn)) continue;');
+        expect(pre).toMatch(/if \(corpsHoldForbidsNewPlans\(state, corpsId, turn\)\) \{\s*return false;/);
+        const trig = read('src/sim/combat/triggered_operations.ts');
+        expect(trig.match(/if \(corpsHoldForbidsNewPlans\(state, def\.primary_corps, turn\)\) \{/g)?.length).toBe(2);
+        expect(pre).not.toContain('clearCorpsHoldsForPresidentialOperation');
+        expect(trig).not.toContain('clearCorpsHoldsForPresidentialOperation');
+    });
+
+    it('only the President\'s own operation orders clear a hold (war_phases op directive and authored ops)', () => {
+        const hits: string[] = [];
+        const walk = (dir: string) => {
+            for (const name of readdirSync(resolve(root, dir)).sort()) {
+                const rel = `${dir}/${name}`;
+                if (statSync(resolve(root, rel)).isDirectory()) walk(rel);
+                else if (/\.(ts|cjs|js)$/.test(name) && read(rel).includes('clearCorpsHoldsForPresidentialOperation(')) hits.push(rel);
+            }
+        };
+        walk('src');
+        hits.sort();
+        expect(hits).toEqual(['src/sim/combat/stance_matters.ts', 'src/sim/turn_phases/war_phases.ts']);
+        expect(read('src/sim/turn_phases/war_phases.ts').match(/clearCorpsHoldsForPresidentialOperation\(state, corpsId, turn\)/g)?.length).toBe(2);
     });
 
     it('the AI corps commander respects the President\'s order and hold', () => {
