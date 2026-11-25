@@ -315,7 +315,7 @@ describe('§6 item 4: a paramilitary request blocks only while its faction is ma
         expect(state.paramilitary_decision_history ?? []).toEqual([]);
     });
 
-    it.each([1, 2, 3] as const)('RS 0→%i under ask: the transition deletes the request, writes no history, and the staff send nothing', async (level) => {
+    it.each([1, 2, 3] as const)('RS 0→%i under ask: the transition deletes the request, writes no history, and the staff then apply the bot\'s order', async (level) => {
         const state = pocket('RS', 'RBiH', { ...human('RS', 0), autonomy_level_pending: level });
         leftoverRequest(state, 'RS');
 
@@ -325,8 +325,14 @@ describe('§6 item 4: a paramilitary request blocks only while its faction is ma
         expect(state.paramilitary_decision_history ?? []).toEqual([]);
 
         state.meta.turn = 6;
+        // H-21 (player-override model, 2026-11-25; was: the staff send nothing): with no order of the player's, the RS staff
+        // apply the bot's order, the RS card's historical Always allow, exactly as headless does on the same state.
+        const headless = structuredClone(state);
+        headless.meta.headless_scenario_auto_control = true;
+        const headlessTargets = detect(headless).spawned.filter((spawn) => spawn.faction === 'RS').map((spawn) => spawn.target_osid);
         const report = detect(state);
-        expect(report.spawned.filter((spawn) => spawn.faction === 'RS')).toEqual([]);
+        expect(report.spawned.filter((spawn) => spawn.faction === 'RS').map((spawn) => spawn.target_osid)).toEqual(headlessTargets);
+        expect(headlessTargets).toEqual([TARGET]);
         expect(state.pending_paramilitary_requests ?? []).toEqual([]);
         expect(state.paramilitary_decision_history ?? []).toEqual([]);
     });

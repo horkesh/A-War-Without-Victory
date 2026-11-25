@@ -216,7 +216,13 @@ function detect(state: GameState, side: Side): [number, number] {
  */
 function inPersonOrderBeforeTheCard(side: Side, order: Order): GameState {
     const state = humanState(side);
-    expect(detect(state, side)).toEqual([0, 0]);
+    // Player-override model (H-14, 2026-11-25): before the card applies, a Full Control side with no order sends the bot's
+    // sweeps, as headless does that week, and no request reaches the player (the T3 gate). Checked on copies, so the
+    // older build's save below stays as it was built (was: nothing sent).
+    const headless = structuredClone(state);
+    headless.meta.headless_scenario_auto_control = true;
+    expect(detect(structuredClone(state), side)).toEqual(detect(headless, side));
+    expect(detect(structuredClone(state), side)[1]).toBe(0);
     state.pending_paramilitary_requests = [{ target_osid: POCKETS[0]!, faction: side, strength: 150, mode: 'rear_pocket' }];
     modalOrder(state, side, order);
     expect(state.paramilitary_policy).toBe(order);

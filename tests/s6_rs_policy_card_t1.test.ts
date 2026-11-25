@@ -188,7 +188,10 @@ describe('the shift row cannot move RS corps targets (operations, engine E5)', (
 
 describe('live RS: the human answers the card at t1, before the first sweep', () => {
     for (const autonomy of [1, 2] as const) {
-        it(`autonomy ${autonomy}: the card left unanswered sends nothing at t1 or t2, and stays on the desk`, async () => {
+        // Player-override model (owner 2026-11-25; §6 HOW ruling lane C s8, H-21; was: the card stayed on the desk and
+        // nothing was sent): the card is on the desk at the t1 pause, and left unanswered it is answered by the staff in
+        // that turn as the bot answers it, so the side sweeps exactly the headless t1 pair, charged to the side.
+        it(`autonomy ${autonomy}: the card left unanswered at the t1 pause is answered as the bot does, and the side sweeps the headless pair`, async () => {
             let player = await newCampaign('RS');
             player = resolveDesktopEventDecision(player, RS_GOALS, 'all_six', baseDir);
             player.meta.autonomy_level = autonomy;
@@ -197,16 +200,15 @@ describe('live RS: the human answers the card at t1, before the first sweep', ()
             expect(player.meta.turn).toBe(1);
             expect(seen.flat()).toContain(RS_POLICY);
             expect(player.military.event_last_fired_turn[RS_POLICY]).toBe(1);
-            expect(cardRows(player, RS_POLICY)).toEqual([]);
-            expect(player.paramilitary_policy).toBe('ask');
-            expect(rsCaptures(player)).toEqual([]);
-            expect(rsParamilitaries(player)).toEqual([]);
-            player = await advance(player);
-            expect(player.meta.turn).toBe(2);
-            expect((player.military.pending_event_decisions ?? []).map((decision) => decision.event_id)).toContain(RS_POLICY);
-            expect(rsCaptures(player)).toEqual([]);
-            expect(rsParamilitaries(player)).toEqual([]);
-            expect(rsWarCrimes(player)).toBe(0);
+            expect(cardRows(player, RS_POLICY)).toEqual([
+                expect.objectContaining({ response_id: 'always_allow', decision_source: 'bot_ai_default', faction: 'RS', turn: 1 }),
+            ]);
+            expect((player.military.pending_event_decisions ?? []).map((decision) => decision.event_id)).not.toContain(RS_POLICY);
+            expect(player.paramilitary_policy).toBe('always_allow');
+            const swept = rsCaptures(player, 1);
+            expect(swept).toEqual(rsCaptures(headlessT1.historical!, 1));
+            expect(swept).toHaveLength(2);
+            expect(rsWarCrimes(player)).toBe(swept.length);
         }, 240_000);
     }
 

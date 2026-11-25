@@ -124,20 +124,26 @@ test('scope table: HRHB only, no RBiH entry, fractions in (0, 1], waves A/B', ()
     }
 });
 
-// Owner rule 2026-11-22, RB5 ruling 2026-11-23 (supersedes the 2026-11-14 bot-only ruling): a human
-// HRHB's staff apply the historical default once the halt card's decision is on record. With no
-// decision on record (the card never fired, or it is still unanswered) nothing is seeded: no expulsion
-// of a human never offered the halt. Default, halt and Observer rows: rb5_hrhb_minority_policy_halt.test.ts.
-test('a human-controlled HRHB with no halt-card decision on record does not expel: no policy timers', () => {
+// Owner rule 2026-11-22, RB5 ruling 2026-11-23 (supersedes the 2026-11-14 bot-only ruling), then the
+// player-override model (owner 2026-11-25, "There should be no drift between live and headless games";
+// H-20, orchestrator settlement 2026-11-25): a human HRHB's staff apply the historical default on the turn
+// the bot does; only the player's own halt refuses it. With no decision on record (the card never fired,
+// or it is still unanswered), the side expels as the bot does (was: nothing seeded). Default, halt and
+// Observer rows: rb5_hrhb_minority_policy_halt.test.ts; parity and G1: tests/sim/player_override_s6.test.ts.
+test('a human-controlled HRHB with no halt-card decision on record expels as the bot does: the same policy timers and waves', () => {
+    const bot = warState(50);
     const state = warState(50);
     state.meta.player_faction = 'HRHB';
     for (let t = 50; t <= 70; t++) {
+        bot.meta.turn = t;
         state.meta.turn = t;
+        run(bot);
         run(state);
     }
-    expect(hrhbEvents(state)).toEqual([]);
-    expect(policyTimers(state)).toEqual({});
-    expect(state.military.event_flags[minorityPolicyAppliedFlag('HRHB')]).toBeUndefined();
+    expect(Object.keys(policyTimers(state)).length).toBeGreaterThan(0);
+    expect(policyTimers(state)).toEqual(policyTimers(bot));
+    expect(hrhbEvents(state)).toEqual(hrhbEvents(bot));
+    expect(state.military.event_flags[minorityPolicyAppliedFlag('HRHB')]).toBe(50);
 });
 
 test('nothing is seeded before the open bilateral war begins (mobilization alone is not enough)', () => {

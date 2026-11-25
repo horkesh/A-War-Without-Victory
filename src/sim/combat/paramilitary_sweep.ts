@@ -10,9 +10,11 @@
  *
  * Casualties inflicted and suffered count toward faction totals.
  *
- * Player choice: a manual (autonomy 0) player gets the batch decision panel under `ask`; every
- * other faction (bots, and a human's staff at Assisted to Observer) passes the one policy gate in
- * `detectParamilitaryTargets` (paramilitary_policy.ts, §6 D1 stage 2).
+ * Player choice: a manual (autonomy 0) player gets the batch decision panel under a Review each
+ * they chose; every other faction (bots, and a human's staff at Assisted to Observer) passes the
+ * one policy gate in `detectParamilitaryTargets` (paramilitary_policy.ts, §6 D1 stage 2). A side
+ * whose player gave no order follows the bot's order at every level (player-override model, H-14
+ * and H-21), so a hands-off side sweeps as headless does.
  *
  * Deterministic: sorted iteration, no randomness, no timestamps.
  */
@@ -61,7 +63,13 @@ import type { EdgeRecord } from '../../map/settlements.js';
 // shipped main-path split (KIA 0.22 / WIA 0.74 / MIA 0.04), byte-identical to before.
 import { getMainCasualtySplit } from './casualty_realism_v2_gate.js';
 import { selectManualPlayerFaction } from '../bot/staff_control.js';
-import { resolveNonManualParamilitaryPolicy } from './paramilitary_policy.js';
+import {
+    botParamilitaryPolicy,
+    explicitParamilitaryOrder,
+    resolveManualParamilitaryOrder,
+    resolveNonManualParamilitaryPolicy,
+} from './paramilitary_policy.js';
+import { resolveBySilence } from '../player_override.js';
 import {
     PARAMILITARY_POLICY_CARD_BY_FACTION,
     hasParamilitaryPolicyCardApplied,
@@ -467,10 +475,13 @@ function splitCasualties(total: number): { killed: number; wounded: number; miss
 
 /**
  * Detect rear enemy pockets for all factions and generate paramilitary requests.
- * A manual (autonomy 0) player's faction follows its standing order request by request and
- * populates pending_paramilitary_requests under `ask`. Every other faction (a bot, or a human's
- * staff at Assisted, Delegated or Observer) sends sweeps only when
- * `resolveNonManualParamilitaryPolicy` allows it (§6 D1 stage 2).
+ * A manual (autonomy 0) player's faction follows `resolveManualParamilitaryOrder`: the player's
+ * explicit order, a request per target under a Review each the player chose, and otherwise (silence)
+ * the bot's order, sent in the same candidate loop as a bot's (H-14). Every other faction (a bot, or
+ * a human's staff at Assisted, Delegated or Observer) sends sweeps only when
+ * `resolveNonManualParamilitaryPolicy` allows it (§6 D1 stage 2; H-21). While the §6 T3 request gate
+ * holds, the manual player's requests are deleted and none is made (that branch stays); the side
+ * then follows the player's refusal, else the bot's order, as headless does in those weeks.
  *
  * `eventDefinitions` is the turn's event catalog: an undecided bot reads its card's historical
  * default from it. Production passes it on every turn (scenario runner, desktop); `undefined`
@@ -486,16 +497,16 @@ export function detectParamilitaryTargets(
 ): ParamilitarySweepReport {
     const report = emptyReport();
     const turn = state.meta?.turn ?? 0;
-    // Only a manual (autonomy 0) player keeps the request/policy path below, behind the §6 T3
-    // request gate. At autonomy >= 1 the player's staff and every bot go through the one policy
-    // gate in the faction loop (§6 D1 stage 2, which replaced the 2026-11-05 "staff run
-    // consolidation like bots" rule). Headless has no player: every faction is a bot.
+    // Only a manual (autonomy 0) player keeps the request path below, behind the §6 T3 request
+    // gate. At autonomy >= 1 the player's staff and every bot go through the one policy gate in the
+    // faction loop (§6 D1 stage 2, which replaced the 2026-11-05 "staff run consolidation like
+    // bots" rule). Headless has no player: every faction is a bot.
     const playerFaction = selectRequestGatePlayer(state);
     const requestGateHolds = paramilitaryRequestGateHolds(state, playerFaction);
     if (requestGateHolds && playerFaction) {
         removePrematurePlayerParamilitaryRequests(state, playerFaction);
     } else {
-        resolveStandingPolicyPendingParamilitaryRequests(state, playerFaction);
+        resolveStandingPolicyPendingParamilitaryRequests(state, playerFaction, eventDefinitions, report);
     }
     // §6 mechanics item 4: a save already at levels 1-3 may still hold the player's undecided requests from
     // Full Control. Delete them before the targets are built, so the staff default can take those targets.
@@ -522,11 +533,16 @@ export function detectParamilitaryTargets(
     }
 
     for (const faction of factions) {
-        if (faction === playerFaction && requestGateHolds) continue;
-        // §6 D1 stage 2: the one gate in front of every non-manual spawn. A bot follows its
-        // decided card flag, else the card's historical default; a human's staff follow the
-        // human's current standing order (unanswered or `ask` sends none). Deny skips every
-        // candidate, so skipping the faction here is the same as skipping each one.
+        // §6 D1 stage 2 under the player-override model (H-14, H-21; §6 HOW ruling, lane C s8): the one
+        // gate in front of every spawn. A bot follows its decided card flag, else the card's historical
+        // default; a human's staff follow the player's explicit order, else the same bot order (silence).
+        // The manual (Full Control) player's side also makes requests, but only under a Review each the
+        // player chose, and never while the §6 T3 request gate holds. Deny skips every candidate, so
+        // skipping the faction here is the same as skipping each one.
+        const manualOrder = faction === playerFaction
+            ? resolveManualParamilitaryOrder(state, faction, eventDefinitions, requestGateHolds)
+            : null;
+        if (manualOrder === 'always_deny') continue;
         if (
             faction !== playerFaction
             && resolveNonManualParamilitaryPolicy(state, faction, eventDefinitions) !== 'always_allow'
@@ -595,20 +611,8 @@ export function detectParamilitaryTargets(
             const deploymentsInMunicipality = municipalityDeploymentCounts.get(candidate.municipalityId) ?? 0;
             if (deploymentsInMunicipality >= PARAMILITARY_MAX_DEPLOYMENTS_PER_MUNICIPALITY_TURN) continue;
 
-            // Player faction: create request instead of auto-spawning. The standing order is read through
-            // the §6 M-a cap (never above the policy card's applied answer; `ask` before it applies).
-            if (faction === playerFaction) {
-                const policy = readParamilitaryStandingOrder(state, faction);
-                if (policy === 'always_deny') continue;
-                if (policy === 'always_allow') {
-                    spawnParamilitary(state, faction, candidate.osid, turn, spawnIndex, report);
-                    spawnIndex++;
-                    deploymentsThisTurn++;
-                    existingTargets.add(`${faction}:${candidate.osid}`);
-                    municipalityDeploymentCounts.set(candidate.municipalityId, deploymentsInMunicipality + 1);
-                    continue;
-                }
-                // 'ask' — add to pending
+            // The manual player's Review each (an explicit choice, never the default): a request instead of a spawn.
+            if (manualOrder === 'ask') {
                 const requests = state.pending_paramilitary_requests ??= [];
                 requests.push({
                     target_osid: candidate.osid,
@@ -624,7 +628,8 @@ export function detectParamilitaryTargets(
                 continue;
             }
 
-            // Non-manual faction (bot, or a human's staff): the policy gate above already allowed it.
+            // Every other sweep (a bot, a human's staff, or the manual player's Always allow or silence): the gate
+            // above allowed it, and it is sent here, through the same counters and index as a bot's (G4).
             spawnParamilitary(state, faction, candidate.osid, turn, spawnIndex, report);
             spawnIndex++;
             deploymentsThisTurn++;
@@ -639,10 +644,19 @@ export function detectParamilitaryTargets(
 function resolveStandingPolicyPendingParamilitaryRequests(
     state: GameState,
     playerFaction: FactionId | null,
+    catalog: readonly EventDefinition[] | undefined,
+    report: ParamilitarySweepReport,
 ): void {
+    if (!playerFaction || !Array.isArray(state.pending_paramilitary_requests)) return;
     // §6 M-a: a standing order above the card's applied answer (an old save's modal order) never auto-approves.
-    const policy = readParamilitaryStandingOrder(state, playerFaction);
-    if (policy === 'ask' || !playerFaction || !Array.isArray(state.pending_paramilitary_requests)) return;
+    // G1: an explicit refusal on record decides even where the global order reads `ask` (a faction switch).
+    const policy = explicitParamilitaryOrder(state, playerFaction) === 'always_deny'
+        ? 'always_deny'
+        : readParamilitaryStandingOrder(state, playerFaction);
+    if (policy === 'ask') {
+        resolveUndecidedPlayerParamilitaryRequestsBySilence(state, playerFaction, catalog, report);
+        return;
+    }
     let changed = false;
     for (const request of state.pending_paramilitary_requests) {
         if (!request || request.faction !== playerFaction) continue;
@@ -651,6 +665,56 @@ function resolveStandingPolicyPendingParamilitaryRequests(
         changed = true;
     }
     if (changed) resolvePlayerParamilitaryDecisions(state);
+}
+
+/**
+ * H-14 (§6 HOW ruling, lane C s8, guard G2): under Review each, a request the player left undecided when they advanced
+ * the turn resolves as the staff's choice: the bot's order for the side (`botParamilitaryPolicy`, the function the bot
+ * path calls), with a "staff proceeded" receipt (`resolveBySilence`). The Advance blocker still holds every undecided
+ * request at Full Control (player_decision_manifest.ts), so this is the deadline, never a silent lapse. A request the
+ * staff resolve is never written to `paramilitary_decision_history`: it is no decision of the player's. Runs at the top
+ * of the next turn's detect, before any new request is built; a hands-off side has no request (silence sends the bot's
+ * sweeps directly), so this never runs in a hands-off or headless game.
+ */
+function resolveUndecidedPlayerParamilitaryRequestsBySilence(
+    state: GameState,
+    playerFaction: FactionId,
+    catalog: readonly EventDefinition[] | undefined,
+    report: ParamilitarySweepReport,
+): void {
+    const requests = state.pending_paramilitary_requests ?? [];
+    const undecided = requests
+        .filter((request) => request
+            && request.faction === playerFaction
+            && request.decision !== 'allow' && request.decision !== 'deny' && request.decision !== 'regular')
+        .sort((a, b) => strictCompare(a.target_osid, b.target_osid));
+    if (undecided.length === 0) return;
+    const turn = state.meta?.turn ?? 0;
+    const staffSends = botParamilitaryPolicy(state, playerFaction, catalog) === 'always_allow';
+    let spawnIndex = 0;
+    for (const request of undecided) {
+        // A retired offensive request (an old save's) is never sent by the staff: the offensive detector is gone.
+        const sends = staffSends && request.mode !== 'offensive' && turn <= PARAMILITARY_FADE_WEEK;
+        resolveBySilence(state, {
+            id: `PARAMILITARY_SILENCE_${request.target_osid}`,
+            faction: playerFaction,
+            turn,
+            domain: 'military',
+            description: sends
+                ? `Paramilitary request for ${request.target_osid}: staff proceeded under the standing default; the sweep was sent. The refusal was available.`
+                : `Paramilitary request for ${request.target_osid}: staff proceeded under the standing default; no sweep was sent.`,
+            proposed_action: `PARAMILITARY_REQUEST:${request.target_osid}`,
+            adopted: sends,
+            proposed_value: sends ? 'sweep_sent' : 'no_sweep',
+        }, () => {
+            if (!sends) return true;
+            spawnParamilitary(state, request.faction, request.target_osid, turn, spawnIndex, report);
+            spawnIndex++;
+            return true;
+        });
+    }
+    const resolved = new Set(undecided);
+    state.pending_paramilitary_requests = requests.filter((request) => !resolved.has(request));
 }
 
 function countFriendlyAdjacentOsids(

@@ -88,10 +88,12 @@ describe('the unrequested-sweep receipt cause is derived from the saved basis', 
             ])), responseId).toBeUndefined();
         }
         expect(causeOf(rawSave('RBiH', []))).toBeUndefined();
-        // An answer given after the sweep is not its basis.
+        // An answer given after the sweep is not its basis. Player-override model (H-14/H-21, 2026-11-25; was: the stage-1
+        // cause): before its card applied an answer, with none filed, the RS side's staff sent the bot's sweep, its card's
+        // historical default, so the receipt names that default. RBiH's default refuses, so it keeps the stage-1 cause.
         expect(causeOf(rawSave('RS', [
             { event_id: 'rs_paramilitary_policy_1992', response_id: 'always_allow', decision_source: 'player', faction: 'RS', turn: 7 },
-        ]))).toBeUndefined();
+        ]))).toBe('historical_default_staff');
         // A side with no card and nothing filed is no longer a stage-1 case: round 4s P2 names the historical default (below).
     });
 
@@ -132,7 +134,8 @@ describe('the unrequested-sweep receipt cause is derived from the saved basis', 
                 { id: 'paramilitary:3:op:x:y', turn: 3, target_osid: 'op:x:y', faction: 'RS', strength: 150, decision: 'allow' },
             ]))).toBe('historical_default_staff');
             expect(causeOf(rawSave('RBiH', []))).toBeUndefined();
-            expect(causeOf(rawSave('RS', []))).toBeUndefined();
+            // Player-override model (2026-11-25; was undefined): an RS side with no card answer by the sweep sent the bot's sweep.
+            expect(causeOf(rawSave('RS', []))).toBe('historical_default_staff');
         });
     });
 

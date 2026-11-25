@@ -62,7 +62,20 @@ export interface DecisionConsequenceRecord {
   titleToken?: DecisionConsequenceCopyToken;
   outcomeToken?: DecisionConsequenceCopyToken;
   detailToken?: DecisionConsequenceCopyToken;
+  /**
+   * H-17 (§6 HOW ruling, lane C s8): display-only attribution line of a war-crime row the side's forces carried out under
+   * the standing default with no order of the player's (`authored_by: 'staff_default'`). Never "you ordered".
+   */
+  attribution?: string;
+  attributionToken?: DecisionConsequenceCopyToken;
   recordTarget: 'records' | 'chronicle';
+}
+
+/** H-17: the attribution line of a war-crime row carried out under the standing default (copy flagged for the §4 copy pass). */
+function staffDefaultAttribution(authoredBy: 'staff_default' | undefined): Pick<DecisionConsequenceRecord, 'attribution' | 'attributionToken'> {
+  if (authoredBy !== 'staff_default') return {};
+  const key = 'decisionConsequences.attribution.staffDefault' as MessageKey;
+  return { attribution: t(key), attributionToken: { key } };
 }
 
 export type DecisionConsequenceFamilyId =
@@ -95,15 +108,17 @@ function strictCompare(a: string, b: string): number {
 
 export function resolveDecisionConsequenceCopy(
   record: DecisionConsequenceRecord,
-  field: 'title' | 'outcome' | 'detail',
+  field: 'title' | 'outcome' | 'detail' | 'attribution',
 ): string {
   const token = field === 'title'
     ? record.titleToken
     : field === 'outcome'
       ? record.outcomeToken
-      : record.detailToken;
+      : field === 'detail'
+        ? record.detailToken
+        : record.attributionToken;
   if (token) return t(token.key, token.params);
-  return record[field];
+  return record[field] ?? '';
 }
 
 function humanizeToken(value: string | undefined): string {
@@ -896,6 +911,7 @@ export function buildDecisionConsequenceLedger(
       outcomeToken: { key: outcomeKey },
       detail: t(detailKey, { place, faction }),
       detailToken: { key: detailKey, params: { place, faction } },
+      ...(unrequested.captured ? staffDefaultAttribution(unrequested.authored_by) : {}),
       recordTarget: 'records',
     });
   }
@@ -925,6 +941,7 @@ export function buildDecisionConsequenceLedger(
       outcomeToken: { key: outcomeKey },
       detail: t(detailKey, detailParams),
       detailToken: { key: detailKey, params: detailParams },
+      ...(minorityReceipt.warCrime ? staffDefaultAttribution(minorityReceipt.authored_by) : {}),
       recordTarget: 'records',
     });
   }

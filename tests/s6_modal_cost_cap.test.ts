@@ -466,10 +466,12 @@ describe('M-a2 paramilitary_order_clamp_legacy_save: an old save whose modal ord
             applyCard(state, faction, 'ask');
             state.paramilitary_policy = 'always_allow';
             state.pending_paramilitary_requests = [pendingRequest(faction, STALE)];
-            detectParamilitaryTargets(state, edges(), reverseMap(), undefined);
-            const stale = ownRequests(state, faction).find((request) => request.target_osid === STALE);
-            expect(stale, faction).toBeDefined();
-            expect(stale!.decision, faction).toBeUndefined();
+            const report = detectParamilitaryTargets(state, edges(), reverseMap(), undefined);
+            // Never approved. H-14 (player-override model, 2026-11-25; was: left pending): a request left undecided at
+            // Advance resolves as the staff's choice, the bot's order under the applied Review each, which sends none
+            // (§2); it is removed with a receipt and never written to the player's history.
+            expect(ownRequests(state, faction).find((request) => request.target_osid === STALE), faction).toBeUndefined();
+            expect(report.spawned.some((spawn) => spawn.faction === faction && spawn.target_osid === STALE), faction).toBe(false);
             expect(state.paramilitary_decision_history ?? [], faction).toEqual([]);
         }
     });

@@ -67,7 +67,7 @@ import { countHeldOgsByCorps } from '../utils/heldOg.js';
 import { computeFullVerdict } from '../../../sim/negotiation/scoring.js';
 import { DIMENSION_WEIGHTS } from '../../../sim/events/strategic_dimensions.js';
 import { ANSWER_AHEAD_EVENT_IDS, decisionAppliedTurn } from '../../../sim/events/answer_ahead_of_firing.js';
-import { paramilitaryStandingOrderCap, readParamilitaryStandingOrder } from '../../../sim/events/paramilitary_policy_card.js';
+import { paramilitaryPolicyCardHistoricalDefault, paramilitaryStandingOrderCap, readParamilitaryStandingOrder } from '../../../sim/events/paramilitary_policy_card.js';
 import {
     MINORITY_POLICY_CARD_ID_BY_FACTION,
     MINORITY_POLICY_DEFAULT_RESPONSE_ID,
@@ -4679,6 +4679,14 @@ function deriveParamilitaryReceiptCause(
     // Round 4s P2: no card and no own record up to the sweep turn (filedFrom is -Infinity without a card answer), so the
     // staff followed the bot's historical default. Keyed on the registry, never on a faction name.
     if (!cardId) return 'historical_default_staff';
+    // H-14/H-21 (player-override model, 2026-11-25): a side whose card has not applied an answer by the sweep's turn, with no
+    // answer of the player's filed for it by then, sent the bot's sweep at every level, which only a card whose historical
+    // default sends sweeps does (RS). Otherwise (RBiH, whose default refuses; or an answer filed ahead) the stage-1 cause stays.
+    if (!answer) {
+        const filedOwnAnswer = (Array.isArray(state.military?.event_decision_log) ? state.military.event_decision_log : [])
+            .some((entry: any) => entry && entry.event_id === cardId && entry.decision_source === 'player' && Number(entry.turn) <= turn);
+        if (!filedOwnAnswer && paramilitaryPolicyCardHistoricalDefault(faction) === 'always_allow') return 'historical_default_staff';
+    }
     if (answer?.responseId === 'always_allow') return answer.inPerson ? 'standing_order' : 'standing_order_automatic';
     return undefined;
 }
@@ -4723,6 +4731,8 @@ function deriveParamilitaryUnrequested(
         ));
         if (capture) capture.used = true;
         const cause = deriveParamilitaryReceiptCause(state, String(formation.faction), Number(turn));
+        // H-17: an act under the standing default with no order of the player's is attributed to the staff (display only).
+        const staffDefault = cause === 'historical_default_staff' || cause === 'standing_order_automatic';
         sweeps.push({
             id: String(formation.id ?? id),
             turn: Number(turn),
@@ -4730,6 +4740,7 @@ function deriveParamilitaryUnrequested(
             faction: String(formation.faction),
             captured: Boolean(capture),
             ...(cause ? { cause } : {}),
+            ...(staffDefault ? { authored_by: 'staff_default' as const } : {}),
         });
     }
     sweeps.sort((a, b) => (a.turn !== b.turn ? b.turn - a.turn : strictCompare(a.id, b.id)));
@@ -4790,6 +4801,8 @@ function deriveMinorityPolicyReceipt(
         municipalities: munIds.size,
         automatic: row.automatic,
         warCrime: flags.hrhb_minority_policy_war_crime_recorded === true,
+        // H-17: an automatic answer (the staff by silence, or Observer) ran the standing default (display only).
+        ...(row.automatic ? { authored_by: 'staff_default' as const } : {}),
     };
 }
 

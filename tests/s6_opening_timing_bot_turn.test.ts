@@ -111,7 +111,7 @@ describe('opening cards: answered at birth, applied on the bot turn', () => {
             .map((row) => [row.response_id, row.decision_source, row.turn])).toEqual([['ask', 'player', 0]]);
     }, 400_000);
 
-    it('RS: the goals card filed at t0 applies at t1; the RS card fires at t1 too, after goals and not enabled by it, and waits for the player', async () => {
+    it('RS: the goals card filed at t0 applies at t1; the RS card fires at t1 too, after goals and not enabled by it, and silence answers it as the bot does', async () => {
         const headless1 = headlessByTurn[1]!;
         expect(botAnswer(headless1, RS_GOALS).turn).toBe(1);
         expect(botAnswer(headless1, RS_POLICY).turn).toBe(1);
@@ -127,16 +127,19 @@ describe('opening cards: answered at birth, applied on the bot turn', () => {
         expect(player.military.enabled_event_ids ?? []).not.toContain(RS_POLICY);
         expect(player.military.fired_event_ids).toContain(RS_POLICY);
         expect(player.military.event_last_fired_turn[RS_POLICY]).toBe(headless1.military.event_last_fired_turn[RS_POLICY]);
-        // The player left it unanswered, so it waits on the desk and nothing is sent in the side's name (ruling A1).
-        expect((player.military.pending_event_decisions ?? []).map((decision) => decision.event_id)).toContain(RS_POLICY);
-        expect((player.military.event_decision_log ?? []).some((row) => row.event_id === RS_POLICY)).toBe(false);
+        // Player-override model (§6 HOW ruling lane C s8, 2026-11-25; was: the card waited on the desk and nothing was sent):
+        // the player left it unanswered, so the staff answer it in its fire turn as the bot does, and the side sends the
+        // same t1 sweeps as the no-player RS bot, under the card's historical default.
+        expect((player.military.pending_event_decisions ?? []).map((decision) => decision.event_id)).not.toContain(RS_POLICY);
+        expect(botAnswer(player, RS_POLICY).response_id).toBe(botAnswer(headless1, RS_POLICY).response_id);
+        expect(botAnswer(player, RS_POLICY).turn).toBe(1);
+        expect(player.military.event_flags?.rs_paramilitary_policy).toBe(headless1.military.event_flags?.rs_paramilitary_policy);
         // The t0 formation set no longer gets a morale bonus the no-player game gives on t1.
-        // Paramilitary formations are left out: an RS human's side sends no sweep before its own policy card applies
-        // (ruling A1), and this player has not answered it, while the no-player RS bot sends its t1 pair under the
-        // card's historical default.
         const rsParamilitaries = (state: GameState) => Object.entries(state.military.formations)
-            .filter(([, formation]) => formation.faction === 'RS' && formation.kind === 'paramilitary').map(([id]) => id);
-        expect(rsParamilitaries(player)).toEqual([]);
+            .filter(([, formation]) => formation.faction === 'RS' && formation.kind === 'paramilitary')
+            .map(([id, formation]) => [id, formation.paramilitary_target]);
+        expect(rsParamilitaries(player)).toEqual(rsParamilitaries(headless1));
+        expect(rsParamilitaries(player).length).toBeGreaterThan(0);
         const rsMorale = (state: GameState) => Object.fromEntries(Object.entries(state.military.formations)
             .filter(([, formation]) => formation.faction === 'RS' && formation.kind !== 'paramilitary')
             .map(([id, formation]) => [id, formation.morale]));

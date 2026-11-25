@@ -94,6 +94,18 @@ export function stampLapsedReviewAsStaffChoice(review: PendingProposalReview, tu
 }
 
 /**
+ * The pure form of the override rule for a standing read that is taken every turn and writes no
+ * receipt (§6 HOW ruling, lane C s8, 2026-11-25): the player's explicit act when one is on record,
+ * else the staff's choice, computed by the same function the bot path calls (`staffChoice`). Used
+ * by the paramilitary policy read (`resolveNonManualParamilitaryPolicy`); the state layer's
+ * minority-policy gate (`hasMinorityExpulsionPolicy`) is the same rule written inline, because the
+ * state layer does not import sim code.
+ */
+export function staffChoiceUnlessExplicit<T>(explicit: T | null, staffChoice: () => T): T {
+    return explicit ?? staffChoice();
+}
+
+/**
  * Resolve one surfaced decision the player left unanswered as the staff's choice: run
  * `applyStaffChoice` (the bot path's own call) and record the silence receipt. Returns what
  * `applyStaffChoice` returns. The receipt is skipped when `applyStaffChoice` returns `false`

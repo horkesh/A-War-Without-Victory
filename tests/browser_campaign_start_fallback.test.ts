@@ -399,12 +399,22 @@ describe('browser new-campaign fallback', () => {
           expect(browserAdvanced.state.military.event_flags[flag]).toEqual(value);
           expect(desktopAdvanced.state.military.event_flags[flag]).toEqual(value);
         }
+        // Player-override model (§6 HOW ruling lane C s8, 2026-11-25): a card the player leaves unanswered in the advanced
+        // turn (the RS paramilitary-policy card fires at t1) is answered by the staff as the bot does, and its own authored
+        // shifts land then, as in the no-player game. The opening answer itself is never applied again.
+        const staffAnswered = (advanced: GameState) => (advanced.military.event_decision_log ?? [])
+          .filter((row) => row.event_id !== eventId && row.decision_source !== 'player' && row.turn === advanced.meta.turn)
+          .flatMap((row) => catalog.find((def) => def.id === row.event_id)?.response_options
+            ?.find((candidate) => candidate.id === row.response_id)?.dimension_shifts ?? []);
         for (const shift of option.dimension_shifts ?? []) {
           const before = browserReady.military.negotiation!.strategic_dimensions![shift.faction][shift.dimension].event_modifier;
-          expect(browserAdvanced.state.military.negotiation!.strategic_dimensions![shift.faction][shift.dimension].event_modifier)
-            .toBe(before);
-          expect(desktopAdvanced.state.military.negotiation!.strategic_dimensions![shift.faction][shift.dimension].event_modifier)
-            .toBe(before);
+          for (const advanced of [browserAdvanced.state, desktopAdvanced.state]) {
+            const staffDelta = staffAnswered(advanced)
+              .filter((other) => other.faction === shift.faction && other.dimension === shift.dimension)
+              .reduce((sum, other) => sum + (other.delta ?? 0), 0);
+            expect(advanced.military.negotiation!.strategic_dimensions![shift.faction][shift.dimension].event_modifier)
+              .toBe(before + staffDelta);
+          }
         }
       }
       vi.restoreAllMocks();

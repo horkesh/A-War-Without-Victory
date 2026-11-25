@@ -94,8 +94,16 @@ describe('paramilitary spawn guards (§6 D1 stage 2)', () => {
         const detect = functionBody(sweep, 'detectParamilitaryTargets');
         const resolver = functionBody(sweep, 'resolvePlayerParamilitaryDecisions');
         const definition = functionBody(sweep, 'spawnParamilitary');
-        // Outside its definition, spawnParamilitary is called only in detection and in the player's decision replay.
-        const elsewhere = sweep.replace(detect, '').replace(resolver, '').replace(definition, '');
+        // H-14 (player-override model, §6 HOW ruling lane C s8): a request the player left undecided at Advance
+        // resolves as the staff's choice; its spawn sits behind the bot's order (`botParamilitaryPolicy`) and it
+        // writes no player history.
+        const silence = functionBody(sweep, 'resolveUndecidedPlayerParamilitaryRequestsBySilence');
+        expect(silence.indexOf('botParamilitaryPolicy(')).toBeGreaterThan(0);
+        expect(silence.indexOf('spawnParamilitary(')).toBeGreaterThan(silence.indexOf('botParamilitaryPolicy('));
+        expect(silence).not.toMatch(/paramilitary_decision_history/);
+        // Outside its definition, spawnParamilitary is called only in detection, in the player's decision replay and in
+        // the staff's resolution of an undecided request (above).
+        const elsewhere = sweep.replace(detect, '').replace(resolver, '').replace(definition, '').replace(silence, '');
         expect(elsewhere).not.toMatch(/spawnParamilitary\(/);
         // In detection the one gate comes before any spawn, and the non-manual spawn is reachable only past it.
         const gate = detect.indexOf('resolveNonManualParamilitaryPolicy(');

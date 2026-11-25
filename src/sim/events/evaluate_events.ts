@@ -36,6 +36,12 @@ import { findAnswerAheadOfFiring, isAnswerAheadOfFiringDecision } from './answer
 import { isObserverDrainablePendingDecision } from './observer_drain.js';
 import { hasInPersonParamilitaryStandingOrder, paramilitaryPolicyFlagKey } from './paramilitary_policy_flag.js';
 import { isRoutedPeacePlanCard, selectRoutedBotOption } from '../negotiation/plan_answer.js';
+import { MINORITY_POLICY_CARD_ID_BY_FACTION } from '../../state/displacement_takeover.js';
+
+/** True for a minority-policy halt card (H-20): it queues at every level, Observer included. */
+export function isMinorityPolicyHaltCardId(eventId: string): boolean {
+    return Object.values(MINORITY_POLICY_CARD_ID_BY_FACTION).includes(eventId);
+}
 
 /**
  * Maximum PLAYER-FACING DECISION events that can fire in a single turn.
@@ -968,7 +974,14 @@ export function evaluateEvents(
             // the political scorer instead (bot_political). Both stay until the packet lands; the
             // panel kept drina deliberately unauthored, and neither pick is a historical claim.
             // Pinned by tests/ev1_history_mode_resolution.test.ts.
-            const observerAutoResolves = isPlayerRespondent && autonomyLevel >= 3;
+            // H-20 (orchestrator call 1, 2026-11-25): the HRHB minority-policy halt card is the one
+            // exception. The halt must be reachable before the first wave at EVERY level, so at
+            // Observer this card is not answered as it fires: it queues and waits at the pause before
+            // combat like Levels 0-2, and the same default (no halt) applies there only as silence
+            // (`resolvePlayerEventDecisionsBySilence`). The answer and the turn it lands on are the
+            // ones the fire-time branch would give, so a hands-off game is unchanged.
+            const observerAutoResolves = isPlayerRespondent && autonomyLevel >= 3
+                && !isMinorityPolicyHaltCardId(def.id);
             const mustShowPlayer = isPlayerRespondent && !observerAutoResolves;
             const answeredAhead = isPlayerRespondent && answeredAheadResponseId != null
                 ? def.response_options.find((option) => option.id === answeredAheadResponseId) ?? null
