@@ -45,8 +45,12 @@ export function recordBattleHistory(params: {
     controller: FactionId | null;
     flip: boolean;
     finalAttackerCas: number;
+    /** Battle-record totals (applied loss, including the morale-absorption extras). */
     finalDefenderCas: number;
-    defenderCasualtyShares?: Map<FormationId, number>;
+    /** CAS-REPORT-3: each attacker brigade's applied loss (share + absorption extra). */
+    attackerAppliedById?: Map<FormationId, number>;
+    /** Each defending brigade's applied loss (share; the primary also takes the extra). */
+    defenderAppliedById?: Map<FormationId, number>;
     state: GameState;
     battleId: string;
     // Equipment loss accumulators
@@ -71,7 +75,8 @@ export function recordBattleHistory(params: {
         flip,
         finalAttackerCas,
         finalDefenderCas,
-        defenderCasualtyShares,
+        attackerAppliedById,
+        defenderAppliedById,
         state,
         battleId,
         battleEquipDefenderTanksLost,
@@ -94,7 +99,7 @@ export function recordBattleHistory(params: {
     recordAttackerEngagements(
         attackerFormations, currentTurn, targetOsid, outcome,
         defFaction, flip, finalAttackerCas, finalDefenderCas, isConcentrated, state,
-        attackerEquipData, battleId,
+        attackerEquipData, battleId, attackerAppliedById,
     );
     if (defenderFormation) {
         const defenderGroup = sectorDefenseBrigades && sectorDefenseBrigades.length > 1
@@ -120,7 +125,7 @@ export function recordBattleHistory(params: {
                 };
                 recordDefenderEngagement(
                     b, currentTurn, targetOsid, outcome,
-                    attackerFaction, flip, defenderCasualtyShares?.get(b.id) ?? takenById.get(b.id) ?? 0, inflictedById.get(b.id) ?? 0, isConcentrated, state,
+                    attackerFaction, flip, defenderAppliedById?.get(b.id) ?? takenById.get(b.id) ?? 0, inflictedById.get(b.id) ?? 0, isConcentrated, state,
                     defenderEquipData, battleId,
                 );
             }

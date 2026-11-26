@@ -146,3 +146,43 @@ describe('CAS-REPORT-2: the battle record includes the morale-absorption extras'
         expect(absorbedCases).toBeGreaterThan(0);
     });
 });
+
+/** This turn's brigade_history engagement row for a formation. */
+function engagementOf(f: FormationState) {
+    const rows = (f as unknown as { brigade_history?: { engagements?: { turn: number; casualties_taken: number }[] } })
+        .brigade_history?.engagements ?? [];
+    return rows.filter((r) => r.turn === 5);
+}
+
+describe('CAS-REPORT-3: brigade history records each brigade its own applied loss', () => {
+    it('absorbed and plain battles: every engagement row equals that brigade\'s personnel drop', () => {
+        let absorbedCases = 0;
+        for (const defenderPersonnel of [1200, 4000, 7000]) {
+            const fx = makeScenario(defenderPersonnel);
+            const before = new Map(fx.attackers.map((a) => [a.id, a.personnel ?? 0] as const));
+            const defBefore = fx.defender.personnel ?? 0;
+            const report = resolveAttackOrdersOsid(fx.state, fx.edges, new Map<string, string[]>(), null, null,
+                new Map<string, number>([[TARGET_OSID, 40_000]]));
+            const battle = report.battles[0]!;
+            if (battle.snap_events.some(e => e.snap_type === 'morale_absorption')) absorbedCases++;
+            let attRows = 0;
+            for (const a of fx.attackers) {
+                const rows = engagementOf(a);
+                expect(rows.length).toBe(1);
+                // The big and small attackers lose different amounts: no even split.
+                expect(rows[0]!.casualties_taken).toBe(before.get(a.id)! - (a.personnel ?? 0));
+                attRows += rows[0]!.casualties_taken;
+            }
+            expect(Math.abs(attRows - battle.attacker_casualties)).toBeLessThanOrEqual(1);
+            const defRows = engagementOf(fx.defender);
+            expect(defRows.length).toBe(1);
+            // The defender's loss is its share plus any absorption extra; a flipped cell's
+            // retreat moves men but is not a battle casualty, so compare with the record.
+            expect(defRows[0]!.casualties_taken).toBe(battle.defender_casualties);
+            if (battle.snap_events.some(e => e.snap_type === 'morale_absorption')) {
+                expect(defRows[0]!.casualties_taken).toBe(defBefore - (fx.defender.personnel ?? 0));
+            }
+        }
+        expect(absorbedCases).toBeGreaterThan(0);
+    });
+});

@@ -1435,6 +1435,7 @@ export function resolveAttackOrdersOsid(
             flip: updatedFlip,
             extraAttackerApplied,
             extraDefenderApplied,
+            extraAttackerByBrigade,
         } = evaluateAndApplyMoraleAbsorption({
             defenderFormation,
             attackerFormations,
@@ -1459,6 +1460,18 @@ export function resolveAttackOrdersOsid(
         if (extraDefenderApplied > 0 && defenderFormation && battleRecord.defender_contributions) {
             const primary = battleRecord.defender_contributions.find((c) => c.brigade_id === defenderFormation.id);
             if (primary) primary.casualties_taken += extraDefenderApplied;
+        }
+        // CAS-REPORT-3 (§21): per-brigade applied losses for brigade history (and through it
+        // the turn summary and compute_capital). Attackers: the applied share (a TG anchor's
+        // includes its donors' applied loss) plus the absorption extra. Defenders: the applied
+        // share, the primary also taking the extra.
+        const attackerAppliedById = new Map<FormationId, number>();
+        for (const a of attackerFormations) {
+            attackerAppliedById.set(a.id, (appliedAttackerById.get(a.id) ?? 0) + (extraAttackerByBrigade.get(a.id) ?? 0));
+        }
+        const defenderAppliedById = new Map<FormationId, number>(defenderCasualtyShares ?? []);
+        if (defenderFormation && extraDefenderApplied > 0) {
+            defenderAppliedById.set(defenderFormation.id, (defenderAppliedById.get(defenderFormation.id) ?? 0) + extraDefenderApplied);
         }
 
         if (flip) {
@@ -1587,7 +1600,7 @@ export function resolveAttackOrdersOsid(
         // Significance: decisive/catastrophic outcome, OR territory flip, OR ≥200 total casualties.
         // Guard: skip in cadet mode (no AI client).
         if (state.meta.ai_commander_config?.mode !== 'cadet') {
-            const aarTotalCas = appliedAttackerCas + appliedDefenderCas;
+            const aarTotalCas = battleRecord.attacker_casualties + battleRecord.defender_casualties;
             const aarSignificant =
                 outcome === 'decisive_victory' ||
                 outcome === 'catastrophic' ||
@@ -1603,8 +1616,8 @@ export function resolveAttackOrdersOsid(
                         corpsId: attackerCorpsId,
                         targetOsid,
                         outcome,
-                        attackerCasualties: appliedAttackerCas,
-                        defenderCasualties: appliedDefenderCas,
+                        attackerCasualties: battleRecord.attacker_casualties,
+                        defenderCasualties: battleRecord.defender_casualties,
                         attackerBrigades: attackerFormations.map(a => a.id),
                         defenderBrigades: defenderFormation ? [defenderFormation.id] : [],
                         territoryChanged: flip,
@@ -1694,9 +1707,10 @@ export function resolveAttackOrdersOsid(
             attackerFaction,
             controller,
             flip,
-            finalAttackerCas: appliedAttackerCas,
-            finalDefenderCas: appliedDefenderCas,
-            defenderCasualtyShares,
+            finalAttackerCas: battleRecord.attacker_casualties,
+            finalDefenderCas: battleRecord.defender_casualties,
+            attackerAppliedById,
+            defenderAppliedById,
             state,
             battleId,
             battleEquipDefenderTanksLost,
