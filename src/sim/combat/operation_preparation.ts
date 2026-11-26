@@ -98,6 +98,7 @@ import { getPostWashingtonJointPressureMultiplier } from '../early_war/washingto
 import { collectAverageDefenseRoster, collectSectorDefenseBrigades } from './sector_defense_roster.js';
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
+import { isFriendlyFaction } from '../early_war/alliance_update.js';
 import { isOperationObjectiveHostile } from './operation_objective_hostility.js';
 import { munFromOsid, type Osid } from './osid_adjacency.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
@@ -733,8 +734,9 @@ function countOperationAxesOnDefendingSector(
 
 /**
  * P3-EST-PRIM (rulings §13; operations seat, lane B s24): the cell an axis's first battle is
- * fought at. That is its first objective, from `current_objective_index` on, whose controller the
- * battle would fight (not the attacker, not uncontrolled, not combat-blocked). The estimate runs in preparation,
+ * fought at. That is its first objective, from `current_objective_index` on, that is held by
+ * neither the attacker nor an ally and is not uncontrolled; none if that cell is combat-blocked
+ * (PRIM-HOSTILE: the axis parks there). The estimate runs in preparation,
  * before the launch reconcile drops friendly-held objectives (`sector_offensive.ts`), and the
  * results pass credits a friendly current objective as captured without a battle, so such a cell
  * is never the first battle. `allowed`, when given, restricts the read to the preparation
@@ -751,10 +753,15 @@ function firstContestedAxisObjective(
         if (typeof o !== 'string' || o.length === 0) continue;
         if (allowed && !allowed.has(o)) continue;
         const controller = getPoliticalControllerOSID(state, o, undefined);
-        // PRIM-HOSTILE (rulings §19): the battle's own test (`isRbihHrhbCombatBlocked`, through
-        // `isOperationObjectiveHostile`). An allied cell, or an RBiH-HRHB cell before their war,
-        // while their combat is not enabled, under a ceasefire or after Washington, is never fought.
-        if (!isOperationObjectiveHostile(state, attackerFaction, controller)) continue;
+        // Own, allied and uncontrolled cells are credited by the results pass without a battle
+        // (`sector_offensive.ts` convergence pass), so the axis walks past them.
+        if (controller === null || isFriendlyFaction(controller, attackerFaction, state)) continue;
+        // PRIM-HOSTILE (rulings §19; operations seat, lane B s25): the battle's own test
+        // (`isRbihHrhbCombatBlocked`, through `isOperationObjectiveHostile`). A foreign RBiH-HRHB
+        // cell before their war, while their combat is not enabled, under a ceasefire or after
+        // Washington is kept at launch but never fought and never credited, so the axis parks on
+        // it: it has no first battle, not one at a deeper cell.
+        if (!isOperationObjectiveHostile(state, attackerFaction, controller)) return undefined;
         return o;
     }
     return undefined;
