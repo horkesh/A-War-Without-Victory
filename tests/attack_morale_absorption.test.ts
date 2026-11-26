@@ -678,4 +678,66 @@ describe('evaluateAndApplyMoraleAbsorption', () => {
             expect(MORALE_ABSORPTION_CAS_MULT).toBe(1.6);
         });
     });
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // CAS-REPORT-2 (§16): the applied extras are returned for the battle record
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    describe('applied extras returned for the battle record (CAS-REPORT-2)', () => {
+        function absorb(atks: FormationState[], def: FormationState, report: AttackResolutionOsidReport) {
+            return evaluateAndApplyMoraleAbsorption({
+                defenderFormation: def,
+                attackerFormations: atks,
+                targetOsid: TARGET_OSID,
+                outcome: 'costly_victory',
+                flip: true,
+                ethnicComposition: null,
+                personnelAttacker: atks.reduce((s, a) => s + (a.personnel ?? 0), 0),
+                finalAttackerCas: 100,
+                finalDefenderCas: 80,
+                casualtyLedger: initializeCasualtyLedger(['RBiH', 'RS', 'HRHB']),
+                report,
+                firstAttackerId: atks[0]!.id,
+                battleSnapEvents: [],
+            });
+        }
+
+        it('returns exactly the personnel removed on each side', () => {
+            const a1 = makeFormation({ id: 'atk_1', faction: 'RBiH', personnel: 600 });
+            const a2 = makeFormation({ id: 'atk_2', faction: 'RBiH', personnel: 400 });
+            const def = makeFormation({ id: 'def_1', faction: 'RS', morale: 80, personnel: 1000 });
+            const report = makeReport();
+            const result = absorb([a1, a2], def, report);
+            expect(result.moraleAbsorbed).toBe(true);
+            const attRemoved = (600 - (a1.personnel ?? 0)) + (400 - (a2.personnel ?? 0));
+            const defRemoved = 1000 - (def.personnel ?? 0);
+            expect(attRemoved).toBeGreaterThan(0);
+            expect(defRemoved).toBeGreaterThan(0);
+            expect(result.extraAttackerApplied).toBe(attRemoved);
+            expect(result.extraDefenderApplied).toBe(defRemoved);
+            expect(report.casualty_attacker).toBe(attRemoved);
+            expect(report.casualty_defender).toBe(defRemoved);
+        });
+
+        it('reports the floor-clamped figure, not the requested extra', () => {
+            const atk = makeFormation({ id: 'atk_1', faction: 'RBiH', personnel: MIN_COMBAT_PERSONNEL + 5 });
+            const def = makeFormation({ id: 'def_1', faction: 'RS', morale: 80, personnel: MIN_COMBAT_PERSONNEL + 7 });
+            const report = makeReport();
+            const result = absorb([atk], def, report);
+            expect(result.moraleAbsorbed).toBe(true);
+            expect(result.extraAttackerApplied).toBe(5);
+            expect(result.extraDefenderApplied).toBe(7);
+            expect(atk.personnel).toBe(MIN_COMBAT_PERSONNEL);
+            expect(def.personnel).toBe(MIN_COMBAT_PERSONNEL);
+        });
+
+        it('returns zero extras when absorption does not trigger', () => {
+            const atk = makeFormation({ id: 'atk_1', faction: 'RBiH', personnel: 1000 });
+            const def = makeFormation({ id: 'def_1', faction: 'RS', morale: 40, personnel: 1000 });
+            const result = absorb([atk], def, makeReport());
+            expect(result.moraleAbsorbed).toBe(false);
+            expect(result.extraAttackerApplied).toBe(0);
+            expect(result.extraDefenderApplied).toBe(0);
+        });
+    });
 });
