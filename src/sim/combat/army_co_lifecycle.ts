@@ -264,6 +264,11 @@ function selectArmyCommanderReplacement(
             || candidate.available_from_turn > turn
             || (candidate.available_until_turn !== undefined && candidate.available_until_turn <= turn)
             || isTerminalOfficerState(officers[candidate.id])) continue;
+        // A token held by the President's corps appointee is skipped: the roster promotion is a
+        // staff pick and never pulls an appointee out of his corps (§15.1, G1). Falls through to
+        // the next token or the political pool. Headless writes no appointment.
+        const heldCorpsId = officers[candidate.id]?.assigned_corps_id;
+        if (heldCorpsId && isPresidentialAppointee(state, heldCorpsId, candidate.id)) continue;
         if (!officers[candidate.id]) officers[candidate.id] = makeOfficerState(candidate.id, 'reserve');
         return candidate;
     }

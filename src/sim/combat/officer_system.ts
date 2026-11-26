@@ -23,7 +23,6 @@ import {
 import { CANONICAL_ARMY_CO_ROSTER } from './army_co_roster_data.js';
 import { getBrigadeOfficerMod } from './combat_math.js';
 import {
-    nextScheduledTenure,
     officersRelievedFrom,
     officerSurvivedWar,
     scheduledTenure,
@@ -63,69 +62,6 @@ const TIER_PRIORITY: Record<OfficerPoolTier, number> = {
     tier_b: 2,
     tier_c: 3,
 };
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Historical successor lookup
-// ═══════════════════════════════════════════════════════════════════════════
-
-/**
- * Find the historical successor for a departing officer.
- * Looks for the next officer with the same home_corps_id, available this turn,
- * not yet in state, prioritized by pool_tier.
- */
-function findHistoricalSuccessor(
-    departing: NamedOfficer,
-    allOfficers: NamedOfficer[],
-    currentState: Record<string, NamedOfficerState>,
-    turn: number,
-    corpsRoster?: CorpsCoRoster,
-    commandedCorpsId?: string | null,
-): NamedOfficer | null {
-    // The dated corps schedule (§5E) names the successor first: the holder whose tenure
-    // is in force for the corps being vacated, else the next scheduled holder. Inert
-    // with an empty schedule.
-    if (commandedCorpsId && corpsRoster) {
-        const current = scheduledTenure(corpsRoster, commandedCorpsId, turn);
-        const tenure = current && current.officer_id !== departing.id
-            ? current
-            : nextScheduledTenure(corpsRoster, commandedCorpsId, turn);
-        const scheduled = tenure ? allOfficers.find((o) => o.id === tenure.officer_id) : undefined;
-        const scheduledState = scheduled ? currentState[scheduled.id] : undefined;
-        if (
-            scheduled
-            && scheduled.id !== departing.id
-            && scheduled.faction === departing.faction
-            && scheduled.rank !== 'army_commander' && scheduled.rank !== 'deputy'
-            && scheduled.available_from_turn <= turn
-            && (scheduled.available_until_turn === undefined || scheduled.available_until_turn > turn)
-            && isEnclaveCompatible(scheduled, commandedCorpsId, turn)
-            && (!scheduledState || scheduledState.status === 'reserve')
-        ) {
-            return scheduled;
-        }
-    }
-
-    const corpsId = departing.home_corps_id;
-    if (!corpsId) return null;
-
-    const candidates = allOfficers
-        .filter(o =>
-            o.id !== departing.id &&
-            o.faction === departing.faction &&
-            o.home_corps_id === corpsId &&
-            o.available_from_turn <= turn &&
-            (o.available_until_turn === undefined || o.available_until_turn > turn) &&
-            isEnclaveCompatible(o, corpsId, turn) &&
-            (!currentState[o.id] || currentState[o.id].status === 'reserve')
-        )
-        .sort((a, b) => {
-            const tierDiff = (TIER_PRIORITY[a.pool_tier] ?? 99) - (TIER_PRIORITY[b.pool_tier] ?? 99);
-            if (tierDiff !== 0) return tierDiff;
-            return strictCompare(a.id, b.id);
-        });
-
-    return candidates[0] ?? null;
-}
 
 export function officerReplacementMatterKey(
     outgoingOfficerId: string,
@@ -683,12 +619,15 @@ export interface OfficerSuccessionReport {
 /**
  * Process officer succession for one turn.
  *
- * 1. Process historical departures (available_until_turn).
- *    - Bot factions: auto-retire. Player faction: create replacement_suggested event.
- * 2. Check for newly available officers (available_from_turn).
+ * 1. Historical departures (available_until_turn): every faction's officer retires on his
+ *    date, the player's included; a presidential appointee keeps his corps (§15.1, G1).
+ * 2. Newly available officers (available_from_turn) enter the reserve.
  *    - Player faction: create officer_available notification event.
- * 3. Casualty checks for active officers in corps that fought.
- * 4. Fill vacant corps commands from pool.
+ * 3. Casualty checks for active officers in corps that fought; 3b scheduled fates and the
+ *    release of holders whose seat is no longer active.
+ * 4. Advance turns in command; the army commander lifecycle runs before the vacancies.
+ * 5. Fill vacant corps commands (schedule first, then the pool); an acting holder gives way
+ *    unless he is a presidential appointee.
  */
 export function processOfficerSuccession(
     state: GameState,
@@ -984,12 +923,14 @@ export function processOfficerSuccession(
         if (existingCommander) {
             // C.3: HVO acting commanders get replaced once their delay is served
             if (existingCommander.state.acting_commander) {
-                // The schedule never retires the President's appointee here; they keep the
-                // pre-existing pool path.
-                const scheduleMayAct = !isPresidentialAppointee(state, corpsFormId, existingCommander.data.id);
-                const scheduledReplacement = scheduleMayAct
-                    ? scheduledHolderForCorps(state, corpsRoster, officerData, officers, corpsFormId, turn, false)
-                    : null;
+                // Neither the schedule nor the pool ranking retires the President's appointee here:
+                // REPLACE-CO seats its appointee acting (relieveOfficer), and this branch is a staff
+                // rotation, not a physical loss (§15.1, G1). He keeps the acting combat modifier.
+                // A generic stopgap (relieveOfficer with an empty reserve) is not the President's
+                // choice of officer and still gives way. Headless writes no appointment.
+                if (!existingCommander.data.id.startsWith('generic_')
+                    && isPresidentialAppointee(state, corpsFormId, existingCommander.data.id)) continue;
+                const scheduledReplacement = scheduledHolderForCorps(state, corpsRoster, officerData, officers, corpsFormId, turn, false);
                 const availableReplacement = scheduledReplacement
                     ?? findBestReplacement(officers, officerData, faction, corpsFormId, turn, officersRelievedFrom(corpsRoster, corpsFormId, turn));
                 if (!availableReplacement) continue;

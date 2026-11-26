@@ -381,4 +381,31 @@ describe('Army commander emergent lifecycle', () => {
         expect(report.army_replacements).toEqual([]);
         expect(playerState.military.named_officers!.arbih_halilovic!.status).toBe('active');
     });
+
+    it('the roster promotion skips a token held by the President\'s corps appointee (G1, §15.1)', () => {
+        // Krstic (the Mladic token) holds the Drina Corps by REPLACE-CO. When Mladic departs, the
+        // staff promotion falls through to political_bot_pick and never pulls him out of his corps.
+        const pick = officer({ id: 'a_pick', faction: 'RS', rank: 'army_commander', political_reliability: 5, competence: 5 });
+        const appointed = stateWith(175, vrsRosterData([pick]), {
+            vrs_mladic: officerState({ officer_id: 'vrs_mladic' }),
+            vrs_krstic: officerState({ officer_id: 'vrs_krstic', status: 'active', assigned_corps_id: 'vrs_drina_corps', acting_commander: true }),
+            a_pick: officerState({ officer_id: 'a_pick', status: 'reserve' }),
+        }, 'RS');
+        (appointed.military.corps_command as Record<string, unknown>).vrs_drina_corps = {
+            active_operations: [],
+            co_replacement_record: [{ relieved_officer_id: 'vrs_zivanovic', replacement_officer_id: 'vrs_krstic', turn: 172 }],
+        };
+        const change = relieveArmyCommander(appointed, 'RS', loadArmyCoRoster()!);
+        expect(change!.new_officer).toBe('a_pick');
+        expect(appointed.military.named_officers!.vrs_krstic).toMatchObject({ status: 'active', assigned_corps_id: 'vrs_drina_corps' });
+
+        // Not an appointee (headless or a staff seat): the authored token still takes him.
+        const staffSeat = stateWith(175, vrsRosterData([pick]), {
+            vrs_mladic: officerState({ officer_id: 'vrs_mladic' }),
+            vrs_krstic: officerState({ officer_id: 'vrs_krstic', status: 'active', assigned_corps_id: 'vrs_drina_corps' }),
+            a_pick: officerState({ officer_id: 'a_pick', status: 'reserve' }),
+        });
+        expect(relieveArmyCommander(staffSeat, 'RS', loadArmyCoRoster()!)!.new_officer).toBe('vrs_krstic');
+        expect(staffSeat.military.named_officers!.vrs_krstic!.assigned_corps_id).toBeNull();
+    });
 });
