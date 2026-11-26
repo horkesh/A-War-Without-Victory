@@ -32,6 +32,7 @@ import type { GameState } from '../../state/game_state.js';
 import { parseMilitiaPoolKey } from '../../state/militia_pool_key.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { ALLIED_THRESHOLD, DEFAULT_MIXED_MUNICIPALITIES } from './alliance_update.js';
+import { lastEventResponse, ZAGREB_CEASEFIRE_EVENT, ZAGREB_RESTRAINT_RESPONSE } from './bilateral_ceasefire.js';
 
 // ── Tunable Washington precondition thresholds ──
 
@@ -274,7 +275,7 @@ export function evaluateWashingtonByConsent(state: GameState): boolean {
     if (!rhs || rhs.washington_signed) return false;
     if (rhs.war_started_turn != null) return false;
     if (!((state.political.war_alliance_rbih_hrhb ?? 0) > ALLIED_THRESHOLD)) return false;
-    const overture = lastResponse(state, FEDERATION_OVERTURE_EVENT);
+    const overture = lastEventResponse(state, FEDERATION_OVERTURE_EVENT);
     if (overture !== null && FEDERATION_REFUSALS.includes(overture)) return false;
     return state.meta.turn >= WASHINGTON_AGREEMENT_WEEK;
 }
@@ -300,17 +301,6 @@ const WASHINGTON_SIGNING_RESPONSES: Readonly<Record<string, readonly string[]>> 
     hrhb_washington_agreement_1994: ['accept', 'reluctant'],
     rbih_washington_agreement_1994: ['accept', 'reluctant'],
 };
-const ZAGREB_CEASEFIRE_EVENT = 'zagreb_orders_hrhb_ceasefire';
-const ZAGREB_RESTRAINT_RESPONSE = 'acknowledge_pressure';
-
-/** Last recorded response to an event (the decision log is append-only; last wins). */
-function lastResponse(state: GameState, eventId: string): string | null {
-    const log = state.military?.event_decision_log ?? [];
-    for (let i = log.length - 1; i >= 0; i--) {
-        if (log[i].event_id === eventId) return log[i].response_id;
-    }
-    return null;
-}
 
 export interface WashingtonQuietFrontResult {
     war_fought: boolean;
@@ -346,9 +336,9 @@ export function evaluateWashingtonQuietFront(state: GameState): WashingtonQuietF
         : 0;
     const frontQuiet = (rhs?.stalemate_turns ?? 0) >= WASH_QUIET_FRONT_TURNS
         || ceasefireHeld >= WASH_QUIET_FRONT_TURNS;
-    const zagrebRestraint = lastResponse(state, ZAGREB_CEASEFIRE_EVENT) === ZAGREB_RESTRAINT_RESPONSE;
+    const zagrebRestraint = lastEventResponse(state, ZAGREB_CEASEFIRE_EVENT) === ZAGREB_RESTRAINT_RESPONSE;
     const cardsSigned = Object.keys(WASHINGTON_SIGNING_RESPONSES).sort(strictCompare).every((eventId) => {
-        const response = lastResponse(state, eventId);
+        const response = lastEventResponse(state, eventId);
         return response !== null && WASHINGTON_SIGNING_RESPONSES[eventId].includes(response);
     });
     const allianceRestored = (state.political.war_alliance_rbih_hrhb ?? 0) > ALLIED_THRESHOLD;

@@ -5,7 +5,9 @@
  *   C1: war duration >= CEASEFIRE_MIN_WAR_DURATION turns since war_started_turn
  *   C2: HRHB exhaustion > CEASEFIRE_HRHB_EXHAUSTION
  *   C3: RBiH exhaustion > CEASEFIRE_RBIH_EXHAUSTION
- *   C4: stalemate >= CEASEFIRE_STALEMATE_MIN consecutive turns with 0 bilateral flips
+ *   C4: stalemate >= CEASEFIRE_STALEMATE_MIN consecutive turns with 0 bilateral flips, OR the
+ *       ceasefire is imposed: HRHB's last answer to `zagreb_orders_hrhb_ceasefire` is
+ *       `acknowledge_pressure` (WASH-IMPOSED, ruling §29, 2026-11-26)
  *   C5: IVP negotiation_momentum > CEASEFIRE_IVP_THRESHOLD
  *   C6: HRHB patron_state.constraint_severity > CEASEFIRE_PATRON_CONSTRAINT
  *
@@ -42,6 +44,27 @@ export const CEASEFIRE_HRHB_EXHAUSTION = 3500;
 export const CEASEFIRE_RBIH_EXHAUSTION = 3000;
 /** C4: Minimum consecutive stalemate turns (0 bilateral flips). */
 export const CEASEFIRE_STALEMATE_MIN = 4;
+/**
+ * C4 alternative (WASH-IMPOSED, orchestrator ruling §29, 2026-11-26; historian + game-designer seats).
+ * The 23 February 1994 ceasefire was imposed from outside on a stalled front (UN, EU sanctions
+ * threat, Zagreb's order to the HVO; BB2 pp.450-451) while ARBiH could still attack. A C4 that
+ * waits for four quiet weeks is circular: the bot keeps an ARBiH corps on the bilateral offensive
+ * until a ceasefire exists. When HRHB has acknowledged Zagreb's order, the ceasefire is imposed;
+ * C1-C3, C5 and C6 still bind. HRHB can refuse (`resist_patron`), and then only a real stalemate
+ * satisfies C4.
+ */
+export const ZAGREB_CEASEFIRE_EVENT = 'zagreb_orders_hrhb_ceasefire';
+export const ZAGREB_RESTRAINT_RESPONSE = 'acknowledge_pressure';
+
+/** Last recorded response to an event (the decision log is append-only; last wins). */
+export function lastEventResponse(state: GameState, eventId: string): string | null {
+    const log = state.military?.event_decision_log ?? [];
+    for (let i = log.length - 1; i >= 0; i--) {
+        if (log[i].event_id === eventId) return log[i].response_id;
+    }
+    return null;
+}
+
 /** C5: IVP negotiation_momentum threshold. */
 export const CEASEFIRE_IVP_THRESHOLD = 0.40;
 /** C6: HRHB patron constraint_severity threshold. */
@@ -52,6 +75,8 @@ export interface CeasefirePreconditionResult {
     c2_hrhb_exhaustion: boolean;
     c3_rbih_exhaustion: boolean;
     c4_stalemate: boolean;
+    /** C4 was met by the imposed path (HRHB acknowledged Zagreb's ceasefire order). */
+    c4_imposed: boolean;
     c5_ivp_momentum: boolean;
     c6_patron_constraint: boolean;
     all_met: boolean;
@@ -83,9 +108,10 @@ export function evaluateCeasefirePreconditions(state: GameState): CeasefirePreco
     const rbihExhaustion = state.political.war_exhaustion?.['RBiH'] ?? 0;
     const c3 = rbihExhaustion > CEASEFIRE_RBIH_EXHAUSTION;
 
-    // C4: stalemate
+    // C4: stalemate, or imposed by Zagreb's acknowledged order (WASH-IMPOSED)
     const stalemateturns = rhs?.stalemate_turns ?? 0;
-    const c4 = stalemateturns >= CEASEFIRE_STALEMATE_MIN;
+    const c4Imposed = lastEventResponse(state, ZAGREB_CEASEFIRE_EVENT) === ZAGREB_RESTRAINT_RESPONSE;
+    const c4 = stalemateturns >= CEASEFIRE_STALEMATE_MIN || c4Imposed;
 
     // C5: IVP negotiation_momentum
     const ivp = state.political.international_visibility_pressure;
@@ -102,6 +128,7 @@ export function evaluateCeasefirePreconditions(state: GameState): CeasefirePreco
         c2_hrhb_exhaustion: c2,
         c3_rbih_exhaustion: c3,
         c4_stalemate: c4,
+        c4_imposed: c4Imposed,
         c5_ivp_momentum: c5,
         c6_patron_constraint: c6,
         all_met: c1 && c2 && c3 && c4 && c5 && c6
@@ -121,6 +148,7 @@ export function checkAndApplyCeasefire(state: GameState): CeasefireCheckReport {
                 c2_hrhb_exhaustion: false,
                 c3_rbih_exhaustion: false,
                 c4_stalemate: false,
+                c4_imposed: false,
                 c5_ivp_momentum: false,
                 c6_patron_constraint: false,
                 all_met: false
