@@ -17,7 +17,7 @@ import {
 import { MIN_BRIGADES_FOR_PLAN } from '../../src/sim/combat/commander/plan.js';
 import { summarizeBrigadesFireSupport } from '../../src/sim/combat/corps_fire_support.js';
 import type { BrigadeEvaluation, ForceAssessment } from '../../src/sim/combat/commander/commander_state.js';
-import type { CorpsCommandState, FactionId, FormationState, GameState } from '../../src/state/game_state.js';
+import type { CorpsCommandState, CorpsOperation, FactionId, FormationState, GameState } from '../../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../../src/state/game_state.js';
 
 function evalRow(id: string, overrides: Partial<BrigadeEvaluation> = {}): BrigadeEvaluation {
@@ -97,6 +97,9 @@ describe('summarizeBrigadesFireSupport', () => {
 // vrs_drina at turn 10 with healthy brigades: the formula and the RS early-war bias
 // choose 'offensive' (see srk_siege_morale_audit.test.ts T4), so the gate's cap shows.
 
+// P2.4 (2026-11-26): an offensive corps stance needs an operation in planning or execution.
+// Tests of a formula layer that drives a corps offensive give it one, so they still test that layer.
+const PLANNING_OP = { type: 'sector_attack', phase: 'planning' } as unknown as CorpsOperation;
 const CORPS = 'vrs_drina';
 
 function makeState(fa: ForceAssessment | undefined): GameState {
@@ -108,7 +111,7 @@ function makeState(fa: ForceAssessment | undefined): GameState {
         } as unknown as FormationState;
     }
     const cmd = {
-        command_span: 5, subordinate_count: 3, og_slots: 1, active_ogs: [], active_operations: [],
+        command_span: 5, subordinate_count: 3, og_slots: 1, active_ogs: [], active_operations: [PLANNING_OP],
         corps_exhaustion: 0, stance: 'balanced',
         ...(fa ? { commander_state: { force_assessment: fa } } : {}),
     } as unknown as CorpsCommandState;

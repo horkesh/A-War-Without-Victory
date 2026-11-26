@@ -11,7 +11,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { generateCorpsStanceOrders } from '../src/sim/combat/bot_corps_stance.js';
-import type { GameState, FactionId, CorpsFrontSector, CorpsCommandState, FormationState } from '../src/state/game_state.js';
+import type { GameState, FactionId, CorpsFrontSector, CorpsCommandState, CorpsOperation, FormationState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
 // ── Helpers ──
@@ -36,6 +36,10 @@ function makeBrigade(id: string, corpsId: string, faction: FactionId): Formation
         home_osid: 'op:travnik:travnik_1',
     } as unknown as FormationState;
 }
+
+// P2.4 (2026-11-26): an offensive corps stance needs an operation in planning or execution.
+// Tests of a formula layer that drives a corps offensive give it one, so they still test that layer.
+const PLANNING_OP = { type: 'sector_attack', phase: 'planning' } as unknown as CorpsOperation;
 
 /** Minimal corps command entry. */
 function makeCorpsCommand(stance: string = 'balanced'): CorpsCommandState {
@@ -334,13 +338,34 @@ describe('open RBiH-HRHB war doctrine', () => {
                 [corpsId]: { id: corpsId, faction: 'RBiH', kind: 'corps', status: 'active', tags: ['mun:travnik'] } as any,
                 arbih_brig_1: makeBrigade('arbih_brig_1', corpsId, 'RBiH'),
             },
-            corpsCommand: { [corpsId]: makeCorpsCommand('balanced') },
+            corpsCommand: { [corpsId]: { ...makeCorpsCommand('balanced'), active_operations: [PLANNING_OP] } },
             corpsFrontSectors: { [`sector:${corpsId}`]: makeSector(corpsId, 'RBiH', ['HRHB']) },
         });
 
         generateCorpsStanceOrders(state, 'RBiH', [], new Map());
 
         expect(state.military.corps_command![corpsId].stance).toBe('offensive');
+    });
+
+    it('P2.4: the same central Bosnia corps with no operation in planning or execution stays balanced', () => {
+        const corpsId = 'arbih_3rd_corps';
+        const state = makeState({
+            turn: 50,
+            allianceValue: -0.2,
+            mobilizationStartedTurn: 35,
+            warStartedTurn: 40,
+            formations: {
+                [corpsId]: { id: corpsId, faction: 'RBiH', kind: 'corps', status: 'active', tags: ['mun:travnik'] } as any,
+                arbih_brig_1: makeBrigade('arbih_brig_1', corpsId, 'RBiH'),
+            },
+            corpsCommand: { [corpsId]: makeCorpsCommand('balanced') },
+            corpsFrontSectors: { [`sector:${corpsId}`]: makeSector(corpsId, 'RBiH', ['HRHB']) },
+        });
+
+        generateCorpsStanceOrders(state, 'RBiH', [], new Map());
+
+        expect(state.military.corps_command![corpsId].stance).toBe('balanced');
+        expect(state.military.corps_command![corpsId].ai_recommended_stance).toBe('balanced');
     });
 
     it('does not force an RBiH corps defensive because its brigades stand in Sarajevo (Fable consult 8 change 2)', () => {

@@ -36,6 +36,7 @@ import type {
     FactionId,
     CorpsFrontSector,
     CorpsCommandState,
+    CorpsOperation,
     FormationState,
 } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
@@ -82,6 +83,10 @@ function makeCorpsFormation(
         tags: [`mun:${homeMun}`],
     } as unknown as FormationState;
 }
+
+// P2.4 (2026-11-26): an offensive corps stance needs an operation in planning or execution.
+// Tests of a formula layer that drives a corps offensive give it one, so they still test that layer.
+const PLANNING_OP = { type: 'sector_attack', phase: 'planning' } as unknown as CorpsOperation;
 
 function makeCorpsCommand(stance: string = 'balanced'): CorpsCommandState {
     return {
@@ -249,11 +254,24 @@ describe('LANE-NIGHTSHIFT-SRK-SIEGE-MORALE-AUDIT — SRK stance under siege doct
             corpsId: 'vrs_drina',
             homeMun: 'vlasenica',
         });
+        state.military.corps_command!['vrs_drina'].active_operations = [PLANNING_OP];
 
         generateCorpsStanceOrders(state, 'RS', [], new Map());
 
         const stance = state.military.corps_command!['vrs_drina'].stance;
         expect(stance).toBe('offensive');
+    });
+
+    it('T4b (P2.4): the same vrs_drina with no operation in planning or execution stays balanced', () => {
+        const state = makeState({
+            turn: 10,
+            corpsId: 'vrs_drina',
+            homeMun: 'vlasenica',
+        });
+
+        generateCorpsStanceOrders(state, 'RS', [], new Map());
+
+        expect(state.military.corps_command!['vrs_drina'].stance).toBe('balanced');
     });
 
     it('T5: SRK after early-war window (w≥26) derives normally — siege override still applies but is bounded', () => {

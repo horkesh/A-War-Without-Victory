@@ -24,7 +24,7 @@ import { effectivePersonnel } from './tactical_group_personnel.js';
 import type { AxisOrderGenerationDetail, BrigadePosture, CorpsOperation, FactionId, FormationId, FormationState, GameState } from '../../state/game_state.js';
 import { findSubSegmentForOsid } from './corps_front_sectors.js';
 import type { CorpsFrontSector, CorpsFrontSubSegment } from '../../state/game_state.js';
-import { isFriendlyFaction, isRbihHrhbCombatEnabled } from '../early_war/alliance_update.js';
+import { isFriendlyFaction, isRbihHrhbCombatBlocked } from '../early_war/alliance_update.js';
 import { assignedBrigadeNotOnSectorFrontOsids } from './bot_brigade_eval_front.js';
 import {
     MAX_SECTOR_COUNTER_ATTACKS_PER_TURN,
@@ -416,10 +416,9 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                         () => {
                             if (avoidedOsidsForFaction?.includes(currentObjective as string)) return true;
                             if (objController === null || objController === faction) return true;
-                            if ((faction === 'HRHB' || faction === 'RBiH') && !isRbihHrhbCombatEnabled(state)) {
-                                const alliedOpponent = faction === 'HRHB' ? 'RBiH' : 'HRHB';
-                                if (objController === alliedOpponent) return true;
-                            }
+                            // PRIM-A2b (rulings §25.4, the §19 class): the battle's own gate, which also
+                            // blocks before the earliest war turn, under a ceasefire and after Washington.
+                            if (isRbihHrhbCombatBlocked(state, faction, objController)) return true;
                             return false;
                         },
                     );
@@ -645,13 +644,13 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                     ethnicMap
                 )
             );
-            // Alliance filter: HRHB must not attack RBiH targets (and vice versa)
-            // when combat is not enabled (allied OR mobilizing). Applies to attack-through fallback.
-            const targets = (faction === 'HRHB' || faction === 'RBiH') && !isRbihHrhbCombatEnabled(state)
-                ? allTargets.filter(t => {
-                    const tc = getPoliticalControllerOSID(state, t.osid, reverseMap);
-                    return tc !== (faction === 'HRHB' ? 'RBiH' : 'HRHB');
-                })
+            // Alliance filter: HRHB must not attack RBiH targets (and vice versa) whenever the
+            // battle would block the pair (PRIM-A2b: `isRbihHrhbCombatBlocked`, the battle's gate:
+            // allied, mobilizing, before the earliest war turn, ceasefire, Washington). Applies to
+            // the attack-through fallback.
+            const targets = faction === 'HRHB' || faction === 'RBiH'
+                ? allTargets.filter(t =>
+                    !isRbihHrhbCombatBlocked(state, faction, getPoliticalControllerOSID(state, t.osid, reverseMap)))
                 : allTargets;
             const { intermediateTargets, bestIntermediate } = sectorAttackProfileTime(
                 '.sectorAttack.executionIntermediateTargets',

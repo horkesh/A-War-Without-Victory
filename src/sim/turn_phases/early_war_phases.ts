@@ -45,7 +45,7 @@ import {
 } from '../turn_pipeline_types.js';
 
 /**
- * Phase C: Peace phase entry gating (Phase_I_Specification_v0_4_0.md; ROADMAP Phase C).
+ * Phase C: Peace phase entry gating (former Phase I Specification, retired when War_Specification_v0_9_0.md replaced it; ROADMAP Phase C).
  * Peace phase execution occurs only when referendum_held and current_turn >= war_start_turn.
  * Phase 0 must remain the only runner before war_start_turn; use state pipeline for phase_0.
  */
