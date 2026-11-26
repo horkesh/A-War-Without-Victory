@@ -10,6 +10,10 @@ Authority: orchestrator ruling §29 (2026-11-26, coordination c772d4d), after th
 - Tests: `tests/alliance_lifecycle.test.ts` "imposed C4": acknowledge fires; resist keeps the stalemate-only path; the last answer wins; C1-C3, C5 and C6 still bind.
 - Canon: Systems Manual System 10, implementation-note "imposed bilateral ceasefire". No Engine Invariants, Phase/War Spec or Rulebook text states C1-C6. The old Phase I §4.8 citation in the code headers was dead and is corrected.
 - Comments only: the `WASHINGTON_AGREEMENT_WEEK` comment and the System 10 Path A' note now date the turns from t0 = 6 April 1992. t102 is about 21 March 1994; the framework (1 March) is about t99 and the signing (18 March) about t101. The constant stays 102.
+- Ruling §30, same PR:
+  - Copy, with a narrative-designer seat: each answer on `zagreb_orders_hrhb_ceasefire` now has a `description`, in EN and BCS. `acknowledge_pressure` says the HVO is committed to a ceasefire once the war's other conditions allow one. `resist_patron` says the ceasefire waits for a stalled front while Zagreb cuts supply. The copy never calls it the cause.
+  - `c4_imposed` is documented as "gate open", not "cause".
+  - The dead Phase I citation is also corrected in the 9 other early-war headers (comment only).
 
 **Measured.**
 - The 188w pair on main e797a09a4 plus this change is **hash-neutral**: hist `0a0990fb803a5fb4`, emer `ca06834c3c61a6a7`, equal to main. Ceasefire t94 and Washington t98 in both modes. On main, C4 is met by the stalemate at t94, before HRHB acknowledges Zagreb at t95, so the imposed path does not change the outcome.

@@ -7,7 +7,7 @@
  *
  * ALLIED_COORDINATION_FACTOR = 0.6 (imperfect coordination; historical: joint Jajce defense still failed).
  *
- * Canon: Phase_I_Specification_v0_4_0.md §4.8.
+ * Canon: Systems_Manual_v0_9_0.md §6.6a (RBiH-HRHB alliance) is the live alliance text. The former Phase I §4.8 was retired when War_Specification_v0_9_0.md replaced it.
  */
 
 import type { FactionId, GameState, MunicipalityId } from '../../state/game_state.js';

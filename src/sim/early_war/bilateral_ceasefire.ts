@@ -78,7 +78,11 @@ export interface CeasefirePreconditionResult {
     c3_rbih_exhaustion: boolean;
     /** C4 met, by either path: a real stalemate or the imposed path below. */
     c4_stalemate: boolean;
-    /** C4 was met by the imposed path (HRHB acknowledged Zagreb's ceasefire order). */
+    /**
+     * The imposed C4 gate was open: HRHB's last answer to Zagreb's ceasefire order is
+     * `acknowledge_pressure`. It means "gate open", NOT "cause". A real stalemate may also hold that
+     * turn, and C1-C3, C5 and C6 must hold too. No report or UI text may say this caused the ceasefire.
+     */
     c4_imposed: boolean;
     c5_ivp_momentum: boolean;
     c6_patron_constraint: boolean;
