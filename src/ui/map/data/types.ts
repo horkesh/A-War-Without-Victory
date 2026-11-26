@@ -1713,6 +1713,9 @@ export interface LoadedGameState {
     }>;
     /** Game over state. */
     gameOver?: boolean;
+    /** §27: `rbihHrhbAllianceHeld(state)`, the one predicate the `alliance_held` ghost and the
+     *  Ahmići essay note both read. */
+    allianceHeld?: boolean;
     gameOutcome?: string;
     /** Game verdict (computed at game end from negotiation capital). */
     gameVerdict?: import('../../../state/negotiation_types.js').GameVerdict;
