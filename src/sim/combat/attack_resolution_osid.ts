@@ -136,7 +136,7 @@ import {
 } from './standing_og_defense.js';
 // ADR-0005 v2.2c #2: Hard Invariant #6 — immediate dissolution on anchor destruction.
 import { dissolveTacticalGroup, TG_ANCHOR_DISSOLVE_COHESION_FLOOR } from './tactical_group_lifecycle.js';
-import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
+import { MIN_ATTACK_PERSONNEL, MIN_COMBAT_PERSONNEL } from '../../state/formation_constants.js';
 import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sectors.js';
 import { getEnclaveGarrisonPower, isEnclaveCapital } from './enclave_resilience.js';
 import { getCollapseDefenderMultiplier } from '../collapse/capacity_modifiers.js';
@@ -273,6 +273,25 @@ export function hasFriendlyNonTgHolder(
         return true;
     }
     return false;
+}
+
+/**
+ * CAS-REPORT §15: personnel an attacker can actually lose in one battle. Its own
+ * personnel above MIN_COMBAT_PERSONNEL; a TG anchor adds each donor's remaining loan,
+ * bounded by that donor's own room above the floor (Hard Invariant #5).
+ */
+function attackerRemovablePersonnel(state: GameState, attacker: FormationState): number {
+    let room = Math.max(0, (attacker.personnel ?? 0) - MIN_COMBAT_PERSONNEL);
+    if (ENABLE_TG_COMBAT_SYNTHESIS) {
+        const tg = findTgForAnchor(state, attacker.id);
+        for (const donorContrib of tg?.donor_contributions ?? []) {
+            const donor = state.military.formations[donorContrib.brigade_id];
+            if (!donor) continue;
+            const loanRoom = Math.max(0, donorContrib.personnel_lent - donorContrib.casualties_so_far);
+            room += Math.min(loanRoom, Math.max(0, (donor.personnel ?? 0) - MIN_COMBAT_PERSONNEL));
+        }
+    }
+    return room;
 }
 
 function getIntelConfidenceBand(confidence: number): IntelConfidenceBand {
@@ -1068,7 +1087,6 @@ export function resolveAttackOrdersOsid(
         let battleEquipScavengedBy = '' as string;
         let battleEquipCapturedBy = '' as string;
 
-        report.casualty_attacker += finalAttackerCas;
         report.casualty_defender += appliedDefenderCas;
 
         // Equipment loss accumulators for battlefield scavenging (summed across attacker formations)
@@ -1083,18 +1101,24 @@ export function resolveAttackOrdersOsid(
         // contested when no friendly non-TG brigade can hold it (no dissolved-TG ghost hold).
         let tgAnchorDissolvedThisBattle = false;
         const anySupport = attackerFormations.some(a => isSupportBrigadeOnActiveOp(state, a.id, a.corps_id));
+        // CAS-REPORT §15: each share is capped at what the brigade can actually lose (its
+        // personnel above MIN_COMBAT_PERSONNEL, plus a TG anchor's donor room), as the
+        // defender shares are. The record below reports the applied sum, not finalAttackerCas.
         const casShares = computeAttackerCasualtyShares(
             attackerFormations.map(a => ({
                 id: a.id,
                 personnel: a.personnel ?? 0,
                 supportRole: isSupportBrigadeOnActiveOp(state, a.id, a.corps_id) ? 'support' as const
                     : anySupport ? 'main' as const : 'none' as const,
+                removable: attackerRemovablePersonnel(state, a),
             })),
             personnelAttacker,
             finalAttackerCas,
         );
+        let appliedAttackerCas = 0;
         for (const a of attackerFormations) {
             const cas = casShares.get(a.id) ?? 0;
+            let appliedCas = 0;
             // ADR-0005 v2.2b: TG anchor distributes casualties to donors per pro-rata
             // math. Anchor floor ≥50% (Hard Inv); donor cap = personnel_lent (Hard Inv #5).
             // Flag-off: falls through to the original single-brigade applyPersonnelLoss.
@@ -1102,20 +1126,21 @@ export function resolveAttackOrdersOsid(
                 const tg = findTgForAnchor(state, a.id);
                 if (tg && tg.donor_contributions.length > 0) {
                     const dist = distributeCasualtiesAcrossTg(cas, a.id, tg.donor_contributions);
-                    applyPersonnelLoss(a, dist.anchor_casualties);
+                    appliedCas += applyPersonnelLoss(a, dist.anchor_casualties);
                     for (const donorContrib of tg.donor_contributions) {
                         const donorCas = dist.donor_casualties[donorContrib.brigade_id] ?? 0;
                         if (donorCas <= 0) continue;
                         const donor = state.military.formations[donorContrib.brigade_id];
-                        if (donor) applyPersonnelLoss(donor, donorCas);
+                        if (donor) appliedCas += applyPersonnelLoss(donor, donorCas);
                         donorContrib.casualties_so_far += donorCas;
                     }
                 } else {
-                    applyPersonnelLoss(a, cas);
+                    appliedCas = applyPersonnelLoss(a, cas);
                 }
             } else {
-                applyPersonnelLoss(a, cas);
+                appliedCas = applyPersonnelLoss(a, cas);
             }
+            appliedAttackerCas += appliedCas;
             a.cohesion = Math.max(0, Math.min(100, (a.cohesion ?? 60) + (COHESION_ATTACKER[outcome] ?? 0)));
 
             // ADR-0005 v2.2c #2 / Hard Invariant #6: anchor destroyed mid-op → dissolve its TG
@@ -1138,7 +1163,7 @@ export function resolveAttackOrdersOsid(
             (a as { recent_battle_outcome?: string }).recent_battle_outcome = outcome;
 
             applyDisruptionFromOutcome(a, outcome, targetOsid, state.meta?.turn ?? 0);
-            recordBattleCasualties(state.military.casualty_ledger!, a.faction, a.id, splitKiaWiaMia(cas));
+            recordBattleCasualties(state.military.casualty_ledger!, a.faction, a.id, splitKiaWiaMia(appliedCas));
             // Equipment losses (extracted to attack_equipment_effects.ts)
             const { tanksLost: aTanksLost, artLost: aArtLost } = computeFormationEquipmentLoss(a, 'attacker', state.military.casualty_ledger!);
             totalATanksLost += aTanksLost;
@@ -1146,6 +1171,7 @@ export function resolveAttackOrdersOsid(
             battleEquipAttackerTanksLost += aTanksLost;
             battleEquipAttackerArtLost += aArtLost;
         }
+        report.casualty_attacker += appliedAttackerCas;
         if (defenderFormation) {
             // ── Distance-weighted casualty distribution ───────────────────
             distributeDefenderCasualties({
@@ -1269,7 +1295,7 @@ export function resolveAttackOrdersOsid(
             defender_kind: defenderFormation ? 'formation' : (militiaResult ? 'militia' : 'none'),
             ...(militiaResult ? { defender_militia_pool_key: militiaResult.poolKey } : {}),
             snap_events: battleSnapEvents,
-            attacker_casualties: finalAttackerCas,
+            attacker_casualties: appliedAttackerCas,
             defender_casualties: appliedDefenderCas,
             defender_contributions: defenderContributions,
             ...(executionFriction ? { execution_friction: executionFriction } : {}),
@@ -1343,7 +1369,7 @@ export function resolveAttackOrdersOsid(
         }
 
         const ammoCrisis = attackerLost && getSupplyMult(firstAttacker, state, 'attack', supplyStateByOsid) < 0.5;
-        const pyrrhic = attackerWon && personnelAttacker > 0 && finalAttackerCas / personnelAttacker > 0.15;
+        const pyrrhic = attackerWon && personnelAttacker > 0 && appliedAttackerCas / personnelAttacker > 0.15;
         const crisisEvent = applyAmmoCrisisPyrrhicEffects({
             isAmmoCrisis: ammoCrisis,
             isPyrrhic: pyrrhic,
@@ -1368,7 +1394,7 @@ export function resolveAttackOrdersOsid(
         // Officer quality loss from casualties (extracted to attack_post_battle_effects.ts)
         for (const a of attackerFormations) {
             const frac = (a.personnel ?? 0) / Math.max(1, personnelAttacker);
-            applyOfficerCasualtyLoss(a, Math.round(finalAttackerCas * frac), a.personnel ?? 0);
+            applyOfficerCasualtyLoss(a, Math.round(appliedAttackerCas * frac), a.personnel ?? 0);
         }
         for (const entry of defenderAftermathEntries) {
             const preCasualtyPersonnel = (entry.formation.personnel ?? 0) + entry.casualties;
@@ -1402,7 +1428,7 @@ export function resolveAttackOrdersOsid(
             flip,
             ethnicComposition,
             personnelAttacker,
-            finalAttackerCas,
+            finalAttackerCas: appliedAttackerCas,
             finalDefenderCas: appliedDefenderCas,
             casualtyLedger: state.military.casualty_ledger!,
             report,
@@ -1537,7 +1563,7 @@ export function resolveAttackOrdersOsid(
         // Significance: decisive/catastrophic outcome, OR territory flip, OR ≥200 total casualties.
         // Guard: skip in cadet mode (no AI client).
         if (state.meta.ai_commander_config?.mode !== 'cadet') {
-            const aarTotalCas = finalAttackerCas + appliedDefenderCas;
+            const aarTotalCas = appliedAttackerCas + appliedDefenderCas;
             const aarSignificant =
                 outcome === 'decisive_victory' ||
                 outcome === 'catastrophic' ||
@@ -1553,7 +1579,7 @@ export function resolveAttackOrdersOsid(
                         corpsId: attackerCorpsId,
                         targetOsid,
                         outcome,
-                        attackerCasualties: finalAttackerCas,
+                        attackerCasualties: appliedAttackerCas,
                         defenderCasualties: appliedDefenderCas,
                         attackerBrigades: attackerFormations.map(a => a.id),
                         defenderBrigades: defenderFormation ? [defenderFormation.id] : [],
@@ -1644,7 +1670,7 @@ export function resolveAttackOrdersOsid(
             attackerFaction,
             controller,
             flip,
-            finalAttackerCas,
+            finalAttackerCas: appliedAttackerCas,
             finalDefenderCas: appliedDefenderCas,
             defenderCasualtyShares,
             state,

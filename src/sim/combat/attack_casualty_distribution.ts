@@ -78,6 +78,13 @@ export interface AttackerCasualtyInput {
     id: FormationId;
     personnel: number;
     supportRole: 'support' | 'main' | 'none';
+    /**
+     * Personnel this attacker can actually lose (CAS-REPORT §15): personnel minus
+     * MIN_COMBAT_PERSONNEL, plus any tactical-group donor room. When given, the share
+     * is capped here, as the defender shares are, so the battle record and the
+     * casualty ledger never report a loss the floor clamp would refuse.
+     */
+    removable?: number;
 }
 
 export function computeAttackerCasualtyShares(
@@ -87,18 +94,19 @@ export function computeAttackerCasualtyShares(
 ): Map<FormationId, number> {
     const result = new Map<FormationId, number>();
     let weightSum = 0;
-    const weights: { id: FormationId; w: number }[] = [];
+    const weights: { id: FormationId; w: number; removable?: number }[] = [];
     for (const input of inputs) {
         const frac = input.personnel / Math.max(1, totalPersonnel);
         const mult = input.supportRole === 'support' ? SUPPORT_CASUALTY_MULT
             : input.supportRole === 'main' ? MAIN_CASUALTY_MULT
             : 1.0;
         const w = frac * mult;
-        weights.push({ id: input.id, w });
+        weights.push({ id: input.id, w, removable: input.removable });
         weightSum += w;
     }
-    for (const { id, w } of weights) {
-        result.set(id, Math.round(finalCas * (weightSum > 0 ? w / weightSum : 0)));
+    for (const { id, w, removable } of weights) {
+        const share = Math.round(finalCas * (weightSum > 0 ? w / weightSum : 0));
+        result.set(id, removable === undefined ? share : Math.min(share, Math.max(0, removable)));
     }
     return result;
 }
