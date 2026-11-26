@@ -23,7 +23,6 @@ import {
 import { CANONICAL_ARMY_CO_ROSTER } from './army_co_roster_data.js';
 import { getBrigadeOfficerMod } from './combat_math.js';
 import {
-    nextScheduledTenure,
     officersRelievedFrom,
     officerSurvivedWar,
     scheduledTenure,
@@ -63,69 +62,6 @@ const TIER_PRIORITY: Record<OfficerPoolTier, number> = {
     tier_b: 2,
     tier_c: 3,
 };
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Historical successor lookup
-// ═══════════════════════════════════════════════════════════════════════════
-
-/**
- * Find the historical successor for a departing officer.
- * Looks for the next officer with the same home_corps_id, available this turn,
- * not yet in state, prioritized by pool_tier.
- */
-function findHistoricalSuccessor(
-    departing: NamedOfficer,
-    allOfficers: NamedOfficer[],
-    currentState: Record<string, NamedOfficerState>,
-    turn: number,
-    corpsRoster?: CorpsCoRoster,
-    commandedCorpsId?: string | null,
-): NamedOfficer | null {
-    // The dated corps schedule (§5E) names the successor first: the holder whose tenure
-    // is in force for the corps being vacated, else the next scheduled holder. Inert
-    // with an empty schedule.
-    if (commandedCorpsId && corpsRoster) {
-        const current = scheduledTenure(corpsRoster, commandedCorpsId, turn);
-        const tenure = current && current.officer_id !== departing.id
-            ? current
-            : nextScheduledTenure(corpsRoster, commandedCorpsId, turn);
-        const scheduled = tenure ? allOfficers.find((o) => o.id === tenure.officer_id) : undefined;
-        const scheduledState = scheduled ? currentState[scheduled.id] : undefined;
-        if (
-            scheduled
-            && scheduled.id !== departing.id
-            && scheduled.faction === departing.faction
-            && scheduled.rank !== 'army_commander' && scheduled.rank !== 'deputy'
-            && scheduled.available_from_turn <= turn
-            && (scheduled.available_until_turn === undefined || scheduled.available_until_turn > turn)
-            && isEnclaveCompatible(scheduled, commandedCorpsId, turn)
-            && (!scheduledState || scheduledState.status === 'reserve')
-        ) {
-            return scheduled;
-        }
-    }
-
-    const corpsId = departing.home_corps_id;
-    if (!corpsId) return null;
-
-    const candidates = allOfficers
-        .filter(o =>
-            o.id !== departing.id &&
-            o.faction === departing.faction &&
-            o.home_corps_id === corpsId &&
-            o.available_from_turn <= turn &&
-            (o.available_until_turn === undefined || o.available_until_turn > turn) &&
-            isEnclaveCompatible(o, corpsId, turn) &&
-            (!currentState[o.id] || currentState[o.id].status === 'reserve')
-        )
-        .sort((a, b) => {
-            const tierDiff = (TIER_PRIORITY[a.pool_tier] ?? 99) - (TIER_PRIORITY[b.pool_tier] ?? 99);
-            if (tierDiff !== 0) return tierDiff;
-            return strictCompare(a.id, b.id);
-        });
-
-    return candidates[0] ?? null;
-}
 
 export function officerReplacementMatterKey(
     outgoingOfficerId: string,
