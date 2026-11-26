@@ -87,7 +87,15 @@ import {
     SECTOR_STANCE_REACTIVE_BONUS,
     REACTIVE_DEFENSE_RATIO,
     MIN_DEFENSE_FLOOR_FRACTION,
+    // P3-EST §11: the battle's attack-side and battle-wide multipliers
+    getAttackerFirepowerDeficitMult,
+    getIntelExecutionFrictionMultipliers,
 } from './combat_math.js';
+import { computeAttackForcePower } from './attack_force_power.js';
+import { getAttackIntelConfidence } from './attack_intel_context.js';
+import { getSeasonalModifiers } from './seasonal_effects.js';
+import { getCollapseDefenderMultiplier } from '../collapse/capacity_modifiers.js';
+import { getPostWashingtonJointPressureMultiplier } from '../early_war/washington_agreement.js';
 import { collectAverageDefenseRoster, collectSectorDefenseBrigades } from './sector_defense_roster.js';
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
@@ -427,6 +435,10 @@ function collectObjectiveEnemySectorIds(
  * summing every facing standing-OG brigade at full power. `_competence` is kept for the
  * call shape; confidence now only picks the sentinel. `adjacency` feeds the friendly-route
  * distance; without it only physical defenders and the floor count.
+ * P3-EST §11: the attack side mirrors the battle too: the primary objective's axis
+ * brigades through `computeAttackForcePower`, with the season (slope 0: preparation has no
+ * slope map), the firepower deficit and the own execution friction; the defence takes the
+ * collapse, joint-pressure and winter multipliers.
  *
  * LANE-2026-05-02: estimateForceRatio defender-modifier integration.
  * Now sums COMBAT POWER (computeAttackerPower / rankDefendersByPower) instead of
@@ -539,37 +551,38 @@ export function estimateForceRatio(
         ? op.staging_osid
         : sortedRelevance[0];
 
-    let ownStrength = 0;
-    for (const a of attackerFormations) {
-        // LANE-2026-05-02-IN-TRANSIT-COMBAT-POWER-CONTEXT: per-formation override
-        // gated on the predecessor predicate. Brigades not in_transit toward a
-        // relevant OSID get no override (default-undefined → byte-stable). The
-        // caller restriction is intentional: only `estimateForceRatio` knows the
-        // operation-relevance set; resolver/predictor/sector-rating evaluate
-        // formations against their CURRENT physical location and must remain so.
-        const useOverride = overrideOsid !== undefined
+    // LANE-2026-05-02-IN-TRANSIT-COMBAT-POWER-CONTEXT: per-formation override
+    // gated on the predecessor predicate. Brigades not in_transit toward a
+    // relevant OSID get no override (default-undefined → byte-stable). The
+    // caller restriction is intentional: only `estimateForceRatio` knows the
+    // operation-relevance set; resolver/predictor/sector-rating evaluate
+    // formations against their CURRENT physical location and must remain so.
+    const contextLocationFor = (a: FormationState): string | undefined =>
+        overrideOsid !== undefined
             && a.location_osid !== overrideOsid
-            && isCommittedInTransitTo(state, a.id as FormationId, relevanceOsids);
-        ownStrength += computeAttackerPower(
-            state,
-            a,
-            supplyByOsid,
-            'attack',
-            targetTerrainMult,
-            primaryTargetOsid,
-            useOverride ? overrideOsid : undefined,
-        );
-    }
-    if (ownStrength === 0) {
-        // LANE-2026-05-02: every attacker had postureMult <= 0 OR base power 0.
-        // Predictor cannot offer a meaningful ratio.
-        return 0;
-    }
+            && isCommittedInTransitTo(state, a.id as FormationId, relevanceOsids)
+            ? overrideOsid
+            : undefined;
 
     // LANE-2026-05-02: sentinel — no objective. Confidence-gated, not an unconditional 3.0.
+    // Zero when every attacker has no attack power (postureMult <= 0 or base power 0).
     if (!primaryTargetOsid) {
+        const anyPower = attackerFormations.some((a) =>
+            computeAttackerPower(state, a, supplyByOsid, 'attack', targetTerrainMult, undefined, contextLocationFor(a)) > 0);
+        if (!anyPower) return 0;
         return confidence >= 0.5 ? 3.0 : 1.0;
     }
+
+    // P3-EST §11 (2026-11-26): the attack side mirrors the battle as the defence does. The
+    // brigades that fight at the primary objective are its axis's brigades
+    // (`collectPrimaryObjectiveAttackers`); the battle's whole-force arithmetic applies
+    // (`computeAttackForcePower`: coordination, concentration, support and execution, the
+    // war-exhaustion tempo, TG donors), with the season, the firepower deficit against the
+    // defending roster and the own execution friction. Measured on the 188w hist: the
+    // per-brigade sum without those read about 2.5x the realised battle ratio, mostly the
+    // missing firepower deficit (ARBiH) and the uncounted split across axes (VRS, HVO).
+    const fightingFormations = collectPrimaryObjectiveAttackers(op, attackerFormations, primaryTargetOsid);
+    const seasonal = getSeasonalModifiers(state.meta?.turn ?? 0, state.meta?.scenario_start_date, 0);
 
     // P3-EST (2026-11-26, freeze inventory §8 queue; operations seat spec): the defence is
     // the one the battle will meet at the primary objective — physical defenders at full
@@ -578,14 +591,15 @@ export function estimateForceRatio(
     // of every facing enemy sector at full power, which was far above any battle. The
     // LANE-2026-05-02-DRINA enclave filter goes with that sum: the friendly-route distance
     // already gives a brigade outside an encirclement ring no reach to a target inside it.
-    const artSuppression = getArtillerySuppression(attackerFormations, attackerFaction, state);
+    const adjacencyMap = adjacency ?? new Map<string, string[]>();
+    const artSuppression = getArtillerySuppression(fightingFormations, attackerFaction, state);
     const noEthnicBonus = (_d: FormationState) => 0; // ethnic composition not threaded in preparation (accepted, small)
     const defence = estimateSectorDefensePower(
         state,
         primaryTargetOsid,
         attackerFaction,
-        attackerFormations.length,
-        adjacency ?? new Map<string, string[]>(),
+        fightingFormations.length,
+        adjacencyMap,
         terrainCache,
         artSuppression,
         supplyByOsid,
@@ -593,16 +607,74 @@ export function estimateForceRatio(
         (sectorId) => countOperationAxesOnDefendingSector(state, op, sectorId),
     );
 
+    // The resolver's deficit compares the attackers with the whole defending roster.
+    const firepowerDeficitMult = getAttackerFirepowerDeficitMult(state, fightingFormations, defence?.roster ?? []);
+    const ownExecutionMult = getIntelExecutionFrictionMultipliers(
+        getAttackIntelConfidence(state, fightingFormations[0]!.location_osid ?? '', defence?.sectorId, primaryTargetOsid),
+        false, // the defender's OPSEC is hidden from the planner, as from the predictor
+    ).attackerPowerMult;
+    const ownStrength = computeAttackForcePower(
+        state,
+        fightingFormations,
+        primaryTargetOsid,
+        adjacencyMap,
+        targetTerrainMult,
+        seasonal.attack_mult,
+        supplyByOsid,
+        undefined,
+        firepowerDeficitMult,
+        contextLocationFor,
+    ) * ownExecutionMult;
+    if (ownStrength === 0) {
+        // LANE-2026-05-02: every attacker had postureMult <= 0 OR base power 0.
+        // Predictor cannot offer a meaningful ratio.
+        return 0;
+    }
+
     // LANE-2026-05-02: sentinel — no contributing defender or zero defence. Same
     // confidence gate as before, not an unconditional optimistic 3.0.
     if (defence === null || defence.power <= 0) {
         return confidence >= 0.5 ? 3.0 : 1.0;
     }
 
+    // The battle's defence multipliers after the roster: own-OSID collapse, post-Washington
+    // joint pressure, and the season (winter defence). Not modelled here (accepted, small):
+    // the enclave garrison (no population map in preparation) and the defender's OPSEC.
+    const controller = getPoliticalControllerOSID(state, primaryTargetOsid, undefined)!;
+    const defencePower = defence.power
+        * getCollapseDefenderMultiplier(state, primaryTargetOsid)
+        * getPostWashingtonJointPressureMultiplier(state, controller, attackerFaction, primaryTargetOsid)
+        * seasonal.defense_mult;
+
     // P3-EST: no estimation error. The old accuracy/bias factor (0.3-1.0x) is removed;
     // confidence and competence still act through the confidence gate, the required ratio
     // and the assessment score.
-    return ownStrength / defence.power;
+    return ownStrength / defencePower;
+}
+
+/**
+ * P3-EST §11: the brigades that will fight at the primary objective. With live axes, the
+ * battle's attackers come from the axes whose objectives include it, so only their assigned
+ * brigades count; without axes, or when no live axis names it, every participating brigade.
+ * Strict ID order, as `computeAttackForcePower` expects.
+ */
+function collectPrimaryObjectiveAttackers(
+    op: CorpsOperation,
+    attackerFormations: FormationState[],
+    primaryTargetOsid: string,
+): FormationState[] {
+    let scoped = attackerFormations;
+    if (op.axes && op.axes.length > 0) {
+        const ids = new Set<string>();
+        for (const ax of op.axes) {
+            if (isAxisExcludedFromPreparation(ax)) continue;
+            if (!ax.objectives.includes(primaryTargetOsid)) continue;
+            for (const bid of ax.assigned_brigades) ids.add(bid);
+        }
+        const onAxis = attackerFormations.filter((a) => ids.has(a.id));
+        if (onAxis.length > 0) scoped = onAxis;
+    }
+    return [...scoped].sort((a, b) => strictCompare(a.id, b.id));
 }
 
 /**
@@ -653,7 +725,7 @@ export function estimateSectorDefensePower(
     supplyByOsid: SupplyStateByOsidReport | null | undefined,
     ethnicBonusFn: (d: FormationState) => number,
     simultaneousAxesForSector: (sectorId: string | undefined) => number = () => 1,
-): { power: number; contributors: number; sectorId: string | undefined } | null {
+): { power: number; contributors: number; sectorId: string | undefined; roster: FormationState[] } | null {
     const controller = getPoliticalControllerOSID(state, targetOsid, undefined);
     if (controller === null || controller === attackerFaction) return null;
     const physical = Object.values(state.military.formations ?? {})
@@ -692,7 +764,7 @@ export function estimateSectorDefensePower(
     const boosted = effectiveReserves * SECTOR_STANCE_REACTIVE_BONUS[sector?.sector_stance ?? 'defend'] / simultaneousAxes;
     const reactive = Math.min(boosted, attackerCount * avgPower * REACTIVE_DEFENSE_RATIO);
     const power = applyMinimumSectorDefenseFloor(physicalPower + reactive, avgPower * MIN_DEFENSE_FLOOR_FRACTION, contributors);
-    return { power, contributors, sectorId: sector?.sector_id };
+    return { power, contributors, sectorId: sector?.sector_id, roster };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

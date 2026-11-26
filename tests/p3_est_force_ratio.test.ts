@@ -11,8 +11,9 @@
 import { describe, expect, it } from 'vitest';
 
 import { predictCombatOutcome } from '../src/sim/combat/combat_predictor.js';
-import { getArtillerySuppression } from '../src/sim/combat/combat_math.js';
+import { getArtillerySuppression, getAttackerFirepowerDeficitMult } from '../src/sim/combat/combat_math.js';
 import { estimateForceRatio, estimateSectorDefensePower } from '../src/sim/combat/operation_preparation.js';
+import { ensureBrigadeComposition } from '../src/sim/combat/equipment_effects.js';
 import type { CorpsOperation, FactionId, FormationId, FormationState, GameState } from '../src/state/game_state.js';
 import type { Osid } from '../src/sim/combat/osid_adjacency.js';
 
@@ -110,5 +111,59 @@ describe('P3-EST: the planner estimates the defence the battle builds', () => {
         const s = fixture(false);
         expect(estimateSectorDefensePower(s, 'E', 'RBiH', 1, adjacency(), {}, 0, null, () => 0)).toBeNull();
         expect(estimateSectorDefensePower(s, 'D', 'RS', 1, adjacency(), {}, 0, null, () => 0)).toBeNull();
+    });
+});
+
+// P3-EST §11 (2026-11-26): the 188w hist read the estimate ~2.5x above the realised battle
+// ratio. The causes were on the attack side: the battle's firepower deficit, its season and
+// whole-force arithmetic, and the split of an operation's brigades across axes.
+describe('P3-EST §11: the attack side mirrors the battle', () => {
+    it('equals the predictor ratio (fog removed): computeAttackForcePower plus own execution friction', () => {
+        const s = fixture(false);
+        const est = estimateForceRatio(s, op(), 3, 0.9, null, {}, adjacency());
+        const p = predictCombatOutcome(s, 'attacker' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack', ['attacker_2' as FormationId]);
+        expect(p).not.toBeNull();
+        expect(est).toBeCloseTo(p!.attacker_power / (p!.defender_power / PREDICTOR_FOG_WITHOUT_INTEL), 6);
+    });
+
+    it('only the axis that holds the primary objective fights there', () => {
+        const s = fixture(false);
+        const twoAxes = {
+            ...op(),
+            objectives: [],
+            axes: [
+                { axis_id: 'a1', objectives: ['D'], assigned_brigades: ['attacker'], current_objective_index: 0 },
+                { axis_id: 'a2', objectives: ['Y2'], assigned_brigades: ['attacker_2'], current_objective_index: 0 },
+            ],
+        } as unknown as CorpsOperation;
+        const scoped = estimateForceRatio(s, twoAxes, 3, 0.9, null, {}, adjacency());
+        const p = predictCombatOutcome(s, 'attacker' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack');
+        expect(p).not.toBeNull();
+        expect(scoped).toBeCloseTo(p!.attacker_power / (p!.defender_power / PREDICTOR_FOG_WITHOUT_INTEL), 6);
+        expect(scoped).toBeLessThan(estimateForceRatio(s, op(), 3, 0.9, null, {}, adjacency()));
+    });
+
+    it('applies the battle firepower deficit against the defending roster', () => {
+        const heavy = { artillery: 30, tanks: 6, artillery_condition: { operational: 1 }, tank_condition: { operational: 1 } };
+        const armed = (on: boolean): GameState => {
+            const s = fixture(false);
+            (s.meta as any).firepower_deficit_penalty_enabled = on;
+            for (const id of ['on_cell', 'reserve']) {
+                const f = s.military.formations[id]!;
+                f.composition = { ...ensureBrigadeComposition({ ...f }), ...heavy } as any;
+            }
+            return s;
+        };
+        const off = estimateForceRatio(armed(false), op(), 3, 0.9, null, {}, adjacency());
+        const sOn = armed(true);
+        const on = estimateForceRatio(sOn, op(), 3, 0.9, null, {}, adjacency());
+        const mult = getAttackerFirepowerDeficitMult(
+            sOn,
+            [sOn.military.formations.attacker!, sOn.military.formations.attacker_2!],
+            [sOn.military.formations.on_cell!, sOn.military.formations.reserve!],
+        );
+        expect(Number.isFinite(off)).toBe(true);
+        expect(mult).toBeLessThan(1);
+        expect(on / off).toBeCloseTo(mult, 6);
     });
 });

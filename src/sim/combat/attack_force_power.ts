@@ -88,6 +88,10 @@ export function computeAttackForcePower(
     supplyStateByOsid?: SupplyStateByOsidReport | null,
     postureOverrides?: ReadonlyMap<string, string>,
     firepowerDeficitMult = 1,
+    // P3-EST §11: the planner's estimate evaluates a brigade still moving to its staging
+    // area at that area (`estimateForceRatio`'s in-transit override). The resolver and the
+    // predictor pass nothing, so their arithmetic is unchanged.
+    contextLocationFor?: (formation: FormationState) => string | undefined,
 ): number {
     const firstAttacker = attackerFormations[0];
     if (!firstAttacker) return 0;
@@ -120,7 +124,7 @@ export function computeAttackForcePower(
         const posture = postureOverrides?.get(a.id) ?? a.posture ?? 'defend';
         const atkMult = POSTURE_ATTACK[posture] ?? 0;
         const effectivePosture = atkMult > 0 ? posture : 'attack';
-        const rawPower = computeAttackerPower(state, a, supplyStateByOsid, effectivePosture, targetTerrainMult, targetOsid);
+        const rawPower = computeAttackerPower(state, a, supplyStateByOsid, effectivePosture, targetTerrainMult, targetOsid, contextLocationFor?.(a));
         // Support brigades contribute reduced power — main brigade carries the assault
         const supportMult = isSupportBrigadeOnActiveOp(state, a.id, a.corps_id) ? SUPPORT_POWER_MULT : 1.0;
         const executionMult = getBrigadeExecutionAttackPowerMult(state, a.id);
