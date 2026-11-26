@@ -29,7 +29,8 @@ const EVENTS_DIR = resolve('data/scenarios/events');
 const EXCEPTIONS: Readonly<Record<string, string>> = {
     // §6 Ring-3 decision, deliberately UNAUTHORED. Unanimous four-seat §6 panel (Historian,
     // scenario-tester/calibration, Engine/systems, Red-team), 2026-11-14, record:
-    // docs/40_reports/implemented/20261114_EV1_EVENT_DEFAULTS_PANEL.md. Neither option describes
+    // docs/40_reports/implemented/20261114_EV1_EVENT_DEFAULTS_PANEL.md (held in the coordination
+    // repo-docs under the docs relocation, #820, until 1.0). Neither option describes
     // what the RS leadership did in the Drina valley in 1992 (written orders for the record while
     // the campaign went on; ICTY Karadžić IT-95-5/18-T), so a "Historical default" chip would be
     // false and a "Staff recommendation" chip would steer a Ring-3 decision. History mode uses the
