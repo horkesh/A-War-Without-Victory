@@ -1465,14 +1465,18 @@ function resolveCompletionOrReopen(
 
     const otherLiveOperations = (state.military.corps_command?.[corpsId]?.active_operations ?? [])
         .filter((other) => other !== op && other.phase !== 'recovery');
-    const operationGateClosed = isCorpsBoundByOct1995Ceasefire(state, corpsId)
-        || isFactionOffensiveOpsSuppressed(state, faction, turn)
-        || (state.military.event_flags?.coha_active === true
-            && !isVlasicCohaExceptionOperation(state, corpsId, op, turn))
-        || candidates.every((candidate) => isObjectivePoliticallyBlocked(state, corpsId, faction, candidate.objective))
-        || getOperationSlotUsageForOperations([...otherLiveOperations, op])
+    // Each closed gate refuses with its own existing reason (s23 ops seat, amendment 1), so a
+    // ceasefire or political refusal books no failed objective and no defeatism count.
+    const operationGate: 'ceasefire' | 'offensive_ops_suppressed' | 'political_blocked' | 'no_attempt' | null =
+        isCorpsBoundByOct1995Ceasefire(state, corpsId) ? 'ceasefire'
+        : isFactionOffensiveOpsSuppressed(state, faction, turn) ? 'offensive_ops_suppressed'
+        : (state.military.event_flags?.coha_active === true
+            && !isVlasicCohaExceptionOperation(state, corpsId, op, turn)) ? 'political_blocked'
+        : (getOperationSlotUsageForOperations([...otherLiveOperations, op])
             > getMaxOperationSlots(getCorpsSubordinates(state, corpsId).length)
-        || otherLiveOperations.some((other) => other.type !== 'probe');
+            || otherLiveOperations.some((other) => other.type !== 'probe')) ? 'no_attempt'
+        : null;
+    const operationGateClosed = operationGate !== null;
 
     const formations = state.military.formations ?? {};
     const mayStay = (brigadeId: FormationId): boolean => {
@@ -1483,8 +1487,15 @@ function resolveCompletionOrReopen(
     };
     const reopening = new Set<(typeof candidates)[number]>();
     let belowAttackFloor = 0;
+    let politicallyBlocked = 0;
     if (!operationGateClosed) {
         for (const candidate of candidates) {
+            // Per candidate: a blocked axis that reopened would idle in execution (its attack
+            // count is above 0, so the idle stall never fires). Refused means stalled.
+            if (isObjectivePoliticallyBlocked(state, corpsId, faction, candidate.objective)) {
+                politicallyBlocked += 1;
+                continue;
+            }
             const failures = candidate.axis ? candidate.axis.failure_count : (op.failure_count ?? 0);
             const failureCap = !candidate.axis
                 ? MAX_TOTAL_FAILURES
@@ -1511,20 +1522,25 @@ function resolveCompletionOrReopen(
     if (axes.length > 0) op.objective_capture_count = sumAxesField(axes, 'objective_capture_count');
 
     if (reopening.size === 0) {
-        return !operationGateClosed && belowAttackFloor === candidates.length
-            ? 'participants_below_attack_floor'
-            : getNoAttemptRecoveryReason(op);
+        if (operationGate !== null && operationGate !== 'no_attempt') return operationGate;
+        if (operationGate === null && politicallyBlocked === candidates.length) return 'political_blocked';
+        if (operationGate === null && belowAttackFloor === candidates.length) return 'participants_below_attack_floor';
+        return getNoAttemptRecoveryReason(op);
     }
 
+    // Momentum is reset on reopen, as at launch (s23 ops seat, amendment 2): the retake attack
+    // must not run on momentum earned weeks earlier. Re-walked objectives then earn it again.
     for (const candidate of reopening) {
         if (candidate.axis) {
             candidate.axis.status = 'executing';
             candidate.axis.current_objective_index = candidate.index;
             candidate.axis.failure_count += 1;
             candidate.axis.consecutive_failures_on_current += 1;
+            candidate.axis.momentum = 0;
         } else {
             op.current_objective_index = candidate.index;
             op.failure_count = (op.failure_count ?? 0) + 1;
+            op.momentum = 0;
         }
     }
     op.participating_brigades = op.participating_brigades.filter(mayStay);

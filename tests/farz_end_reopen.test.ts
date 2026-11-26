@@ -146,6 +146,8 @@ describe('FARZ-END: completion reopens when a credited objective is lost', () =>
         expect(op.objective_capture_count).toBe(0);
         expect(main.failure_count).toBe(1);
         expect(main.consecutive_failures_on_current).toBe(1);
+        // s23 ops seat amendment 2: momentum resets on reopen, as at launch (fixture had 2).
+        expect(main.momentum).toBe(0);
         expect(state.operation_history ?? []).toHaveLength(0);
         const armyHq = (state.military.army_hq_operations as any)['ahq:farz'];
         expect(armyHq.status).toBe('executing');
@@ -273,7 +275,9 @@ describe('FARZ-END: completion reopens when a credited objective is lost', () =>
         expect(op.phase).toBe('recovery');
         expect(op.phase_started_turn).toBe(40);
         expect(op.recovery_reason).not.toBe('completed');
-        expect(op.recovery_reason).toBe('max_failures');
+        // s23 ops seat amendment 1: the ceasefire refusal keeps its own reason, so it books no
+        // failed objective or defeatism count (council fix 3).
+        expect(op.recovery_reason).toBe('ceasefire');
         expect(op.axes![0]!.status).toBe('stalled');
         expect(op.axes![0]!.failure_count).toBe(0);
     });
