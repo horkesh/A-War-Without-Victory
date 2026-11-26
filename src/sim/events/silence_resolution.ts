@@ -151,3 +151,30 @@ export function resolvePlayerEventDecisionsBySilence(
     }
     return resolved;
 }
+
+/** The PAUSE BEFORE COMBAT hook (`TurnInput.onPlayerDecisionsPending`). */
+export type PlayerDecisionPauseHook = (
+    state: GameState,
+    decisions: PendingEventDecision[],
+) => Promise<void> | void;
+
+/**
+ * Settle this turn's player decisions inside `evaluate-events`, after the primary firing pass and
+ * BEFORE the same-turn follow-up snapshot (#865 r4693814641): first the pause, where the President's
+ * explicit answer lands (called at most once, only when a decision fired this turn), then silence,
+ * resolved as the staff default. A follow-up row then sees an answered decision in a live game, as
+ * it does in headless, where the bot answers at fire time. Inert in headless (no hook, no player).
+ */
+export async function settlePlayerEventDecisionsThisTurn(
+    state: GameState,
+    eventDefinitions: readonly EventDefinition[],
+    turn: number,
+    onPlayerDecisionsPending: PlayerDecisionPauseHook | undefined,
+): Promise<void> {
+    const firedThisTurn = (state.military.pending_event_decisions ?? [])
+        .filter((decision) => decision.turn_fired === turn);
+    if (firedThisTurn.length > 0 && onPlayerDecisionsPending) {
+        await onPlayerDecisionsPending(state, firedThisTurn);
+    }
+    resolvePlayerEventDecisionsBySilence(state, eventDefinitions, turn);
+}

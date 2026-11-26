@@ -103,7 +103,8 @@ import {
 import { strictCompare } from '../../state/validateGameState.js';
 
 import { applyPhase3DCollapseResolution } from '../collapse/phase3d_collapse_resolution.js';
-import { evaluateEvents } from '../events/evaluate_events.js';
+import { beginEvaluateEvents } from '../events/evaluate_events.js';
+import { settlePlayerEventDecisionsThisTurn } from '../events/silence_resolution.js';
 import { updateEventReadiness } from '../events/pressure_system.js';
 import { collectStrategicReserves, reinforceFromStrategicReserves } from '../combat/strategic_reserve.js';
 import {
@@ -1202,9 +1203,16 @@ export const warPhases: NamedPhase[] = [
     },
     {
         name: 'evaluate-events',
-        run: (context) => {
+        run: async (context) => {
             const turn = context.state.meta.turn;
-            const result = evaluateEvents(context.state, context.rng, turn, context.input.eventDefinitions ?? []);
+            const definitions = context.input.eventDefinitions ?? [];
+            // PAUSE BEFORE COMBAT (#865 r4693814641): the primary pass fires; this turn's player
+            // decisions are settled (the President's answer at the pause, then silence as the
+            // staff default); only then does the same-turn follow-up snapshot run, so a hands-off
+            // live turn sees the answered state headless sees. Inert in headless.
+            const primary = beginEvaluateEvents(context.state, context.rng, turn, definitions);
+            await settlePlayerEventDecisionsThisTurn(context.state, definitions, turn, context.input.onPlayerDecisionsPending);
+            const result = primary.finish();
             context.report.events_fired = result.fired;
             // Graz Accords: fires at week 4 (6 May 1992), sets state.political.vienna_declaration_turn
             const grazText = checkAndFireGrazAccords(context.state);

@@ -17,7 +17,6 @@ import { writeOwedRecordsAtTermination } from './endgame/owed_termination_record
 import { earlyWarPhases } from './turn_phases/early_war_phases.js';
 import { warPhases } from './turn_phases/war_phases.js';
 import { runPostTurnInvariantBarrier } from './turn_phases/war_phase_reconciliation_steps.js';
-import { resolvePlayerEventDecisionsBySilence } from './events/silence_resolution.js';
 import type { ValidationIssue } from '../validate/validate.js';
 import { createMovementPhaseObserver, type MovementPhaseObserver } from './combat/movement_phase_diagnostic.js';
 import { createPersonnelObserver, type PersonnelObserver } from './combat/personnel_diagnostic.js';
@@ -161,10 +160,7 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<TurnR
     });
 
     for (const step of warPhases) {
-        const phaseStep = step.name === PLAYER_DECISION_PAUSE_STEP
-            ? withPlayerDecisionPause(step, input.onPlayerDecisionsPending)
-            : step;
-        await runNamedPhase(context, phaseStep, 'war', movementObserver, personnelObserver, poolFlowObserver);
+        await runNamedPhase(context, step, 'war', movementObserver, personnelObserver, poolFlowObserver);
     }
 
     // Bottom-up formation mode: run militia/pool/formation steps in war context.
@@ -283,32 +279,11 @@ async function refreshFrontEdgeSnapshot(state: GameState, input: TurnInput): Pro
 /** The step after which a human answers this turn's decisions (see `TurnInput.onPlayerDecisionsPending`). */
 export const PLAYER_DECISION_PAUSE_STEP = 'evaluate-events';
 
-/**
- * Wrap the decision step so the pause runs inside its phase boundary: the response effects
- * are then attributed to `evaluate-events` by the phase observers, exactly as a bot's
- * in-turn answer is. After the pause (or at once, without a pause hook), every player
- * decision of this turn still unanswered is resolved as the bot's choice in the same
- * boundary (player-override model, §14.10a; `resolvePlayerEventDecisionsBySilence`).
- * Inert in headless runs, which queue no player decision.
- */
-function withPlayerDecisionPause(
-    step: NamedPhase,
-    onPlayerDecisionsPending: TurnInput['onPlayerDecisionsPending'],
-): NamedPhase {
-    return {
-        ...step,
-        run: async (context) => {
-            await step.run(context);
-            const turn = context.state.meta.turn;
-            const firedThisTurn = (context.state.military.pending_event_decisions ?? [])
-                .filter((decision) => decision.turn_fired === turn);
-            if (firedThisTurn.length > 0 && onPlayerDecisionsPending) {
-                await onPlayerDecisionsPending(context.state, firedThisTurn);
-            }
-            resolvePlayerEventDecisionsBySilence(context.state, context.input.eventDefinitions ?? [], turn);
-        },
-    };
-}
+// The pause runs INSIDE this step (war_phases.ts `evaluate-events`, via
+// `settlePlayerEventDecisionsThisTurn`), between the primary firing pass and the same-turn
+// follow-up snapshot, so the response effects are attributed to `evaluate-events` by the phase
+// observers, exactly as a bot's in-turn answer is, and silence resolves before the follow-ups
+// read the answered state (#865 r4693814641; player-override model, §14.10a). Inert in headless.
 
 function rejectRandomness(): never {
     throw new Error('Engine Invariants 11.1 prohibits simulation randomness');
