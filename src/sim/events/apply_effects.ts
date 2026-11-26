@@ -219,7 +219,9 @@ function applyTargetedFormationStatChange(
  *  effects — §6). Deterministic (sorted by formation id, no RNG). Flag-gated
  *  `AWWV_ENCLAVE_COLUMN_DISPLACEMENT` — **DEFAULT-ON since 2026-08-26** (owner decision on
  *  an escalated split §6 panel); explicit 'false'/'0' disables it for rollback.
- *  Panel-reviewed spec: docs/plans/2026-08-05-enclave-column-displacement-and-codex-lane.md. */
+ *  Panel-reviewed spec (moved out of the repo in #820): AWWV-coordination
+ *  repo-docs/docs/plans/2026-08-05-enclave-column-displacement-and-codex-lane.md. Where the
+ *  survivors re-form when the destination is not held: E-fall, SHDG §6. */
 function applyEnclaveFormationDisplacement(
     state: GameState,
     effect: Extract<EventEffect, { kind: 'enclave_formation_displacement' }>,
