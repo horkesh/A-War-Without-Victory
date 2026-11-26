@@ -545,7 +545,10 @@ export function displaceFormationsInEnemyTerritory(
     }
 }
 
-export function applyPersonnelLoss(formation: FormationState, loss: number): void {
-    if (typeof formation.personnel !== 'number') return;
+/** Applies a loss down to the MIN_COMBAT_PERSONNEL floor; returns the personnel actually removed. */
+export function applyPersonnelLoss(formation: FormationState, loss: number): number {
+    if (typeof formation.personnel !== 'number') return 0;
+    const before = formation.personnel;
     formation.personnel = Math.max(MIN_COMBAT_PERSONNEL, formation.personnel - loss);
+    return Math.max(0, before - formation.personnel);
 }

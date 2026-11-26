@@ -15,6 +15,7 @@ import {
     splitKiaWiaMia,
     computeFinalCasualties,
     computeAttackerCasualtyShares,
+    attackerCasualtyRecord,
     computeDefenderCasualtyShares,
     distributeDefenderCasualties,
     buildDefenderContributions,
@@ -222,7 +223,50 @@ describe('computeFinalCasualties', () => {
 // computeAttackerCasualtyShares
 // ═══════════════════════════════════════════════════════════════════════════
 
+describe('attackerCasualtyRecord (CAS-REPORT §15)', () => {
+    it('nothing clamped: equals the force figure even when the rounded shares do not sum to it', () => {
+        const shares = new Map([['a', 33], ['b', 33], ['c', 33]]);
+        expect(attackerCasualtyRecord(100, shares, new Map(shares))).toBe(100);
+    });
+
+    it('subtracts only the clamp shortfall', () => {
+        const shares = new Map([['a', 33], ['b', 33], ['c', 33]]);
+        const applied = new Map([['a', 33], ['b', 10], ['c', 33]]);
+        expect(attackerCasualtyRecord(100, shares, applied)).toBe(77);
+    });
+
+    it('never goes below zero', () => {
+        expect(attackerCasualtyRecord(5, new Map([['a', 9]]), new Map([['a', 0]]))).toBe(0);
+    });
+});
+
 describe('computeAttackerCasualtyShares', () => {
+    it('CAS-REPORT §15: a share is capped at the brigade removable personnel; others unchanged', () => {
+        // A small brigade beside a large one: the force-wide cap (personnel - floor) does
+        // not stop the small brigade's share from exceeding its own room above the floor.
+        const small = MIN_COMBAT_PERSONNEL + 10;
+        const inputs: AttackerCasualtyInput[] = [
+            { id: 'bde_big', personnel: 2000, supportRole: 'none', removable: 2000 - MIN_COMBAT_PERSONNEL },
+            { id: 'bde_small', personnel: small, supportRole: 'none', removable: 10 },
+        ];
+        const total = 2000 + small;
+        const uncapped = computeAttackerCasualtyShares(
+            inputs.map(({ removable: _r, ...rest }) => rest), total, 1000);
+        const capped = computeAttackerCasualtyShares(inputs, total, 1000);
+        expect(uncapped.get('bde_small')!).toBeGreaterThan(10);
+        expect(capped.get('bde_small')).toBe(10);
+        expect(capped.get('bde_big')).toBe(uncapped.get('bde_big'));
+    });
+
+    it('CAS-REPORT §15: a cap that does not bind leaves every share byte-identical', () => {
+        const inputs: AttackerCasualtyInput[] = [
+            { id: 'bde_1', personnel: 900, supportRole: 'main', removable: 900 - MIN_COMBAT_PERSONNEL },
+            { id: 'bde_2', personnel: 600, supportRole: 'support', removable: 600 - MIN_COMBAT_PERSONNEL },
+        ];
+        const without = computeAttackerCasualtyShares(inputs.map(({ removable: _r, ...rest }) => rest), 1500, 120);
+        expect([...computeAttackerCasualtyShares(inputs, 1500, 120)]).toEqual([...without]);
+    });
+
     it('single attacker with none role: gets all casualties', () => {
         const inputs: AttackerCasualtyInput[] = [
             { id: 'bde_1', personnel: 1000, supportRole: 'none' },
