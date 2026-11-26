@@ -411,8 +411,11 @@ describe('Family 3 GREEN — neutral parity preserved', () => {
         // Critical guarantee: "still recognizes superiority" stop-gate (per
         // /war-or-game) — symmetric must NOT produce ratio >= 3.0 (clear-superiority
         // territory). Family 2 already covers >=3.0 GREEN.
-        expect(ratio).toBeGreaterThanOrEqual(1.4);
-        expect(ratio).toBeLessThanOrEqual(2.2);
+        // P3-EST (2026-11-26): the band moves to 1.0–1.4. The estimate now mirrors the
+        // battle, which sums physical defenders at full power (the old estimator ranked
+        // them with a stacking discount) and drops the confidence/competence factor.
+        expect(ratio).toBeGreaterThanOrEqual(1.0);
+        expect(ratio).toBeLessThanOrEqual(1.4);
     });
 });
 
