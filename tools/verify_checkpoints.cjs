@@ -28,11 +28,21 @@
  *    -26 at 188w with the damage in Šipovo / Glamoč / Grahovo / Mrkonjić / Drvar. That
  *    damage lands ~200 km from a Sarajevo-belt or east-Bosnian change and is invisible
  *    in a sector check, so it is checked unconditionally here.
+ *
+ *  - OPERATION FARZ RECEIPTS, in three tiers (Fable consult 10, orchestrator ruling §26,
+ *    2026-11-26). GATE rows fail the run (exit 1) at every merge, in both modes. SHAPE rows
+ *    are printed and do not fail it: they are the calibration pass's target. TRIPWIRE rows
+ *    fail it (exit 1, "hold and trace") when the shape drifts past bounds set from the 57
+ *    runs measured in consult 10. The tier logic lives in tools/lib/farz_objective_gate.cjs.
  */
 const fs = require('fs');
 const path = require('path');
 const { classifyCombatCapture } = require('./lib/capture_provenance.cjs');
-const { checkFarzObjectiveCaptures } = require('./lib/farz_objective_gate.cjs');
+const {
+  checkFarzObjectiveCaptures, LATE_SCAN_START, FARZ_LIVENESS_TURN, TRIPWIRE_BOUNDS,
+  easternCaptureGate, operationOwnershipGate, farzLivenessGate, earlyFarzFalls, stoppingLineRows,
+  anchorContract, receiptTripwire, distinctCells,
+} = require('./lib/farz_objective_gate.cjs');
 
 const runDir = process.argv[2];
 if (!runDir) {
@@ -141,16 +151,22 @@ if (base) console.log(`  NET across checkpoints: ${net >= 0 ? '+' : ''}${net}`);
 // threat." The ring version needs data/derived/operational/operational_contact_graph.json.
 const contestCount = {};
 const battleById = new Map();
+// Every battle with its turn (the weekly row's `week_index` is the turn), for the Farz liveness gate.
+const battlesWithTurn = [];
 try {
   const wrPath = path.join(runDir, 'weekly_report.jsonl');
+  let lineNo = 0;
   for (const line of fs.readFileSync(wrPath, 'utf8').split('\n')) {
     if (!line.trim()) continue;
+    lineNo++;
     let rec;
     try { rec = JSON.parse(line); } catch { continue; }
+    const turn = Number.isFinite(rec.week_index) ? rec.week_index : lineNo;
     for (const b of rec.battles || []) {
       if (!b || !b.target_osid) continue;
       contestCount[b.target_osid] = (contestCount[b.target_osid] || 0) + 1;
       if (typeof b.battle_id === 'string' && b.battle_id.length > 0) battleById.set(b.battle_id, b);
+      battlesWithTurn.push({ turn, battle: b });
     }
   }
 } catch {
@@ -331,16 +347,6 @@ if (neverLost.length > 0) {
 // the guard without breaching, for diagnosing older runs; `--farz-guard` is accepted and is a no-op.
 const FARZ_GUARD_ENFORCED = !process.argv.includes('--no-farz-guard');
 
-console.log('');
-console.log(`OPERATION FARZ / "Uragan 95" — the positive half; a fix that breaks this is the WRONG fix${FARZ_GUARD_ENFORCED ? '' : '  [--no-farz-guard: informational, not a breach]'}`);
-console.log('  P1 cells — all four Ozren cells must be RBiH by w188');
-let farzBroken = 0;
-for (const [name, osid] of FARZ_CELLS) {
-  const got = at188[osid];
-  const ok = got === 'RBiH';
-  if (!ok) farzBroken++;
-  console.log(`    ${name.padEnd(26)} ${String(got)}  ${ok ? '** TAKEN **' : '*** NOT TAKEN — 2nd/3rd Corps suppressed; this is not a pass ***'}`);
-}
 
 // ── Farz objective receipts and 2nd-Corps diagnostic ──
 //
@@ -361,11 +367,11 @@ for (const [name, osid] of FARZ_CELLS) {
 // Seats' ruling (2026-11-17; scenario tester, operations expert, historian): the P-A window opens
 // at t177 (21-27 Aug 1995, the week of the planning order; Uragan 95 ran 10-14 Sep 1995, BB1 file
 // p.423; Uragan's enqueue/prestage turn is 177). An RBiH capture of a Farz cell in [160, 177) is
-// the early fall the guard exists to catch and fails that cell. P-B's late 2nd-Corps scan keeps its
-// own start (160), so tightening P-A does not shrink P-B.
-const FARZ_PA_WINDOW_START = 177;
-const FARZ_EARLY_FALL_START = 160;
-const SECOND_CORPS_LATE_SCAN_START = 160;
+// the early fall the guard exists to catch and fails that cell. The late 2nd/3rd Corps scans keep
+// their own start (LATE_SCAN_START, 160), so tightening P-A does not shrink them.
+// Under the §26 tiers the credit rows below are SHAPE; the early-fall SHAPE row reads every week.
+const FARZ_PA_WINDOW_START = FARZ_LIVENESS_TURN;
+const FARZ_EARLY_FALL_START = LATE_SCAN_START;
 // Emergent mode (GameStateMeta.decision_mode === 'emergent') credits any RBiH operation-owned
 // capture inside the window; historical mode (or no mode recorded) keeps the authored Farz/Uragan
 // receipts, plus the joint-offensive path (orchestrator ruling 2026-11-22; BB1 printed pp. 384-388):
@@ -373,7 +379,6 @@ const SECOND_CORPS_LATE_SCAN_START = 160;
 // between the joint launch and Farz's end, provided Farz itself took a cell
 // (tools/lib/farz_objective_gate.cjs).
 const farzMode = (save.meta && save.meta.decision_mode) === 'emergent' ? 'emergent' : 'historical';
-const SECOND_CORPS = 'arbih_2nd_corps';
 
 // Corps attribution needs formation -> corps, which lives in the save this tool already loaded.
 const formationsForAttribution = (save.military && save.military.formations) || {};
@@ -397,69 +402,100 @@ const farz = checkFarzObjectiveCaptures({
   // The engine's own Army HQ registry: identifies the authored Farz even when no TG formed.
   armyHqOperations: (save.military && save.military.army_hq_operations) || {},
 });
-if (farz.provisional) console.log('  (Farz has no AAR yet: still in progress at the last turn; read from the live operation)');
-console.log(farz.mode === 'emergent'
-  ? `  P-A (emergent) operation-owned RBiH captures in the window t${FARZ_PA_WINDOW_START}+, none before it`
-  : `  P-A authored Farz objective receipts — operation-owned combat in the window t${FARZ_PA_WINDOW_START}+`);
+const factionOf = (brigadeId) => (formationsForAttribution[brigadeId] || {}).faction ?? null;
+let runSummary = null;
+try { runSummary = JSON.parse(fs.readFileSync(path.join(runDir, 'run_summary.json'), 'utf8')); } catch { /* unknown anchors trip below */ }
+
+// ── GATE tier: checked at every merge, both modes. A red fails the run. ──
+let farzGateBroken = 0;
+const eastRows = easternCaptureGate({ events, ref, factionOf, easternMuns: EASTERN_SURPLUS_MUNS });
+const ownershipRows = operationOwnershipGate({ events, battleById, cells: FARZ_CELLS, corpsOf });
+const liveness = farzLivenessGate({ cells: FARZ_CELLS, stateAt, farz, battles: battlesWithTurn, events, battleById });
+
+console.log('');
+console.log(`OPERATION FARZ / "Uragan 95" RECEIPTS — GATE tier (every merge, both modes; mode read: ${farz.mode})${FARZ_GUARD_ENFORCED ? '' : '  [--no-farz-guard: informational, not a breach]'}`);
+console.log(`  G1 eastern municipalities (§6, any ARBiH corps, from t${LATE_SCAN_START}) — a red goes to the §6 panel`);
+if (eastRows.length === 0) console.log(`    no late ARBiH capture in ${EASTERN_SURPLUS_MUNS.length} municipalities ** PASS **`);
+else {
+  farzGateBroken++;
+  for (const r of eastRows) console.log(`    *** t${r.turn} ${r.osid} by ${r.attacker} (${corpsOf(r.attacker) ?? '?'}) — §6 panel matter; do not merge ***`);
+}
+console.log(`  G2 operation ownership — every Farz-cell capture, and every late (t${LATE_SCAN_START}+) 2nd/3rd Corps capture, is operation-owned combat`);
+if (ownershipRows.length === 0) console.log('    all operation-owned ** PASS **');
+else {
+  farzGateBroken++;
+  for (const r of ownershipRows) console.log(`    *** t${r.turn} ${r.osid} by ${r.attacker ?? '?'} — ${r.kind}${r.farz_cell ? ' (Farz cell)' : ''} ***`);
+}
+console.log(`  G3 Farz liveness — an objective still not RBiH entering t${FARZ_LIVENESS_TURN}: the authored Farz starts (t${LATE_SCAN_START}+) with its roster; Farz/Uragan attacks it or an operation takes it`);
+if (farz.provisional) console.log('    (Farz has no AAR yet: still in progress at the last turn; read from the live operation)');
+if (liveness.rows.length === 0) console.log(`    every objective was RBiH before t${FARZ_LIVENESS_TURN}; nothing to attack (see the early-fall row and the tripwire)`);
+for (const r of liveness.rows) {
+  console.log(`    ${r.name.padEnd(26)} ${r.ok ? (r.reason === 'attacked' ? `attacked by Farz/Uragan t${r.attack_turn} ** PASS **` : `taken t${r.taken_turn} by ${r.operation_ids.join('+')} ** PASS **`) : `*** ${r.reason.toUpperCase()} ***`}`);
+}
+if (!liveness.ok) farzGateBroken++;
+if (farzGateBroken > 0 && FARZ_GUARD_ENFORCED) breached = true;
+else if (farzGateBroken > 0) console.log(`  Farz gates NOT ENFORCED (--no-farz-guard): ${farzGateBroken} finding(s) above are informational.`);
+
+// ── SHAPE tier: recorded, exit 0; must be green at the end of the calibration pass. ──
+const early = earlyFarzFalls({ cells: FARZ_CELLS, events, battleById });
+const earlyCells = distinctCells(early);
+const stopRows = stoppingLineRows({ events, battleById, ref, corpsOf, easternMuns: EASTERN_SURPLUS_MUNS });
+const stopCells = distinctCells(stopRows);
+const anchors = anchorContract(runSummary);
+const heldAt188 = FARZ_CELLS.filter(([, osid]) => at188[osid] === 'RBiH').length;
+let shapeRed = 0;
+
+console.log('');
+console.log('OPERATION FARZ RECEIPTS — SHAPE tier (recorded, not gating; the calibration pass\'s target)');
+console.log(`  S1 P1 — all four Ozren cells RBiH at w188: ${heldAt188}/${FARZ_CELLS.length}`);
+for (const [name, osid] of FARZ_CELLS) {
+  if (at188[osid] !== 'RBiH') { shapeRed++; console.log(`    ${name.padEnd(26)} ${String(at188[osid])}  -- SHAPE RED`); }
+}
+console.log(`  S2 early falls — a Farz cell taken before t${FARZ_LIVENESS_TURN}, any week: ${earlyCells.length} cell(s)`);
+for (const r of early) {
+  shapeRed++;
+  console.log(`    t${r.turn} ${r.osid} by ${r.attacker ?? '?'}${r.operation_ids.length ? ` (${r.operation_ids.join('+')})` : ''}  -- SHAPE RED`);
+}
+console.log(`  S3 credit per cell (${farz.mode === 'emergent' ? 'emergent: any operation in the window' : 'historical: Farz, Uragan or the joint path'}, t${FARZ_PA_WINDOW_START}+)`);
 for (const row of farz.rows) {
   const viaLabel = row.via === 'uragan' ? ' (2nd Corps, Uragan 95)'
     : row.via === 'joint' ? ` (joint offensive: ${row.operation_id})`
-      : row.via === 'operation' ? ' (operation-owned)' : '';
-  const earlyLabel = row.early_captures.length > 0
-    ? ` *** EARLY FALL: ${row.early_captures.map((c) => `t${c.turn}${c.operation_ids.length ? ` by ${c.operation_ids.join('+')}` : ''}`).join(', ')} ***`
-    : '';
-  console.log(`    ${row.name.padEnd(26)} ${row.ok ? `t${row.turn} ** CAPTURED **${viaLabel}` : `*** MISSING OR UNATTRIBUTED ***${earlyLabel}`}`);
+      : row.via === 'operation' ? ' (operation-owned)' : row.via === 'farz' ? ' (Farz)' : '';
+  if (!row.ok) shapeRed++;
+  console.log(`    ${row.name.padEnd(26)} ${row.ok ? `t${row.turn} credited${viaLabel}` : '-- SHAPE RED: no credited capture'}`);
 }
-if (!farz.ok) {
-  farzBroken++;
-  console.log(`    *** FAIL — ${farz.authoredCount} authored Farz AAR(s); all four receipts required ***`);
-} else {
-  console.log(farz.mode === 'emergent'
-    ? '    all four objectives captured by operations in the window ** PASS **'
-    : '    all four authored objectives captured ** PASS **');
+console.log(`    authored Farz AAR(s): ${farz.authoredCount}; 2nd Corps participation: ${farz.secondCorpsParticipated ? 'recorded' : 'NOT RECORDED'}`);
+console.log(`  S4 stopping line — late (t${LATE_SCAN_START}+) 2nd/3rd Corps captures of cells the oct1995 reference does not have RBiH (outside the §6 municipalities): ${stopCells.length} cell(s)`);
+for (const r of stopRows) {
+  shapeRed++;
+  console.log(`    t${r.turn} ${r.osid} by ${r.attacker} (${r.corps})${r.operation_ids.length ? ` ${r.operation_ids.join('+')}` : ''}  oct95=${ref.oct1995[r.osid] ?? '-'}  -- SHAPE RED`);
 }
-console.log(`  2nd Corps participation: ${farz.secondCorpsParticipated ? 'recorded' : 'NOT RECORDED — historical fidelity diagnostic'}`);
+if (!anchors.known) console.log('  S5 anchor contract: UNKNOWN (run_summary.json has no anchor checks)');
+else {
+  console.log(`  S5 anchor contract: ${anchors.passed}/${anchors.total}${anchors.failed.length ? `  failed: ${anchors.failed.join(', ')}  -- SHAPE RED` : ''}`);
+  if (anchors.failed.length) shapeRed++;
+}
+console.log(`  shape rows red: ${shapeRed}`);
 
-// P-B — THE UNIVERSAL GUARD, and the reason it exists rather than another list.
-//
-// P-A is about the authored operation's objective captures: it can pass while the corps also does
-// five wrong things. P-B is UNIVERSAL over what the corps DOES ("every late capture must be
-// warranted"): it cannot pass while the corps does anything wrong. Different quantifiers, different
-// failure modes, no overlap — which is why P-B is NOT a restatement of the cell list.
-//
-// ★ IT IS ALSO SELF-MAINTAINING, and that is the point. A hand-enumerated municipality list has a
-// hole for every municipality nobody thought of, and BOTH halves of the previous condition already
-// had one: `gracanica` was absent from the negative list, so an ahistorical 2nd Corps capture of
-// `op:gracanica:petrovo_2` (RS at ALL FOUR painted checkpoints, and the only RS cell left in
-// Gračanica at oct1995) slipped through the negative net AND satisfied the old liveness test. The
-// guard reported LIVE on the strength of the engine doing the wrong thing.
-//
-// ★ AND IT ENFORCES THE OPERATION'S HISTORICAL STOPPING LINE FOR FREE. Uragan/Farz did not run on:
-// Doboj held — "these elite additions at last secured Doboj from the threat of further ARBiH
-// advances" (BB1 printed 388), and the painted reference agrees (13 cells, 10 still RS at oct1995,
-// ZERO flips). Petrovo held — Vozuća took the SOUTHERN Ozren tip, not the northern. The correct
-// shape of this operation is its four gains AND its two limits, and P-B checks both without either
-// being enumerated here.
-console.log('  P-B universal guard — EVERY late 2nd-Corps capture must be reference-warranted');
-const lateSecondCorps = events.filter((e) => (e.turn ?? -1) >= SECOND_CORPS_LATE_SCAN_START
-  && e.mechanism === 'combat' && corpsOf(e.attacker_brigade) === SECOND_CORPS && e.to === 'RBiH');
-const unwarranted = lateSecondCorps.filter((e) => !(ref.apr1995[e.settlement_id] === 'RS' && ref.oct1995[e.settlement_id] === 'RBiH'));
-console.log(`    ${lateSecondCorps.length} late 2nd-Corps capture(s) examined`);
-if (unwarranted.length > 0) {
-  farzBroken++;
-  for (const e of unwarranted) {
-    console.log(`    *** t${e.turn} ${e.settlement_id} by ${e.attacker_brigade}`
-      + ` — reference says apr95=${ref.apr1995[e.settlement_id] ?? '-'} oct95=${ref.oct1995[e.settlement_id] ?? '-'}; NOT warranted ***`);
-  }
-} else if (lateSecondCorps.length > 0) {
-  console.log('    all warranted by the painted reference ** PASS **');
-} else {
-  // Zero late captures is not a failure under the owner's objective-based ruling.
-  console.log('    (none; 2nd Corps participation is reported above)');
-}
+// ── TRIPWIRE tier: hold and trace. ──
+const trips = receiptTripwire({ earlyCells, stoppingCells: stopCells, farzCellsAt188: heldAt188, anchors });
+console.log('');
+console.log(`OPERATION FARZ RECEIPTS — TRIPWIRE (bounds: early <= ${TRIPWIRE_BOUNDS.maxEarlyFarzCells}, stopping line <= ${TRIPWIRE_BOUNDS.maxStoppingLineCells}, held at w188 >= ${TRIPWIRE_BOUNDS.minFarzCellsAt188}, anchors >= ${TRIPWIRE_BOUNDS.minAnchorsPassed})`);
+if (trips.length === 0) console.log('  within bounds ** PASS **');
+else for (const t of trips) console.log(`  *** TRIPPED: ${t} — hold and trace ***`);
+const tripped = trips.length > 0 && FARZ_GUARD_ENFORCED;
+if (trips.length > 0 && !FARZ_GUARD_ENFORCED) console.log('  tripwire NOT ENFORCED (--no-farz-guard): informational.');
 
-if (farzBroken > 0 && FARZ_GUARD_ENFORCED) breached = true;
-else if (farzBroken > 0) console.log(`  Farz guard NOT ENFORCED (--no-farz-guard): ${farzBroken} Farz finding(s) above are informational.`);
+// P-B, THE UNIVERSAL GUARD, is now two rows: G1 (the nine eastern municipalities, every ARBiH corps)
+// and S4 (the stopping line everywhere else, the 2nd and 3rd Corps). Both are universal over what the
+// corps DO rather than a cell list, and so self-maintaining: `gracanica` was absent from the old negative
+// list, so an ahistorical capture of `op:gracanica:petrovo_2` (RS at all four painted checkpoints)
+// slipped through it. The stopping line is the operation's historical limit: Doboj held ("these
+// elite additions at last secured Doboj from the threat of further ARBiH advances", BB1 printed 388;
+// the painted reference has 13 cells, 10 still RS at oct1995, zero flips), and Petrovo held: Vozuća
+// took the southern Ozren tip, not the northern. The old P-B read the 2nd Corps alone and missed the
+// 3rd Corps' Jelen 2 at Boljanić and Petrovo (Fable consult 10), and its warrant (apr95 RS and oct95
+// RBiH) flagged a retake of a cell the reference keeps RBiH (Maglaj Jablanica).
 // LIVENESS: say how much was compared, not merely that nothing tripped.
 console.log(`  compared: ${EASTERN_SURPLUS_MUNS.length} municipalities (negative) + ${FARZ_CELLS.length} cells (positive)`);
 if (guardCells !== 9) {
@@ -534,7 +570,8 @@ if (base) {
 
 console.log('');
 if (breached) console.log('RESULT: GUARD BREACHED — inspect failed guard(s). Do not merge.');
+else if (tripped) console.log('RESULT: TRIPWIRE — the Farz shape drifted past its bounds. Hold and trace.');
 else if (regressed) console.log('RESULT: SCORE REGRESSION beyond tolerance. Not a guard breach; explain or revert.');
-else console.log('RESULT: guard intact.');
+else console.log(`RESULT: guard intact.${shapeRed > 0 ? ` ${shapeRed} SHAPE row(s) red: list them on Part 6.` : ''}`);
 
-process.exit(breached || regressed ? 1 : 0);
+process.exit(breached || tripped || regressed ? 1 : 0);
