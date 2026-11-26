@@ -145,6 +145,21 @@ describe('P3-EST §11: the attack side mirrors the battle', () => {
         expect(scoped).toBeLessThan(estimateForceRatio(s, op(), 3, 0.9, null, {}, adjacency()));
     });
 
+    it('P3-EST-PRIM: the primary objective is the live axis current objective, not a lower-sorted depth objective', () => {
+        const s = fixture(false);
+        // 'C3' sorts before 'D' but is the axis's depth objective; the first battle is at 'D'.
+        const axisOp = {
+            ...op(),
+            objectives: [],
+            axes: [{ axis_id: 'a1', objectives: ['D', 'C3'], assigned_brigades: ['attacker', 'attacker_2'], current_objective_index: 0 }],
+        } as unknown as CorpsOperation;
+        const atCurrent = estimateForceRatio(s, axisOp, 3, 0.9, null, {}, adjacency());
+        expect(atCurrent).toBeCloseTo(estimateForceRatio(s, op(), 3, 0.9, null, {}, adjacency()), 9);
+        const advanced = { ...axisOp, axes: [{ ...(axisOp.axes as any)[0], current_objective_index: 1 }] } as unknown as CorpsOperation;
+        const atDepth = estimateForceRatio(s, advanced, 3, 0.9, null, {}, adjacency());
+        expect(atDepth).not.toBeCloseTo(atCurrent, 3);
+    });
+
     it('keeps predictor parity in a winter month (seasonal attack and defence multipliers)', () => {
         const s = fixture(false);
         (s.meta as any).scenario_start_date = { year: 1992, month: 5, day: 1 };

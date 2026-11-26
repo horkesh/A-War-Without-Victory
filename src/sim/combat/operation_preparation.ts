@@ -480,8 +480,17 @@ export function estimateForceRatio(
     // LANE-2026-05-02: pick a single primary objective OSID for terrain/supply lookups.
     // Stable: lowest sorted objective string. P3-EST: the defence is estimated at
     // this primary OSID; it is also the terrain/urban/forest cache representative.
+    // P3-EST-PRIM (rulings §13): with live axes, the primary is the lowest of the axes'
+    // CURRENT objectives (the cells the first battles are fought at), not the lowest of
+    // every objective, which in 19 of 104 operations was a depth objective. Without a live
+    // axis current objective in the preparation view, the lowest objective as before.
     const sortedObjectives = Array.from(objectives).sort(strictCompare);
-    const primaryTargetOsid = sortedObjectives[0];
+    const liveCurrentObjectives = (op.axes ?? [])
+        .filter((ax) => !isAxisExcludedFromPreparation(ax))
+        .map((ax) => ax.objectives[ax.current_objective_index ?? 0])
+        .filter((o): o is string => typeof o === 'string' && o.length > 0 && objectives.has(o))
+        .sort(strictCompare);
+    const primaryTargetOsid = liveCurrentObjectives[0] ?? sortedObjectives[0];
 
     // LANE-2026-05-02: backward-compatible neutral terrain lookup when caller
     // does not pass terrainMultByOsid. Matches combat_math.ts default.
