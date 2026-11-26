@@ -1809,7 +1809,7 @@ export function advanceSectorOffensives(
             // combat-blocked without being completed. Retain it during objective
             // reconciliation, but never consume launch readiness or create a
             // failed-objective cooldown while the political gate is closed.
-            if (hasOnlyPoliticallyBlockedCurrentObjectives(state, corpsId, faction, op)) {
+            if (hasOnlyPoliticallyBlockedCurrentObjectives(state, corpsId, faction, op, operationStaticAdjacency)) {
                 beginRecovery(op, turn, 'political_blocked', state);
                 continue;
             }
@@ -1877,7 +1877,7 @@ export function advanceSectorOffensives(
             // turn, then let the existing readiness and opening-attack gates decide.
             const plannedLaunchReady = elapsed >= 1 && (preparationReady || stagedEarly);
             if (plannedLaunchReady || elapsed > planDuration || forcedLaunch) {
-                if (hasOnlyPoliticallyBlockedCurrentObjectives(state, corpsId, faction, op)) {
+                if (hasOnlyPoliticallyBlockedCurrentObjectives(state, corpsId, faction, op, operationStaticAdjacency)) {
                     beginRecovery(op, turn, 'political_blocked', state);
                     continue;
                 }
@@ -2561,18 +2561,26 @@ function updateMultiAxisResults(
     }
 }
 
-function hasOnlyPoliticallyBlockedCurrentObjectives(
+export function hasOnlyPoliticallyBlockedCurrentObjectives(
     state: GameState,
     corpsId: FormationId,
     faction: FactionId,
     op: CorpsOperation,
+    staticAdjacency?: Map<string, string[]>,
 ): boolean {
     const politicalControllers = state.political.political_controllers ?? {};
     if (isMultiAxis(op) && op.axes) {
+        // PRIM-RAW-AXIS (rulings §31/§34): in planning read each axis's launch view objectives[0]
+        // and skip axes the reconcile would drop; execution reads the stored index.
+        const planning = op.phase !== 'execution';
         const activeAxes = op.axes.filter((axis) => axis.status === 'executing');
-        if (activeAxes.length === 0) return false;
-        return activeAxes.every((axis) => {
-            const objective = axis.objectives[axis.current_objective_index ?? 0];
+        const currentObjectives = planning
+            ? activeAxes
+                .map((axis) => launchAxisObjectiveView(state, corpsId, faction, op, axis, staticAdjacency)?.objectives[0])
+                .filter((objective): objective is string => objective !== undefined)
+            : activeAxes.map((axis) => axis.objectives[axis.current_objective_index ?? 0]);
+        if (currentObjectives.length === 0) return false;
+        return currentObjectives.every((objective) => {
             if (!objective) return false;
             const controller = politicalControllers[objective] ?? '';
             return shouldGrazBlockAttack(state, corpsId, faction, objective, controller)

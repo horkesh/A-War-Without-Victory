@@ -134,16 +134,23 @@ export function getConvergingOperationBrigades(
     return getOperationBrigadesAtCurrentObjective(op, objective);
 }
 
-/** All brigades assigned to live axes currently aimed at `objective`. */
+/**
+ * All brigades assigned to live axes currently aimed at `objective`. `objectiveOf` overrides
+ * the stored read of each axis's current objective (a planning caller passes the launch view's
+ * first objective, PRIM-RAW-AXIS rulings §31/§34); absent, the stored index is read.
+ */
 export function getOperationBrigadesAtCurrentObjective(
     op: CorpsOperation,
     objective: string,
+    objectiveOf?: (axis: OperationAxis) => string | undefined,
 ): FormationId[] {
     const axes = op.axes;
     if (!Array.isArray(axes) || axes.length === 0) return [];
+    const currentObjectiveOf = objectiveOf
+        ?? ((axis: OperationAxis) => axis.objectives[axis.current_objective_index ?? 0]);
     return [...new Set(axes
         .filter((axis) => axis.status !== 'complete' && axis.status !== 'stalled')
-        .filter((axis) => axis.objectives[axis.current_objective_index ?? 0] === objective)
+        .filter((axis) => currentObjectiveOf(axis) === objective)
         .flatMap((axis) => axis.assigned_brigades))]
         .sort(strictCompare);
 }
@@ -151,14 +158,16 @@ export function getOperationBrigadesAtCurrentObjective(
 /**
  * Include executing partner commands in a named synchronized assault forecast.
  * Planning peers are deliberately excluded: they have not committed to the attack.
+ * `objectiveOf` applies to `op`'s own axes only; executing peers keep the stored index.
  */
 export function getSynchronizedOperationBrigadesAtObjective(
     state: GameState,
     op: CorpsOperation,
     faction: FactionId,
     objective: string,
+    objectiveOf?: (axis: OperationAxis) => string | undefined,
 ): FormationId[] {
-    const brigadeIds = new Set(getOperationBrigadesAtCurrentObjective(op, objective));
+    const brigadeIds = new Set(getOperationBrigadesAtCurrentObjective(op, objective, objectiveOf));
     if (!op.sync_operation_name) return [...brigadeIds].sort(strictCompare);
     const commands = state.military.corps_command ?? {};
     for (const corpsId of Object.keys(commands).sort(strictCompare)) {

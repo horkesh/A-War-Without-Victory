@@ -1169,10 +1169,26 @@ export function resolveLinkedPreparationProbeBattle(
 
 /**
  * Find the best target OSID for a probe (first objective of the operation).
+ * PRIM-RAW-AXIS (rulings §31/§34): with axes, the first objective of axis 0's launch view (the
+ * probe runs in preparation, before the reconcile); a dropped view gives no target.
  */
-export function getProbeTargetOsid(op: CorpsOperation): string | undefined {
-    if (op.axes && op.axes.length > 0) {
-        return op.axes[0]!.objectives[0];
+export function getProbeTargetOsid(
+    state: GameState,
+    op: CorpsOperation,
+    corpsId: FormationId,
+    faction: FactionId,
+    staticAdjacency?: Map<string, string[]>,
+): string | undefined {
+    const leadAxis = op.axes?.[0];
+    if (leadAxis) {
+        return launchAxisObjectiveView(
+            state,
+            corpsId,
+            faction,
+            op,
+            leadAxis,
+            op.is_pre_planned === true ? staticAdjacency : undefined,
+        )?.objectives[0];
     }
     return op.objectives?.[0];
 }
@@ -1789,7 +1805,7 @@ export function tickPreparation(
                     // Intel insufficient — consider ordering a probe
                     if (!op.active_probe) {
                         const probeBrigades = selectProbeBrigades(state, op);
-                        const probeTarget = getProbeTargetOsid(op);
+                        const probeTarget = getProbeTargetOsid(state, op, corpsId, faction, adjacency);
                         if (probeBrigades.length > 0 && probeTarget) {
                             op.active_probe = {
                                 target_osid: probeTarget,
