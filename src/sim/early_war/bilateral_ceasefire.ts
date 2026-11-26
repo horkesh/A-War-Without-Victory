@@ -17,7 +17,7 @@
  *   - Bots stop targeting each other; redirect to RS (bot layer reads ceasefire_active)
  *   - Minority erosion halted (erosion step checks ceasefire_active)
  *
- * Canon: Phase_I_Specification_v0_4_0.md §4.8; Engine_Invariants §J.
+ * Canon: Systems_Manual_v0_9_0.md System 10 (implementation-note "imposed bilateral ceasefire") and §6.6a. The former Phase I §4.8 was folded into War_Specification_v0_9_0 with no ceasefire clause.
  */
 
 import type { GameState } from '../../state/game_state.js';
@@ -76,6 +76,7 @@ export interface CeasefirePreconditionResult {
     c1_war_duration: boolean;
     c2_hrhb_exhaustion: boolean;
     c3_rbih_exhaustion: boolean;
+    /** C4 met, by either path: a real stalemate or the imposed path below. */
     c4_stalemate: boolean;
     /** C4 was met by the imposed path (HRHB acknowledged Zagreb's ceasefire order). */
     c4_imposed: boolean;

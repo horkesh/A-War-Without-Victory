@@ -25,7 +25,7 @@
  *   - Joint ops vs RS get POST_WASH_JOINT_PRESSURE_BONUS (1.15)
  *   - Mixed municipalities restored to joint status
  *
- * Canon: Phase_I_Specification_v0_4_0.md §4.8; Systems_Manual §10; Engine_Invariants §J.
+ * Canon: Systems_Manual_v0_9_0.md System 10 (Washington paths A, A', B, C).
  */
 
 import type { GameState } from '../../state/game_state.js';
@@ -252,7 +252,8 @@ export function evaluateWashingtonPatronOverride(state: GameState): WashingtonPa
 // ── Path C: Federation by consent (B5 A2, 2026-11-16) ──
 
 /**
- * Week of the Washington framework (1 March 1994; the Washington event cards' turn_min).
+ * The Washington week: the Washington event cards' turn_min. With t0 = 6 April 1992, t102 is about
+ * 21 March 1994; the framework (1 March 1994) falls at about t99 and the signing (18 March) at about t101.
  * Single owner: political_peace_plan.ts reads it for the HRHB Contact Group / Dayton alignment.
  */
 export const WASHINGTON_AGREEMENT_WEEK = 102;
@@ -290,7 +291,7 @@ export const WASH_QUIET_FRONT_TURNS = WASH_CEASEFIRE_DURATION;
 
 /**
  * First week Path A' can fire: the week after the Washington week. A Path A signing in the Washington
- * week itself (t102, 18 Mar 1994: the 23 Feb ceasefire plus the four-week W2 hold) is the historical
+ * week itself (t102, about 21 Mar 1994, just after the 18 March signing at about t101; the 23 Feb ceasefire plus the four-week W2 hold) is the historical
  * outcome, so Path A' waits until it has been missed (orchestrator ruling, 2026-11-19). Only Path A'
  * reads this; WASHINGTON_AGREEMENT_WEEK stays the boundary for Path C and the peace plan.
  */
