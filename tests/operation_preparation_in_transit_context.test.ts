@@ -343,10 +343,12 @@ describe('LANE-2026-05-02-IN-TRANSIT-COMBAT-POWER-CONTEXT T7: estimateForceRatio
                 corps_id: attackerCorps,
                 posture: 'attack',
             });
+            // P3-EST: the estimate now uses the battle's defence, which needs the defender
+            // to reach the objective; it stands on it (physical defender, full power).
             const defender = makeBrigade({
                 id: 'synth_def',
                 faction: 'OTHER_FACTION',
-                location_osid: ENEMY,
+                location_osid: TARGET,
                 corps_id: defenderCorps,
                 posture: 'defend',
                 cohesion: 80,

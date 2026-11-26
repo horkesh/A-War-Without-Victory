@@ -517,9 +517,11 @@ describe('estimateForceRatio', () => {
         state.military.formations = {
             atk_1: makeFormation('atk_1', { personnel: 1200 }),
             atk_2: makeFormation('atk_2', { personnel: 1200 }),
-            def_small: makeFormation('def_small', { faction: 'RBiH', personnel: 1000 }),
-            def_large_a: makeFormation('def_large_a', { faction: 'RBiH', personnel: 3000 }),
-            def_large_b: makeFormation('def_large_b', { faction: 'RBiH', personnel: 3000 }),
+            // P3-EST: defenders stand in their own sector's cells (the battle's defence
+            // needs reach to the objective).
+            def_small: makeFormation('def_small', { faction: 'RBiH', personnel: 1000, location_osid: 'enemy_target_small' }),
+            def_large_a: makeFormation('def_large_a', { faction: 'RBiH', personnel: 3000, location_osid: 'enemy_target_large' }),
+            def_large_b: makeFormation('def_large_b', { faction: 'RBiH', personnel: 3000, location_osid: 'enemy_target_large' }),
         };
         addSectorIntel(state, 'sector_a', 'enemy_sector_small', 0.9);
         addSectorIntel(state, 'sector_a', 'enemy_sector_large', 0.9);
