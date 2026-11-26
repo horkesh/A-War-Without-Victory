@@ -22,6 +22,8 @@ import {
 } from './army_co_lifecycle.js';
 import { CANONICAL_ARMY_CO_ROSTER } from './army_co_roster_data.js';
 import { getBrigadeOfficerMod } from './combat_math.js';
+// Cycle-safe: read only inside processOfficerSuccession, after both modules are loaded.
+import { RELIEF_ACTING_DURATION } from './order_interpretation.js';
 import {
     officersRelievedFrom,
     officerSurvivedWar,
@@ -62,74 +64,6 @@ const TIER_PRIORITY: Record<OfficerPoolTier, number> = {
     tier_b: 2,
     tier_c: 3,
 };
-
-export function officerReplacementMatterKey(
-    outgoingOfficerId: string,
-    corpsId: string,
-    proposedSuccessorId: string,
-): string {
-    return `replacement:${outgoingOfficerId}:${corpsId}:${proposedSuccessorId}`;
-}
-
-/**
- * Put a corps-command change to the President as a `replacement_suggested` matter,
- * deduplicated against pending and resolved matters. Returns true when a new matter was
- * queued. Shared by the §5E schedule paths and the corps-reorganisation handover.
- */
-export function queueReplacementMatter(
-    state: GameState,
-    faction: FactionId,
-    outgoingOfficerId: string,
-    corpsId: string,
-    proposedSuccessorId: string,
-    turn: number,
-): boolean {
-    const pendingEvents = (state.military.pending_officer_events ??= []);
-    const matterKey = officerReplacementMatterKey(outgoingOfficerId, corpsId, proposedSuccessorId);
-    const alreadyPending = pendingEvents.some(event => replacementMatterMatches(event, matterKey, outgoingOfficerId, corpsId, proposedSuccessorId));
-    const alreadyResolved = (state.military.officer_decision_history ?? []).some(record => replacementMatterMatches(
-        record as typeof record & { matter_key?: string },
-        matterKey,
-        outgoingOfficerId,
-        corpsId,
-        proposedSuccessorId,
-    ));
-    if (alreadyPending || alreadyResolved) return false;
-    pendingEvents.push({
-        event_id: matterKey,
-        type: 'replacement_suggested',
-        faction,
-        turn,
-        officer_id: proposedSuccessorId,
-        current_commander_id: outgoingOfficerId,
-        corps_id: corpsId,
-        acknowledged: false,
-    });
-    return true;
-}
-
-function replacementMatterMatches(
-    value: {
-        type?: string;
-        event_type?: string;
-        officer_id?: string;
-        current_commander_id?: string;
-        outgoing_officer_id?: string;
-        new_officer_id?: string;
-        corps_id?: string;
-        matter_key?: string;
-    },
-    matterKey: string,
-    outgoingOfficerId: string,
-    corpsId: string,
-    proposedSuccessorId: string,
-): boolean {
-    if (value.matter_key === matterKey) return true;
-    if ((value.type ?? value.event_type) !== 'replacement_suggested') return false;
-    return (value.outgoing_officer_id ?? value.current_commander_id) === outgoingOfficerId
-        && value.corps_id === corpsId
-        && (value.new_officer_id ?? value.officer_id) === proposedSuccessorId;
-}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Deterministic casualty exposure eligibility
@@ -859,6 +793,14 @@ export function processOfficerSuccession(
             os.turns_in_command++;
             if (os.penalty_turns_remaining > 0) {
                 os.penalty_turns_remaining--;
+            }
+            // REPLACE-CO seats a named appointee acting for RELIEF_ACTING_DURATION turns
+            // (relieveOfficer); then he holds the corps in his own right (G1, §15.1). A generic
+            // stopgap stays acting. Headless writes no appointment.
+            if (os.acting_commander && !id.startsWith('generic_')
+                && os.turns_in_command >= RELIEF_ACTING_DURATION
+                && isPresidentialAppointee(state, os.assigned_corps_id, id)) {
+                os.acting_commander = false;
             }
         }
     }

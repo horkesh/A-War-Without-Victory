@@ -681,7 +681,8 @@ function applyCoReplacements(state: GameState): void {
 
         // REUSE the orphan relief helper: retires the CO, installs the staged/auto
         // replacement, emits officer_relieved, returns the morale hit.
-        const relief = relieveOfficer(state, currentCoId, corpsId);
+        // The President's explicit pick is honoured when still eligible (G1, §15.1).
+        const relief = relieveOfficer(state, currentCoId, corpsId, staged.replacement_officer_id ?? null);
 
         // Apply the returned morale hit to this corps's active brigades (relieveOfficer
         // documents this as the caller's responsibility). getCorpsSubordinates returns the
@@ -721,10 +722,14 @@ function applyCoReplacements(state: GameState): void {
         }
 
         // Append the replacement record for the UI / follow-up consequence.
+        // When the President's pick could not be seated, the record names the pick and why.
         const record = {
             relieved_officer_id: relief.relieved_officer_id,
             replacement_officer_id: relief.replacement_officer_id,
             turn,
+            ...(relief.pick_fallback && staged.replacement_officer_id
+                ? { requested_officer_id: staged.replacement_officer_id, pick_fallback: relief.pick_fallback }
+                : {}),
         };
         if (Array.isArray(cmd.co_replacement_record)) cmd.co_replacement_record.push(record);
         else cmd.co_replacement_record = [record];

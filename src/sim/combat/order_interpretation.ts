@@ -259,6 +259,8 @@ export interface ReliefResult {
     replacement_officer_id: string | null;
     transition_penalty_turns: number;
     morale_hit: number;
+    /** Set when an explicit pick was requested but could not be seated (the ranking picked). */
+    pick_fallback?: 'requested_officer_not_eligible';
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -585,6 +587,8 @@ export function relieveOfficer(
     state: GameState,
     officerId: string,
     corpsId: string,
+    /** The President's explicit pick (REPLACE-CO staging); omitted = the ranking picks. */
+    requestedReplacementId?: string | null,
 ): ReliefResult {
     const noOp: ReliefResult = {
         relieved_officer_id: officerId,
@@ -638,9 +642,16 @@ export function relieveOfficer(
         });
 
     let replacementId: string | null = null;
+    // G1: the President's explicit REPLACE-CO pick is seated when it is still eligible: in the
+    // candidate list above (same faction, corps_commander, in reserve, enclave-compatible).
+    // Otherwise the ranking picks, and the result says why the pick was not honoured.
+    const requested = requestedReplacementId
+        ? candidates.find(c => c.id === requestedReplacementId)
+        : undefined;
+    const pickFallback = requestedReplacementId && !requested ? 'requested_officer_not_eligible' as const : undefined;
 
     if (candidates.length > 0) {
-        const replacement = candidates[0]!;
+        const replacement = requested ?? candidates[0]!;
         replacementId = replacement.id;
         const repState = officers[replacementId]!;
         repState.status = 'active';
@@ -711,5 +722,6 @@ export function relieveOfficer(
         replacement_officer_id: replacementId,
         transition_penalty_turns: RELIEF_ACTING_DURATION,
         morale_hit: RELIEF_MORALE_PENALTY,
+        ...(pickFallback ? { pick_fallback: pickFallback } : {}),
     };
 }
