@@ -94,7 +94,6 @@ import {
 import { computeAttackForcePower } from './attack_force_power.js';
 import { getAttackIntelConfidence } from './attack_intel_context.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
-import { getCollapseDefenderMultiplier } from '../collapse/capacity_modifiers.js';
 import { getPostWashingtonJointPressureMultiplier } from '../early_war/washington_agreement.js';
 import { collectAverageDefenseRoster, collectSectorDefenseBrigades } from './sector_defense_roster.js';
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
@@ -438,7 +437,7 @@ function collectObjectiveEnemySectorIds(
  * P3-EST §11: the attack side mirrors the battle too: the primary objective's axis
  * brigades through `computeAttackForcePower`, with the season (slope 0: preparation has no
  * slope map), the firepower deficit and the own execution friction; the defence takes the
- * collapse, joint-pressure and winter multipliers.
+ * joint-pressure and winter multipliers (not the collapse reader: §6 single combat consumer).
  *
  * LANE-2026-05-02: estimateForceRatio defender-modifier integration.
  * Now sums COMBAT POWER (computeAttackerPower / rankDefendersByPower) instead of
@@ -648,11 +647,13 @@ export function estimateForceRatio(
         return confidence >= 0.5 ? 3.0 : 1.0;
     }
 
-    // The battle's defence multipliers after the roster: own-OSID collapse, post-Washington
-    // joint pressure, and the season (winter defence). Not modelled here (accepted, small):
-    // the enclave garrison (no population map in preparation) and the defender's OPSEC.
+    // The battle's defence multipliers after the roster: post-Washington joint pressure and the
+    // season (winter defence). Not modelled here (accepted, small): the enclave garrison (no
+    // population map in preparation), the defender's OPSEC, and the own-OSID collapse
+    // multiplier. The collapse reader is deliberately NOT read here: §6 allows exactly one
+    // collapse consumer to reach combat (tests/collapse_consumer_manifest.test.ts), and it
+    // is 1.0 while collapse is off.
     const defencePower = defence.power
-        * getCollapseDefenderMultiplier(state, primaryTargetOsid)
         * getPostWashingtonJointPressureMultiplier(state, defence.controller, attackerFaction, primaryTargetOsid)
         * seasonal.defense_mult;
 
