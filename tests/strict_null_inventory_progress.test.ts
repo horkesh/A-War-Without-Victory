@@ -859,7 +859,11 @@ describe('strict null inventory progress', () => {
             // first written (old saves load): DisplacementDomainState.negotiated_evacuation_records (write-only
             // display record) and DisplacementState.negotiated_evacuation_by_side (episode state, read only by the
             // convoy rule). No new type escape. 622 -> 624.
-            optional_fields_game_state: 624,
+            // G1 follow-up (lane C s14, 2026-11-26): +2 record-only optional fields on the
+            // co_replacement_record entry (CorpsCommandState): requested_officer_id and pick_fallback,
+            // written only when the President's REPLACE-CO pick could not be seated; never read by a sim
+            // decision; absent on headless runs. No new type escape. 624 -> 626.
+            optional_fields_game_state: 626,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
@@ -893,12 +897,13 @@ describe('strict null inventory progress', () => {
         // Player-override model PR-B: +1 (PendingProposalReview.resolved_by). 619 -> 620 / state 231 -> 232.
         // A9 P0-A: +2 state (pocket_fall_records, pocket_fall_originals_booked_by_side). 620 -> 622 / state 232 -> 234.
         // A9 P1: +2 state (negotiated_evacuation_records, negotiated_evacuation_by_side). 622 -> 624 / state 234 -> 236.
-        expect(current.optional_field_domains.total).toBe(624);
+        // G1 follow-up: +2 sim (co_replacement_record.requested_officer_id / pick_fallback). 624 -> 626 / sim 378 -> 380.
+        expect(current.optional_field_domains.total).toBe(626);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 378,
+            sim: 380, // G1 follow-up: +2 (co_replacement_record entry, CorpsCommandState). 378 -> 380.
             state: 236, // +1 PendingProposalReview.resolved_by (player-override model PR-B), +2 A9 P0-A, +2 A9 P1
             ui_adapter: 0,
             unknown: 0,
