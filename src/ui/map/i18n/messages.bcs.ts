@@ -5547,7 +5547,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'frontVisit.unavailable': 'Trenutno nije moguća posjeta frontu.',
     'eventDecision.decisionRequired': 'Potrebna odluka',
     'eventArt.alt.event_concentration_camps_revealed_1992': 'Ograda logora viđena izvana, područje Prijedora, 1992.',
-    'eventArt.alt.event_ahmici_massacre_1993': 'Spaljene kuće i srušeni minaret, Ahmići, april 1993.',
+    'eventArt.alt.event_ahmici_massacre_1993': 'Spaljene kuće i srušeni minaret, Ahmići, 1993.',
     'eventArt.alt.event_drina_valley_ethnic_cleansing_1992': 'Ispražnjene kuće na Drini, 1992.',
     'eventArt.alt.event_markale_shelling': 'Pijačne tezge nakon granatiranja, Markale, Sarajevo',
     'eventArt.alt.event_srebrenica_falls_1995': 'Ostavljene stvari na podu fabrike, Srebrenica, juli 1995.',

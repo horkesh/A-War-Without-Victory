@@ -227,11 +227,14 @@ describe('VerdictScreen mount — verdict content', () => {
             loadedGameState: endgame({
                 rawGameState: {
                     meta: { turn: 188, phase: 'war', player_faction: 'RBiH' },
-                    political: { political_controllers: {}, initial_political_controllers: {} },
+                    political: {
+                        political_controllers: {},
+                        initial_political_controllers: {},
+                        rbih_hrhb_state: { war_started_turn: null },
+                    },
                     military: {
                         formations: {},
                         event_flags: {
-                            federation_never_fractured: true,
                             vrs_quality_inverted: true,
                         },
                         event_fire_counts: {},

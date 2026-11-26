@@ -213,7 +213,11 @@ export interface GhostEntryStateView {
         };
     };
     /** Read-only: current controllers, for the enclave_defended capital check. */
-    political?: { political_controllers?: Readonly<Record<string, string | null | undefined>> };
+    political?: {
+        political_controllers?: Readonly<Record<string, string | null | undefined>>;
+        /** RBiH-HRHB alliance record; `war_started_turn` is written once, by `alliance_update.ts`. */
+        rbih_hrhb_state?: { readonly war_started_turn?: number | null } | null;
+    };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -472,12 +476,32 @@ function requiredOperands(
         : null;
 }
 
+/** The RBiH-HRHB alliance never fell to the hostile threshold: `rbih_hrhb_state.war_started_turn`
+ *  is null. Fails closed when the alliance record is absent. */
+function allianceWarNotStartedOperand(state: GhostEntryStateView): ClaimPredicateOperand | null {
+    const record = state.political?.rbih_hrhb_state;
+    if (!record || record.war_started_turn != null) return null;
+    return {
+        owner_path: 'state.political.rbih_hrhb_state.war_started_turn',
+        operator: 'equals',
+        expected_value: null,
+        observed_value: null,
+        expression: 'rbih_hrhb_state.war_started_turn=null',
+    };
+}
+
 // — Ghost 1: alliance_held —
-//   federation_never_fractured = true AND croat_bosniak_war_begins_1993 did
-//   NOT fire by t70.
+//   The RBiH-HRHB alliance never reached the hostile threshold AND
+//   croat_bosniak_war_begins_1993 did NOT fire, by t70.
+//   AH-2 (§6 bright-line sitting 2026-11-26, 8/8; round 3 on the operand): the
+//   `federation_never_fractured` flag operand is retired, since nothing in src/, data/ or tools/
+//   ever wrote that flag and the ghost could never show. The positive claim is now the engine's
+//   own alliance record (the ghost body's "the alliance threshold did not fall through the floor
+//   that triggers open conflict"); a path_not_taken ghost needs a claim distinct from its missed
+//   condition, or `buildGhostEntries` drops it.
 function predAllianceHeld(state: GhostEntryStateView, currentTurn: number): GhostPredicateMatch | null {
     const operands = requiredOperands(
-        flagOperand(state, 'federation_never_fractured', true),
+        allianceWarNotStartedOperand(state),
         eventFiredOperand(state, 'croat_bosniak_war_begins_1993', false),
     );
     return operands ? matchGhost(operands, [operands[1]!], currentTurn, 70) : null;
