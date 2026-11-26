@@ -22,6 +22,8 @@ import {
 } from './army_co_lifecycle.js';
 import { CANONICAL_ARMY_CO_ROSTER } from './army_co_roster_data.js';
 import { getBrigadeOfficerMod } from './combat_math.js';
+// Cycle-safe: read only inside processOfficerSuccession, after both modules are loaded.
+import { RELIEF_ACTING_DURATION } from './order_interpretation.js';
 import {
     officersRelievedFrom,
     officerSurvivedWar,
@@ -791,6 +793,14 @@ export function processOfficerSuccession(
             os.turns_in_command++;
             if (os.penalty_turns_remaining > 0) {
                 os.penalty_turns_remaining--;
+            }
+            // REPLACE-CO seats a named appointee acting for RELIEF_ACTING_DURATION turns
+            // (relieveOfficer); then he holds the corps in his own right (G1, §15.1). A generic
+            // stopgap stays acting. Headless writes no appointment.
+            if (os.acting_commander && !id.startsWith('generic_')
+                && os.turns_in_command >= RELIEF_ACTING_DURATION
+                && isPresidentialAppointee(state, os.assigned_corps_id, id)) {
+                os.acting_commander = false;
             }
         }
     }

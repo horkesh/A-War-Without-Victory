@@ -1212,7 +1212,14 @@ export interface CorpsCommandState {
      * Append-only log of corps-CO replacements the president has ordered via REPLACE-CO
      * (one entry per applied replacement). Surfaced to the UI and consumed by any
      * follow-up consequence wiring. Optional — absent in headless scenarios. */
-    co_replacement_record?: { relieved_officer_id: string; replacement_officer_id: string | null; turn: number }[];
+    co_replacement_record?: {
+        relieved_officer_id: string;
+        replacement_officer_id: string | null;
+        turn: number;
+        /** Present only when the President's explicit pick could not be seated (G1): the pick and why. */
+        requested_officer_id?: string;
+        pick_fallback?: 'requested_officer_not_eligible';
+    }[];
     /**
      * Append-only log of faction-asymmetric COMMAND-LEVER CONSEQUENCES (Presidential
      * Command Model §4) applied to this corps: the deferred political fallout of a

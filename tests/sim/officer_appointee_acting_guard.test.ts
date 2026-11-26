@@ -88,6 +88,57 @@ describe('G1: the acting-commander branch never removes a presidential appointee
         });
     }
 
+    it('REPLACE-CO seats the President\'s explicit pick when eligible, not the ranking\'s first candidate', async () => {
+        const state = makeState({ player_faction: 'RBiH', autonomy_level: 0 });
+        state.military.corps_command[CORPS].pending_co_replacement = { replacement_officer_id: 'co_second', turn: 20, ca_cost: 25 };
+        await runTurnSteps(state);
+        const officers = state.military.named_officers;
+        expect(officers.co_second).toMatchObject({ status: 'active', assigned_corps_id: CORPS });
+        expect(officers.co_appointee.status).toBe('reserve');
+        expect(state.military.corps_command[CORPS].co_replacement_record).toEqual([
+            { relieved_officer_id: 'co_current', replacement_officer_id: 'co_second', turn: 20 },
+        ]);
+    });
+
+    it('an ineligible pick falls back to the ranking and the record says why', async () => {
+        const state = makeState({ player_faction: 'RBiH', autonomy_level: 0 });
+        state.military.named_officers.co_second.status = 'retired';
+        state.military.corps_command[CORPS].pending_co_replacement = { replacement_officer_id: 'co_second', turn: 20, ca_cost: 25 };
+        await runTurnSteps(state);
+        expect(state.military.named_officers.co_appointee).toMatchObject({ status: 'active', assigned_corps_id: CORPS });
+        expect(state.military.corps_command[CORPS].co_replacement_record).toEqual([{
+            relieved_officer_id: 'co_current', replacement_officer_id: 'co_appointee', turn: 20,
+            requested_officer_id: 'co_second', pick_fallback: 'requested_officer_not_eligible',
+        }]);
+    });
+
+    it('a named appointee stops acting after RELIEF_ACTING_DURATION turns; a generic stopgap stays acting', async () => {
+        const state = makeState({ player_faction: 'RBiH', autonomy_level: 0 });
+        state.military.corps_command[CORPS].pending_co_replacement = { replacement_officer_id: 'co_appointee', turn: 20, ca_cost: 25 };
+        await runTurnSteps(state); // turn 20: seated, 1 turn in command
+        const app = state.military.named_officers.co_appointee;
+        const seen: boolean[] = [app.acting_commander];
+        for (const turn of [21, 22, 23, 24]) {
+            state.meta.turn = turn;
+            await SUCCESSION_STEP.run({ state, report: {} } as any);
+            seen.push(app.acting_commander);
+        }
+        expect(seen).toEqual([true, true, true, false, false]); // cleared at 4 turns in command
+        expect(app).toMatchObject({ status: 'active', assigned_corps_id: CORPS });
+
+        const generic = makeState({ player_faction: 'RBiH', autonomy_level: 0 });
+        generic.military.named_officers.co_appointee.status = 'retired';
+        generic.military.named_officers.co_second.status = 'retired';
+        generic.military.corps_command[CORPS].pending_co_replacement = { turn: 20, ca_cost: 25 };
+        await runTurnSteps(generic);
+        const gid = generic.military.corps_command[CORPS].co_replacement_record[0].replacement_officer_id;
+        for (const turn of [21, 22, 23, 24]) {
+            generic.meta.turn = turn;
+            await SUCCESSION_STEP.run({ state: generic, report: {} } as any);
+        }
+        expect(generic.military.named_officers[gid]).toMatchObject({ status: 'active', acting_commander: true });
+    });
+
     it('a generic stopgap seated by REPLACE-CO on an empty reserve still gives way to a named officer', async () => {
         const state = makeState({ player_faction: 'RBiH', autonomy_level: 0 });
         const officers = state.military.named_officers;
