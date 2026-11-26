@@ -8,7 +8,7 @@
  *   (d) ceasefire:    +CEASEFIRE_RECOVERY_RATE when ceasefire active
  *
  * Update is one-turn-delayed for incidents (this turn's flips feed next turn's update).
- * Canon: Phase_I_Specification_v0_4_0.md §4.8; Engine Invariants §J.
+ * Canon: Systems_Manual_v0_9_0.md §6.6a (RBiH-HRHB alliance). The former Phase I §4.8 was retired when War_Specification_v0_9_0.md replaced it.
  */
 
 import type { FactionId, GameState, RbihHrhbState } from '../../state/game_state.js';

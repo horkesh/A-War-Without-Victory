@@ -249,10 +249,11 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
             historicalComparison: loadedGameState?.historicalComparison,
             costLedger: loadedGameState?.costLedger,
             gameOver: loadedGameState?.gameOver,
+            allianceHeld: loadedGameState?.allianceHeld,
             currentTurn: loadedGameState?.turn,
         };
         return resolveCodexEssayIndex(essays, context, locale);
-    }, [essays, firedEventIds, locale, loadedGameState?.eventFlags, loadedGameState?.decisionResponses, loadedGameState?.historicalComparison, loadedGameState?.costLedger, loadedGameState?.gameOver, loadedGameState?.turn]);
+    }, [essays, firedEventIds, locale, loadedGameState?.eventFlags, loadedGameState?.decisionResponses, loadedGameState?.historicalComparison, loadedGameState?.costLedger, loadedGameState?.gameOver, loadedGameState?.allianceHeld, loadedGameState?.turn]);
 
     // Per-year rows sort Tier 0-2 start-visible history before Tier 3 campaign
     // entries. A graph-gated Tier 3 row may show a redacted hint; a plain

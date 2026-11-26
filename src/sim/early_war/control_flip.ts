@@ -1,5 +1,5 @@
 /**
- * Phase C Step 4: Early war control change system (Phase_I_Specification_v0_4_0.md §4.3).
+ * Phase C Step 4: Early war control change system (former Phase I Specification §4.3, retired when War_Specification_v0_9_0.md replaced it; live text: Systems_Manual_v0_9_0.md §3).
  * Control flips only via Peace phase mechanisms, only after war_start_turn.
  * Control changes do not grant authority (Engine Invariants §3, §9).
  */

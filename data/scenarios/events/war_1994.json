@@ -66,6 +66,7 @@
       {
         "id": "acknowledge_pressure",
         "label": "Acknowledge the message",
+        "description": "Zagreb's order is accepted, and the HVO is committed to a ceasefire with the ARBiH as soon as the war's other conditions allow one.",
         "branch_tag": "hrhb_zagreb_ceasefire_acknowledge",
         "historical_marker": "historical_default",
         "aggression_affinity": -0.3,
@@ -91,6 +92,7 @@
       {
         "id": "resist_patron",
         "label": "Maintain our position",
+        "description": "The ceasefire waits until the front has actually stalled, about four quiet weeks. Zagreb cuts supply to the HVO in the meantime.",
         "branch_tag": "hrhb_zagreb_ceasefire_resist",
         "historical_marker": "counterfactual",
         "aggression_affinity": 0.5,
@@ -122,7 +124,19 @@
           }
         ]
       }
-    ]
+    ],
+    "localizations": {
+      "bcs": {
+        "response_options": {
+          "acknowledge_pressure": {
+            "description": "Zagrebova naredba se prihvata, a HVO se obavezuje na primirje s ARBiH čim to dopuste ostali uslovi rata."
+          },
+          "resist_patron": {
+            "description": "Primirje čeka da front stvarno zastane, otprilike četiri mirne sedmice. Zagreb u međuvremenu smanjuje snabdijevanje HVO-a."
+          }
+        }
+      }
+    }
   },
   {
     "id": "markale_massacre_1994",

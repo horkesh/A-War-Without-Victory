@@ -1,5 +1,5 @@
 /**
- * Phase C Step 5: Authority degradation (Phase_I_Specification_v0_4_0.md §4.7).
+ * Phase C Step 5: Authority degradation (former Phase I Specification §4.7, retired when War_Specification_v0_9_0.md replaced it; live text: Systems_Manual_v0_9_0.md §9).
  * Authority evolves independently of control; distinct fields remain distinct.
  * State uses profile.authority in 0–100 scale; spec formulas applied in 0–1 then scaled.
  *

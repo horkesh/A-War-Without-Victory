@@ -1,5 +1,5 @@
 /**
- * Phase C Step 3: Militia emergence (Phase_I_Specification_v0_4_0.md §4.2).
+ * Phase C Step 3: Militia emergence (former Phase I Specification §4.2, retired when War_Specification_v0_9_0.md replaced it; live text: Systems_Manual_v0_9_0.md §3 and §13).
  * Converts organizational penetration into militia strength per municipality per faction.
  * Deterministic ordering; no fronts.
  */

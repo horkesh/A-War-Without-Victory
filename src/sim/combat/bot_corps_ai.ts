@@ -33,7 +33,7 @@ import { buildOsidAdjacency, type Osid } from './osid_adjacency.js';
 import { analyzeFactionGraphCached, type FactionGraphAnalysis } from './osid_graph_analysis.js';
 
 // ── Submodule imports for orchestrator ──────────────────────────────────
-import { setArmyStandingOrder, generateCorpsStanceOrders, type CorpsStanceTrace } from './bot_corps_stance.js';
+import { setArmyStandingOrder, generateCorpsStanceOrders, capCorpsStancesWithoutOperation, type CorpsStanceTrace } from './bot_corps_stance.js';
 import { clampHeldCorpsStances } from './stance_matter_holds.js';
 import { clampHeldOgStances } from './stance_matters.js';
 import { evaluateOperationProgress } from './sector_offensive.js';
@@ -541,6 +541,10 @@ export function generateAllCorpsOrders(
     }
     // Default-off per-corps plan receipts (why a corps made no plan). Observation only.
     emitCorpsPlanTrace(state, faction, planTraceStance);
+
+    // P2.4: an offensive corps stance needs an operation in planning or execution. The formula
+    // applies the cap itself; this pass catches the later writers (bilateral-war reassignment).
+    capCorpsStancesWithoutOperation(state, faction);
 
     // Clamp point 3 of 3 (the hold is the last writer), then OG holds after the commander
     // loop, which rewrites every OG stance. Both inert without a hold.
