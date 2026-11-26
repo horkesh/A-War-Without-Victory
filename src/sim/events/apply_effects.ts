@@ -15,6 +15,9 @@ import { recordBattleCasualties } from '../../state/casualty_ledger.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { invalidateBrigadeJourney } from '../combat/brigade_journey_lifecycle.js';
 import { applyPatronSupportDelta } from '../negotiation/patron_pressure.js';
+// The cached OSID contact adjacency (operational_contact_graph.json), the same graph the turn uses.
+import { getSettlementAdjacency } from '../negotiation/peace_settlement.js';
+import { ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from '../combat/enclave_resilience.js';
 
 /** Deterministic kind ordering for effect application (alphabetical).
  *  NOTE: alphabetic insertion shifts indices of every kind sorted after the
@@ -216,7 +219,9 @@ function applyTargetedFormationStatChange(
  *  effects — §6). Deterministic (sorted by formation id, no RNG). Flag-gated
  *  `AWWV_ENCLAVE_COLUMN_DISPLACEMENT` — **DEFAULT-ON since 2026-08-26** (owner decision on
  *  an escalated split §6 panel); explicit 'false'/'0' disables it for rollback.
- *  Panel-reviewed spec: docs/plans/2026-08-05-enclave-column-displacement-and-codex-lane.md. */
+ *  Panel-reviewed spec (moved out of the repo in #820): AWWV-coordination
+ *  repo-docs/docs/plans/2026-08-05-enclave-column-displacement-and-codex-lane.md. Where the
+ *  survivors re-form when the destination is not held: E-fall, SHDG §6. */
 function applyEnclaveFormationDisplacement(
     state: GameState,
     effect: Extract<EventEffect, { kind: 'enclave_formation_displacement' }>,
@@ -279,12 +284,29 @@ function applyEnclaveFormationDisplacement(
 
         if (effect.reconstitute_as === 'reduced') {
             // Survivors break out and reform at reduced strength in their own corps AOR.
+            // E-fall (2026-11-26): the authored destination is friendly in a hands-off game, but
+            // in a divergent one the enemy may hold it. The survivors then re-form at the nearest
+            // friendly-held cell instead, never on enemy ground (they used to be placed there and
+            // then silently disbanded by the enemy-territory safety net).
+            const reformOsid = resolveEnclaveReformOsid(
+                state, effect.faction, f.corps_id ?? null, effect.destination_osid, sourceSet,
+            );
+            if (reformOsid == null) {
+                // The contact graph reaches no held cell outside the fallen pocket and the named
+                // enclaves: there is no friendly ground to re-form on.
+                // Same terminal record as the 'none' branch below (disbanded, not destroyed).
+                (f as { personnel?: number }).personnel = 0;
+                (f as { status?: string }).status = 'inactive';
+                (f as { lifecycle_status?: string }).lifecycle_status = 'disbanded';
+                (f as { destruction_turn?: number }).destruction_turn = state.meta?.turn ?? 0;
+                continue;
+            }
             (f as { personnel?: number }).personnel = Math.max(0, personnel - lost);
-            if (f.location_osid !== effect.destination_osid) {
+            if (f.location_osid !== reformOsid) {
                 invalidateBrigadeJourney(state, fid as FormationId);
             }
-            (f as { location_osid?: string }).location_osid = effect.destination_osid;
-            (f as { home_osid?: string }).home_osid = effect.destination_osid;
+            (f as { location_osid?: string }).location_osid = reformOsid;
+            (f as { home_osid?: string }).home_osid = reformOsid;
             (f as { assignment: unknown }).assignment = null; // re-slotted by sector assignment next turn
         } else {
             // 'none' — forcibly deported / removed from theatre (Žepa). No reconstitution.
@@ -322,6 +344,70 @@ function applyEnclaveFormationDisplacement(
             (f as { destruction_turn?: number }).destruction_turn = state.meta?.turn ?? 0;
         }
     }
+}
+
+/** E-fall (2026-11-26): where enclave survivors re-form.
+ *  - The authored destination, if `faction` holds it. This is the hands-off path, so a
+ *    historical game is unchanged.
+ *  - Otherwise the nearest cell `faction` holds, by a layered BFS from the destination over the
+ *    operational contact graph: first restricted to the brigade's own corps territory
+ *    (`corps_front_sectors[*].territory_osids`), then any friendly cell. A fallen source cell and
+ *    any cell of a named enclave (`ENCLAVE_DEFINITIONS`) are never candidates. Within a layer the
+ *    smallest id by strictCompare wins. The BFS measures nearness, not a march route: this is
+ *    the event's breakout placement, not Engine Invariants §14.5a (unimplemented at 1.0).
+ *  - null when the graph reaches no friendly cell (the caller disbands the formation).
+ *  Deterministic: no RNG, and the pick does not depend on iteration order. */
+function resolveEnclaveReformOsid(
+    state: GameState,
+    faction: FactionId,
+    corpsId: string | null,
+    destination: string,
+    excluded: ReadonlySet<string>,
+): string | null {
+    const pc = state.political?.political_controllers ?? {};
+    if (pc[destination] === faction) return destination;
+
+    // Never a cell of a named enclave (operations seat R1): the survivors keep their `enclave` tag,
+    // so re-forming inside another pocket (Žepa, Teočak, Goražde...) would confine them there.
+    const inAnyEnclave = (osid: string): boolean =>
+        ENCLAVE_DEFINITIONS.some((enclave) => osidBelongsToEnclave(osid, enclave));
+    const isFriendly = (osid: string): boolean =>
+        pc[osid] === faction && !excluded.has(osid) && !inAnyEnclave(osid);
+    const corpsTerritory = new Set<string>();
+    if (corpsId) {
+        const sectors = state.military.corps_front_sectors ?? {};
+        for (const sid of Object.keys(sectors)) {
+            const sector = sectors[sid];
+            if (!sector || sector.corps_id !== corpsId) continue;
+            for (const osid of sector.territory_osids ?? []) corpsTerritory.add(osid);
+        }
+    }
+    const filters: Array<(osid: string) => boolean> = [];
+    if (corpsTerritory.size > 0) filters.push((osid) => isFriendly(osid) && corpsTerritory.has(osid));
+    filters.push(isFriendly);
+
+    const adjacency = getSettlementAdjacency();
+    for (const accept of filters) {
+        const visited = new Set<string>([destination]);
+        let frontier: string[] = [destination];
+        while (frontier.length > 0) {
+            const next: string[] = [];
+            let best: string | null = null;
+            for (const curr of frontier) {
+                for (const n of adjacency.get(curr) ?? []) {
+                    if (visited.has(n)) continue;
+                    visited.add(n);
+                    next.push(n);
+                    if (accept(n) && (best == null || strictCompare(n, best) < 0)) best = n;
+                }
+            }
+            if (best != null) return best;
+            frontier = next;
+        }
+    }
+    // No friendly cell the graph reaches: there is no nearest ground. No pick by id order alone
+    // (Engine Invariants §14.5, canon seat 2026-11-26); the caller disbands the formation.
+    return null;
 }
 
 /** Fall-1995 mechanic E-A5: push an offensive-ops suppression entry into
