@@ -174,9 +174,16 @@ describe('P3-EST §11: the attack side mirrors the battle', () => {
         expect(est).toBeCloseTo(estimateForceRatio(s, op(), 3, 0.9, null, {}, adjacency()), 9);
         // Not the no-defender sentinel a friendly-held read would give.
         expect(est).not.toBeCloseTo(3.0, 6);
-        // Out of range: no contested objective from the index on, so the lowest objective is read.
+        // PRIM-A3: an index past the end reads what the launch reconcile gives the axis. It keeps
+        // the foreign-held cells (['D']) and clamps the index to the last of them, so the first
+        // battle is still at 'D' (main read past the end and fell back to the sentinel).
         const pastEnd = { ...axisOp, axes: [{ ...(axisOp.axes as any)[0], current_objective_index: 9 }] } as unknown as CorpsOperation;
-        expect(estimateForceRatio(s, pastEnd, 3, 0.9, null, {}, adjacency())).toBeCloseTo(3.0, 9);
+        expect(estimateForceRatio(s, pastEnd, 3, 0.9, null, {}, adjacency()))
+            .toBeCloseTo(estimateForceRatio(s, op(), 3, 0.9, null, {}, adjacency()), 9);
+        // An axis the reconcile drops (no foreign-held objective left) has no first battle: the
+        // lowest objective, friendly-held 'A0', gives the no-defender sentinel.
+        const allHeld = { ...axisOp, axes: [{ ...(axisOp.axes as any)[0], objectives: ['A0'] }] } as unknown as CorpsOperation;
+        expect(estimateForceRatio(s, allHeld, 3, 0.9, null, {}, adjacency())).toBeCloseTo(3.0, 9);
     });
 
     it('PRIM-HOSTILE: an axis whose current cell is HRHB-held and combat-blocked (ceasefire, mobilizing) parks there, as in the battle', () => {
@@ -233,19 +240,68 @@ describe('P3-EST §11: the attack side mirrors the battle', () => {
 
     it('PRIM-ATT fallback: with no axis fighting anywhere first, the lowest objective is read with every participating brigade', () => {
         const s = fixture(false);
-        // Both axes are past their last objective, so neither has a first contested objective. The
-        // primary falls back to the lowest objective ('D'), and no axis fights there first, so every
-        // participating brigade counts (main counted only a1, which held 'D' at depth).
-        const exhausted = {
+        // Neither axis has a first contested objective inside the preparation view (the operation's
+        // objectives, ['D']): a1's 'C3' and a2's 'C1' are outside it. (PRIM-A3: an index past the
+        // end no longer empties an axis; the launch reconcile clamps it.) The primary falls back to
+        // the lowest objective ('D'), and no axis fights there first, so every participating brigade
+        // counts.
+        const outsideView = {
+            ...op(),
+            objectives: ['D'],
+            axes: [
+                { axis_id: 'a1', objectives: ['C3'], assigned_brigades: ['attacker'], current_objective_index: 0 },
+                { axis_id: 'a2', objectives: ['C1'], assigned_brigades: ['attacker_2'], current_objective_index: 0 },
+            ],
+        } as unknown as CorpsOperation;
+        expect(estimateForceRatio(s, outsideView, 3, 0.9, null, {}, adjacency()))
+            .toBeCloseTo(estimateForceRatio(s, op(), 3, 0.9, null, {}, adjacency()), 9);
+    });
+
+    it('PRIM-A3: a leading objective the launch reconcile cuts as unreachable is not read as the first battle', () => {
+        // The ops seat's case: axis A = [unreachable C3, D], axis B = [D]. At launch the reconcile
+        // cuts C3 (no approach OSID), so both axes fight at D. The estimate reads both at D, which
+        // equals the post-launch shape (both axes ['D'], two axes splitting s_a's reserve). Main
+        // read A at C3 (lower-sorted), so C3 became the primary.
+        const s = fixture(false);
+        (s.military as any).war_front_edges_osid = [{ edge_id: 'e:E-D', a: 'E', b: 'D', side_a: 'RBiH', side_b: 'RS' }];
+        const axes = (preserve: boolean) => ({
             ...op(),
             objectives: [],
             axes: [
-                { axis_id: 'a1', objectives: ['D'], assigned_brigades: ['attacker'], current_objective_index: 1 },
-                { axis_id: 'a2', objectives: ['Y2'], assigned_brigades: ['attacker_2'], current_objective_index: 1 },
+                { axis_id: 'a1', objectives: ['C3', 'D'], assigned_brigades: ['attacker_2'], current_objective_index: 0, ...(preserve ? { preserve_objective_sequence: true } : {}) },
+                { axis_id: 'a2', objectives: ['D'], assigned_brigades: ['attacker'], current_objective_index: 0 },
+            ],
+        } as unknown as CorpsOperation);
+        const launched = {
+            ...op(),
+            objectives: [],
+            axes: [
+                { axis_id: 'a1', objectives: ['D'], assigned_brigades: ['attacker_2'], current_objective_index: 0 },
+                { axis_id: 'a2', objectives: ['D'], assigned_brigades: ['attacker'], current_objective_index: 0 },
             ],
         } as unknown as CorpsOperation;
-        expect(estimateForceRatio(s, exhausted, 3, 0.9, null, {}, adjacency()))
-            .toBeCloseTo(estimateForceRatio(s, op(), 3, 0.9, null, {}, adjacency()), 9);
+        const both = estimateForceRatio(s, launched, 3, 0.9, null, {}, adjacency());
+        expect(estimateForceRatio(s, axes(false), 3, 0.9, null, {}, adjacency())).toBeCloseTo(both, 9);
+        // An axis that keeps its authored sequence is not cut at launch, so C3 stays its first battle.
+        expect(estimateForceRatio(s, axes(true), 3, 0.9, null, {}, adjacency())).not.toBeCloseTo(both, 3);
+    });
+
+    it('PRIM-A4: the sector split counts axes in the preparation view, as the primary and attacker picks do', () => {
+        // op.objectives is ['D']; a2's 'C1' is outside that view, so a2 has no first battle and does
+        // not split s_a's reserves. The estimate equals the operation with a1 alone (main counted
+        // a2 at C1 on s_a and halved the reserve).
+        const s = fixture(false);
+        const withA2 = {
+            ...op(),
+            objectives: ['D'],
+            axes: [
+                { axis_id: 'a1', objectives: ['D'], assigned_brigades: ['attacker', 'attacker_2'], current_objective_index: 0 },
+                { axis_id: 'a2', objectives: ['C1'], assigned_brigades: [], current_objective_index: 0 },
+            ],
+        } as unknown as CorpsOperation;
+        const a1Only = { ...withA2, axes: [(withA2.axes as any)[0]] } as unknown as CorpsOperation;
+        expect(estimateForceRatio(s, withA2, 3, 0.9, null, {}, adjacency()))
+            .toBeCloseTo(estimateForceRatio(s, a1Only, 3, 0.9, null, {}, adjacency()), 9);
     });
 
     it('keeps predictor parity in a winter month (seasonal attack and defence multipliers)', () => {
