@@ -15,6 +15,7 @@ import {
     splitKiaWiaMia,
     computeFinalCasualties,
     computeAttackerCasualtyShares,
+    attackerCasualtyRecord,
     computeDefenderCasualtyShares,
     distributeDefenderCasualties,
     buildDefenderContributions,
@@ -221,6 +222,23 @@ describe('computeFinalCasualties', () => {
 // ═══════════════════════════════════════════════════════════════════════════
 // computeAttackerCasualtyShares
 // ═══════════════════════════════════════════════════════════════════════════
+
+describe('attackerCasualtyRecord (CAS-REPORT §15)', () => {
+    it('nothing clamped: equals the force figure even when the rounded shares do not sum to it', () => {
+        const shares = new Map([['a', 33], ['b', 33], ['c', 33]]);
+        expect(attackerCasualtyRecord(100, shares, new Map(shares))).toBe(100);
+    });
+
+    it('subtracts only the clamp shortfall', () => {
+        const shares = new Map([['a', 33], ['b', 33], ['c', 33]]);
+        const applied = new Map([['a', 33], ['b', 10], ['c', 33]]);
+        expect(attackerCasualtyRecord(100, shares, applied)).toBe(77);
+    });
+
+    it('never goes below zero', () => {
+        expect(attackerCasualtyRecord(5, new Map([['a', 9]]), new Map([['a', 0]]))).toBe(0);
+    });
+});
 
 describe('computeAttackerCasualtyShares', () => {
     it('CAS-REPORT §15: a share is capped at the brigade removable personnel; others unchanged', () => {

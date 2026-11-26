@@ -190,6 +190,7 @@ import {
     splitKiaWiaMia,
     computeFinalCasualties,
     computeAttackerCasualtyShares,
+    attackerCasualtyRecord,
     computeDefenderCasualtyShares,
     distributeDefenderCasualties,
     buildDefenderContributions,
@@ -1103,19 +1104,25 @@ export function resolveAttackOrdersOsid(
         const anySupport = attackerFormations.some(a => isSupportBrigadeOnActiveOp(state, a.id, a.corps_id));
         // CAS-REPORT §15: each share is capped at what the brigade can actually lose (its
         // personnel above MIN_COMBAT_PERSONNEL, plus a TG anchor's donor room), as the
-        // defender shares are. The record below reports the applied sum, not finalAttackerCas.
-        const casShares = computeAttackerCasualtyShares(
-            attackerFormations.map(a => ({
-                id: a.id,
-                personnel: a.personnel ?? 0,
-                supportRole: isSupportBrigadeOnActiveOp(state, a.id, a.corps_id) ? 'support' as const
-                    : anySupport ? 'main' as const : 'none' as const,
-                removable: attackerRemovablePersonnel(state, a),
-            })),
+        // defender shares are. The record reports finalAttackerCas less every share's
+        // shortfall (rounded share minus the personnel actually removed), so it equals
+        // finalAttackerCas exactly whenever nothing is clamped and never counts a loss the
+        // floor refused. (Summing the rounded shares instead would drift by rounding in
+        // every multi-attacker battle.)
+        const attackerShareInputs = attackerFormations.map(a => ({
+            id: a.id,
+            personnel: a.personnel ?? 0,
+            supportRole: isSupportBrigadeOnActiveOp(state, a.id, a.corps_id) ? 'support' as const
+                : anySupport ? 'main' as const : 'none' as const,
+            removable: attackerRemovablePersonnel(state, a),
+        }));
+        const uncappedShares = computeAttackerCasualtyShares(
+            attackerShareInputs.map(({ removable: _removable, ...input }) => input),
             personnelAttacker,
             finalAttackerCas,
         );
-        let appliedAttackerCas = 0;
+        const casShares = computeAttackerCasualtyShares(attackerShareInputs, personnelAttacker, finalAttackerCas);
+        const appliedAttackerById = new Map<FormationId, number>();
         for (const a of attackerFormations) {
             const cas = casShares.get(a.id) ?? 0;
             let appliedCas = 0;
@@ -1140,7 +1147,7 @@ export function resolveAttackOrdersOsid(
             } else {
                 appliedCas = applyPersonnelLoss(a, cas);
             }
-            appliedAttackerCas += appliedCas;
+            appliedAttackerById.set(a.id, appliedCas);
             a.cohesion = Math.max(0, Math.min(100, (a.cohesion ?? 60) + (COHESION_ATTACKER[outcome] ?? 0)));
 
             // ADR-0005 v2.2c #2 / Hard Invariant #6: anchor destroyed mid-op → dissolve its TG
@@ -1171,6 +1178,7 @@ export function resolveAttackOrdersOsid(
             battleEquipAttackerTanksLost += aTanksLost;
             battleEquipAttackerArtLost += aArtLost;
         }
+        const appliedAttackerCas = attackerCasualtyRecord(finalAttackerCas, uncappedShares, appliedAttackerById);
         report.casualty_attacker += appliedAttackerCas;
         if (defenderFormation) {
             // ── Distance-weighted casualty distribution ───────────────────

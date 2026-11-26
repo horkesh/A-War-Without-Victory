@@ -112,6 +112,24 @@ export function computeAttackerCasualtyShares(
 }
 
 /**
+ * CAS-REPORT §15: the attacker casualty figure a battle records. It is the force-wide
+ * figure less each brigade's shortfall (its uncapped rounded share minus the personnel
+ * actually removed), so it equals `finalCas` exactly when nothing is clamped (the
+ * rounded shares need not sum to it) and never includes a loss the floor refused.
+ */
+export function attackerCasualtyRecord(
+    finalCas: number,
+    uncappedShares: ReadonlyMap<FormationId, number>,
+    appliedById: ReadonlyMap<FormationId, number>,
+): number {
+    let shortfall = 0;
+    for (const [id, share] of uncappedShares) {
+        shortfall += Math.max(0, share - (appliedById.get(id) ?? 0));
+    }
+    return Math.max(0, finalCas - shortfall);
+}
+
+/**
  * Deterministic bounded allocation for explicit defender weights.
  *
  * An eligible supplied primary keeps the existing proportional/remainder

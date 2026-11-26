@@ -132,28 +132,64 @@ function ledgerTotal(state: GameState, faction: string): number {
     return row ? row.killed + row.wounded + row.missing_captured : 0;
 }
 
+/** Attaches a tactical group to `anchor` with one donor that lent `lent` men. */
+function addTg(fx: ReturnType<typeof makeScenario>, anchor: FormationState, lent: number): FormationState {
+    const donor = makeFormation('brig_rs_donor', 'RS', 'brigade', STAGING_OSID, { corps_id: 'vrs_drina', personnel: 3000 });
+    (fx.state.military.formations as Record<string, FormationState>)[donor.id] = donor;
+    (fx.state.military as unknown as { tactical_groups: Record<string, unknown> }).tactical_groups = {
+        tg_1: {
+            id: 'tg_1', corps_id: 'vrs_drina', op_id: 'test_cas_op', anchor_brigade_id: anchor.id,
+            status: 'active', formed_turn: 4,
+            donor_contributions: [{
+                brigade_id: donor.id, source_corps_id: 'vrs_drina', distance_hops: 1,
+                personnel_lent: lent, heavy_equipment_lent: { tanks: 0, artillery: 0, aa_systems: 0 },
+                casualties_so_far: 0,
+            }],
+        },
+    };
+    return donor;
+}
+
+const personnelOf = (fs_: FormationState[]) => fs_.reduce((n, f) => n + (f.personnel ?? 0), 0);
+
 describe('CAS-REPORT §15: attacker casualties are recorded as applied', () => {
-    it('a brigade one man above the floor loses at most one man, and the record says so', () => {
+    it('a brigade one man above the floor is never charged past the floor: ledger = personnel drop, record within rounding', () => {
         const fx = makeScenario(MIN_COMBAT_PERSONNEL + 1);
-        const before = (fx.big.personnel ?? 0) + (fx.small.personnel ?? 0);
+        const before = personnelOf([fx.big, fx.small]);
         const report = resolve(fx);
         const battle = report.battles.find(b => (b.attacker_brigades ?? []).includes(fx.small.id));
         expect(battle).toBeDefined();
-        const drop = before - ((fx.big.personnel ?? 0) + (fx.small.personnel ?? 0));
+        const drop = before - personnelOf([fx.big, fx.small]);
         expect(fx.small.personnel).toBeGreaterThanOrEqual(MIN_COMBAT_PERSONNEL);
-        expect(battle!.attacker_casualties).toBe(drop);
-        expect(report.casualty_attacker).toBe(drop);
+        // The ledger rows are the per-brigade applied losses (the old code charged the share).
+        expect(ledgerTotal(fx.state, 'RS')).toBe(drop);
+        // The record is the force figure less the clamp shortfall: it may differ from the
+        // drop only by the share rounding (at most 1 for two brigades), never by the clamp.
+        expect(Math.abs(battle!.attacker_casualties - drop)).toBeLessThanOrEqual(1);
+        expect(report.casualty_attacker).toBe(battle!.attacker_casualties);
+    });
+
+    it('with room to spare nothing is clamped: ledger = personnel drop, record within rounding', () => {
+        const fx = makeScenario(3000);
+        const before = personnelOf([fx.big, fx.small]);
+        const report = resolve(fx);
+        const battle = report.battles[0]!;
+        const drop = before - personnelOf([fx.big, fx.small]);
+        expect(battle.attacker_casualties).toBeGreaterThan(0);
+        expect(Math.abs(battle.attacker_casualties - drop)).toBeLessThanOrEqual(1);
         expect(ledgerTotal(fx.state, 'RS')).toBe(drop);
     });
 
-    it('with room to spare the applied figure equals the computed figure (no behaviour change)', () => {
-        const fx = makeScenario(3000);
-        const before = (fx.big.personnel ?? 0) + (fx.small.personnel ?? 0);
+    it('a TG anchor at the floor: its donor absorbs within the loan, the ledger counts what was removed', () => {
+        const fx = makeScenario(MIN_COMBAT_PERSONNEL + 1);
+        const donor = addTg(fx, fx.small, 400);
+        const before = personnelOf([fx.big, fx.small, donor]);
         const report = resolve(fx);
-        const battle = report.battles[0]!;
-        const drop = before - ((fx.big.personnel ?? 0) + (fx.small.personnel ?? 0));
-        expect(battle.attacker_casualties).toBeGreaterThan(0);
-        expect(battle.attacker_casualties).toBe(drop);
+        expect(report.battles.length).toBe(1);
+        const drop = before - personnelOf([fx.big, fx.small, donor]);
+        expect(fx.small.personnel).toBeGreaterThanOrEqual(MIN_COMBAT_PERSONNEL);
+        expect(3000 - (donor.personnel ?? 0)).toBeLessThanOrEqual(400);
         expect(ledgerTotal(fx.state, 'RS')).toBe(drop);
+        expect(Math.abs(report.battles[0]!.attacker_casualties - drop)).toBeLessThanOrEqual(1);
     });
 });
