@@ -46,8 +46,10 @@ export const CEASEFIRE_RBIH_EXHAUSTION = 3000;
 export const CEASEFIRE_STALEMATE_MIN = 4;
 /**
  * C4 alternative (WASH-IMPOSED, orchestrator ruling §29, 2026-11-26; historian + game-designer seats).
- * The 23 February 1994 ceasefire was imposed from outside on a stalled front (UN, EU sanctions
- * threat, Zagreb's order to the HVO; BB2 pp.450-451) while ARBiH could still attack. A C4 that
+ * The 23 February 1994 ceasefire came from outside pressure on Zagreb, applied to a stalled front:
+ * Boutros-Ghali's accusation that the HV was in Bosnia and Italy's threat to seek EU sanctions led
+ * Tudjman to order a peace initiative, and Delic and Roso signed in Zagreb (BB2 pp.449-450). ARBiH
+ * could still attack. The event models that pressure as Zagreb's order to the HVO. A C4 that
  * waits for four quiet weeks is circular: the bot keeps an ARBiH corps on the bilateral offensive
  * until a ceasefire exists. When HRHB has acknowledged Zagreb's order, the ceasefire is imposed;
  * C1-C3, C5 and C6 still bind. HRHB can refuse (`resist_patron`), and then only a real stalemate
