@@ -22,6 +22,7 @@ import { OfficerDossierPanel } from './OfficerDossierPanel';
 import { isCanonicalPlayerFaction, playerFactionMatch } from '../data/playerFactionMatch';
 import { PARAMILITARY_POLICY_CARD_BY_FACTION } from '../../../sim/events/paramilitary_policy_card';
 import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
+import { getPlayerSafeOperationBalancePresentation } from '../../../shared/playerSafeOperationBalance';
 import { toTitleCase } from '../utils/formatters';
 import { t, type MessageKey } from '../i18n';
 import type { NamedOfficerView } from '../data/types';
@@ -180,13 +181,6 @@ interface ProposalCardProps {
     inspectable?: boolean;
 }
 
-/** Force ratio → label colour. <1 is unfavourable (defender stronger). */
-function ratioClass(ratio: number): string {
-    if (ratio >= 2) return 'text-green-300';
-    if (ratio >= 1) return 'text-[#d4d0c8]';
-    return 'text-red-300';
-}
-
 function ProposalCard({ proposal, opCard, onInspectOfficer, inspectable }: ProposalCardProps) {
     const resolved = isResolvedProposalReview(proposal);
 
@@ -258,11 +252,16 @@ function ProposalCard({ proposal, opCard, onInspectOfficer, inspectable }: Propo
                                     : t('autonomy.proposal.fieldCommander')}
                             </span>
                         )}
-                        {opCard.force_ratio_estimate != null && (
-                            <span className={`shrink-0 ${ratioClass(opCard.force_ratio_estimate)}`}>
-                                {t('autonomy.proposal.forceRatio', { ratio: opCard.force_ratio_estimate.toFixed(1) })}
-                            </span>
-                        )}
+                        {opCard.force_ratio_estimate != null && (() => {
+                            // The staff estimate is shown as a band, never as a raw ratio
+                            // (a thin enclave defence can put it in the hundreds).
+                            const balance = getPlayerSafeOperationBalancePresentation(opCard.force_ratio_estimate);
+                            return (
+                                <span className={`shrink-0 ${balance.toneClass}`} title={balance.summary}>
+                                    {balance.label}
+                                </span>
+                            );
+                        })()}
                     </div>
                     {opCard.commander_assessment && (
                         <div className="text-[13px] font-mono uppercase tracking-[0.12em] text-[#a9a398]">

@@ -1950,7 +1950,6 @@ export const enMessages = {
     'autonomy.proposal.overrideCost': 'Force-launch over your commander\'s objection. Costs {cost} command authority.',
     'autonomy.proposal.overrideInsufficient': 'Need {cost} CA (have {current})',
     'autonomy.proposal.fieldCommander': 'Your field commander',
-    'autonomy.proposal.forceRatio': '{ratio}:1',
     // Command loop L5 (2026-11-15): proposal dossiers (proposalDossier.ts).
     'dossier.action.review': 'Review the plan',
     'dossier.title.advanceFrom': 'Advance from {place}',
