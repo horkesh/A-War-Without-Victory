@@ -56,15 +56,23 @@ export function getSectorOffensiveApproachOsids(
     reverseMap: OperationalToCanonicalReverseMap,
     brigadeId?: FormationId,
 ): Set<Osid> {
+    // PRIM-RAW-AXIS (rulings §31). In execution the raw index is right: launch reset it, so it is
+    // the live objective, and the preserve-sequence slice keys on the authored order (march
+    // correction's synthetic axes set index 0 themselves). In planning the stored index is not
+    // where the first battle is: the launch resets it to 0 after the reconcile, so a planning
+    // march reads from the reconciled axis's first objective.
+    const indexOf = (stored: number | undefined): number =>
+        activeOp.phase === 'execution' ? (stored ?? 0) : 0;
     const axis = brigadeId ? getBrigadeAxis(activeOp, brigadeId) : null;
+    const axisIndex = axis ? indexOf(axis.current_objective_index) : 0;
     const objectives = axis
         ? axis.preserve_objective_sequence === true
-            ? axis.objectives.slice(axis.current_objective_index, axis.current_objective_index + 1)
+            ? axis.objectives.slice(axisIndex, axisIndex + 1)
             : axis.objectives
         : (activeOp.objectives ?? []);
     const currentIdx = axis
-        ? axis.preserve_objective_sequence === true ? 0 : axis.current_objective_index
-        : (activeOp.current_objective_index ?? 0);
+        ? axis.preserve_objective_sequence === true ? 0 : axisIndex
+        : indexOf(activeOp.current_objective_index);
     const approachOsids = new Set<Osid>();
     for (const objective of objectives.slice(currentIdx)) {
         for (const neighbor of getTacticalAdjacentOsids(state, objective as Osid, adjacency)) {

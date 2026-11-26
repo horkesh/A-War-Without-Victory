@@ -630,7 +630,9 @@ export function areParticipantsReadyForExecution(
     if (isMultiAxis(operation) && operation.axes) {
         let readyAxisCount = 0;
         for (const axis of operation.axes) {
-            const currentObjective = axis.objectives[axis.current_objective_index ?? 0];
+            // PRIM-RAW-AXIS (rulings §31): the launch resets the index to 0 right after this
+            // check, so readiness is judged at the first objective of the reconciled axis.
+            const currentObjective = axis.objectives[0];
             if (typeof currentObjective !== 'string' || currentObjective.length === 0) continue;
             const axisApproachOsids = collectObjectiveApproachOsids(state, corpsId, faction, [currentObjective], operationStaticAdjacency);
             if (axisApproachOsids.size === 0) {

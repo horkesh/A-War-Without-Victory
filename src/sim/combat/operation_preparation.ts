@@ -1108,6 +1108,8 @@ export function recordLinkedPreparationProbeOrderOpportunity(
             if (!link || child.phase !== 'execution' || link.target_osid !== targetOsid) continue;
             if (!child.participating_brigades.includes(brigadeId)) continue;
             const axis = child.axes?.find((candidate) => candidate.assigned_brigades.includes(brigadeId));
+            // PRIM-RAW-AXIS (rulings §31): the raw index is right here. The link matches only an
+            // operation in execution, after launch reset the axis, so the index is the live one.
             if (!axis || axis.objectives[axis.current_objective_index ?? 0] !== targetOsid) continue;
             const parent = findExactPreparationProbeParent(cmd, child);
             const request = parent?.active_probe;
@@ -1212,7 +1214,13 @@ export const ASSEMBLY_THRESHOLD = 0.6;
  * for 1-hop adjacency (all OSIDs in the operational zone near staging).
  * Used during force_staging to ensure brigades have assembled before execution.
  */
-function countAssembledBrigades(state: GameState, op: CorpsOperation): number {
+export function countAssembledBrigades(
+    state: GameState,
+    op: CorpsOperation,
+    corpsId: FormationId,
+    faction: FactionId,
+    staticAdjacency?: Map<string, string[]>,
+): number {
     const formations = state.military.formations ?? {};
     const staging = op.staging_osid;
     if (!staging) return op.participating_brigades.length; // no staging = all assembled
@@ -1220,8 +1228,22 @@ function countAssembledBrigades(state: GameState, op: CorpsOperation): number {
     // Collect valid assembly positions: staging + first objective
     const assemblyOsids = new Set<string>([staging]);
 
-    const firstObjective = op.axes?.[0]?.objectives?.[0]
-        ?? op.objectives?.[op.current_objective_index ?? 0];
+    // PRIM-RAW-AXIS (rulings §31): with an axis, the first objective is the one the launch
+    // fights first: the launch view's objectives[0] (the reconcile's foreign-cell filter and
+    // its cut of leading unreachable objectives; launch then resets the index to 0). A view
+    // the reconcile would drop adds nothing. The static adjacency is the reconcile's
+    // (pre-planned operations only).
+    const leadAxis = op.axes?.[0];
+    const firstObjective = leadAxis
+        ? launchAxisObjectiveView(
+            state,
+            corpsId,
+            faction,
+            op,
+            leadAxis,
+            op.is_pre_planned === true ? staticAdjacency : undefined,
+        )?.objectives[0]
+        : op.objectives?.[op.current_objective_index ?? 0];
     if (firstObjective) assemblyOsids.add(firstObjective);
 
     // Expand with sector territory + sub-segment friendly OSIDs.
@@ -1798,7 +1820,7 @@ export function tickPreparation(
                 // or any sector territory/friendly OSID)?
                 // Don't advance to supply_check until ASSEMBLY_THRESHOLD assembled
                 // or ASSEMBLY_TIMEOUT_TURNS elapsed since preparation started.
-                const assembled = countAssembledBrigades(state, op);
+                const assembled = countAssembledBrigades(state, op, corpsId, faction, adjacency);
                 const assemblyFraction = op.participating_brigades.length > 0
                     ? assembled / op.participating_brigades.length
                     : 1.0;
