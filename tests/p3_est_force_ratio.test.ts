@@ -155,9 +155,16 @@ describe('P3-EST §11: the attack side mirrors the battle', () => {
         } as unknown as CorpsOperation;
         const atCurrent = estimateForceRatio(s, axisOp, 3, 0.9, null, {}, adjacency());
         expect(atCurrent).toBeCloseTo(estimateForceRatio(s, op(), 3, 0.9, null, {}, adjacency()), 9);
+        // PRIM-A3 (operations seat, s27): an index carried through a recovery is reset to 0 at
+        // launch (`resetAxisForExecution`), so with 'D' still RS-held the first battle is at 'D'.
         const advanced = { ...axisOp, axes: [{ ...(axisOp.axes as any)[0], current_objective_index: 1 }] } as unknown as CorpsOperation;
-        const atDepth = estimateForceRatio(s, advanced, 3, 0.9, null, {}, adjacency());
+        expect(estimateForceRatio(s, advanced, 3, 0.9, null, {}, adjacency())).toBeCloseTo(atCurrent, 9);
+        // Once 'D' is taken, the launch reconcile drops it and the first battle is at the depth cell.
+        const taken = fixture(false);
+        (taken.political as any).political_controllers.D = 'RBiH';
+        const atDepth = estimateForceRatio(taken, advanced, 3, 0.9, null, {}, adjacency());
         expect(atDepth).not.toBeCloseTo(atCurrent, 3);
+        expect(atDepth).not.toBeCloseTo(3.0, 6);
     });
 
     it('P3-EST-PRIM: an axis current objective the attacker already holds is skipped; the read is at its next contested objective', () => {
@@ -174,9 +181,9 @@ describe('P3-EST §11: the attack side mirrors the battle', () => {
         expect(est).toBeCloseTo(estimateForceRatio(s, op(), 3, 0.9, null, {}, adjacency()), 9);
         // Not the no-defender sentinel a friendly-held read would give.
         expect(est).not.toBeCloseTo(3.0, 6);
-        // PRIM-A3: an index past the end reads what the launch reconcile gives the axis. It keeps
-        // the foreign-held cells (['D']) and clamps the index to the last of them, so the first
-        // battle is still at 'D' (main read past the end and fell back to the sentinel).
+        // PRIM-A3: an index past the end reads what launch gives the axis. The reconcile keeps the
+        // foreign-held cells (['D']) and launch walks them from index 0, so the first battle is
+        // still at 'D' (main read past the end and fell back to the sentinel).
         const pastEnd = { ...axisOp, axes: [{ ...(axisOp.axes as any)[0], current_objective_index: 9 }] } as unknown as CorpsOperation;
         expect(estimateForceRatio(s, pastEnd, 3, 0.9, null, {}, adjacency()))
             .toBeCloseTo(estimateForceRatio(s, op(), 3, 0.9, null, {}, adjacency()), 9);

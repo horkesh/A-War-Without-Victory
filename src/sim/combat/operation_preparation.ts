@@ -497,6 +497,9 @@ export function estimateForceRatio(
     // leading unreachable objectives), computed once per axis. The reconcile gets the static
     // adjacency only for pre-planned operations (`sector_offensive.ts`), so the view does too.
     const launchCorps = (launchCorpsId ?? attackerFormations[0]!.corps_id ?? '') as FormationId;
+    // Mirrors the reconcile's gate. Pre-planned operations return before the estimate in
+    // `tickPreparation` today, so in production this is always undefined; kept so the view stays
+    // the launch view if that ever changes.
     const launchStaticAdjacency = op.is_pre_planned === true ? adjacency : undefined;
     const launchViews = new Map<OperationAxis, LaunchAxisObjectiveView | null>();
     const launchViewFor = (ax: OperationAxis): LaunchAxisObjectiveView | null => {
@@ -767,10 +770,12 @@ function countOperationAxesOnDefendingSector(
  * results pass credits a friendly current objective as captured without a battle, so such a cell
  * is never the first battle. `allowed`, when given, restricts the read to the preparation
  * objective view. Pure and deterministic: it walks the authored objective order, writes nothing.
- * PRIM-A3 (rulings §25.5; operations seat, lane B s25): the walk is over the axis's LAUNCH view
- * (`launchAxisObjectiveView`), the objectives and index the launch reconcile will give it, so a
- * leading objective the reconcile cuts as unreachable is never read as the first battle. A null
- * view (the reconcile drops the axis) has no first battle.
+ * PRIM-A3 (rulings §25.5; operations seat, lane B s25 and s27): the walk is over the axis's
+ * LAUNCH view (`launchAxisObjectiveView`), the objectives the launch reconcile will give it, so a
+ * leading objective the reconcile cuts as unreachable is never read as the first battle. It walks
+ * from the first of them: right after the reconcile, launch resets every axis to index 0
+ * (`resetAxisForExecution`), so an index carried through a recovery is not where the first battle
+ * is fought. A null view (the reconcile drops the axis) has no first battle.
  */
 function firstContestedAxisObjective(
     state: GameState,
@@ -781,7 +786,7 @@ function firstContestedAxisObjective(
 ): string | undefined {
     if (launchView === null) return undefined;
     const launchObjectives = launchView.objectives;
-    for (let i = Math.max(0, launchView.currentIndex); i < launchObjectives.length; i++) {
+    for (let i = 0; i < launchObjectives.length; i++) {
         const o = launchObjectives[i];
         if (typeof o !== 'string' || o.length === 0) continue;
         if (allowed && !allowed.has(o)) continue;
