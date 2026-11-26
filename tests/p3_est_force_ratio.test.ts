@@ -179,6 +179,52 @@ describe('P3-EST §11: the attack side mirrors the battle', () => {
         expect(estimateForceRatio(s, pastEnd, 3, 0.9, null, {}, adjacency())).toBeCloseTo(3.0, 9);
     });
 
+    it('PRIM-HOSTILE: an HRHB cell the battle may not fight (ceasefire, mobilizing) is skipped for RBiH, as the battle skips it', () => {
+        // 'A0' (HRHB-held) sorts first and is the axis's current objective; the first battle is at 'D'.
+        const axisOp = {
+            ...op(),
+            objectives: [],
+            axes: [{ axis_id: 'a1', objectives: ['A0', 'D'], assigned_brigades: ['attacker', 'attacker_2'], current_objective_index: 0 }],
+        } as unknown as CorpsOperation;
+        const at = (alliance: number, rhs: Record<string, unknown>) => {
+            const s = fixture(false);
+            (s.meta as any).turn = 60;
+            (s.political as any).political_controllers.A0 = 'HRHB';
+            (s.political as any).war_alliance_rbih_hrhb = alliance;
+            (s.political as any).rbih_hrhb_state = rhs;
+            return { s, est: estimateForceRatio(s, axisOp, 3, 0.9, null, {}, adjacency()), atD: estimateForceRatio(s, op(), 3, 0.9, null, {}, adjacency()) };
+        };
+        // At war, under a ceasefire: not allied (so `isFriendlyFaction` called A0 contested), but combat is blocked.
+        const ceasefire = at(-0.3, { ceasefire_active: true });
+        expect(ceasefire.est).toBeCloseTo(ceasefire.atD, 9);
+        // Mobilizing: below the alliance threshold, combat not yet enabled.
+        const mobilizing = at(0.1, {});
+        expect(mobilizing.est).toBeCloseTo(mobilizing.atD, 9);
+        // Open war, no block: A0 is a legal battle and is read (no defender there, so the sentinel).
+        const war = at(-0.3, {});
+        expect(war.est).not.toBeCloseTo(war.atD, 3);
+    });
+
+    it('PRIM-ATT: an axis that holds the primary only as a depth objective does not fight there first', () => {
+        const s = fixture(false);
+        // a1 fights at 'D' first. a2's first contested objective is 'Z0' (RS-held); 'D' is only its depth.
+        (s.political as any).political_controllers.Z0 = 'RS';
+        const depthAxisOp = {
+            ...op(),
+            objectives: [],
+            axes: [
+                { axis_id: 'a1', objectives: ['D'], assigned_brigades: ['attacker'], current_objective_index: 0 },
+                { axis_id: 'a2', objectives: ['Z0', 'D'], assigned_brigades: ['attacker_2'], current_objective_index: 0 },
+            ],
+        } as unknown as CorpsOperation;
+        const est = estimateForceRatio(s, depthAxisOp, 3, 0.9, null, {}, adjacency());
+        // Only 'attacker' fights at D, as in the battle.
+        const p = predictCombatOutcome(s, 'attacker' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack');
+        expect(p).not.toBeNull();
+        expect(est).toBeCloseTo(p!.attacker_power / (p!.defender_power / PREDICTOR_FOG_WITHOUT_INTEL), 6);
+        expect(est).toBeLessThan(estimateForceRatio(s, op(), 3, 0.9, null, {}, adjacency()));
+    });
+
     it('keeps predictor parity in a winter month (seasonal attack and defence multipliers)', () => {
         const s = fixture(false);
         (s.meta as any).scenario_start_date = { year: 1992, month: 5, day: 1 };
