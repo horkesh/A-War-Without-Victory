@@ -25,13 +25,14 @@
  *   - Joint ops vs RS get POST_WASH_JOINT_PRESSURE_BONUS (1.15)
  *   - Mixed municipalities restored to joint status
  *
- * Canon: Phase_I_Specification_v0_4_0.md §4.8; Systems_Manual §10; Engine_Invariants §J.
+ * Canon: Systems_Manual_v0_9_0.md System 10 (Washington paths A, A', B, C).
  */
 
 import type { GameState } from '../../state/game_state.js';
 import { parseMilitiaPoolKey } from '../../state/militia_pool_key.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { ALLIED_THRESHOLD, DEFAULT_MIXED_MUNICIPALITIES } from './alliance_update.js';
+import { lastEventResponse, ZAGREB_CEASEFIRE_EVENT, ZAGREB_RESTRAINT_RESPONSE } from './bilateral_ceasefire.js';
 
 // ── Tunable Washington precondition thresholds ──
 
@@ -251,7 +252,8 @@ export function evaluateWashingtonPatronOverride(state: GameState): WashingtonPa
 // ── Path C: Federation by consent (B5 A2, 2026-11-16) ──
 
 /**
- * Week of the Washington framework (1 March 1994; the Washington event cards' turn_min).
+ * The Washington week: the Washington event cards' turn_min. With t0 = 6 April 1992, t102 is about
+ * 21 March 1994; the framework (1 March 1994) falls at about t99 and the signing (18 March) at about t101.
  * Single owner: political_peace_plan.ts reads it for the HRHB Contact Group / Dayton alignment.
  */
 export const WASHINGTON_AGREEMENT_WEEK = 102;
@@ -274,7 +276,7 @@ export function evaluateWashingtonByConsent(state: GameState): boolean {
     if (!rhs || rhs.washington_signed) return false;
     if (rhs.war_started_turn != null) return false;
     if (!((state.political.war_alliance_rbih_hrhb ?? 0) > ALLIED_THRESHOLD)) return false;
-    const overture = lastResponse(state, FEDERATION_OVERTURE_EVENT);
+    const overture = lastEventResponse(state, FEDERATION_OVERTURE_EVENT);
     if (overture !== null && FEDERATION_REFUSALS.includes(overture)) return false;
     return state.meta.turn >= WASHINGTON_AGREEMENT_WEEK;
 }
@@ -289,7 +291,7 @@ export const WASH_QUIET_FRONT_TURNS = WASH_CEASEFIRE_DURATION;
 
 /**
  * First week Path A' can fire: the week after the Washington week. A Path A signing in the Washington
- * week itself (t102, 18 Mar 1994: the 23 Feb ceasefire plus the four-week W2 hold) is the historical
+ * week itself (t102, about 21 Mar 1994, just after the 18 March signing at about t101; the 23 Feb ceasefire plus the four-week W2 hold) is the historical
  * outcome, so Path A' waits until it has been missed (orchestrator ruling, 2026-11-19). Only Path A'
  * reads this; WASHINGTON_AGREEMENT_WEEK stays the boundary for Path C and the peace plan.
  */
@@ -300,17 +302,6 @@ const WASHINGTON_SIGNING_RESPONSES: Readonly<Record<string, readonly string[]>> 
     hrhb_washington_agreement_1994: ['accept', 'reluctant'],
     rbih_washington_agreement_1994: ['accept', 'reluctant'],
 };
-const ZAGREB_CEASEFIRE_EVENT = 'zagreb_orders_hrhb_ceasefire';
-const ZAGREB_RESTRAINT_RESPONSE = 'acknowledge_pressure';
-
-/** Last recorded response to an event (the decision log is append-only; last wins). */
-function lastResponse(state: GameState, eventId: string): string | null {
-    const log = state.military?.event_decision_log ?? [];
-    for (let i = log.length - 1; i >= 0; i--) {
-        if (log[i].event_id === eventId) return log[i].response_id;
-    }
-    return null;
-}
 
 export interface WashingtonQuietFrontResult {
     war_fought: boolean;
@@ -346,9 +337,9 @@ export function evaluateWashingtonQuietFront(state: GameState): WashingtonQuietF
         : 0;
     const frontQuiet = (rhs?.stalemate_turns ?? 0) >= WASH_QUIET_FRONT_TURNS
         || ceasefireHeld >= WASH_QUIET_FRONT_TURNS;
-    const zagrebRestraint = lastResponse(state, ZAGREB_CEASEFIRE_EVENT) === ZAGREB_RESTRAINT_RESPONSE;
+    const zagrebRestraint = lastEventResponse(state, ZAGREB_CEASEFIRE_EVENT) === ZAGREB_RESTRAINT_RESPONSE;
     const cardsSigned = Object.keys(WASHINGTON_SIGNING_RESPONSES).sort(strictCompare).every((eventId) => {
-        const response = lastResponse(state, eventId);
+        const response = lastEventResponse(state, eventId);
         return response !== null && WASHINGTON_SIGNING_RESPONSES[eventId].includes(response);
     });
     const allianceRestored = (state.political.war_alliance_rbih_hrhb ?? 0) > ALLIED_THRESHOLD;

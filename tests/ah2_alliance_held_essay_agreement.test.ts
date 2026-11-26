@@ -1,20 +1,24 @@
 /**
- * AH-2 (§6 bright-line sitting 2026-11-26, 8/8 on the r2 text; round 3 8/8 on operand A).
+ * AH-2 (§6 bright-line sitting 2026-11-26, 8/8 on the r2 text; round 3 8/8 on operand A),
+ * closed by orchestrator ruling §27 (2026-11-26): ONE shared predicate.
  *
- * The retired `federation_never_fractured` read (no writer anywhere) is replaced by:
- * - essay lines: `GAME_OVER AND NOT EVENT:croat_bosniak_war_begins_1993`;
- * - the `alliance_held` ghost: alliance `war_started_turn` null AND the onset event not fired, from t70.
+ * The retired `federation_never_fractured` read (no writer anywhere) is replaced by the shared
+ * `rbihHrhbAllianceHeld` predicate (src/sim/codex/alliance_held.ts):
+ * - essay lines: `GAME_OVER AND ALLIANCE_HELD` (the atom reads the adapter's `allianceHeld`);
+ * - the `alliance_held` ghost: the same predicate, from t70 (the ghost body's own "by week seventy").
  *
- * Every visible line is worded to be true at any ending, including one before onset could
- * happen (a t30 collapse). The predicate and the essay lines agree on the states where the
- * alliance record and the onset event coincide. A state with `war_started_turn` set and the
- * onset event unfired is a REGISTERED divergence (round 3, Q2), excluded here and not asserted.
+ * Every visible line keeps the 8/8 wording, true at any ending. The ghost and the essay note can
+ * no longer disagree: this file asserts agreement on every combination of the alliance record and
+ * the onset event, including the two edge states §27 named (alliance fell with no onset event;
+ * the record absent).
  */
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { rbihHrhbAllianceHeld } from '../src/sim/codex/alliance_held.js';
 import { buildGhostEntries } from '../src/sim/codex/dynamic_section_builder.js';
 import type { GameState } from '../src/state/game_state.js';
+import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
 import {
     evaluateEssayCondition,
     resolveCodexEssay,
@@ -30,12 +34,14 @@ const essays: EssayEntry[] = Array.isArray(essayIndex) ? essayIndex : essayIndex
 const ahmici = essays.find((e) => e.id === 'essay_ahmici_massacre_1993')!;
 const note = ahmici.dynamic_sections!.find((s) => s.id === 'v091_ahmici_federation_held_note')!;
 
-function ghostState(onsetFired: boolean, warStartedTurn: number | null): GameState {
+type AllianceRecord = 'absent' | 'held' | 'fell';
+
+function ghostState(onsetFired: boolean, record: AllianceRecord): GameState {
     return {
         meta: { turn: 188, phase: 'war', player_faction: 'RBiH' },
         factions: [{ id: 'RBiH' }, { id: 'RS' }, { id: 'HRHB' }],
         paramilitary_policy: 'ask',
-        political: { rbih_hrhb_state: { war_started_turn: warStartedTurn } },
+        political: record === 'absent' ? {} : { rbih_hrhb_state: { war_started_turn: record === 'fell' ? 49 : null } },
         military: {
             event_flags: {},
             event_fire_counts: onsetFired ? { [ONSET]: 1 } : {},
@@ -51,25 +57,32 @@ function ghostState(onsetFired: boolean, warStartedTurn: number | null): GameSta
 const ghostShows = (state: GameState, turn: number) =>
     buildGhostEntries(state, turn).some((g) => g.ghost_id === 'alliance_held');
 
-describe('AH-2: the federation_never_fractured read is retired', () => {
-    it('no essay line reads the flag', () => {
+/** The essay context as the CodexPanel builds it: fired ids plus the shared predicate. */
+function noteShows(state: GameState, gameOver = true): boolean {
+    const firedEventIds = new Set<string>((state.military as { fired_event_ids?: string[] }).fired_event_ids ?? []);
+    const context = { firedEventIds, gameOver, allianceHeld: rbihHrhbAllianceHeld(state) };
+    return evaluateEssayCondition(note.condition, context);
+}
+
+describe('AH-2 / §27: the federation_never_fractured read is retired', () => {
+    it('no essay line reads the flag; both lines read the shared ALLIANCE_HELD atom', () => {
         const raw = JSON.stringify(ahmici);
         expect(raw).not.toContain('federation_never_fractured');
-        expect(ahmici.ghost_when).toBe(`GAME_OVER AND NOT EVENT:${ONSET}`);
-        expect(note.condition).toBe(`GAME_OVER AND NOT EVENT:${ONSET}`);
+        expect(ahmici.ghost_when).toBe('GAME_OVER AND ALLIANCE_HELD');
+        expect(note.condition).toBe('GAME_OVER AND ALLIANCE_HELD');
     });
 
-    it('war fired hides the note; never fired shows it', () => {
-        const fired = { firedEventIds: new Set([ONSET]), gameOver: true };
-        const never = { firedEventIds: new Set<string>(), gameOver: true };
-        expect(evaluateEssayCondition(note.condition, fired)).toBe(false);
-        expect(evaluateEssayCondition(note.condition, never)).toBe(true);
-        expect(evaluateEssayCondition(ahmici.ghost_when, fired)).toBe(false);
-        expect(evaluateEssayCondition(ahmici.ghost_when, never)).toBe(true);
+    it('the ALLIANCE_HELD atom fails closed when the context lacks it, and never reads an event flag', () => {
+        expect(evaluateEssayCondition('ALLIANCE_HELD', { firedEventIds: new Set() })).toBe(false);
+        expect(evaluateEssayCondition('ALLIANCE_HELD', {
+            firedEventIds: new Set(),
+            eventFlags: { ALLIANCE_HELD: true },
+        })).toBe(false);
+        expect(evaluateEssayCondition('ALLIANCE_HELD', { firedEventIds: new Set(), allianceHeld: true })).toBe(true);
     });
 
     it('a t30 ending shows the amended wording, true at any ending (EN and BCS)', () => {
-        const context = { firedEventIds: new Set<string>(), gameOver: true, currentTurn: 30 };
+        const context = { firedEventIds: new Set<string>(), gameOver: true, allianceHeld: true, currentTurn: 30 };
         const en = resolveCodexEssay(ahmici, context, 'en').paragraphs.map((p) => p.text).join('\n');
         const bcs = resolveCodexEssay(ahmici, context, 'bcs').paragraphs.map((p) => p.text).join('\n');
         const enAll = `${en}\n${ahmici.ghost_summary}`;
@@ -82,16 +95,45 @@ describe('AH-2: the federation_never_fractured read is retired', () => {
         expect(bcsAll).toContain('nije se raspao u rat prije njenog završetka');
         expect(bcsAll).toContain('U vašoj kampanji do njenog završetka nije zabilježen hrvatsko-bošnjački rat.');
     });
+});
 
-    it('predAllianceHeld and the essay lines agree where the alliance record and the onset event coincide', () => {
-        // War: alliance fell (t49) and the onset fired. Both hide.
-        const war = ghostState(true, 49);
-        expect(ghostShows(war, 188)).toBe(false);
-        expect(evaluateEssayCondition(note.condition, { firedEventIds: new Set([ONSET]), gameOver: true })).toBe(false);
+describe('§27: the alliance_held ghost and the essay note read ONE predicate', () => {
+    const cases: Array<{ name: string; onset: boolean; record: AllianceRecord; held: boolean }> = [
+        { name: 'war: alliance fell and the onset fired', onset: true, record: 'fell', held: false },
+        { name: 'held: no fall and no onset', onset: false, record: 'held', held: true },
+        { name: 'AH2-EDGE: alliance fell, onset never fired', onset: false, record: 'fell', held: false },
+        { name: 'onset fired, alliance record still null', onset: true, record: 'held', held: false },
+        { name: 'alliance record absent, no onset', onset: false, record: 'absent', held: false },
+        { name: 'alliance record absent, onset fired', onset: true, record: 'absent', held: false },
+    ];
 
-        // Held: no alliance fall and no onset. Both show (the ghost from t70).
-        const held = ghostState(false, null);
-        expect(ghostShows(held, 188)).toBe(true);
-        expect(evaluateEssayCondition(note.condition, { firedEventIds: new Set<string>(), gameOver: true })).toBe(true);
+    for (const c of cases) {
+        it(`${c.name}: ghost (t188) and note agree (${c.held ? 'both show' : 'both hide'})`, () => {
+            const state = ghostState(c.onset, c.record);
+            expect(rbihHrhbAllianceHeld(state)).toBe(c.held);
+            expect(ghostShows(state, 188)).toBe(c.held);
+            expect(noteShows(state)).toBe(c.held);
+        });
+    }
+
+    it('the note still needs GAME_OVER; the ghost keeps its t70 floor', () => {
+        const held = ghostState(false, 'held');
+        expect(noteShows(held, false)).toBe(false);
+        expect(ghostShows(held, 69)).toBe(false);
+        expect(ghostShows(held, 70)).toBe(true);
+    });
+
+    it('the adapter publishes the same predicate the ghost reads', () => {
+        for (const c of cases) {
+            const state = ghostState(c.onset, c.record);
+            expect(parseGameState(state).allianceHeld).toBe(rbihHrhbAllianceHeld(state));
+        }
+    });
+
+    it('a non-finite onset count reads as not fired, as the ghost operand reads it', () => {
+        const state = ghostState(false, 'held');
+        (state.military as { event_fire_counts: Record<string, number> }).event_fire_counts[ONSET] = Number.NaN;
+        expect(rbihHrhbAllianceHeld(state)).toBe(true);
+        expect(ghostShows(state, 188)).toBe(true);
     });
 });

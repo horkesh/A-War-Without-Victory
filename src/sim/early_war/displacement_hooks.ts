@@ -1,5 +1,5 @@
 /**
- * Phase C Step 7: Displacement initiation hooks (Phase_I_Specification_v0_3_0.md §4.4).
+ * Phase C Step 7: Displacement initiation hooks (former Phase I Specification §4.4, retired when War_Specification_v0_9_0.md replaced it; live text: Systems_Manual_v0_9_0.md §12).
  * Deterministic hooks when control flip triggers displacement (Hostile_Population_Share > 0.30).
  * No population totals change unless explicitly authorized by spec.
  */

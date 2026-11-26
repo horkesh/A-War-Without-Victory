@@ -340,6 +340,80 @@ describe('bilateral ceasefire', () => {
     });
 });
 
+// ── WASH-IMPOSED (ruling §29): C4 met by Zagreb's acknowledged order ──
+
+describe('bilateral ceasefire: imposed C4 (WASH-IMPOSED)', () => {
+    /** Every precondition met except C4: no stalemate, front still active. */
+    function makeImposedCandidate(): GameState {
+        const state = makeState({ political: { war_alliance_rbih_hrhb: -0.30 } as any });
+        ensureRbihHrhbState(state);
+        state.political.rbih_hrhb_state!.war_started_turn = 5;
+        state.political.rbih_hrhb_state!.stalemate_turns = 0;
+        state.meta.turn = 5 + CEASEFIRE_MIN_WAR_DURATION + 1;
+        state.political.war_exhaustion = { RBiH: CEASEFIRE_RBIH_EXHAUSTION + 1, RS: 10, HRHB: CEASEFIRE_HRHB_EXHAUSTION + 1 };
+        state.political.international_visibility_pressure = {
+            sarajevo_siege_visibility: 0, enclave_humanitarian_pressure: 0,
+            atrocity_visibility: 0, negotiation_momentum: CEASEFIRE_IVP_THRESHOLD + 0.01,
+            last_major_shift: null
+        };
+        state.factions.find((f) => f.id === 'HRHB')!.patron_state!.constraint_severity = CEASEFIRE_PATRON_CONSTRAINT + 0.01;
+        return state;
+    }
+    function answerZagreb(state: GameState, responseId: string, turn = state.meta.turn - 1): void {
+        const log = (state.military.event_decision_log ??= []);
+        log.push({ event_id: 'zagreb_orders_hrhb_ceasefire', response_id: responseId, decision_source: 'bot_political', faction: 'HRHB', turn });
+    }
+
+    test('acknowledge_pressure imposes the ceasefire with no stalemate', () => {
+        const state = makeImposedCandidate();
+        expect(evaluateCeasefirePreconditions(state).all_met).toBe(false);
+        answerZagreb(state, 'acknowledge_pressure');
+        const report = checkAndApplyCeasefire(state);
+        expect(report.preconditions.c4_imposed).toBe(true);
+        expect(report.preconditions.c4_stalemate).toBe(true);
+        expect(report.fired).toBe(true);
+        expect(state.political.rbih_hrhb_state!.ceasefire_active).toBe(true);
+    });
+
+    test('resist_patron keeps the stalemate-only path', () => {
+        const state = makeImposedCandidate();
+        answerZagreb(state, 'resist_patron');
+        let report = checkAndApplyCeasefire(state);
+        expect(report.preconditions.c4_imposed).toBe(false);
+        expect(report.fired).toBe(false);
+        state.political.rbih_hrhb_state!.stalemate_turns = CEASEFIRE_STALEMATE_MIN;
+        report = checkAndApplyCeasefire(state);
+        expect(report.preconditions.c4_imposed).toBe(false);
+        expect(report.fired).toBe(true);
+    });
+
+    test('the last answer wins: acknowledge, then resist, is not imposed', () => {
+        const state = makeImposedCandidate();
+        answerZagreb(state, 'acknowledge_pressure', state.meta.turn - 3);
+        answerZagreb(state, 'resist_patron', state.meta.turn - 1);
+        expect(evaluateCeasefirePreconditions(state).c4_imposed).toBe(false);
+    });
+
+    test('C1-C3, C5 and C6 still bind on the imposed path', () => {
+        const breakers: Array<[string, (s: GameState) => void]> = [
+            ['C1 war duration', (s) => { s.meta.turn = 5 + CEASEFIRE_MIN_WAR_DURATION - 1; }],
+            ['C2 HRHB exhaustion', (s) => { s.political.war_exhaustion!.HRHB = CEASEFIRE_HRHB_EXHAUSTION; }],
+            ['C3 RBiH exhaustion', (s) => { s.political.war_exhaustion!.RBiH = CEASEFIRE_RBIH_EXHAUSTION; }],
+            ['C5 IVP momentum', (s) => { s.political.international_visibility_pressure!.negotiation_momentum = CEASEFIRE_IVP_THRESHOLD; }],
+            ['C6 patron constraint', (s) => { s.factions.find((f) => f.id === 'HRHB')!.patron_state!.constraint_severity = CEASEFIRE_PATRON_CONSTRAINT; }],
+        ];
+        for (const [label, breakIt] of breakers) {
+            const state = makeImposedCandidate();
+            answerZagreb(state, 'acknowledge_pressure');
+            breakIt(state);
+            const report = checkAndApplyCeasefire(state);
+            expect(report.preconditions.c4_imposed, label).toBe(true);
+            expect(report.fired, label).toBe(false);
+            expect(state.political.rbih_hrhb_state!.ceasefire_active ?? false, label).toBe(false);
+        }
+    });
+});
+
 // ── Washington Agreement Tests ──
 
 describe('washington agreement', () => {

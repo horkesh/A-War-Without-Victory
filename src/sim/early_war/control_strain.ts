@@ -1,5 +1,5 @@
 /**
- * Phase C Step 6: Control strain initiation (Phase_I_Specification_v0_4_0.md §4.5).
+ * Phase C Step 6: Control strain initiation (former Phase I Specification §4.5, retired when War_Specification_v0_9_0.md replaced it; live text: Systems_Manual_v0_9_0.md §3).
  * Control strain is not supply or exhaustion; spec authorizes exhaustion coupling and authority penalty.
  */
 
