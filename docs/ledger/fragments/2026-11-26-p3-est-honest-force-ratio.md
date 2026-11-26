@@ -10,11 +10,16 @@ Authority: the orchestrator's freeze-inventory rulings 2026-11-26 §8 (queue: P3
 - Canon: Systems Manual, operation preparation, "Force-ratio estimate". FORAWWV unchanged.
 - Tests: `tests/p3_est_force_ratio.test.ts` (parity with the predictor's defence, fog removed; no confidence dependence; no reach through enemy ground). Three fixtures that pinned the old estimator now place their defenders where they defend, and the neutral-parity band moves from 1.4-2.2 to 1.0-1.4.
 
-**Accepted divergences and effects (operations, scenario-tester and canon seats, all GO).**
-- The estimate does not model the ethnic defence bonus, the local-militia floor or the predictor's intel fog.
-- The axis count takes every live axis on the defending sector, while the battle counts axes executing that turn. Multi-axis estimates lean optimistic.
-- More doomed launches: `consecutive_catastrophic` end rules 1→5 (hist) and 0→3 (emer).
-- Against realised battle ratios the estimate reads about 2x high (median). Re-measure before player-facing odds use it.
-- The hist Farz P-A pass is a bot target re-ranking side effect, not a Farz fix.
+**§11 check (rulings 2026-11-26 §11; lane B s23).** The first pair read the estimate about 2x high against realised battle ratios (median; the old estimate, x1.15/x1.04, was closer only because its error factor cancelled its over-counted defence). A state-neutral instrumented hist twin traced it to the attack side: a per-brigade sum over every participant, without the battle's firepower deficit (ARBiH median x2.1), season, whole-force arithmetic, or the split across axes. The planning-phase axis divisor was not the cause (above 1 in 3 of 54 operations).
+- The attack side now mirrors the battle: the primary objective's axis brigades through `computeAttackForcePower` (`src/sim/combat/attack_force_power.ts`), with the seasonal attack multiplier (slope 0), `getAttackerFirepowerDeficitMult` against the defending roster (now returned by `estimateSectorDefensePower`) and the own intel execution friction. The defence takes the collapse, joint-pressure and winter multipliers.
+- `computeAttackForcePower` gains two optional inputs: a per-brigade context location (the planner's in-transit override) and an execution-modifier override. The estimate is taken while the operation plans, when the per-brigade read is 1, so it passes the operation's own clamped `execution_attack_power_mult`; the triggered Cerska-Kamenica op (2.5x) is not pre-planned and goes through the estimate. The resolver and predictor pass neither, so their arithmetic is unchanged. The intel execution friction is read at the lead attacker's context location (systems seat).
+- Tests: predictor parity for the whole ratio, also in a winter month; axis scoping; the firepower deficit; the execution modifier and its cap; a pin that support brigades fight at full power.
+- Result: median estimate/realised x0.85 hist / x0.80 emer (RBiH x0.98/x0.97), `consecutive_catastrophic` 2/2. The remaining gap is size only.
+
+**Accepted divergences (operations, systems, scenario-tester and canon seats).**
+- Not modelled: the ethnic defence bonus, the local-militia floor and enclave garrison (no population map in preparation), slope in the seasonal multiplier, the defender's OPSEC, and the predictor's intel fog.
+- The axis count takes every live axis on the defending sector, while the battle counts axes executing that turn.
+- Farz P-A is red in both modes with consult 9's known cause 1: the 3rd Corps' own "Operacija Slap" takes Donja Bočinja at t161. All four cells are RBiH at w188, and P-B passes. The orchestrator accepted it (rulings §12, amending §10's interim rule to either mode for a consult 9 known cause with a no-defect check); FZ-FARZ goes to Fable with this pair as evidence, and freeze condition 1 stays NOT MET.
+- The remaining x0.8 under-estimate is a magnitude, recorded as a Part 6 row for the calibration pass.
 
 **Measured.** Hash-moving; also R7 (the 188w after the fix). The PR body lists the 188w pair against the C4 pins, the merge bar and the operation receipts.

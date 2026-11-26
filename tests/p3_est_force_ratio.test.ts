@@ -14,6 +14,8 @@ import { predictCombatOutcome } from '../src/sim/combat/combat_predictor.js';
 import { getArtillerySuppression, getAttackerFirepowerDeficitMult } from '../src/sim/combat/combat_math.js';
 import { estimateForceRatio, estimateSectorDefensePower } from '../src/sim/combat/operation_preparation.js';
 import { ensureBrigadeComposition } from '../src/sim/combat/equipment_effects.js';
+import { getSeasonalModifiers } from '../src/sim/combat/seasonal_effects.js';
+import { SUPPORT_POWER_MULT } from '../src/sim/combat/bot_constants.js';
 import type { CorpsOperation, FactionId, FormationId, FormationState, GameState } from '../src/state/game_state.js';
 import type { Osid } from '../src/sim/combat/osid_adjacency.js';
 
@@ -141,6 +143,32 @@ describe('P3-EST §11: the attack side mirrors the battle', () => {
         expect(p).not.toBeNull();
         expect(scoped).toBeCloseTo(p!.attacker_power / (p!.defender_power / PREDICTOR_FOG_WITHOUT_INTEL), 6);
         expect(scoped).toBeLessThan(estimateForceRatio(s, op(), 3, 0.9, null, {}, adjacency()));
+    });
+
+    it('keeps predictor parity in a winter month (seasonal attack and defence multipliers)', () => {
+        const s = fixture(false);
+        (s.meta as any).scenario_start_date = { year: 1992, month: 5, day: 1 };
+        const season = getSeasonalModifiers(30, (s.meta as any).scenario_start_date, 0);
+        expect(season.attack_mult).not.toBe(1);
+        expect(season.defense_mult).not.toBe(1);
+        const est = estimateForceRatio(s, op(), 3, 0.9, null, {}, adjacency());
+        const p = predictCombatOutcome(s, 'attacker' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack', ['attacker_2' as FormationId]);
+        expect(est).toBeCloseTo(p!.attacker_power / (p!.defender_power / PREDICTOR_FOG_WITHOUT_INTEL), 6);
+    });
+
+    it("carries the operation's authored execution modifier, which the battle applies in execution", () => {
+        const s = fixture(false);
+        const plain = estimateForceRatio(s, op(), 3, 0.9, null, {}, adjacency());
+        const boosted = estimateForceRatio(s, { ...op(), execution_attack_power_mult: 2.5 } as CorpsOperation, 3, 0.9, null, {}, adjacency());
+        expect(boosted / plain).toBeCloseTo(2.5, 6);
+        const capped = estimateForceRatio(s, { ...op(), execution_attack_power_mult: 9 } as CorpsOperation, 3, 0.9, null, {}, adjacency());
+        expect(capped / plain).toBeCloseTo(3, 6);
+    });
+
+    it('support brigades fight at full power, so planning (where support status is not yet set) matches the battle', () => {
+        // If this changes, estimateForceRatio must pass the support multiplier too: it is
+        // taken while the operation plans, and isSupportBrigadeOnActiveOp reads execution only.
+        expect(SUPPORT_POWER_MULT).toBe(1);
     });
 
     it('applies the battle firepower deficit against the defending roster', () => {

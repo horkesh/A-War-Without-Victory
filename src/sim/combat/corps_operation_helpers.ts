@@ -237,7 +237,12 @@ export function getBrigadeExecutionAttackPowerMult(
 ): number {
     const match = findBrigadeOperationAnywhere(state, brigadeId);
     if (!match || match.op.phase !== 'execution') return 1;
-    return Math.max(0.5, Math.min(3, match.op.execution_attack_power_mult ?? 1));
+    return clampExecutionAttackPowerMult(match.op.execution_attack_power_mult);
+}
+
+/** The bounds of an operation's authored execution attack-power modifier (0.5-3, default 1). */
+export function clampExecutionAttackPowerMult(mult: number | undefined): number {
+    return Math.max(0.5, Math.min(3, mult ?? 1));
 }
 
 /** Find a brigade's planning/execution commitment anywhere in corps command. */

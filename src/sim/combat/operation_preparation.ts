@@ -132,7 +132,7 @@ import {
 // ADR-0005 Phase 4: phantom-aware anchor resolution + dual-anchor de-confliction. Flag-gated.
 import { resolveTgAnchor, collectActiveAnchorIds } from './tactical_group_anchor.js';
 import { getReservedPrePlannedBrigadeIds } from './pre_planned_operations.js';
-import { buildProbeOperation } from './corps_operation_helpers.js';
+import { buildProbeOperation, clampExecutionAttackPowerMult } from './corps_operation_helpers.js';
 import {
     getPreparationObjectiveView,
     isAxisExcludedFromPreparation,
@@ -609,8 +609,16 @@ export function estimateForceRatio(
 
     // The resolver's deficit compares the attackers with the whole defending roster.
     const firepowerDeficitMult = getAttackerFirepowerDeficitMult(state, fightingFormations, defence?.roster ?? []);
+    // The battle reads the lead attacker's intel where it attacks from; a lead brigade still
+    // moving to its staging area is read there (the in-transit context location).
+    const leadAttacker = fightingFormations[0]!;
     const ownExecutionMult = getIntelExecutionFrictionMultipliers(
-        getAttackIntelConfidence(state, fightingFormations[0]!.location_osid ?? '', defence?.sectorId, primaryTargetOsid),
+        getAttackIntelConfidence(
+            state,
+            contextLocationFor(leadAttacker) ?? leadAttacker.location_osid ?? '',
+            defence?.sectorId,
+            primaryTargetOsid,
+        ),
         false, // the defender's OPSEC is hidden from the planner, as from the predictor
     ).attackerPowerMult;
     const ownStrength = computeAttackForcePower(
@@ -624,6 +632,9 @@ export function estimateForceRatio(
         undefined,
         firepowerDeficitMult,
         contextLocationFor,
+        // The battle applies the operation's authored execution modifier (e.g. a Main Staff
+        // triggered op); while planning the per-brigade read is 1, so pass the op's own.
+        clampExecutionAttackPowerMult(op.execution_attack_power_mult),
     ) * ownExecutionMult;
     if (ownStrength === 0) {
         // LANE-2026-05-02: every attacker had postureMult <= 0 OR base power 0.
@@ -640,10 +651,9 @@ export function estimateForceRatio(
     // The battle's defence multipliers after the roster: own-OSID collapse, post-Washington
     // joint pressure, and the season (winter defence). Not modelled here (accepted, small):
     // the enclave garrison (no population map in preparation) and the defender's OPSEC.
-    const controller = getPoliticalControllerOSID(state, primaryTargetOsid, undefined)!;
     const defencePower = defence.power
         * getCollapseDefenderMultiplier(state, primaryTargetOsid)
-        * getPostWashingtonJointPressureMultiplier(state, controller, attackerFaction, primaryTargetOsid)
+        * getPostWashingtonJointPressureMultiplier(state, defence.controller, attackerFaction, primaryTargetOsid)
         * seasonal.defense_mult;
 
     // P3-EST: no estimation error. The old accuracy/bias factor (0.3-1.0x) is removed;
@@ -725,7 +735,7 @@ export function estimateSectorDefensePower(
     supplyByOsid: SupplyStateByOsidReport | null | undefined,
     ethnicBonusFn: (d: FormationState) => number,
     simultaneousAxesForSector: (sectorId: string | undefined) => number = () => 1,
-): { power: number; contributors: number; sectorId: string | undefined; roster: FormationState[] } | null {
+): { power: number; contributors: number; sectorId: string | undefined; roster: FormationState[]; controller: FactionId } | null {
     const controller = getPoliticalControllerOSID(state, targetOsid, undefined);
     if (controller === null || controller === attackerFaction) return null;
     const physical = Object.values(state.military.formations ?? {})
@@ -764,7 +774,7 @@ export function estimateSectorDefensePower(
     const boosted = effectiveReserves * SECTOR_STANCE_REACTIVE_BONUS[sector?.sector_stance ?? 'defend'] / simultaneousAxes;
     const reactive = Math.min(boosted, attackerCount * avgPower * REACTIVE_DEFENSE_RATIO);
     const power = applyMinimumSectorDefenseFloor(physicalPower + reactive, avgPower * MIN_DEFENSE_FLOOR_FRACTION, contributors);
-    return { power, contributors, sectorId: sector?.sector_id, roster };
+    return { power, contributors, sectorId: sector?.sector_id, roster, controller };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

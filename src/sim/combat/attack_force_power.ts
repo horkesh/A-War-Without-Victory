@@ -74,8 +74,10 @@ function computeTgDonorPower(
 
 /** Known friendly force arithmetic shared by forecast and execution.
  * Callers supply active, tactically adjacent, unique attackers in strict ID order.
- * Enemy-dependent firepower deficit remains an explicit resolver input; prediction
- * must not query hidden enemy equipment to manufacture exact knowledge.
+ * Enemy-dependent firepower deficit remains an explicit caller input. The player-facing
+ * predictor must not query hidden enemy equipment to manufacture exact knowledge, so it
+ * passes none. The resolver passes it, and so does the bot planner's estimate
+ * (`estimateForceRatio`), which already reads the defending roster exactly (P3-EST §11).
  * No state mutation or enemy-intelligence lookup occurs here.
  */
 export function computeAttackForcePower(
@@ -92,6 +94,11 @@ export function computeAttackForcePower(
     // area at that area (`estimateForceRatio`'s in-transit override). The resolver and the
     // predictor pass nothing, so their arithmetic is unchanged.
     contextLocationFor?: (formation: FormationState) => string | undefined,
+    // P3-EST §11: the estimate is taken while the operation is still planning, when the
+    // per-brigade execution modifier reads 1. It passes the operation's own (clamped)
+    // modifier, which the battle will apply in execution. The resolver and the predictor
+    // pass nothing.
+    executionMultOverride?: number,
 ): number {
     const firstAttacker = attackerFormations[0];
     if (!firstAttacker) return 0;
@@ -127,7 +134,7 @@ export function computeAttackForcePower(
         const rawPower = computeAttackerPower(state, a, supplyStateByOsid, effectivePosture, targetTerrainMult, targetOsid, contextLocationFor?.(a));
         // Support brigades contribute reduced power — main brigade carries the assault
         const supportMult = isSupportBrigadeOnActiveOp(state, a.id, a.corps_id) ? SUPPORT_POWER_MULT : 1.0;
-        const executionMult = getBrigadeExecutionAttackPowerMult(state, a.id);
+        const executionMult = executionMultOverride ?? getBrigadeExecutionAttackPowerMult(state, a.id);
         return s + rawPower * supportMult * executionMult;
     }, 0);
     const tempoMult = getWarExhaustionTempoMult(state, attackerFaction);
