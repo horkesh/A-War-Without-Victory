@@ -6779,7 +6779,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'verdict.basis.combatLosses': 'Ubijeni, ranjeni i nestali, zbir po borbama ove strane; ova kampanja',
     'verdict.basis.populationHeld': 'Stanovništvo općina u kojima je ova strana na kraju držala bar jedno naselje; zajednička općina računa se svakoj strani',
     'verdict.basis.displacedBooked': 'Raseljeni ili ubijeni na područjima koja je ova strana zauzela, držala ili opsjedala, u ovoj kampanji',
-    'verdict.basis.refugeesReceived': 'Raseljeni koji su stigli na teritoriju ove strane, ova kampanja',
+    'verdict.basis.refugeesReceived': 'Raseljeni koji su iz svojih domova stigli na teritoriju ove strane, ova kampanja; protjerani pri padu enklave i evakuirani konvojima ovdje nisu uračunati',
     'verdict.basis.campaignRecord': 'Zapis ove kampanje',
     'verdict.basis.campaignAllSides': 'Sve strane, ova kampanja; smrti od granatiranja i u opsadama nisu uračunate',
     'verdict.basis.displacedAllSides': 'Sve strane, ova kampanja; raseljeni iz svojih domova i ubijeni, zbrojeni zajedno',

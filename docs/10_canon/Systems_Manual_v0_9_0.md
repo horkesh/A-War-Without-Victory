@@ -1119,6 +1119,8 @@ Enclaves track integrity and humanitarian pressure.
 
 As integrity declines, international visibility and external pressure escalate. Enclaves are disproportionate political liabilities.
 
+**Implementation-note (enclave falls by event, E-fall 2026-11-26):** the 1995 Srebrenica and Žepa falls are event writes (`control_change`, then `enclave_formation_displacement`, `src/sim/events/apply_effects.ts`). The second applies the authored `casualty_fraction` to the enclave's tagged formations (execution-skewed split, `casualty_ledger`). For `reduced` the survivors re-form at reduced strength at the authored `destination_osid` if their side holds it, otherwise at the nearest held cell by layered BFS over the operational contact graph (own corps territory first; never a fallen source cell or a cell of a named enclave; strictCompare only within a ring), and are disbanded if the graph reaches none. For `none` the formations are disbanded (removed from the theatre, not reconstitution-eligible). This is an event placement, not a retreat: the Engine Invariants §14.5 chain and §14.5a do not apply.
+
 ## 17. Exceptional spaces: Sarajevo
 
 Sarajevo uses a unique connectivity model separating internal and external supply.
