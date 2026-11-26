@@ -133,7 +133,7 @@ const RBiH_NAMES: string[] = [
     'Operacija Slap',
     'Operacija Krug',
     'Operacija Svjetlost',
-    'Operacija Zavet',
+    'Operacija Klas',           // Ear of grain (C4 2026-11-26, replaces Zavet)
     'Operacija Korak',
     'Operacija Val',
     'Operacija Znak',
@@ -155,10 +155,10 @@ const RBiH_NAMES: string[] = [
     'Operacija Ćuprija',      // Bridge (Turkish/Bosnian)
     'Operacija Prevoj',        // Mountain pass
     'Operacija Vedrina',        // Clear weather
-    'Operacija Ihlas',          // Sincerity (Islamic term)
+    'Operacija Iskra',          // Spark (C4 2026-11-26, replaces Ihlas)
     'Operacija Magla',          // Fog
     'Operacija Lavina',         // Avalanche
-    'Operacija Kopljem',        // By the Spear
+    'Operacija Jelen',          // Stag (C4 2026-11-26, replaces Kopljem)
     'Operacija Ponos',          // Pride
     'Operacija Izlaz',          // Way out / Exit
     'Operacija Odbrana',        // Defense
