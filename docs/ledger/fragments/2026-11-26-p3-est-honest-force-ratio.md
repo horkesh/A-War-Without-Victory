@@ -10,4 +10,11 @@ Authority: the orchestrator's freeze-inventory rulings 2026-11-26 §8 (queue: P3
 - Canon: Systems Manual, operation preparation, "Force-ratio estimate". FORAWWV unchanged.
 - Tests: `tests/p3_est_force_ratio.test.ts` (parity with the predictor's defence, fog removed; no confidence dependence; no reach through enemy ground). Three fixtures that pinned the old estimator now place their defenders where they defend, and the neutral-parity band moves from 1.4-2.2 to 1.0-1.4.
 
-**Measured.** Hash-moving. The PR body lists the 188w pair against the C4 pins, the merge bar and the operation receipts.
+**Accepted divergences and effects (operations, scenario-tester and canon seats, all GO).**
+- The estimate does not model the ethnic defence bonus, the local-militia floor or the predictor's intel fog.
+- The axis count takes every live axis on the defending sector, while the battle counts axes executing that turn. Multi-axis estimates lean optimistic.
+- More doomed launches: `consecutive_catastrophic` end rules 1→5 (hist) and 0→3 (emer).
+- Against realised battle ratios the estimate reads about 2x high (median). Re-measure before player-facing odds use it.
+- The hist Farz P-A pass is a bot target re-ranking side effect, not a Farz fix.
+
+**Measured.** Hash-moving; also R7 (the 188w after the fix). The PR body lists the 188w pair against the C4 pins, the merge bar and the operation receipts.

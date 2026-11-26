@@ -466,9 +466,8 @@ export function estimateForceRatio(
     const objectives = new Set(getPreparationObjectiveView(op, fullObjectives));
 
     // LANE-2026-05-02: pick a single primary objective OSID for terrain/supply lookups.
-    // Stable: lowest sorted objective string. Defender power is summed across the
-    // facing enemy sector (covering multiple OSIDs); the primary OSID is the
-    // representative for terrain/urban/forest cache lookups.
+    // Stable: lowest sorted objective string. P3-EST: the defence is estimated at
+    // this primary OSID; it is also the terrain/urban/forest cache representative.
     const sortedObjectives = Array.from(objectives).sort(strictCompare);
     const primaryTargetOsid = sortedObjectives[0];
 
