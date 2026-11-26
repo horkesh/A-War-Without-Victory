@@ -160,6 +160,25 @@ describe('P3-EST §11: the attack side mirrors the battle', () => {
         expect(atDepth).not.toBeCloseTo(atCurrent, 3);
     });
 
+    it('P3-EST-PRIM: an axis current objective the attacker already holds is skipped; the read is at its next contested objective', () => {
+        const s = fixture(false);
+        // 'A0' (RBiH-held, so no battle is fought there) sorts first and is the axis's current
+        // objective; 'B0' is uncontrolled. The first battle is at 'D'.
+        (s.political as any).political_controllers.A0 = 'RBiH';
+        const axisOp = {
+            ...op(),
+            objectives: [],
+            axes: [{ axis_id: 'a1', objectives: ['A0', 'B0', 'D'], assigned_brigades: ['attacker', 'attacker_2'], current_objective_index: 0 }],
+        } as unknown as CorpsOperation;
+        const est = estimateForceRatio(s, axisOp, 3, 0.9, null, {}, adjacency());
+        expect(est).toBeCloseTo(estimateForceRatio(s, op(), 3, 0.9, null, {}, adjacency()), 9);
+        // Not the no-defender sentinel a friendly-held read would give.
+        expect(est).not.toBeCloseTo(3.0, 6);
+        // Out of range: no contested objective from the index on, so the lowest objective is read.
+        const pastEnd = { ...axisOp, axes: [{ ...(axisOp.axes as any)[0], current_objective_index: 9 }] } as unknown as CorpsOperation;
+        expect(estimateForceRatio(s, pastEnd, 3, 0.9, null, {}, adjacency())).toBeCloseTo(3.0, 9);
+    });
+
     it('keeps predictor parity in a winter month (seasonal attack and defence multipliers)', () => {
         const s = fixture(false);
         (s.meta as any).scenario_start_date = { year: 1992, month: 5, day: 1 };

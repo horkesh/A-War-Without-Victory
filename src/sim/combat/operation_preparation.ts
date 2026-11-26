@@ -98,6 +98,7 @@ import { getPostWashingtonJointPressureMultiplier } from '../early_war/washingto
 import { collectAverageDefenseRoster, collectSectorDefenseBrigades } from './sector_defense_roster.js';
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
+import { isFriendlyFaction } from '../early_war/alliance_update.js';
 import { munFromOsid, type Osid } from './osid_adjacency.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 // ADR-0005 v2.2b: TG formation wiring at sub_phase='ready' transition. Flag-gated.
@@ -483,11 +484,14 @@ export function estimateForceRatio(
     // CURRENT objectives (the cells the first battles are fought at), not the lowest of
     // every objective, which in 19 of 104 operations was a depth objective. Without a live
     // axis current objective in the preparation view, the lowest objective as before.
+    // Operations seat (lane B s24): an axis's first battle is at its first objective, from the
+    // current index on, that is still contested (`firstContestedAxisObjective`).
+    const attackerFaction: FactionId = attackerFormations[0]!.faction || 'RBiH';
     const sortedObjectives = Array.from(objectives).sort(strictCompare);
     const liveCurrentObjectives = (op.axes ?? [])
         .filter((ax) => !isAxisExcludedFromPreparation(ax))
-        .map((ax) => ax.objectives[ax.current_objective_index ?? 0])
-        .filter((o): o is string => typeof o === 'string' && o.length > 0 && objectives.has(o))
+        .map((ax) => firstContestedAxisObjective(state, ax, attackerFaction, objectives))
+        .filter((o): o is string => o !== undefined)
         .sort(strictCompare);
     const primaryTargetOsid = liveCurrentObjectives[0] ?? sortedObjectives[0];
 
@@ -499,7 +503,6 @@ export function estimateForceRatio(
     // LANE-2026-05-02: sum attacker COMBAT POWER (override posture to 'attack' so
     // dig_in / defend brigades contribute their offensive value). Each brigade
     // gets supply/terrain/officer/morale/fatigue applied via combat_math.
-    const attackerFaction: FactionId = attackerFormations[0]!.faction || 'RBiH';
 
     // LANE-2026-05-02-IN-TRANSIT-COMBAT-POWER-CONTEXT: derive corps_id + faction
     // from the first attacker formation. CorpsOperation has no top-level
@@ -612,7 +615,7 @@ export function estimateForceRatio(
         artSuppression,
         supplyByOsid,
         noEthnicBonus,
-        (sectorId) => countOperationAxesOnDefendingSector(state, op, sectorId),
+        (sectorId) => countOperationAxesOnDefendingSector(state, op, sectorId, attackerFaction),
     );
 
     // The resolver's deficit compares the attackers with the whole defending roster.
@@ -698,27 +701,54 @@ function collectPrimaryObjectiveAttackers(
 }
 
 /**
- * P3-EST: the number of this operation's live axes whose current objective is defended by
- * `sectorId`, at least 1. The battle divides the sector's reactive reserves by the number of
- * an operation's axes attacking the same sector (`attack_resolution_osid.ts`, simultaneousAxes).
- * A single-axis operation is 1.
+ * P3-EST: the number of this operation's live axes whose first contested objective
+ * (`firstContestedAxisObjective`) is defended by `sectorId`, at least 1. The battle divides the
+ * sector's reactive reserves by the number of an operation's axes attacking the same sector
+ * (`attack_resolution_osid.ts`, simultaneousAxes). A single-axis operation is 1.
  */
 function countOperationAxesOnDefendingSector(
     state: GameState,
     op: CorpsOperation,
     sectorId: string | undefined,
+    attackerFaction: FactionId,
 ): number {
     if (!sectorId || !op.axes || op.axes.length === 0) return 1;
     let count = 0;
     for (const ax of op.axes) {
         if (isAxisExcludedFromPreparation(ax)) continue;
-        const objective = ax.objectives[ax.current_objective_index ?? 0];
-        if (typeof objective !== 'string' || objective.length === 0) continue;
+        const objective = firstContestedAxisObjective(state, ax, attackerFaction);
+        if (objective === undefined) continue;
         const controller = getPoliticalControllerOSID(state, objective, undefined);
         if (controller === null) continue;
         if (findSectorForEnemyOsid(state, objective, controller)?.sector_id === sectorId) count += 1;
     }
     return Math.max(1, count);
+}
+
+/**
+ * P3-EST-PRIM (rulings §13; operations seat, lane B s24): the cell an axis's first battle is
+ * fought at. That is its first objective, from `current_objective_index` on, that is held by
+ * neither the attacker nor an ally and is not uncontrolled. The estimate runs in preparation,
+ * before the launch reconcile drops friendly-held objectives (`sector_offensive.ts`), and the
+ * results pass credits a friendly current objective as captured without a battle, so such a cell
+ * is never the first battle. `allowed`, when given, restricts the read to the preparation
+ * objective view. Pure and deterministic: it walks the authored objective order, writes nothing.
+ */
+function firstContestedAxisObjective(
+    state: GameState,
+    ax: OperationAxis,
+    attackerFaction: FactionId,
+    allowed?: ReadonlySet<string>,
+): string | undefined {
+    for (let i = Math.max(0, ax.current_objective_index ?? 0); i < ax.objectives.length; i++) {
+        const o = ax.objectives[i];
+        if (typeof o !== 'string' || o.length === 0) continue;
+        if (allowed && !allowed.has(o)) continue;
+        const controller = getPoliticalControllerOSID(state, o, undefined);
+        if (controller === null || isFriendlyFaction(controller, attackerFaction, state)) continue;
+        return o;
+    }
+    return undefined;
 }
 
 /**
