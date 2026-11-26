@@ -212,7 +212,7 @@ Historical corps and army-level commanders are represented as **named officers**
 
 When an officer departs (historical departure date, casualty, capture, or retirement), the system must find a replacement.
 
-**Player faction:** The player receives a notification event (`replacement_suggested`) identifying the departing officer and recommending a historical successor. The player may accept the recommendation, choose a different officer from the available pool, or leave the position temporarily vacant (acting commander at reduced effectiveness). The `available_until_turn` field on an officer creates a suggestion event — the officer does not automatically retire, giving the player time to plan the transition.
+**Player faction:** An officer leaves at his `available_until_turn`, except a presidential appointee, who stays (Engine Invariants §15.1, #871). The staff fill a vacant corps command by the corps schedule or the pool ranking (Systems Manual, succession). The President may seat his own pick through REPLACE-CO; the appointee acts for `RELIEF_ACTING_DURATION` (4) turns at the acting commander's reduced effectiveness. No replacement notification is shown in 1.0.
 
 **Bot factions:** Automatic succession using historical successor lookup. The system finds the next officer with the same `home_corps_id`, available at the current turn, prioritized by pool tier (starter > tier_a > tier_b > tier_c).
 
