@@ -1112,4 +1112,48 @@ describe('recordBattleHistory', () => {
 
         expect(atk.brigade_history!.engagements[0]!.enemy_faction).toBe('RBiH');
     });
+
+    // CAS-REPORT-3 (§21): rows carry each brigade's own applied loss.
+    it('CAS-REPORT-3: attackers get their own applied loss, not an even split', () => {
+        const big = makeHistoryFormation({ id: 'atk_big', faction: 'RBiH' as FactionId });
+        const small = makeHistoryFormation({ id: 'atk_small', faction: 'RBiH' as FactionId });
+        recordBattleHistory(baseHistoryParams({
+            attackerFormations: [big, small],
+            finalAttackerCas: 100,
+            attackerAppliedById: new Map([['atk_big', 88], ['atk_small', 12]]),
+        }));
+        expect(big.brigade_history!.engagements[0]!.casualties_taken).toBe(88);
+        expect(small.brigade_history!.engagements[0]!.casualties_taken).toBe(12);
+    });
+
+    it('CAS-REPORT-3: grouped defenders take their applied share; a zero-weight primary that lost men still gets a row', () => {
+        const atk = makeHistoryFormation({ id: 'atk_1', faction: 'RBiH' as FactionId });
+        const primary = makeHistoryFormation({ id: 'def_p', faction: 'RS' as FactionId });
+        const a = makeHistoryFormation({ id: 'def_a', faction: 'RS' as FactionId });
+        const b = makeHistoryFormation({ id: 'def_b', faction: 'RS' as FactionId });
+        recordBattleHistory(baseHistoryParams({
+            attackerFormations: [atk],
+            defenderFormation: primary,
+            sectorDefenseBrigades: [a, b],
+            sectorBrigadeWeights: new Map([['def_a', 2], ['def_b', 1], ['def_p', 0]]),
+            finalDefenderCas: 130,
+            defenderAppliedById: new Map([['def_a', 70], ['def_b', 30], ['def_p', 30]]),
+        }));
+        expect(a.brigade_history!.engagements[0]!.casualties_taken).toBe(70);
+        expect(b.brigade_history!.engagements[0]!.casualties_taken).toBe(30);
+        expect(primary.brigade_history!.engagements[0]!.casualties_taken).toBe(30);
+    });
+
+    it('CAS-REPORT-3: a single defender row uses its applied loss when given', () => {
+        const atk = makeHistoryFormation({ id: 'atk_1', faction: 'RBiH' as FactionId });
+        const def = makeHistoryFormation({ id: 'def_1', faction: 'RS' as FactionId });
+        recordBattleHistory(baseHistoryParams({
+            attackerFormations: [atk],
+            defenderFormation: def,
+            finalDefenderCas: 100,
+            defenderAppliedById: new Map([['def_1', 100]]),
+        }));
+        expect(def.brigade_history!.engagements[0]!.casualties_taken).toBe(100);
+        expect(def.brigade_history!.engagements[0]!.equipment_destroyed).toEqual({ tanks: 0, artillery: 0 });
+    });
 });
