@@ -111,6 +111,7 @@ Runs every turn. The war step (`update-displacement` in `war_phases.ts`) feeds i
 
 - When both fire the larger rate applies, never the sum.
 - Only the holder's people leave and only the holder's manpower pool loses people. Departures are booked to the pressing side (`resolvePressingFactions`, pro rata between two besiegers), with killed 0 and no flight abroad. Each departure is routed to municipalities the holder's side holds; people with nowhere to go stay.
+- Each routed leg also books an arrival row (origin the municipality, destination the route's municipality, settled the routed count; displaced, killed and fled abroad 0; no causer). The departure rows keep the causer. So `displacement_origin_dest_arrivals`, `refugees_received` and the destination's inflow count a siege leaver, and reconstitution Path B can read it. The leavers are the holder's own residents leaving under siege, a first move, not an organised evacuation. People who stay (trapped) write no arrival row (E-dest, 8-seat §6 panel, 2026-11-26).
 - The rate is sourced from Krstić TJ (UNHCR evacuations from Srebrenica, 1993), UNCOE S/1994/674/Add.2 Annex VI and the Tabeau and Galić demographic report (2002).
 - The old 5%, 10% and 3% rates, the front-breach trigger (it read `front_pressure`, which nothing wrote) and the 1.5 sustainability-collapse multiplier (sustainability marks 109 of 110 municipalities collapsed) are removed.
 - Siege deaths in place (shelling, sniping, starvation) are still not modelled.
@@ -191,7 +192,7 @@ Two triggers, each checked per municipality and per side holding settlements the
 1. **Siege:** the side's settlements touch an at-war front and none is supplied for `UNSUPPLIED_PRESSURE_TURNS = 3` consecutive turns → 0.1% per week of the holder's own people (`UNSUPPLIED_DISPLACEMENT_FRACTION = 0.001`)
 2. **Encirclement:** under front pressure and every held settlement lies in a body outside the side's main territory that held at most `POCKET_MAX_SHARE = 0.15` of the side's settlements at turn 0 → 0.1% per week (`ENCIRCLEMENT_DISPLACEMENT_FRACTION = 0.001`)
 
-The larger of the two applies. Departures are booked to the pressing side with killed 0 and no flight abroad.
+The larger of the two applies. Departures are booked to the pressing side with killed 0 and no flight abroad. Each routed leg is also booked as an arrival at its destination municipality (settled > 0, displaced 0, no causer; E-dest, 2026-11-26).
 
 **Trapped in a separate pocket (A9 B3, 8-seat §6 ruling D10, unanimous 2026-11-25).** Leavers go to A5's destinations (supplied ground in the side's main body) only when the pocket's municipality is linked to the main body, by the same linked-body test as the B2 pass-through resolver (the bodies of the side's settlements there, or any body next to one of the municipality's settlements), or when the leavers' own body holds the near end of a sourced crossing (§10.3; one entry). Otherwise the pocket is separate and its leavers are TRAPPED: nobody leaves, nothing is booked, nobody is killed, the carry still advances on `wanted`, and the trapped count is written to Ledger line 2 below. Goražde, Srebrenica, Žepa and Bihać have no sourced civilian exit; only the P1 convoy rule (§3.6) can open one. Tests: `tests/state/siege_b3_trapped_pocket.test.ts`.
 
@@ -532,9 +533,11 @@ interface DisplacementEvent {
 }
 ```
 
-Two events are logged per displacement cycle:
-1. **Origin event** (timer maturation): `displaced > 0, settled = 0`
-2. **Arrival event** (camp reroute): `displaced = 0, settled > 0`
+Two kinds of event are logged:
+1. **Origin event** (timer maturation, or a siege departure): `displaced > 0, settled = 0`
+2. **Arrival event** (camp reroute, takeover routing, or a routed siege leg): `displaced = 0, settled > 0`, `dest_mun` the destination
+
+Siege departures (§2.3) write both (E-dest, 2026-11-26). The pocket fall (§3.5) and the negotiated-evacuation convoy (§3.6) write neither, by their 8-seat rulings (D1-D7, D9): their survivors and evacuees do not count for `displacement_origin_dest_arrivals` or reconstitution Path B. That split is ruled and deliberate; do not "fix" it without a panel.
 
 Events are sorted by `(turn, origin_mun)` for deterministic ordering.
 
