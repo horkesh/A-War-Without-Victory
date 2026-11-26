@@ -93,21 +93,25 @@ gates:
       in the BC19 row; the slot 1 items #677, #680 and the SE7E-h fix are merged. Part 2: the
       1994-95 attack and defence package P0 to P6 (the #686 trace and the dead-site
       retirements, the defence trace, the defence repairs, planner odds, P4 RF-STRENGTH's live
-      change (open), P5 the ARBiH plan lockout, P6 RF-PK re-measured on current main, then
-      retired or fixed), with Farz P1, P-A, P-B and the enclave guard passing at every merge.
+      change (merged, #852), P5 the ARBiH plan lockout, P6 RF-PK (RETIRED, orchestrator
+      ruling 2026-11-24)), with Farz P1, P-A, P-B and the enclave guard passing at every merge.
       P5 is closed: the package (#826, #828) gave the 1st to 4th Corps operations again, and
       the probe-exhaustion lock that remains is ACCEPT AS FINAL (#841, orchestrator ruling
       2026-11-22, Systems Manual "Defence of a held line"); the probe gate and the unlock
-      instrument do not ship. Shipping the passive ARBiH as final behaviour is not an option. (2) Every roadmap §4.1 RF row is disposed: BC14 merged, BC15 with SE6 and
-      SE10 decided by the defence repairs, BC16
+      instrument do not ship. Shipping the passive ARBiH as final behaviour is not an option. (2) Every roadmap §4.1 RF row is disposed: BC14 merged, BC15 with SE6 retired at
+      its archive tag and SE10 decided by a band re-check on main after P3-EST and P2.4 merge:
+      built if still above the 20-40% band, retired if in it (orchestrator ruling 2026-11-26;
+      on main 2b7761822 the 1st-4th Corps take 70.6% of targeted objectives in weeks 99-178
+      historical and 58.3% emergent), BC16
       merged, BC17 held for the calibration pass, BC18 closed as decided, BC19 as listed in
       its row. (3) One 188-week run at the candidate commit, repeated once for determinism:
       strict health PASS, enclave 9/9, Farz P1, P-A and P-B, consistency 0, baselines
       re-blessed; its scores become the freeze figures. (4) Live = headless at that commit,
-      0 cells differing for RBiH at autonomy 2, in historical mode and in emergent mode (the
-      first measurement was historical on both sides; all three factions are re-measured at
-      RF-CALIBRATION-RESIGNOFF); the historical-mode result was met before the freeze, and
-      both are re-run at the frozen commit. (5) The final-behaviour record
+      0 cells differing: hands-off live equals headless at EVERY autonomy level, for all three
+      factions, in historical mode and in emergent mode (owner, 2026-11-25). Met on aa76f6fc3
+      lane figures: #866 (a0-a3 x 3 factions historical, a2 emergent x 3) and #871 (15 cells,
+      0 differing); emergent at a0, a1 and a3 is not yet shown. Re-run at the frozen commit
+      (check entrypoint_source_sha256 and run from the worktree, ORCHESTRATION §4 rule 12). (5) The final-behaviour record
       (docs/40_reports/governance/20261115_FINAL_BEHAVIOUR_AT_1_0.md; held in the coordination
       repo-docs until 1.0 under the docs relocation, #820) is merged. (6) One
       named commit is recorded as the frozen source in the roadmap and the owner is told. (7) A hands-off

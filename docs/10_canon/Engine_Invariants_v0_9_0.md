@@ -99,6 +99,8 @@ MORALE_OVERRIDE_RESET     = 20   // streak resets when morale exceeds this (hyst
 
 **Sole exception:** Counter-attacks to retake a just-lost position are permitted at brigade level.
 
+**DEC1 closed (recorded 2026-11-26):** this section matches the code since #774: the brigade-level counter-attack is retake-only and fires in any corps stance.
+
 Pioneer attacks seed with threshold `repulsed`; subsequent brigades join via `estimateConcentratedOutcome()`.
 
 **COHA ceasefire ownership:** An active cessation-of-hostilities agreement suppresses operation attack/posture orders without erasing legal movement intent. While suppression is active, the affected operation's execution/recovery clock is paused and the operation records `operation_lifecycle_paused_reason: 'coha_ceasefire'`; it cannot age into failure or completion for attacks that the political layer prohibited. Attack resolution emits explicit suppression receipts rather than inferring a missing attempt.
@@ -364,7 +366,7 @@ rule.
 
 **Retreat destination classes (priority order):**
 1. **Friendly OSID** (safe rear retreat) -- by enemy adjacency count ascending, then OSID sort
-2. **Breakthrough to friendly** (cut-off brigade escapes through hostile territory; see 14.5a)
+2. **Breakthrough to friendly** (cut-off brigade escapes through hostile territory; specified in 14.5a, not implemented at 1.0)
 3. **Last stand** (no retreat possible -- defenderPower x 1.5, casualty multiplier x 2)
 
 Note: per 6.2, "last stand" results in forced retreat with penalties, not destruction.
@@ -385,11 +387,13 @@ compatibility fallback, which is lexical-only. Open debt: the cut-off outcome in
 `forceRetreatWithPenalties` currently sets the brigade inactive with a `destruction_turn`,
 which does not conform to 6.2 or the note above; the BFS depth defect and the same-turn
 lifecycle question remain open in `CALIBRATION_MASTER.md`. Ordering the last two steps by
-distance or enemy adjacency would be a calibration-moving change. The panel also found no
-implementation of 14.5a (breakthrough) in `src/sim`; that is unverified here and recorded for
-the owner.
+distance or enemy adjacency would be a calibration-moving change. There is no
+implementation of 14.5a (breakthrough) in `src/sim` (checked 2026-11-26); see the status line
+at 14.5a.
 
 ### 14.5a Breakthrough Retreat
+
+**Status at 1.0 (recorded 2026-11-26):** 14.5a is specified but not implemented: a brigade with no valid retreat destination takes the cut-off outcome of 14.5; breakthrough retreat is not a simulation behaviour in 1.0. The specification below is kept as the design record.
 
 When a brigade has NO valid retreat destination AND a friendly OSID exists within M hops (M = 3-4):
 - Brigade attempts breakthrough toward nearest friendly OSID via deterministic BFS
