@@ -103,7 +103,15 @@ import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.j
 import type { PreparationEvent } from '../turn_pipeline_types.js';
 import { checkLoanedArrivals, areLoanedBrigadesReady, cleanupDissolvedLoans } from './operation_reinforcement.js';
 import { MAX_OP_LOAN_DISTANCE, LOAN_STAGING_BUFFER_TURNS } from './operation_reinforcement_constants.js';
-import { findBrigadeLiveOperationAnywhere, hasActiveOperation, isCommanderBuiltOperation, removeOperation } from './corps_operation_helpers.js';
+import {
+    findBrigadeLiveOperationAnywhere,
+    getMaxOperationSlots,
+    getOperationSlotUsageForOperations,
+    hasActiveOperation,
+    isCommanderBuiltOperation,
+    removeOperation,
+} from './corps_operation_helpers.js';
+import { resolveArmyHqOperation } from '../../state/operation_lifecycle_reconciliation.js';
 import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { mayEliteJoinOperation } from './historical_elite_reservations.js';
 import { isVlasicCohaExceptionOperation } from './coha_operation_exception.js';
@@ -146,6 +154,7 @@ import {
     getEquipmentOffensivePriority,
     getMomentumAggressionBonus,
     getMomentumMinOutcome,
+    hasEligibleAttackersForLaunch,
     resolveEquipmentClass,
     shouldStallAxisForRecentCatastrophicObjective,
 } from './sector_offensive_launch_helpers.js';
@@ -1398,6 +1407,172 @@ function getCompletedObjectiveRecoveryReason(op: CorpsOperation): CorpsOperation
     return getNoAttemptRecoveryReason(op);
 }
 
+/**
+ * FARZ-END (§26, lane C s22 seats): the capture predicate read in reverse. An objective is lost
+ * only when its controller is known and is neither `faction` nor friendly to it, so a null
+ * controller or ground held by an ally never counts (same test as capture credit in the result
+ * passes, `updateMultiAxisResults` and `updateLegacyFlatResults`; no reverse map).
+ */
+function isCreditedObjectiveLost(state: GameState, osid: string, faction: FactionId): boolean {
+    const controller = getPoliticalControllerOSID(state, osid, undefined);
+    if (controller == null) return false;
+    return controller !== faction && !isFriendlyFactionCtrl(controller, faction, state);
+}
+
+/** Earliest objective below `currentIndex` that is lost, or null. */
+function findEarliestLostCreditedObjective(
+    state: GameState,
+    objectives: readonly string[],
+    currentIndex: number,
+    faction: FactionId,
+): { index: number; objective: string } | null {
+    const credited = Math.min(currentIndex, objectives.length);
+    for (let index = 0; index < credited; index += 1) {
+        const objective = objectives[index];
+        if (objective !== undefined && isCreditedObjectiveLost(state, objective, faction)) return { index, objective };
+    }
+    return null;
+}
+
+/**
+ * FARZ-END (§26, lane C s22 seats): the single owner of "is this operation finished?" for a
+ * sector attack whose capture counter is full. The counter alone says every objective was taken
+ * once; this also asks whether each one is still held.
+ *
+ * Returns `'reopened'` or the recovery reason to record. Only a `sector_attack` with a full counter
+ * and no `preparation_probe_link` can reopen; every other operation gets
+ * `getCompletedObjectiveRecoveryReason(op)` unchanged. A full counter means no objective was
+ * skipped under MAX_CONSECUTIVE_FAILURES_ON_CURRENT, so every objective behind the index was
+ * credited by this operation.
+ *
+ * Every `complete` axis (array order) with a lost objective is a candidate at its own earliest
+ * lost index k. Stalled axes, and axes whose `late_phase` is holding or terminal, never reopen.
+ * Refused (no reopen) when: the October 1995 ceasefire binds the corps; offensive operations are
+ * suppressed; COHA pauses the operation; every candidate objective is politically blocked; the
+ * corps' live slots, this operation counted, exceed `getMaxOperationSlots`; or another live
+ * non-probe operation exists (the commander's major-operation rule). A candidate axis is also
+ * refused when booking the reopen would reach its failure cap (spent), or when, after dropping
+ * brigades that are inactive or now in another live operation, none is above the attack floor.
+ *
+ * On reopen each reopened axis goes back to `executing` at k with `objective_capture_count =
+ * min(count, k)`; the result pass re-credits the objectives it re-walks, so nothing is credited
+ * twice. Each reopen books one failure (`failure_count` and `consecutive_failures_on_current` on
+ * the axis; `failure_count` on a flat operation), so the existing caps end a capture-loss loop.
+ * An operation in recovery returns to execution; `started_turn` is kept, so the AAR id is kept.
+ * No axis reset, no TG formation, no late-phase hold restart.
+ * A refused candidate axis is stalled (so `recordFailedObjectives` books it) and its counter is
+ * truncated the same way, so a later completion check cannot count the lost objective.
+ *
+ * Reads control only through `getPoliticalControllerOSID`; never AAR telemetry or `weekly_log`.
+ * Deterministic: axes in array order, objectives in index order.
+ */
+function resolveCompletionOrReopen(
+    state: GameState,
+    corpsId: FormationId,
+    op: CorpsOperation,
+    faction: FactionId,
+    turn: number,
+): 'reopened' | CorpsOperation['recovery_reason'] {
+    const completedReason = getCompletedObjectiveRecoveryReason(op);
+    if (op.type !== 'sector_attack' || op.preparation_probe_link || completedReason !== 'completed') {
+        return completedReason;
+    }
+
+    const axes = op.axes ?? [];
+    const candidates: Array<{ axis?: OperationAxis; index: number; objective: string }> = [];
+    if (axes.length > 0) {
+        for (const axis of axes) {
+            if (axis.status !== 'complete') continue;
+            if (axis.late_phase && (axis.late_phase.phase === 'holding' || axis.late_phase.terminal_reason !== undefined)) continue;
+            if ((axis.objective_capture_count ?? 0) < axis.objectives.length) continue;
+            const lost = findEarliestLostCreditedObjective(state, axis.objectives, axis.current_objective_index ?? 0, faction);
+            if (lost) candidates.push({ axis, ...lost });
+        }
+    } else {
+        const lost = findEarliestLostCreditedObjective(state, op.objectives ?? [], op.current_objective_index ?? 0, faction);
+        if (lost) candidates.push(lost);
+    }
+    if (candidates.length === 0) return 'completed';
+
+    const otherLiveOperations = (state.military.corps_command?.[corpsId]?.active_operations ?? [])
+        .filter((other) => other !== op && other.phase !== 'recovery');
+    const operationGateClosed = isCorpsBoundByOct1995Ceasefire(state, corpsId)
+        || isFactionOffensiveOpsSuppressed(state, faction, turn)
+        || (state.military.event_flags?.coha_active === true
+            && !isVlasicCohaExceptionOperation(state, corpsId, op, turn))
+        || candidates.every((candidate) => isObjectivePoliticallyBlocked(state, corpsId, faction, candidate.objective))
+        || getOperationSlotUsageForOperations([...otherLiveOperations, op])
+            > getMaxOperationSlots(getCorpsSubordinates(state, corpsId).length)
+        || otherLiveOperations.some((other) => other.type !== 'probe');
+
+    const formations = state.military.formations ?? {};
+    const mayStay = (brigadeId: FormationId): boolean => {
+        const brigade = formations[brigadeId];
+        if (!brigade || brigade.status !== 'active') return false;
+        const live = findBrigadeLiveOperationAnywhere(state, brigadeId);
+        return live === null || live.op === op;
+    };
+    const reopening = new Set<(typeof candidates)[number]>();
+    let belowAttackFloor = 0;
+    if (!operationGateClosed) {
+        for (const candidate of candidates) {
+            const failures = candidate.axis ? candidate.axis.failure_count : (op.failure_count ?? 0);
+            const failureCap = !candidate.axis
+                ? MAX_TOTAL_FAILURES
+                : axes.length === 1 ? MAX_TOTAL_FAILURES_SINGLE_AXIS : MAX_TOTAL_FAILURES;
+            if (failures + 1 >= failureCap) continue;
+            const brigades = (candidate.axis ? candidate.axis.assigned_brigades : op.participating_brigades)
+                .filter(mayStay);
+            if (!hasEligibleAttackersForLaunch(formations, brigades)) {
+                belowAttackFloor += 1;
+                continue;
+            }
+            reopening.add(candidate);
+        }
+    }
+
+    for (const candidate of candidates) {
+        if (candidate.axis) {
+            candidate.axis.objective_capture_count = Math.min(candidate.axis.objective_capture_count, candidate.index);
+            if (!reopening.has(candidate)) candidate.axis.status = 'stalled';
+        } else {
+            op.objective_capture_count = Math.min(op.objective_capture_count ?? 0, candidate.index);
+        }
+    }
+    if (axes.length > 0) op.objective_capture_count = sumAxesField(axes, 'objective_capture_count');
+
+    if (reopening.size === 0) {
+        return !operationGateClosed && belowAttackFloor === candidates.length
+            ? 'participants_below_attack_floor'
+            : getNoAttemptRecoveryReason(op);
+    }
+
+    for (const candidate of reopening) {
+        if (candidate.axis) {
+            candidate.axis.status = 'executing';
+            candidate.axis.current_objective_index = candidate.index;
+            candidate.axis.failure_count += 1;
+            candidate.axis.consecutive_failures_on_current += 1;
+        } else {
+            op.current_objective_index = candidate.index;
+            op.failure_count = (op.failure_count ?? 0) + 1;
+        }
+    }
+    op.participating_brigades = op.participating_brigades.filter(mayStay);
+    for (const axis of op.axes ?? []) axis.assigned_brigades = axis.assigned_brigades.filter(mayStay);
+
+    if (op.phase === 'recovery') {
+        op.phase = 'execution';
+        op.phase_started_turn = turn;
+        op.recovery_reason = undefined;
+        delete op.planning_phase_started_turn;
+        markOperationExecuting(state, corpsId, op);
+        const armyHqOperation = resolveArmyHqOperation(state, corpsId, op);
+        if (armyHqOperation) delete armyHqOperation.operation.recovery_started_turn;
+    }
+    return 'reopened';
+}
+
 function getMultiAxisRecoveryDuration(op: CorpsOperation): number {
     let maxLen = 0;
     for (const axis of op.axes ?? []) {
@@ -2059,14 +2234,16 @@ export function advanceSectorOffensives(
                 }
                 // Multi-axis: check if all axes are terminal
                 if (allAxesTerminal(op.axes!)) {
-                    beginRecovery(op, turn, getCompletedObjectiveRecoveryReason(op), state);
+                    const resolution = resolveCompletionOrReopen(state, corpsId, op, faction, turn);
+                    if (resolution !== 'reopened') beginRecovery(op, turn, resolution, state);
                     continue;
                 }
             } else {
                 // Legacy flat: check completion and failures
                 const objectives = op.objectives ?? [];
                 if ((op.current_objective_index ?? 0) >= objectives.length) {
-                    beginRecovery(op, turn, getCompletedObjectiveRecoveryReason(op), state);
+                    const resolution = resolveCompletionOrReopen(state, corpsId, op, faction, turn);
+                    if (resolution !== 'reopened') beginRecovery(op, turn, resolution, state);
                     continue;
                 }
                 if ((op.failure_count ?? 0) >= MAX_TOTAL_FAILURES) {
@@ -2102,6 +2279,25 @@ export function advanceSectorOffensives(
                 continue;
             }
         } else if (op.phase === 'recovery') {
+            // FARZ-END (§26, lane C s22 seats): before any end-of-operation work, a sector attack
+            // recovering as `completed` with a full counter re-checks its credited objectives. A
+            // lost one reopens the operation; a refused reopen records a non-completed reason (the
+            // recovery clock is kept) so the operation never ends as `completed` over a lost cell.
+            // A refusal finalizes on the next tick, so this week's operation row still shows the
+            // operation and the report side re-derives its end-rule receipt from the new reason.
+            if (
+                op.type === 'sector_attack'
+                && op.recovery_reason === 'completed'
+                && !op.preparation_probe_link
+                && hasCapturedAllObjectives(op)
+            ) {
+                const resolution = resolveCompletionOrReopen(state, corpsId, op, faction, turn);
+                if (resolution === 'reopened') continue;
+                if (resolution !== 'completed') {
+                    op.recovery_reason = resolution;
+                    continue;
+                }
+            }
             const elapsed = turn - op.phase_started_turn;
             const recoveryDuration = multiAxis
                 ? getMultiAxisRecoveryDuration(op)
@@ -2586,9 +2782,10 @@ function updateMultiAxisResults(
         }
     }
 
-    // Check if all axes terminal → operation enters recovery
+    // Check if all axes terminal → operation enters recovery (unless a lost objective reopens it)
     if (allAxesTerminal(axes)) {
-        beginRecovery(op, turn, getCompletedObjectiveRecoveryReason(op), state);
+        const resolution = resolveCompletionOrReopen(state, corpsId, op, faction, turn);
+        if (resolution !== 'reopened') beginRecovery(op, turn, resolution, state);
     }
 }
 
@@ -2598,21 +2795,28 @@ function hasOnlyPoliticallyBlockedCurrentObjectives(
     faction: FactionId,
     op: CorpsOperation,
 ): boolean {
-    const politicalControllers = state.political.political_controllers ?? {};
     if (isMultiAxis(op) && op.axes) {
         const activeAxes = op.axes.filter((axis) => axis.status === 'executing');
         if (activeAxes.length === 0) return false;
         return activeAxes.every((axis) => {
             const objective = axis.objectives[axis.current_objective_index ?? 0];
             if (!objective) return false;
-            const controller = politicalControllers[objective] ?? '';
-            return shouldGrazBlockAttack(state, corpsId, faction, objective, controller)
-                || isRbihHrhbCombatBlocked(state, faction, controller);
+            return isObjectivePoliticallyBlocked(state, corpsId, faction, objective);
         });
     }
     const objective = op.objectives?.[op.current_objective_index ?? 0];
     if (!objective) return false;
-    const controller = politicalControllers[objective] ?? '';
+    return isObjectivePoliticallyBlocked(state, corpsId, faction, objective);
+}
+
+/** The Graz / RBiH-HRHB political gate on one objective (shared with the FARZ-END reopen gate). */
+function isObjectivePoliticallyBlocked(
+    state: GameState,
+    corpsId: FormationId,
+    faction: FactionId,
+    objective: string,
+): boolean {
+    const controller = state.political.political_controllers?.[objective] ?? '';
     return shouldGrazBlockAttack(state, corpsId, faction, objective, controller)
         || isRbihHrhbCombatBlocked(state, faction, controller);
 }
@@ -2648,7 +2852,8 @@ function updateLegacyFlatResults(
     const objectives = op.objectives ?? [];
     const currentIdx = op.current_objective_index ?? 0;
     if (currentIdx >= objectives.length) {
-        beginRecovery(op, turn, getCompletedObjectiveRecoveryReason(op), state);
+        const resolution = resolveCompletionOrReopen(state, corpsId, op, faction, turn);
+        if (resolution !== 'reopened') beginRecovery(op, turn, resolution, state);
         return;
     }
 
@@ -2784,7 +2989,8 @@ function updateLegacyFlatResults(
     }
 
     if ((op.current_objective_index ?? 0) >= objectives.length) {
-        beginRecovery(op, turn, getCompletedObjectiveRecoveryReason(op), state);
+        const resolution = resolveCompletionOrReopen(state, corpsId, op, faction, turn);
+        if (resolution !== 'reopened') beginRecovery(op, turn, resolution, state);
     }
     if ((op.failure_count ?? 0) >= MAX_TOTAL_FAILURES) {
         beginRecovery(op, turn, getNoAttemptRecoveryReason(op), state);
@@ -2898,8 +3104,12 @@ export function reevaluateWeakenedOperations(state: GameState): void {
                 const anyComplete = op.axes.some(a => a.status === 'complete');
                 abortReason = anyComplete ? null : 'all_axes_stalled';
                 if (anyComplete) {
-                    // Some axes completed, treat as partial success — enter recovery normally
-                    beginRecovery(op, turn, getCompletedObjectiveRecoveryReason(op), state, corpsId);
+                    // Some axes completed, treat as partial success — enter recovery normally,
+                    // unless a lost credited objective reopens the operation (FARZ-END).
+                    const faction: FactionId = formations[corpsId]?.faction ?? 'RS';
+                    const resolution = resolveCompletionOrReopen(state, corpsId, op, faction, turn);
+                    if (resolution === 'reopened') continue;
+                    beginRecovery(op, turn, resolution, state, corpsId);
                     appendReevaluationLog(op, turn, 'abort', activeBrigadeCount, totalPersonnel,
                         'all_axes_terminal_partial_success');
                     continue;
