@@ -74,9 +74,24 @@ import {
 } from './sector_offensive_launch_helpers.js';
 import { SYNC_WAIT_MAX_TURNS } from './army_hq_gathering_constants.js';
 // LANE-2026-05-02: estimateForceRatio defender-modifier integration
-import { computeAttackerPower, rankDefendersByPower, getArtillerySuppression } from './combat_math.js';
-// LANE-2026-05-02-DRINA: enclave-scoped defender aggregation
-import { ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from './enclave_resilience.js';
+import {
+    computeAttackerPower,
+    rankDefendersByPower,
+    getArtillerySuppression,
+    // P3-EST: the battle's defence model (estimateSectorDefensePower)
+    computeDefenderPower,
+    bfsDistanceFriendly,
+    getReactiveDistanceWeight,
+    applyMinimumSectorDefenseFloor,
+    HOME_DEFENSE_REACTIVE_BONUS,
+    SECTOR_STANCE_REACTIVE_BONUS,
+    REACTIVE_DEFENSE_RATIO,
+    MIN_DEFENSE_FLOOR_FRACTION,
+} from './combat_math.js';
+import { collectAverageDefenseRoster, collectSectorDefenseBrigades } from './sector_defense_roster.js';
+import { findSectorForEnemyOsid } from './corps_front_sectors.js';
+import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
+import { munFromOsid, type Osid } from './osid_adjacency.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 // ADR-0005 v2.2b: TG formation wiring at sub_phase='ready' transition. Flag-gated.
 // ADR-0005 Phase 2: per-op donor policy classifier + cap.
@@ -109,7 +124,6 @@ import {
 // ADR-0005 Phase 4: phantom-aware anchor resolution + dual-anchor de-confliction. Flag-gated.
 import { resolveTgAnchor, collectActiveAnchorIds } from './tactical_group_anchor.js';
 import { getReservedPrePlannedBrigadeIds } from './pre_planned_operations.js';
-import { getStandingOgDefenseBrigadeIds } from './standing_og_defense.js';
 import { buildProbeOperation } from './corps_operation_helpers.js';
 import {
     getPreparationObjectiveView,
@@ -404,36 +418,15 @@ function collectObjectiveEnemySectorIds(
     return objectiveEnemySectors;
 }
 
-// LANE-2026-05-02-DRINA: helper — return the enclave that contains ALL of an
-// operation's objectives, or null if no single enclave covers them. Faction-
-// agnostic: iterates ENCLAVE_DEFINITIONS in canonical order. Used by
-// estimateForceRatio to scope defender aggregation to enclave-interior brigades
-// when the operation's objectives sit wholly inside one enclave.
-function allObjectivesInOneEnclave(
-    op: CorpsOperation,
-): typeof ENCLAVE_DEFINITIONS[number] | null {
-    const fullObjectives = [
-        ...(op.objectives ?? []),
-        ...(op.axes ?? []).flatMap(axis => axis.objectives),
-    ];
-    const objectives = new Set(getPreparationObjectiveView(op, fullObjectives));
-    if (objectives.size === 0) return null;
-    for (const enclave of ENCLAVE_DEFINITIONS) {
-        let allMatch = true;
-        for (const obj of objectives) {
-            if (!osidBelongsToEnclave(obj, enclave)) {
-                allMatch = false;
-                break;
-            }
-        }
-        if (allMatch) return enclave;
-    }
-    return null;
-}
-
 /**
- * Estimate force ratio based on intel confidence and competence.
- * High confidence → close to ground truth. Low confidence → inaccurate estimate.
+ * Estimate the force ratio the operation will meet: attacker combat power over the defence
+ * the battle builds at the primary objective (`estimateSectorDefensePower`).
+ *
+ * P3-EST (2026-11-26): the estimate is the honest ratio. The former confidence/competence
+ * error factor (0.3-1.0x) is removed, and the defender side mirrors the battle instead of
+ * summing every facing standing-OG brigade at full power. `_competence` is kept for the
+ * call shape; confidence now only picks the sentinel. `adjacency` feeds the friendly-route
+ * distance; without it only physical defenders and the floor count.
  *
  * LANE-2026-05-02: estimateForceRatio defender-modifier integration.
  * Now sums COMBAT POWER (computeAttackerPower / rankDefendersByPower) instead of
@@ -451,10 +444,11 @@ function allObjectivesInOneEnclave(
 export function estimateForceRatio(
     state: GameState,
     op: CorpsOperation,
-    competence: number,
+    _competence: number,
     confidence: number,
     supplyByOsid?: SupplyStateByOsidReport | null, // LANE-2026-05-02
     terrainMultByOsid?: Record<string, number>, // LANE-2026-05-02
+    adjacency?: Map<string, string[]>, // P3-EST
 ): number {
     // LANE-2026-05-02: collect attacker formations (active only) once for both
     // power summation and the artillery-suppression input to defender ranking.
@@ -573,92 +567,133 @@ export function estimateForceRatio(
         return 0;
     }
 
-    const objectiveEnemySectors = collectObjectiveEnemySectorIds(state, objectives);
-
-    // LANE-2026-05-02: collect defender brigades from the facing enemy sector(s).
-    const defenderFormations: FormationState[] = [];
-    if (op.sector_id && state.military.corps_front_sectors) {
-        const sector = state.military.corps_front_sectors[op.sector_id];
-        if (sector) {
-            const intel = state.military.sector_intel?.[op.sector_id];
-            if (intel) {
-                for (const rec of intel) {
-                    if (objectiveEnemySectors.size > 0 && !objectiveEnemySectors.has(rec.enemy_sector_id)) continue;
-                    const enemySector = state.military.corps_front_sectors?.[rec.enemy_sector_id];
-                    if (!enemySector) continue;
-                    const defenderIds = getStandingOgDefenseBrigadeIds(enemySector);
-                    for (const bid of defenderIds) {
-                        const b = state.military.formations?.[bid];
-                        if (!b || b.status !== 'active') continue;
-                        defenderFormations.push(b);
-                    }
-                }
-            }
-        }
-    }
-
-    // LANE-2026-05-02-DRINA: enclave-scoped defender filter.
-    // When all objectives target one enclave's interior, restrict defender
-    // aggregation to formations physically inside the enclave. Mirrors the
-    // historical reality that only enclave-interior brigades can defend the
-    // enclave; outer-corps formations in the same sector cannot project power
-    // across the encirclement ring. Faction-agnostic predicate; pre-fix the
-    // entire facing corps was aggregated, drowning out the small enclave
-    // garrison and producing fantasy-low ratios that said Krivaja-95 was
-    // infeasible. Reverse-iteration splice preserves order for the
-    // surviving (enclave-interior) defenders so deterministic ordering below
-    // is unaffected.
-    const enclaveScope = allObjectivesInOneEnclave(op);
-    if (enclaveScope !== null) {
-        for (let i = defenderFormations.length - 1; i >= 0; i--) {
-            const loc = defenderFormations[i]!.location_osid;
-            if (!loc || !osidBelongsToEnclave(loc, enclaveScope)) {
-                defenderFormations.splice(i, 1);
-            }
-        }
-    }
-
-    // LANE-2026-05-02: deterministic ordering of defenders before passing to
-    // rankDefendersByPower (which sorts by power desc internally; sort by id
-    // first to make ties deterministic).
-    defenderFormations.sort((a, b) => strictCompare(a.id, b.id));
-
-    // LANE-2026-05-02: sentinel — no known defenders. Tighten the previous
-    // unconditional 3.0 fantasy to confidence-gated honest estimate.
-    if (defenderFormations.length === 0 || !primaryTargetOsid) {
+    // LANE-2026-05-02: sentinel — no objective. Confidence-gated, not an unconditional 3.0.
+    if (!primaryTargetOsid) {
         return confidence >= 0.5 ? 3.0 : 1.0;
     }
 
-    // LANE-2026-05-02: rank defender power using shared combat_math.
-    // computeDefenderPower honors entrenchment, urban/forest, supply, posture,
-    // corps stance, terrain, equipment, morale, fatigue, officer, home distance.
+    // P3-EST (2026-11-26, freeze inventory §8 queue; operations seat spec): the defence is
+    // the one the battle will meet at the primary objective — physical defenders at full
+    // power, the sector roster reacting by friendly-route distance, the reactive cap and the
+    // floor (`estimateSectorDefensePower`). It replaces the sum of every standing-OG brigade
+    // of every facing enemy sector at full power, which was far above any battle. The
+    // LANE-2026-05-02-DRINA enclave filter goes with that sum: the friendly-route distance
+    // already gives a brigade outside an encirclement ring no reach to a target inside it.
     const artSuppression = getArtillerySuppression(attackerFormations, attackerFaction, state);
-    const noEthnicBonus = (_d: FormationState) => 0; // ethnic composition not threaded; matches combat_predictor "no sector" path
-    const { totalPower: enemyStrength } = rankDefendersByPower(
-        defenderFormations,
+    const noEthnicBonus = (_d: FormationState) => 0; // ethnic composition not threaded in preparation (accepted, small)
+    const defence = estimateSectorDefensePower(
         state,
         primaryTargetOsid,
+        attackerFaction,
+        attackerFormations.length,
+        adjacency ?? new Map<string, string[]>(),
         terrainCache,
         artSuppression,
         supplyByOsid,
         noEthnicBonus,
+        (sectorId) => countOperationAxesOnDefendingSector(state, op, sectorId),
     );
 
-    if (enemyStrength <= 0) {
-        // LANE-2026-05-02: defenders present but power resolved to 0 (e.g. all in
-        // terminal disruption + critical supply). Same sentinel rule: confidence
-        // gate, not an unconditional optimistic 3.0.
+    // LANE-2026-05-02: sentinel — no contributing defender or zero defence. Same
+    // confidence gate as before, not an unconditional optimistic 3.0.
+    if (defence === null || defence.power <= 0) {
         return confidence >= 0.5 ? 3.0 : 1.0;
     }
 
-    const trueRatio = ownStrength / enemyStrength;
+    // P3-EST: no estimation error. The old accuracy/bias factor (0.3-1.0x) is removed;
+    // confidence and competence still act through the confidence gate, the required ratio
+    // and the assessment score.
+    return ownStrength / defence.power;
+}
 
-    // Apply estimation error based on confidence and competence
-    // High confidence + high competence → accurate. Low → random-feeling but deterministic offset.
-    const accuracyFactor = Math.min(1.0, confidence * 0.6 + competence * 0.08);
-    // Bias: low accuracy overestimates (commanders tend to be optimistic about own strength)
-    const bias = (1 - accuracyFactor) * 0.3;
-    return trueRatio * (accuracyFactor + bias);
+/**
+ * P3-EST: the number of this operation's live axes whose current objective is defended by
+ * `sectorId`, at least 1. The battle divides the sector's reactive reserves by the number of
+ * an operation's axes attacking the same sector (`attack_resolution_osid.ts`, simultaneousAxes).
+ * A single-axis operation is 1.
+ */
+function countOperationAxesOnDefendingSector(
+    state: GameState,
+    op: CorpsOperation,
+    sectorId: string | undefined,
+): number {
+    if (!sectorId || !op.axes || op.axes.length === 0) return 1;
+    let count = 0;
+    for (const ax of op.axes) {
+        if (isAxisExcludedFromPreparation(ax)) continue;
+        const objective = ax.objectives[ax.current_objective_index ?? 0];
+        if (typeof objective !== 'string' || objective.length === 0) continue;
+        const controller = getPoliticalControllerOSID(state, objective, undefined);
+        if (controller === null) continue;
+        if (findSectorForEnemyOsid(state, objective, controller)?.sector_id === sectorId) count += 1;
+    }
+    return Math.max(1, count);
+}
+
+/**
+ * P3-EST (2026-11-26, freeze inventory §8 queue; operations seat spec): the defence the
+ * planner expects at one target, built the way the battle builds it (the sector branch of
+ * `attack_resolution_osid.ts`; `combat_predictor.ts` mirrors it). Physical defenders at the
+ * target fight at full power. The sector roster (same-corps seams included) reacts by
+ * friendly-route distance, with the home-municipality bonus. Reserves take the sector stance
+ * bonus, divided by the operation's axes on that sector, and are capped at attackers ×
+ * average roster power × REACTIVE_DEFENSE_RATIO; then the minimum floor applies.
+ * Pure: it reads state and writes nothing. Not modelled here (accepted, small): the ethnic
+ * defence bonus, the local-militia floor (no population map in preparation) and the
+ * predictor's intel fog. Returns null when the target is not enemy-held or no roster brigade
+ * can contribute.
+ */
+export function estimateSectorDefensePower(
+    state: GameState,
+    targetOsid: string,
+    attackerFaction: FactionId,
+    attackerCount: number,
+    adjacency: Map<string, string[]>,
+    terrainMultByOsid: Record<string, number>,
+    artSuppression: number,
+    supplyByOsid: SupplyStateByOsidReport | null | undefined,
+    ethnicBonusFn: (d: FormationState) => number,
+    simultaneousAxesForSector: (sectorId: string | undefined) => number = () => 1,
+): { power: number; contributors: number; sectorId: string | undefined } | null {
+    const controller = getPoliticalControllerOSID(state, targetOsid, undefined);
+    if (controller === null || controller === attackerFaction) return null;
+    const physical = Object.values(state.military.formations ?? {})
+        .filter((f) => f.status === 'active' && f.location_osid === targetOsid && f.faction !== attackerFaction)
+        .sort((a, b) => strictCompare(a.id, b.id));
+    const sector = findSectorForEnemyOsid(state, targetOsid, controller);
+    const roster = collectSectorDefenseBrigades(state, sector, targetOsid, controller, adjacency, physical);
+    if (roster.length === 0) return null;
+    const { totalPower } = rankDefendersByPower(roster, state, targetOsid, terrainMultByOsid, artSuppression, supplyByOsid, ethnicBonusFn);
+    const averageRoster = collectAverageDefenseRoster(state, sector, targetOsid, controller, adjacency, physical, roster);
+    const avgPower = averageRoster
+        ? rankDefendersByPower(averageRoster, state, targetOsid, terrainMultByOsid, artSuppression, supplyByOsid, ethnicBonusFn).totalPower / averageRoster.length
+        : totalPower / roster.length;
+    const targetMun = munFromOsid(targetOsid);
+    const pc = state.political?.political_controllers ?? {};
+    let physicalPower = 0;
+    let effectiveReserves = 0;
+    let contributors = 0;
+    for (const b of roster) {
+        const loc = b.location_osid ?? '';
+        const p = computeDefenderPower(state, b, targetOsid as Osid, terrainMultByOsid, artSuppression, supplyByOsid, ethnicBonusFn(b));
+        const homeMun = munFromOsid(b.home_osid ?? '');
+        const homeBonus = homeMun && homeMun === targetMun ? HOME_DEFENSE_REACTIVE_BONUS : 1.0;
+        if (loc === targetOsid) {
+            physicalPower += p;
+            if (p * homeBonus > 0) contributors += 1;
+        } else {
+            const hops = bfsDistanceFriendly(loc, targetOsid, adjacency, pc, controller);
+            const contribution = p * getReactiveDistanceWeight(hops) * homeBonus;
+            effectiveReserves += contribution;
+            if (contribution > 0) contributors += 1;
+        }
+    }
+    if (contributors === 0) return null;
+    const simultaneousAxes = Math.max(1, simultaneousAxesForSector(sector?.sector_id));
+    const boosted = effectiveReserves * SECTOR_STANCE_REACTIVE_BONUS[sector?.sector_stance ?? 'defend'] / simultaneousAxes;
+    const reactive = Math.min(boosted, attackerCount * avgPower * REACTIVE_DEFENSE_RATIO);
+    const power = applyMinimumSectorDefenseFloor(physicalPower + reactive, avgPower * MIN_DEFENSE_FLOOR_FRACTION, contributors);
+    return { power, contributors, sectorId: sector?.sector_id };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1462,7 +1497,7 @@ export function tickPreparation(
 
     const confidence = getOperationIntelConfidence(state, op, confidenceLookupContext, 'initial');
     // LANE-2026-05-02: pass supplyByOsid + terrainMultByOsid for honest defender modifiers
-    const forceRatio = estimateForceRatio(state, op, competence, confidence, supplyByOsid, terrainMultByOsid);
+    const forceRatio = estimateForceRatio(state, op, competence, confidence, supplyByOsid, terrainMultByOsid, adjacency);
     const requiredConfidence = getRequiredConfidence(competence, aggressiveness);
     const requiredForceRatio = getRequiredForceRatio(competence, aggressiveness);
     let currentConfidenceReached: number | undefined;
