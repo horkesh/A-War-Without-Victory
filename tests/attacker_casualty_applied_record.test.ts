@@ -192,4 +192,18 @@ describe('CAS-REPORT §15: attacker casualties are recorded as applied', () => {
         expect(ledgerTotal(fx.state, 'RS')).toBe(drop);
         expect(Math.abs(report.battles[0]!.attacker_casualties - drop)).toBeLessThanOrEqual(1);
     });
+
+    it('TG-LOAN (§17): a donor near its floor books only the loss actually removed in casualties_so_far', () => {
+        const fx = makeScenario(3000);
+        const donor = addTg(fx, fx.small, 400);
+        donor.personnel = MIN_COMBAT_PERSONNEL + 3;
+        resolve(fx);
+        const tg = (fx.state.military as unknown as {
+            tactical_groups: Record<string, { donor_contributions: { casualties_so_far: number }[] }>;
+        }).tactical_groups.tg_1;
+        const donorDrop = MIN_COMBAT_PERSONNEL + 3 - (donor.personnel ?? 0);
+        expect(donor.personnel).toBeGreaterThanOrEqual(MIN_COMBAT_PERSONNEL);
+        expect(donorDrop).toBeGreaterThan(0);
+        expect(tg.donor_contributions[0]!.casualties_so_far).toBe(donorDrop);
+    });
 });
