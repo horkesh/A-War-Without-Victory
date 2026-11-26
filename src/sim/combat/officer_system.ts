@@ -619,12 +619,15 @@ export interface OfficerSuccessionReport {
 /**
  * Process officer succession for one turn.
  *
- * 1. Process historical departures (available_until_turn).
- *    - Bot factions: auto-retire. Player faction: create replacement_suggested event.
- * 2. Check for newly available officers (available_from_turn).
+ * 1. Historical departures (available_until_turn): every faction's officer retires on his
+ *    date, the player's included; a presidential appointee keeps his corps (§15.1, G1).
+ * 2. Newly available officers (available_from_turn) enter the reserve.
  *    - Player faction: create officer_available notification event.
- * 3. Casualty checks for active officers in corps that fought.
- * 4. Fill vacant corps commands from pool.
+ * 3. Casualty checks for active officers in corps that fought; 3b scheduled fates and the
+ *    release of holders whose seat is no longer active.
+ * 4. Advance turns in command; the army commander lifecycle runs before the vacancies.
+ * 5. Fill vacant corps commands (schedule first, then the pool); an acting holder gives way
+ *    unless he is a presidential appointee.
  */
 export function processOfficerSuccession(
     state: GameState,
