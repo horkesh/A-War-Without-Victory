@@ -138,6 +138,50 @@ describe('A5: siege leavers go only to a supplied settlement in the main body', 
     });
 });
 
+describe('E-dest (orchestrator ruling 2026-11-26): a routed siege leaver books its arrival row', () => {
+    const POCKET = 'novi_grad_sarajevo';
+    const log = (w: ReturnType<typeof world>) => (w.state.displacement.displacement_event_log ?? []) as any[];
+
+    it('each routed leg writes origin, dest_mun and settled; the arrivals aggregate and refugees_received see it', async () => {
+        const w = world({ homeSupplied: true, enclaveSupplied: true });
+        await runWarStep(w);
+        const routed = ds(w).home.displaced_in_by_faction?.RBiH ?? 0;
+        expect(routed).toBeGreaterThan(0);
+
+        const arrivals = log(w).filter((e) => e.origin_mun === POCKET && e.dest_mun !== POCKET);
+        expect(arrivals).toEqual([
+            {
+                turn: w.state.meta.turn,
+                origin_mun: POCKET,
+                dest_mun: 'home',
+                dest_osid: 'op:home:e',
+                ethnicity: 'RBiH',
+                displaced: 0,
+                killed: 0,
+                fled_abroad: 0,
+                settled: routed,
+            },
+        ]);
+        // The departure rows are unchanged: dest = origin, settled 0, the routed count booked to the besieger.
+        const departures = log(w).filter((e) => e.origin_mun === POCKET && e.dest_mun === POCKET);
+        expect(departures.every((e) => e.settled === 0 && e.caused_by === 'RS')).toBe(true);
+        expect(departures.reduce((s, e) => s + e.displaced, 0)).toBe(routed);
+
+        const disp = w.state.displacement as any;
+        expect(disp.displacement_origin_dest_arrivals?.[`${POCKET}|RBiH`]).toEqual({ home: routed });
+        expect(disp.displacement_humanitarian_aggregates?.RBiH?.RBiH?.refugees_received).toBe(routed);
+        expect(disp.displacement_humanitarian_aggregates?.RS?.RBiH?.refugees_created).toBe(routed);
+        expect(disp.displacement_flows_by_osid?.['op:home:e']?.in).toBe(routed);
+    });
+
+    it('trapped leavers write no arrival row and no arrivals entry', async () => {
+        const w = world({ homeSupplied: false, enclaveSupplied: true });
+        await runWarStep(w);
+        expect(log(w).filter((e) => (e.settled ?? 0) > 0)).toEqual([]);
+        expect((w.state.displacement as any).displacement_origin_dest_arrivals?.[`${POCKET}|RBiH`]).toBeUndefined();
+    });
+});
+
 describe('Ledger line 2 (s6_ledger12_ruling.md): the write-only "unable to leave" stock', () => {
     it('stores this week\'s trapped amount per side with the turn stamp, and only amounts of 1 or more', async () => {
         const w = world({ homeSupplied: false, enclaveSupplied: true });

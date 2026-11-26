@@ -25,7 +25,12 @@ import { areRbihHrhbAllied, DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN } from '../sim/e
 import type { EdgeRecord } from '../map/settlements.js';
 import { getReceivingCapacityFraction, POCKET_CROSSINGS, type PocketCrossing } from './displacement_routing_data.js';
 import { appendDisplacementEvent, UNKNOWN_CAUSER_BUCKET } from './displacement_event_log.js';
-import { getBilateralRoutingOrder, getDynamicHostileShare, type PassThroughDestinationResolver } from './displacement_takeover.js';
+import {
+    getBilateralRoutingOrder,
+    getDynamicHostileShare,
+    resolveRepresentativeDestOsid,
+    type PassThroughDestinationResolver,
+} from './displacement_takeover.js';
 import { recordCivilianDisplacementCasualties } from './displacement_state_utils.js';
 import { strictCompare } from './validateGameState.js';
 import type { MunicipalityPopulation1991Map } from './population_share.js';
@@ -1242,6 +1247,27 @@ export function updateDisplacement(
                 const byFaction: Record<FactionId, number> = { RBiH: 0, RS: 0, HRHB: 0 };
                 byFaction[side] = share.amount;
                 pushDisplacementEventLogFromMun(state, munId, settlements, byFaction, currentTurn, byFaction, share.faction, noKilled, sideSidSet);
+            }
+            // E-dest (freeze inventory, orchestrator ruling 2026-11-26): each routed leg also books its arrival
+            // row, the documented arrival shape (DISPLACEMENT_MASTER §6.4) the takeover writer uses: origin this
+            // municipality, dest the route's municipality, settled the routed count, displaced/killed/fled 0, no
+            // causer (the departure rows above carry it). Before this, the departure rows said dest_mun = origin,
+            // settled 0, so `displacement_origin_dest_arrivals` (reconstitution Path B, pocket membership) and
+            // `refugees_received` never saw a siege leaver arrive. Leavers here are the holder's own residents
+            // (a first move), so the A4 rule against booking a second move of displaced people does not apply.
+            for (const route of routing) {
+                if (route.amount <= 0) continue;
+                appendDisplacementEvent(state, {
+                    turn: currentTurn,
+                    origin_mun: munId,
+                    dest_mun: route.to_mun,
+                    dest_osid: resolveRepresentativeDestOsid(state, route.to_mun, side),
+                    ethnicity: side,
+                    displaced: 0,
+                    killed: 0,
+                    fled_abroad: 0,
+                    settled: route.amount,
+                });
             }
 
             // Only this side's pool loses manpower: only its people left (Engine seat).
