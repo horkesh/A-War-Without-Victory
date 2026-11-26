@@ -48,7 +48,7 @@ import {
 } from './bot_constants.js';
 import { isRbihHrhbAtWar, isRbihHrhbMobilizing } from '../early_war/alliance_update.js';
 import { getActivePatronDirective } from './patron_directive_scope.js';
-import { capStanceForOct1995Ceasefire, isFactionBoundByOct1995Ceasefire } from './oct1995_ceasefire.js';
+import { capStanceForOct1995Ceasefire, isFactionBoundByOct1995Ceasefire, isOffensiveOperationType } from './oct1995_ceasefire.js';
 import type { CampaignPlan } from './army_hq_gathering_types.js';
 import { hasLightStrikeGroup } from './commander/force_eval.js';
 import {
@@ -60,7 +60,7 @@ import {
     getFactionCorps,
 } from './bot_corps_helpers.js';
 
-import type { CorpsStance } from '../../state/game_state.js';
+import type { CorpsCommandState, CorpsStance } from '../../state/game_state.js';
 
 /** Stance aggressiveness rank for ceiling enforcement (higher = more aggressive). */
 const STANCE_RANK: Record<CorpsStance, number> = {
@@ -83,10 +83,52 @@ export interface CorpsStanceTrace {
     driver:
         | 'reorganize_critical' | 'threat_high' | 'opportunity'
         | 'doctrine' | 'campaign_plan' | 'readiness_low' | 'faction_rule'
-        | 'patron_ceiling' | 'army_directive' | 'alliance_front' | 'ceasefire';
+        | 'patron_ceiling' | 'army_directive' | 'alliance_front' | 'ceasefire'
+        | 'no_operation';
     avg_cohesion: number;
     avg_strength: number;
     sector_threat: number;
+}
+
+/**
+ * P2.4 stance coherence (orchestrator ruling §8 R1, 2026-11-26). An offensive corps stance
+ * is carried by an offensive operation (sector attack, feint, probe or general offensive;
+ * `isOffensiveOperationType`) in planning or execution. Recovery does not count, nor does a
+ * strategic-defence or reorganization operation (seat AMEND, corps and operations seats).
+ * Without one the corps is capped at balanced. Balanced never blocks planning
+ * (commander/plan.ts blocks only defensive and reorganize), so a corps still plans its
+ * next operation and takes the offensive stance once that operation exists.
+ */
+export function corpsHasPlanningOrExecutionOperation(cmd: Pick<CorpsCommandState, 'active_operations'>): boolean {
+    return (cmd.active_operations ?? []).some((op) =>
+        (op.phase === 'planning' || op.phase === 'execution') && isOffensiveOperationType(op.type));
+}
+
+export function capOffensiveStanceWithoutOperation(
+    stance: CorpsStance,
+    cmd: Pick<CorpsCommandState, 'active_operations'>,
+): CorpsStance {
+    return stance === 'offensive' && !corpsHasPlanningOrExecutionOperation(cmd) ? 'balanced' : stance;
+}
+
+/**
+ * P2.4 final pass, after the commander loop: re-applies the cap to writers that run after
+ * the formula (the bilateral-war reassignment). A President's explicit stance order is an
+ * override and is left alone; the formula recommendation is capped like the bot stance, so
+ * Level 1 never proposes an offensive with no operation behind it.
+ */
+export function capCorpsStancesWithoutOperation(state: GameState, faction: FactionId): void {
+    const corpsCommand = state.military.corps_command;
+    if (!corpsCommand) return;
+    for (const corps of getFactionCorps(state, faction)) {
+        const cmd = corpsCommand[corps.id];
+        if (!cmd) continue;
+        if (cmd.ai_recommended_stance) {
+            cmd.ai_recommended_stance = capOffensiveStanceWithoutOperation(cmd.ai_recommended_stance, cmd);
+        }
+        if (cmd.player_ordered_stance != null) continue;
+        if (cmd.stance) cmd.stance = capOffensiveStanceWithoutOperation(cmd.stance, cmd);
+    }
 }
 
 export function generateCorpsStanceOrders(
@@ -359,6 +401,10 @@ export function generateCorpsStanceOrders(
         // or below, including AI/army directives above. Inert unless the ceasefire flag is set.
         stance = capStanceForOct1995Ceasefire(state, faction, stance);
         noteDriver('ceasefire');
+
+        // P2.4: no offensive stance without an operation in planning or execution to carry it.
+        stance = capOffensiveStanceWithoutOperation(stance, cmd);
+        noteDriver('no_operation');
 
         // Read-only trace for the stance-matter path (posture model option 2). No state write.
         if (trace) {

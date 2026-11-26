@@ -418,7 +418,8 @@ function reasonFromTrace(trace: CorpsStanceTrace | undefined, finalStance: Corps
     if (trace.stance !== finalStance) {
         // A later writer in the pass changed it. Since the corridor-breach pass was retired
         // (RF-corridor-breach 2026-11-15) that is only the bilateral-war reassignment, which
-        // sets balanced; the offensive branch is kept for any future late writer.
+        // sets balanced (the P2.4 no-operation pass after it only lowers that reassignment's
+        // offensive back to balanced); the offensive branch is kept for any future late writer.
         return finalStance === 'offensive' ? 'opportunity' : 'alliance_front';
     }
     switch (trace.driver) {
@@ -433,6 +434,9 @@ function reasonFromTrace(trace: CorpsStanceTrace | undefined, finalStance: Corps
         case 'army_directive': return 'army_directive';
         case 'alliance_front': return 'alliance_front';
         case 'ceasefire': return 'ceasefire';
+        // P2.4 (no operation in planning or execution, so offensive is capped at balanced):
+        // the general reason until a dedicated reason and its copy exist.
+        case 'no_operation': return 'other';
         default: return 'other';
     }
 }
