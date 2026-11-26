@@ -292,7 +292,8 @@ function applyEnclaveFormationDisplacement(
                 state, effect.faction, f.corps_id ?? null, effect.destination_osid, sourceSet,
             );
             if (reformOsid == null) {
-                // The faction holds no cell at all: there is no friendly ground to re-form on.
+                // The contact graph reaches no held cell outside the fallen pocket and the named
+                // enclaves: there is no friendly ground to re-form on.
                 // Same terminal record as the 'none' branch below (disbanded, not destroyed).
                 (f as { personnel?: number }).personnel = 0;
                 (f as { status?: string }).status = 'inactive';
