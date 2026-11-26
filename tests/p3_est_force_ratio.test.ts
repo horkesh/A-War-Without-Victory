@@ -179,6 +179,75 @@ describe('P3-EST §11: the attack side mirrors the battle', () => {
         expect(estimateForceRatio(s, pastEnd, 3, 0.9, null, {}, adjacency())).toBeCloseTo(3.0, 9);
     });
 
+    it('PRIM-HOSTILE: an axis whose current cell is HRHB-held and combat-blocked (ceasefire, mobilizing) parks there, as in the battle', () => {
+        // a1's current objective 'A0' (HRHB-held) sorts first; the battle refuses it and the results
+        // pass does not credit it, so a1 parks: no first battle, not one at its depth cell 'C3'.
+        // a2 fights at 'D'. So the estimate is a2's brigade alone at 'D'.
+        const twoAxes = {
+            ...op(),
+            objectives: [],
+            axes: [
+                { axis_id: 'a1', objectives: ['A0', 'C3'], assigned_brigades: ['attacker_2'], current_objective_index: 0 },
+                { axis_id: 'a2', objectives: ['D'], assigned_brigades: ['attacker'], current_objective_index: 0 },
+            ],
+        } as unknown as CorpsOperation;
+        const at = (alliance: number, rhs: Record<string, unknown>) => {
+            const s = fixture(false);
+            (s.meta as any).turn = 60;
+            (s.political as any).political_controllers.A0 = 'HRHB';
+            (s.political as any).war_alliance_rbih_hrhb = alliance;
+            (s.political as any).rbih_hrhb_state = rhs;
+            const p = predictCombatOutcome(s, 'attacker' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack');
+            return { est: estimateForceRatio(s, twoAxes, 3, 0.9, null, {}, adjacency()), aloneAtD: p!.attacker_power / (p!.defender_power / PREDICTOR_FOG_WITHOUT_INTEL) };
+        };
+        // At war, under a ceasefire: not allied (so `isFriendlyFaction` alone called A0 contested), but combat is blocked.
+        const ceasefire = at(-0.3, { ceasefire_active: true });
+        expect(ceasefire.est).toBeCloseTo(ceasefire.aloneAtD, 6);
+        // Mobilizing: below the alliance threshold, combat not yet enabled.
+        const mobilizing = at(0.1, {});
+        expect(mobilizing.est).toBeCloseTo(mobilizing.aloneAtD, 6);
+        // Open war, no block: A0 is a legal battle and is the primary (no defender there, so the sentinel).
+        const war = at(-0.3, {});
+        expect(war.est).not.toBeCloseTo(war.aloneAtD, 3);
+    });
+
+    it('PRIM-ATT: an axis that holds the primary only as a depth objective does not fight there first', () => {
+        const s = fixture(false);
+        // a1 fights at 'D' first. a2's first contested objective is 'Z0' (RS-held); 'D' is only its depth.
+        (s.political as any).political_controllers.Z0 = 'RS';
+        const depthAxisOp = {
+            ...op(),
+            objectives: [],
+            axes: [
+                { axis_id: 'a1', objectives: ['D'], assigned_brigades: ['attacker'], current_objective_index: 0 },
+                { axis_id: 'a2', objectives: ['Z0', 'D'], assigned_brigades: ['attacker_2'], current_objective_index: 0 },
+            ],
+        } as unknown as CorpsOperation;
+        const est = estimateForceRatio(s, depthAxisOp, 3, 0.9, null, {}, adjacency());
+        // Only 'attacker' fights at D, as in the battle.
+        const p = predictCombatOutcome(s, 'attacker' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack');
+        expect(p).not.toBeNull();
+        expect(est).toBeCloseTo(p!.attacker_power / (p!.defender_power / PREDICTOR_FOG_WITHOUT_INTEL), 6);
+        expect(est).toBeLessThan(estimateForceRatio(s, op(), 3, 0.9, null, {}, adjacency()));
+    });
+
+    it('PRIM-ATT fallback: with no axis fighting anywhere first, the lowest objective is read with every participating brigade', () => {
+        const s = fixture(false);
+        // Both axes are past their last objective, so neither has a first contested objective. The
+        // primary falls back to the lowest objective ('D'), and no axis fights there first, so every
+        // participating brigade counts (main counted only a1, which held 'D' at depth).
+        const exhausted = {
+            ...op(),
+            objectives: [],
+            axes: [
+                { axis_id: 'a1', objectives: ['D'], assigned_brigades: ['attacker'], current_objective_index: 1 },
+                { axis_id: 'a2', objectives: ['Y2'], assigned_brigades: ['attacker_2'], current_objective_index: 1 },
+            ],
+        } as unknown as CorpsOperation;
+        expect(estimateForceRatio(s, exhausted, 3, 0.9, null, {}, adjacency()))
+            .toBeCloseTo(estimateForceRatio(s, op(), 3, 0.9, null, {}, adjacency()), 9);
+    });
+
     it('keeps predictor parity in a winter month (seasonal attack and defence multipliers)', () => {
         const s = fixture(false);
         (s.meta as any).scenario_start_date = { year: 1992, month: 5, day: 1 };

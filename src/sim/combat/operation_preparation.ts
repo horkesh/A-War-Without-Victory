@@ -99,6 +99,7 @@ import { collectAverageDefenseRoster, collectSectorDefenseBrigades } from './sec
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { isFriendlyFaction } from '../early_war/alliance_update.js';
+import { isOperationObjectiveHostile } from './operation_objective_hostility.js';
 import { munFromOsid, type Osid } from './osid_adjacency.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 // ADR-0005 v2.2b: TG formation wiring at sub_phase='ready' transition. Flag-gated.
@@ -592,7 +593,8 @@ export function estimateForceRatio(
     // defending roster and the own execution friction. Measured on the 188w hist: the
     // per-brigade sum without those read about 2.5x the realised battle ratio, mostly the
     // missing firepower deficit (ARBiH) and the uncounted split across axes (VRS, HVO).
-    const fightingFormations = collectPrimaryObjectiveAttackers(op, attackerFormations, primaryTargetOsid);
+    const fightingFormations = collectPrimaryObjectiveAttackers(
+        state, op, attackerFormations, primaryTargetOsid, attackerFaction, objectives);
     const seasonal = getSeasonalModifiers(state.meta?.turn ?? 0, state.meta?.scenario_start_date, 0);
 
     // P3-EST (2026-11-26, freeze inventory §8 queue; operations seat spec): the defence is
@@ -677,21 +679,26 @@ export function estimateForceRatio(
 
 /**
  * P3-EST §11: the brigades that will fight at the primary objective. With live axes, the
- * battle's attackers come from the axes whose objectives include it, so only their assigned
- * brigades count; without axes, or when no live axis names it, every participating brigade.
- * Strict ID order, as `computeAttackForcePower` expects.
+ * battle's attackers come from the axes whose first contested objective it is, so only their
+ * assigned brigades count; without axes, or when no live axis fights there first, every
+ * participating brigade. Strict ID order, as `computeAttackForcePower` expects.
+ * PRIM-ATT (rulings §18): an axis that holds the primary only as a depth objective does not
+ * fight at it first, so its brigades are not counted (the same helper the primary is chosen by).
  */
 function collectPrimaryObjectiveAttackers(
+    state: GameState,
     op: CorpsOperation,
     attackerFormations: FormationState[],
     primaryTargetOsid: string,
+    attackerFaction: FactionId,
+    allowed: ReadonlySet<string>,
 ): FormationState[] {
     let scoped = attackerFormations;
     if (op.axes && op.axes.length > 0) {
         const ids = new Set<string>();
         for (const ax of op.axes) {
             if (isAxisExcludedFromPreparation(ax)) continue;
-            if (!ax.objectives.includes(primaryTargetOsid)) continue;
+            if (firstContestedAxisObjective(state, ax, attackerFaction, allowed) !== primaryTargetOsid) continue;
             for (const bid of ax.assigned_brigades) ids.add(bid);
         }
         const onAxis = attackerFormations.filter((a) => ids.has(a.id));
@@ -728,7 +735,8 @@ function countOperationAxesOnDefendingSector(
 /**
  * P3-EST-PRIM (rulings §13; operations seat, lane B s24): the cell an axis's first battle is
  * fought at. That is its first objective, from `current_objective_index` on, that is held by
- * neither the attacker nor an ally and is not uncontrolled. The estimate runs in preparation,
+ * neither the attacker nor an ally and is not uncontrolled; none if that cell is combat-blocked
+ * (PRIM-HOSTILE: the axis parks there). The estimate runs in preparation,
  * before the launch reconcile drops friendly-held objectives (`sector_offensive.ts`), and the
  * results pass credits a friendly current objective as captured without a battle, so such a cell
  * is never the first battle. `allowed`, when given, restricts the read to the preparation
@@ -745,7 +753,15 @@ function firstContestedAxisObjective(
         if (typeof o !== 'string' || o.length === 0) continue;
         if (allowed && !allowed.has(o)) continue;
         const controller = getPoliticalControllerOSID(state, o, undefined);
+        // Own, allied and uncontrolled cells are credited by the results pass without a battle
+        // (`sector_offensive.ts` convergence pass), so the axis walks past them.
         if (controller === null || isFriendlyFaction(controller, attackerFaction, state)) continue;
+        // PRIM-HOSTILE (rulings §19; operations seat, lane B s25): the battle's own test
+        // (`isRbihHrhbCombatBlocked`, through `isOperationObjectiveHostile`). A foreign RBiH-HRHB
+        // cell before their war, while their combat is not enabled, under a ceasefire or after
+        // Washington is kept at launch but never fought and never credited, so the axis parks on
+        // it: it has no first battle, not one at a deeper cell.
+        if (!isOperationObjectiveHostile(state, attackerFaction, controller)) return undefined;
         return o;
     }
     return undefined;
