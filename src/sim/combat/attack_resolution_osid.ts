@@ -1138,8 +1138,12 @@ export function resolveAttackOrdersOsid(
                         const donorCas = dist.donor_casualties[donorContrib.brigade_id] ?? 0;
                         if (donorCas <= 0) continue;
                         const donor = state.military.formations[donorContrib.brigade_id];
-                        if (donor) appliedCas += applyPersonnelLoss(donor, donorCas);
-                        donorContrib.casualties_so_far += donorCas;
+                        // TG-LOAN (§17): the loan counter books the donor loss actually
+                        // removed. A donor near its floor is clamped by applyPersonnelLoss,
+                        // and booking the planned share over-counted the loan loss.
+                        const donorApplied = donor ? applyPersonnelLoss(donor, donorCas) : 0;
+                        appliedCas += donorApplied;
+                        donorContrib.casualties_so_far += donorApplied;
                     }
                 } else {
                     appliedCas = applyPersonnelLoss(a, cas);
