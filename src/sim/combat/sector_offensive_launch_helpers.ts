@@ -4,8 +4,10 @@ import type {
     FormationId,
     FormationState,
     GameState,
+    OperationAxis,
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { isOperationObjectiveForeignControlled } from './operation_objective_hostility.js';
 // TEMPORARY DIAGNOSTIC import — remove together with axis_readiness_debug.ts.
 import { emitAxisReadinessTrace, emitOperationReadinessTrace, emitExecutabilityTrace } from './axis_readiness_debug.js';
 import type { AxisReadinessDebugContext, BrigadePredictionFact } from './axis_readiness_debug.js';
@@ -1577,4 +1579,63 @@ export function getMomentumMinOutcome(momentum: number, base: string): string {
     if (momentum >= 2 && baseRank > 3) return 'costly_victory';
     if (momentum >= 1 && baseRank > 4) return 'victory';
     return base;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// The launch view of an axis (PRIM-A3 + A4, rulings §25.5-6)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** The launch reconcile keeps an axis's foreign-controlled objectives, blocked or not, in order. */
+export function filterAxisPlanningObjectives(
+    state: GameState,
+    axis: OperationAxis,
+    faction: FactionId,
+): string[] {
+    return (axis.objectives ?? []).filter((osid) => {
+        const controller = getPoliticalControllerOSID(state, osid, undefined);
+        return isOperationObjectiveForeignControlled(faction, controller);
+    });
+}
+
+/** The launch reconcile drops leading objectives that have no approach OSID. */
+export function pruneUnreachablePlanningObjectivePrefix(
+    state: GameState,
+    corpsId: FormationId,
+    faction: FactionId,
+    objectives: string[],
+    staticAdjacency?: Map<string, string[]>,
+): string[] {
+    const firstReachableIndex = objectives.findIndex((objective) =>
+        collectObjectiveApproachOsids(state, corpsId, faction, [objective], staticAdjacency).size > 0);
+    if (firstReachableIndex <= 0) return objectives;
+
+    return objectives.slice(firstReachableIndex);
+}
+
+export interface LaunchAxisObjectiveView {
+    readonly objectives: readonly string[];
+    readonly currentIndex: number;
+}
+
+/**
+ * The objectives and current index an axis would carry if the operation launched now: exactly
+ * what `reconcilePlanningObjectives` (sector_offensive.ts) writes onto a live axis, computed
+ * without writing anything. Null when the reconcile would drop the axis (no foreign-controlled
+ * objective left). `staticAdjacency` must be the map the reconcile is given (only pre-planned
+ * operations get one). Pure and deterministic: authored order, no Map iteration.
+ */
+export function launchAxisObjectiveView(
+    state: GameState,
+    corpsId: FormationId,
+    faction: FactionId,
+    op: CorpsOperation,
+    axis: OperationAxis,
+    staticAdjacency?: Map<string, string[]>,
+): LaunchAxisObjectiveView | null {
+    const enemyObjectives = filterAxisPlanningObjectives(state, axis, faction);
+    const objectives = op.preserve_objective_sequence === true || axis.preserve_objective_sequence === true
+        ? enemyObjectives
+        : pruneUnreachablePlanningObjectivePrefix(state, corpsId, faction, enemyObjectives, staticAdjacency);
+    if (objectives.length === 0) return null;
+    return { objectives, currentIndex: Math.min(axis.current_objective_index ?? 0, objectives.length - 1) };
 }

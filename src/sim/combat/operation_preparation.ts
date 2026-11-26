@@ -71,6 +71,9 @@ import {
     // `sector_offensive_launch_helpers.ts` JSDoc on `isCommittedInTransitTo`.
     isCommittedInTransitTo,
     collectObjectiveApproachOsids,
+    // PRIM-A3 + A4: the launch reconcile's own view of each axis.
+    launchAxisObjectiveView,
+    type LaunchAxisObjectiveView,
 } from './sector_offensive_launch_helpers.js';
 import { SYNC_WAIT_MAX_TURNS } from './army_hq_gathering_constants.js';
 // LANE-2026-05-02: estimateForceRatio defender-modifier integration
@@ -462,6 +465,7 @@ export function estimateForceRatio(
     supplyByOsid?: SupplyStateByOsidReport | null, // LANE-2026-05-02
     terrainMultByOsid?: Record<string, number>, // LANE-2026-05-02
     adjacency?: Map<string, string[]>, // P3-EST
+    launchCorpsId?: FormationId, // PRIM-A3: the corps the launch reconcile runs for
 ): number {
     // LANE-2026-05-02: collect attacker formations (active only) once for both
     // power summation and the artillery-suppression input to defender ranking.
@@ -488,10 +492,26 @@ export function estimateForceRatio(
     // Operations seat (lane B s24): an axis's first battle is at its first objective, from the
     // current index on, that is still contested (`firstContestedAxisObjective`).
     const attackerFaction: FactionId = attackerFormations[0]!.faction || 'RBiH';
+    // PRIM-A3 + A4 (rulings §25.5-6): every axis read below uses the launch step's view of
+    // the axis (`launchAxisObjectiveView`: the reconcile's foreign-cell filter and its cut of
+    // leading unreachable objectives), computed once per axis. The reconcile gets the static
+    // adjacency only for pre-planned operations (`sector_offensive.ts`), so the view does too.
+    const launchCorps = (launchCorpsId ?? attackerFormations[0]!.corps_id ?? '') as FormationId;
+    // Mirrors the reconcile's gate. Pre-planned operations return before the estimate in
+    // `tickPreparation` today, so in production this is always undefined; kept so the view stays
+    // the launch view if that ever changes.
+    const launchStaticAdjacency = op.is_pre_planned === true ? adjacency : undefined;
+    const launchViews = new Map<OperationAxis, LaunchAxisObjectiveView | null>();
+    const launchViewFor = (ax: OperationAxis): LaunchAxisObjectiveView | null => {
+        if (!launchViews.has(ax)) {
+            launchViews.set(ax, launchAxisObjectiveView(state, launchCorps, attackerFaction, op, ax, launchStaticAdjacency));
+        }
+        return launchViews.get(ax)!;
+    };
     const sortedObjectives = Array.from(objectives).sort(strictCompare);
     const liveCurrentObjectives = (op.axes ?? [])
         .filter((ax) => !isAxisExcludedFromPreparation(ax))
-        .map((ax) => firstContestedAxisObjective(state, ax, attackerFaction, objectives))
+        .map((ax) => firstContestedAxisObjective(state, ax, attackerFaction, objectives, launchViewFor(ax)))
         .filter((o): o is string => o !== undefined)
         .sort(strictCompare);
     const primaryTargetOsid = liveCurrentObjectives[0] ?? sortedObjectives[0];
@@ -527,7 +547,10 @@ export function estimateForceRatio(
         for (const ax of op.axes) {
             if (isAxisExcludedFromPreparation(ax)) continue;
             if (ax.staging_osid) relevanceOsids.add(ax.staging_osid);
-            const currentObjective = ax.objectives[ax.current_objective_index ?? 0];
+            // PRIM-A4 (systems seat): the axis's first battle in the launch view, not the raw
+            // current objective, so a friendly, blocked or unreachable cell seeds no approach.
+            const currentObjective = firstContestedAxisObjective(
+                state, ax, attackerFaction, objectives, launchViewFor(ax));
             if (typeof currentObjective === 'string' && currentObjective.length > 0
                 && attackerCorpsId
             ) {
@@ -594,7 +617,7 @@ export function estimateForceRatio(
     // per-brigade sum without those read about 2.5x the realised battle ratio, mostly the
     // missing firepower deficit (ARBiH) and the uncounted split across axes (VRS, HVO).
     const fightingFormations = collectPrimaryObjectiveAttackers(
-        state, op, attackerFormations, primaryTargetOsid, attackerFaction, objectives);
+        state, op, attackerFormations, primaryTargetOsid, attackerFaction, objectives, launchViewFor);
     const seasonal = getSeasonalModifiers(state.meta?.turn ?? 0, state.meta?.scenario_start_date, 0);
 
     // P3-EST (2026-11-26, freeze inventory §8 queue; operations seat spec): the defence is
@@ -617,7 +640,8 @@ export function estimateForceRatio(
         artSuppression,
         supplyByOsid,
         noEthnicBonus,
-        (sectorId) => countOperationAxesOnDefendingSector(state, op, sectorId, attackerFaction),
+        (sectorId) => countOperationAxesOnDefendingSector(
+            state, op, sectorId, attackerFaction, objectives, launchViewFor),
     );
 
     // The resolver's deficit compares the attackers with the whole defending roster.
@@ -692,13 +716,14 @@ function collectPrimaryObjectiveAttackers(
     primaryTargetOsid: string,
     attackerFaction: FactionId,
     allowed: ReadonlySet<string>,
+    launchViewFor: (ax: OperationAxis) => LaunchAxisObjectiveView | null,
 ): FormationState[] {
     let scoped = attackerFormations;
     if (op.axes && op.axes.length > 0) {
         const ids = new Set<string>();
         for (const ax of op.axes) {
             if (isAxisExcludedFromPreparation(ax)) continue;
-            if (firstContestedAxisObjective(state, ax, attackerFaction, allowed) !== primaryTargetOsid) continue;
+            if (firstContestedAxisObjective(state, ax, attackerFaction, allowed, launchViewFor(ax)) !== primaryTargetOsid) continue;
             for (const bid of ax.assigned_brigades) ids.add(bid);
         }
         const onAxis = attackerFormations.filter((a) => ids.has(a.id));
@@ -712,18 +737,22 @@ function collectPrimaryObjectiveAttackers(
  * (`firstContestedAxisObjective`) is defended by `sectorId`, at least 1. The battle divides the
  * sector's reactive reserves by the number of an operation's axes attacking the same sector
  * (`attack_resolution_osid.ts`, simultaneousAxes). A single-axis operation is 1.
+ * PRIM-A4: the same preparation view (`allowed`) and launch view as the primary pick and the
+ * attacker pick, so the three reads agree on every axis's first battle.
  */
 function countOperationAxesOnDefendingSector(
     state: GameState,
     op: CorpsOperation,
     sectorId: string | undefined,
     attackerFaction: FactionId,
+    allowed: ReadonlySet<string>,
+    launchViewFor: (ax: OperationAxis) => LaunchAxisObjectiveView | null,
 ): number {
     if (!sectorId || !op.axes || op.axes.length === 0) return 1;
     let count = 0;
     for (const ax of op.axes) {
         if (isAxisExcludedFromPreparation(ax)) continue;
-        const objective = firstContestedAxisObjective(state, ax, attackerFaction);
+        const objective = firstContestedAxisObjective(state, ax, attackerFaction, allowed, launchViewFor(ax));
         if (objective === undefined) continue;
         const controller = getPoliticalControllerOSID(state, objective, undefined);
         if (controller === null) continue;
@@ -741,15 +770,24 @@ function countOperationAxesOnDefendingSector(
  * results pass credits a friendly current objective as captured without a battle, so such a cell
  * is never the first battle. `allowed`, when given, restricts the read to the preparation
  * objective view. Pure and deterministic: it walks the authored objective order, writes nothing.
+ * PRIM-A3 (rulings §25.5; operations seat, lane B s25 and s27): the walk is over the axis's
+ * LAUNCH view (`launchAxisObjectiveView`), the objectives the launch reconcile will give it, so a
+ * leading objective the reconcile cuts as unreachable is never read as the first battle. It walks
+ * from the first of them: right after the reconcile, launch resets every axis to index 0
+ * (`resetAxisForExecution`), so an index carried through a recovery is not where the first battle
+ * is fought. A null view (the reconcile drops the axis) has no first battle.
  */
 function firstContestedAxisObjective(
     state: GameState,
     ax: OperationAxis,
     attackerFaction: FactionId,
-    allowed?: ReadonlySet<string>,
+    allowed: ReadonlySet<string>,
+    launchView: LaunchAxisObjectiveView | null,
 ): string | undefined {
-    for (let i = Math.max(0, ax.current_objective_index ?? 0); i < ax.objectives.length; i++) {
-        const o = ax.objectives[i];
+    if (launchView === null) return undefined;
+    const launchObjectives = launchView.objectives;
+    for (let i = 0; i < launchObjectives.length; i++) {
+        const o = launchObjectives[i];
         if (typeof o !== 'string' || o.length === 0) continue;
         if (allowed && !allowed.has(o)) continue;
         const controller = getPoliticalControllerOSID(state, o, undefined);
@@ -1634,7 +1672,7 @@ export function tickPreparation(
 
     const confidence = getOperationIntelConfidence(state, op, confidenceLookupContext, 'initial');
     // LANE-2026-05-02: pass supplyByOsid + terrainMultByOsid for honest defender modifiers
-    const forceRatio = estimateForceRatio(state, op, competence, confidence, supplyByOsid, terrainMultByOsid, adjacency);
+    const forceRatio = estimateForceRatio(state, op, competence, confidence, supplyByOsid, terrainMultByOsid, adjacency, corpsId);
     const requiredConfidence = getRequiredConfidence(competence, aggressiveness);
     const requiredForceRatio = getRequiredForceRatio(competence, aggressiveness);
     let currentConfidenceReached: number | undefined;
