@@ -43,6 +43,10 @@ function enclaveBrigade(id: string, homeOsid: string, personnel = 1500): Formati
 function makeState(): GameState {
     const s = {
         meta: { turn: 168, phase: 'war' },
+        // E-fall (2026-11-26): survivors re-form at the destination only while RBiH holds it,
+        // as it does in a hands-off game. The divergent case is pinned in
+        // enclave_formation_displacement.test.ts.
+        political: { political_controllers: { 'op:zivinice:gracanica_2': 'RBiH' } },
         military: {
             formations: {
                 // the five Srebrenica defenders
