@@ -47,6 +47,13 @@ export const MORALE_ABSORPTION_CAS_MULT = 1.6;
 export interface MoraleAbsorptionResult {
     moraleAbsorbed: boolean;
     flip: boolean;
+    /**
+     * Homeland-determination extra losses actually removed (after the personnel
+     * floor), per side. The battle record is pushed before absorption runs, so
+     * the resolver adds these to it; the record then reports the applied loss.
+     */
+    extraAttackerApplied: number;
+    extraDefenderApplied: number;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -144,6 +151,10 @@ export function evaluateAndApplyMoraleAbsorption(params: {
     }
 
     // === HOMELAND DETERMINATION: Extra casualties when morale absorption triggers ===
+    // CAS-REPORT-2: each extra is booked at the figure applyPersonnelLoss actually removed,
+    // and the totals are returned so the battle record reports the applied loss.
+    let extraAttackerApplied = 0;
+    let extraDefenderApplied = 0;
     if (moraleAbsorbed && defenderFormation) {
         const extraMult = MORALE_ABSORPTION_CAS_MULT - 1.0;
         const extraAttackerTotal = Math.round(finalAttackerCas * extraMult);
@@ -152,9 +163,12 @@ export function evaluateAndApplyMoraleAbsorption(params: {
                 const frac = (a.personnel ?? 0) / Math.max(1, personnelAttacker);
                 const extraCas = Math.min(Math.max(0, (a.personnel ?? 0) - MIN_COMBAT_PERSONNEL), Math.round(extraAttackerTotal * frac));
                 if (extraCas > 0) {
-                    applyPersonnelLoss(a, extraCas);
-                    report.casualty_attacker += extraCas;
-                    recordBattleCasualties(casualtyLedger, a.faction, a.id, splitKiaWiaMia(extraCas));
+                    const applied = applyPersonnelLoss(a, extraCas);
+                    if (applied > 0) {
+                        report.casualty_attacker += applied;
+                        recordBattleCasualties(casualtyLedger, a.faction, a.id, splitKiaWiaMia(applied));
+                        extraAttackerApplied += applied;
+                    }
                 }
             }
         }
@@ -163,11 +177,14 @@ export function evaluateAndApplyMoraleAbsorption(params: {
             Math.round(finalDefenderCas * extraMult)
         );
         if (extraDefenderTotal > 0) {
-            applyPersonnelLoss(defenderFormation, extraDefenderTotal);
-            report.casualty_defender += extraDefenderTotal;
-            recordBattleCasualties(casualtyLedger, defenderFormation.faction, defenderFormation.id, splitKiaWiaMia(extraDefenderTotal));
+            const applied = applyPersonnelLoss(defenderFormation, extraDefenderTotal);
+            if (applied > 0) {
+                report.casualty_defender += applied;
+                recordBattleCasualties(casualtyLedger, defenderFormation.faction, defenderFormation.id, splitKiaWiaMia(applied));
+                extraDefenderApplied = applied;
+            }
         }
     }
 
-    return { moraleAbsorbed, flip };
+    return { moraleAbsorbed, flip, extraAttackerApplied, extraDefenderApplied };
 }

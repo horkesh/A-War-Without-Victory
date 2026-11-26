@@ -1287,8 +1287,9 @@ export function resolveAttackOrdersOsid(
         // Compute deterministic battle_id join key
         const battleId = `${currentTurn}:${targetOsid}:${firstAttacker.id}:${defenderFormation?.id ?? 'null'}`;
 
-        // Push battle report with equipment data
-        report.battles.push({
+        // Push battle report with equipment data. The reference is kept so morale
+        // absorption (below) can add the extra losses it applies (CAS-REPORT-2).
+        const battleRecord: AttackResolutionOsidReport['battles'][number] = {
             battle_id: battleId,
             attacker_brigade: firstAttacker.id,
             attacker_brigades: attackerBrigadeIds,
@@ -1353,7 +1354,8 @@ export function resolveAttackOrdersOsid(
                     min_floor_applied: dbgMinFloorApplied,
                 },
             })),
-        });
+        };
+        report.battles.push(battleRecord);
 
         const linkedChildren = new Map<string, { corpsId: FormationId; op: CorpsOperation }>();
         for (const attacker of attackerFormations) {
@@ -1428,7 +1430,12 @@ export function resolveAttackOrdersOsid(
             && occupiesOnVictory;
 
         // === MORALE-BASED RETREAT RESISTANCE + HOMELAND DETERMINATION (extracted to attack_morale_absorption.ts) ===
-        const { moraleAbsorbed, flip: updatedFlip } = evaluateAndApplyMoraleAbsorption({
+        const {
+            moraleAbsorbed,
+            flip: updatedFlip,
+            extraAttackerApplied,
+            extraDefenderApplied,
+        } = evaluateAndApplyMoraleAbsorption({
             defenderFormation,
             attackerFormations,
             targetOsid,
@@ -1444,6 +1451,15 @@ export function resolveAttackOrdersOsid(
             battleSnapEvents,
         });
         flip = updatedFlip;
+        // CAS-REPORT-2 (§16): the record reports exactly the applied loss on both sides,
+        // including the homeland-determination extras. Only the record is touched; every
+        // behaviour reader above (Pyrrhic check, officer loss) keeps the pre-absorption figure.
+        battleRecord.attacker_casualties += extraAttackerApplied;
+        battleRecord.defender_casualties += extraDefenderApplied;
+        if (extraDefenderApplied > 0 && defenderFormation && battleRecord.defender_contributions) {
+            const primary = battleRecord.defender_contributions.find((c) => c.brigade_id === defenderFormation.id);
+            if (primary) primary.casualties_taken += extraDefenderApplied;
+        }
 
         if (flip) {
             if (!state.political.political_controllers) state.political.political_controllers = {};
