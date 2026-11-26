@@ -926,8 +926,10 @@ export function processOfficerSuccession(
                 // Neither the schedule nor the pool ranking retires the President's appointee here:
                 // REPLACE-CO seats its appointee acting (relieveOfficer), and this branch is a staff
                 // rotation, not a physical loss (§15.1, G1). He keeps the acting combat modifier.
-                // Headless writes no appointment, so it is unaffected.
-                if (isPresidentialAppointee(state, corpsFormId, existingCommander.data.id)) continue;
+                // A generic stopgap (relieveOfficer with an empty reserve) is not the President's
+                // choice of officer and still gives way. Headless writes no appointment.
+                if (!existingCommander.data.id.startsWith('generic_')
+                    && isPresidentialAppointee(state, corpsFormId, existingCommander.data.id)) continue;
                 const scheduledReplacement = scheduledHolderForCorps(state, corpsRoster, officerData, officers, corpsFormId, turn, false);
                 const availableReplacement = scheduledReplacement
                     ?? findBestReplacement(officers, officerData, faction, corpsFormId, turn, officersRelievedFrom(corpsRoster, corpsFormId, turn));

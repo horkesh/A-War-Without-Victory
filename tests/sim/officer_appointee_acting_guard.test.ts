@@ -88,6 +88,24 @@ describe('G1: the acting-commander branch never removes a presidential appointee
         });
     }
 
+    it('a generic stopgap seated by REPLACE-CO on an empty reserve still gives way to a named officer', async () => {
+        const state = makeState({ player_faction: 'RBiH', autonomy_level: 0 });
+        const officers = state.military.named_officers;
+        officers.co_appointee.status = 'retired';
+        officers.co_second.status = 'retired';
+        state.military.corps_command[CORPS].pending_co_replacement = { replacement_officer_id: 'co_appointee', turn: 20, ca_cost: 25 };
+        REPLACE_STEP.run({ state } as any);
+        const genericId = state.military.corps_command[CORPS].co_replacement_record?.[0]?.replacement_officer_id;
+        expect(genericId).toMatch(/^generic_relief_/);
+        expect(officers[genericId]).toMatchObject({ status: 'active', assigned_corps_id: CORPS, acting_commander: true });
+
+        officers.co_second.status = 'reserve';
+        state.meta.turn = 21;
+        await SUCCESSION_STEP.run({ state, report: {} } as any);
+        expect(officers[genericId].assigned_corps_id).toBeNull();
+        expect(officers.co_second).toMatchObject({ status: 'active', assigned_corps_id: CORPS });
+    });
+
     it('a non-appointee acting holder still gives way to the pool pick (headless and live)', async () => {
         for (const meta of [{}, { player_faction: 'RBiH', autonomy_level: 0 }]) {
             const state = makeState(meta);
