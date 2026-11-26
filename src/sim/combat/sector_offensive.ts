@@ -155,6 +155,8 @@ import {
     getMomentumAggressionBonus,
     getMomentumMinOutcome,
     hasEligibleAttackersForLaunch,
+    launchAxisObjectiveView,
+    pruneUnreachablePlanningObjectivePrefix,
     resolveEquipmentClass,
     shouldStallAxisForRecentCatastrophicObjective,
 } from './sector_offensive_launch_helpers.js';
@@ -1153,31 +1155,6 @@ function findLiveLinkedPreparationProbe(
     }) ?? null;
 }
 
-function filterAxisPlanningObjectives(
-    state: GameState,
-    axis: OperationAxis,
-    faction: FactionId,
-): string[] {
-    return (axis.objectives ?? []).filter((osid) => {
-        const controller = getPoliticalControllerOSID(state, osid, undefined);
-        return isOperationObjectiveForeignControlled(faction, controller);
-    });
-}
-
-function pruneUnreachablePlanningObjectivePrefix(
-    state: GameState,
-    corpsId: FormationId,
-    faction: FactionId,
-    objectives: string[],
-    staticAdjacency?: Map<string, string[]>,
-): string[] {
-    const firstReachableIndex = objectives.findIndex((objective) =>
-        collectObjectiveApproachOsids(state, corpsId, faction, [objective], staticAdjacency).size > 0);
-    if (firstReachableIndex <= 0) return objectives;
-
-    return objectives.slice(firstReachableIndex);
-}
-
 type SanaPlanningTracePhase = 'pre' | 'post';
 
 /**
@@ -1297,20 +1274,12 @@ export function reconcilePlanningObjectives(
             objectives: string[];
         }> = [];
         for (const axis of op.axes) {
-            const enemyObjectives = filterAxisPlanningObjectives(state, axis, faction);
-            const filteredObjectives = op.preserve_objective_sequence === true
-                || axis.preserve_objective_sequence === true
-                ? enemyObjectives
-                : pruneUnreachablePlanningObjectivePrefix(
-                    state,
-                    corpsId,
-                    faction,
-                    enemyObjectives,
-                    staticAdjacency,
-                );
-            if (filteredObjectives.length === 0) continue;
+            // PRIM-A3: the same pure launch view the preparation estimate reads.
+            const view = launchAxisObjectiveView(state, corpsId, faction, op, axis, staticAdjacency);
+            if (view === null) continue;
+            const filteredObjectives = [...view.objectives];
             axis.objectives = filteredObjectives;
-            axis.current_objective_index = Math.min(axis.current_objective_index ?? 0, filteredObjectives.length - 1);
+            axis.current_objective_index = view.currentIndex;
             candidates.push({
                 axis,
                 objectives: filteredObjectives,
