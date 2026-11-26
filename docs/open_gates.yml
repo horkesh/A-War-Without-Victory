@@ -94,7 +94,19 @@ gates:
       1994-95 attack and defence package P0 to P6 (the #686 trace and the dead-site
       retirements, the defence trace, the defence repairs, planner odds, P4 RF-STRENGTH's live
       change (merged, #852), P5 the ARBiH plan lockout, P6 RF-PK (RETIRED, orchestrator
-      ruling 2026-11-24)), with Farz P1, P-A, P-B and the enclave guard passing at every merge.
+      ruling 2026-11-24)), with the Farz gates and the enclave guard passing at every merge,
+      in both modes. Gates: the authored Farz starts in its window and attacks any Farz
+      objective still RS at week 177. Every capture of a Farz cell, and every late 2nd or 3rd
+      Corps capture, is combat owned by an operation. No ARBiH corps captures a cell in the
+      nine eastern municipalities from week 160 (the §6 ruling; a red goes to the
+      §6 panel). Shape rows are recorded at every merge and listed on the calibration
+      Part 6 list, and must be green by the end of the calibration pass: all four Farz cells
+      RBiH at week 188; no Farz cell taken before week 177; no late 2nd or 3rd Corps capture
+      of a cell the reference has RS in October 1995; anchors 31 of 31. Tripwire (hold and
+      trace): more than one Farz cell taken early, more than three stopping-line cells in a
+      run, fewer than three Farz cells at week 188, or anchors under 29. The rule comes from
+      Fable consult 10 and orchestrator ruling 2026-11-26 §26; it replaces the interim
+      rule of §12. NOT MET while the checkpoint tool lacks these tiers.
       P5 is closed: the package (#826, #828) gave the 1st to 4th Corps operations again, and
       the probe-exhaustion lock that remains is ACCEPT AS FINAL (#841, orchestrator ruling
       2026-11-22, Systems Manual "Defence of a held line"); the probe gate and the unlock
@@ -105,8 +117,13 @@ gates:
       historical and 58.3% emergent), BC16
       merged, BC17 held for the calibration pass, BC18 closed as decided, BC19 as listed in
       its row. (3) One 188-week run at the candidate commit, repeated once for determinism:
-      strict health PASS, enclave 9/9, Farz P1, P-A and P-B, consistency 0, baselines
-      re-blessed; its scores become the freeze figures. (4) Live = headless at that commit,
+      strict health PASS, enclave 9/9, the Farz gates in both modes with the tripwire clear
+      and the shape rows listed, consistency 0, baselines re-blessed; its scores become the
+      freeze figures. Before the freeze, one data-only configuration is measured in both
+      modes with every Farz shape row green (OZ-DATA: the RS starting pools of the Ozren home
+      municipalities, so that the Ozren-line brigades stay manned). If no data change keeps
+      those brigades manned, the Ozren defence becomes a pre-freeze engine item.
+      (4) Live = headless at that commit,
       0 cells differing: hands-off live equals headless at EVERY autonomy level, for all three
       factions, in historical mode and in emergent mode (owner, 2026-11-25). Met on aa76f6fc3
       lane figures: #866 (a0-a3 x 3 factions historical, a2 emergent x 3) and #871 (15 cells,
@@ -115,8 +132,9 @@ gates:
       (docs/40_reports/governance/20261115_FINAL_BEHAVIOUR_AT_1_0.md; held in the coordination
       repo-docs until 1.0 under the docs relocation, #820) is merged. (6) One
       named commit is recorded as the frozen source in the roadmap and the owner is told. (7) A hands-off
-      emergent 188-week run at the frozen commit passes the history guards (Farz, enclave,
-      the western-Bosnia cascade) and the historian accepts its divergences. It used to end at
+      emergent 188-week run at the frozen commit passes the history guards (the Farz gates,
+      enclave, the western-Bosnia cascade) with its Farz shape rows listed and the historian
+      accepts its divergences. It used to end at
       week 40, when RS accepted Vance-Owen, because the peace-plan floor compared a
       settlement-count share with an area share; that floor fix (RS and Contact Group) is
       merged (#697, by area), a hands-off emergent game now runs to t188, and the other
@@ -125,7 +143,9 @@ gates:
       hands-off emergent 188-week run passes every guard (Farz 4 of 4 receipts, P-B pass,
       enclaves on schedule), scores 709 / 709 / 708 / 680, and all 15 divergent emergent picks
       revert to history; the Drina "restrained" pick (t11) is recorded as a section 6
-      artefact. It is re-run at the frozen commit.
+      artefact. That proof predates #867 and #877. Main's emergent run now loses Petrovo and
+      Boljanić at weeks 176-177 to the 3rd Corps' Jelen 2, so under the §26 tiers it is
+      re-run at the frozen commit.
       From that commit the freeze is a byte test: a change merges freely if the 188-week
       headless final_state_hash is unchanged, and a change that moves the hash needs the
       owner's OK. The one calibration pass then runs on the frozen engine under the
