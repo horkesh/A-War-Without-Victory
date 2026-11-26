@@ -126,6 +126,9 @@ export interface CodexRenderContext {
     historicalComparison?: ComparisonResult;
     costLedger?: CostLedger;
     gameOver?: boolean;
+    /** §27: the shared `rbihHrhbAllianceHeld` predicate (src/sim/codex/alliance_held.ts), the same
+     *  read as the `alliance_held` ghost. Drives the `ALLIANCE_HELD` atom; absent = false. */
+    allianceHeld?: boolean;
     /** A1b: current turn (week index) for `unlock_turn_min` gating. Absent =
      *  the turn floor is treated as satisfied (no over-hiding). */
     currentTurn?: number;
@@ -313,6 +316,8 @@ function parseThreshold(rest: string): number {
 function evaluateAtom(token: string, context: CodexRenderContext): boolean {
     if (token === 'ALWAYS') return true;
     if (token === 'GAME_OVER') return Boolean(context.gameOver);
+    // §27: never falls through to the eventFlags read below; absent = false (fails closed).
+    if (token === 'ALLIANCE_HELD') return context.allianceHeld === true;
     if (token === 'COMPARISON_NOTES') return comparisonNotes(context).length > 0;
 
     // v0.9.1: comparison-derived condition atoms. Each returns false when the

@@ -56,6 +56,7 @@ import {
     inPersonParamilitaryPolicyCardAnswer,
 } from '../events/paramilitary_policy_flag.js';
 import type { GameState, FactionId } from '../../state/game_state.js';
+import { CROAT_BOSNIAK_WAR_ONSET_EVENT_ID, rbihHrhbAllianceHeld } from './alliance_held.js';
 import {
     buildRealizedConsequenceReceipts,
     type ClaimPredicateOperand,
@@ -499,10 +500,14 @@ function allianceWarNotStartedOperand(state: GhostEntryStateView): ClaimPredicat
 //   own alliance record (the ghost body's "the alliance threshold did not fall through the floor
 //   that triggers open conflict"); a path_not_taken ghost needs a claim distinct from its missed
 //   condition, or `buildGhostEntries` drops it.
+//   §27 (2026-11-26): the ghost and the Ahmići essay note read ONE shared predicate,
+//   `rbihHrhbAllianceHeld`, so they can never disagree. The operands below are the claim's
+//   receipt; the t70 floor is the ghost body's own "by week seventy".
 function predAllianceHeld(state: GhostEntryStateView, currentTurn: number): GhostPredicateMatch | null {
+    if (!rbihHrhbAllianceHeld(state)) return null;
     const operands = requiredOperands(
         allianceWarNotStartedOperand(state),
-        eventFiredOperand(state, 'croat_bosniak_war_begins_1993', false),
+        eventFiredOperand(state, CROAT_BOSNIAK_WAR_ONSET_EVENT_ID, false),
     );
     return operands ? matchGhost(operands, [operands[1]!], currentTurn, 70) : null;
 }

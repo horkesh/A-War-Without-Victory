@@ -65,6 +65,7 @@ import { getMunicipalitySupportLabel } from '../../../sim/combat/municipality_su
 import { splitKiaWiaMia } from '../../../sim/combat/attack_casualty_distribution.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { PARAMILITARY_POLICY_CARD_ID_BY_FACTION } from '../../../sim/events/paramilitary_policy_flag.js';
+import { rbihHrhbAllianceHeld } from '../../../sim/codex/alliance_held.js';
 import { countHeldOgsByCorps } from '../utils/heldOg.js';
 import { computeFullVerdict } from '../../../sim/negotiation/scoring.js';
 import { DIMENSION_WEIGHTS } from '../../../sim/events/strategic_dimensions.js';
@@ -3216,6 +3217,8 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         ...derivePeacePhaseData(state, phase),
         // Game over (LANE-NIGHTSHIFT-N3 — see snapshot-prefer block above).
         gameOver: Boolean(meta.game_over),
+        // §27: one shared predicate with the `alliance_held` ghost (src/sim/codex/alliance_held.ts).
+        allianceHeld: rbihHrhbAllianceHeld(state),
         gameOutcome: typeof meta.outcome === 'string' ? meta.outcome : undefined,
         gameVerdict,
         costLedger,
