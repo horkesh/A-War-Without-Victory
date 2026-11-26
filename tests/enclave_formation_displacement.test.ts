@@ -356,6 +356,31 @@ describe('E-fall: authored destination not friendly-held', () => {
         });
     });
 
+    it('never re-forms inside another named enclave, even in its own corps territory (operations seat R1)', () => {
+        withFlag(undefined, () => {
+            const f = encFormation();
+            const other = ring2[ring2.length - 1]!;
+            const state = divergentState(f, [other, 'op:rogatica:zepa_2']);
+            (state.military as any).corps_front_sectors = {
+                'sector:arbih_2nd_corps:0': { corps_id: 'arbih_2nd_corps', territory_osids: ['op:rogatica:zepa_2'] },
+            };
+            applyEventEffects(state, [srebEffect]);
+            expect(f.location_osid).toBe(other);
+            expect(f.status).toBe('active');
+        });
+    });
+
+    it('a held cell the contact graph never reaches is not a pick by id order: disbanded (canon seat, EI §14.5)', () => {
+        withFlag(undefined, () => {
+            const f = encFormation();
+            const state = divergentState(f, ['op:aaa:not_in_graph']);
+            applyEventEffects(state, [srebEffect]);
+            expect(f.location_osid).not.toBe('op:aaa:not_in_graph');
+            expect(f.status).toBe('inactive');
+            expect(f.lifecycle_status).toBe('disbanded');
+        });
+    });
+
     it("the 'none' branch (Žepa) is unchanged in a divergent game", () => {
         withFlag(undefined, () => {
             const f = encFormation();

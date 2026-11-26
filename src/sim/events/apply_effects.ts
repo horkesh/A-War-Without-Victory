@@ -17,6 +17,7 @@ import { invalidateBrigadeJourney } from '../combat/brigade_journey_lifecycle.js
 import { applyPatronSupportDelta } from '../negotiation/patron_pressure.js';
 // The cached OSID contact adjacency (operational_contact_graph.json), the same graph the turn uses.
 import { getSettlementAdjacency } from '../negotiation/peace_settlement.js';
+import { ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from '../combat/enclave_resilience.js';
 
 /** Deterministic kind ordering for effect application (alphabetical).
  *  NOTE: alphabetic insertion shifts indices of every kind sorted after the
@@ -347,10 +348,11 @@ function applyEnclaveFormationDisplacement(
  *    historical game is unchanged.
  *  - Otherwise the nearest cell `faction` holds, by a layered BFS from the destination over the
  *    operational contact graph: first restricted to the brigade's own corps territory
- *    (`corps_front_sectors[*].territory_osids`), then any friendly cell. A fallen source cell is
- *    never a candidate. Within a layer the smallest id by strictCompare wins.
- *  - If the graph does not reach one, the smallest friendly id (corps territory first).
- *  - null only when `faction` holds no cell at all.
+ *    (`corps_front_sectors[*].territory_osids`), then any friendly cell. A fallen source cell and
+ *    any cell of a named enclave (`ENCLAVE_DEFINITIONS`) are never candidates. Within a layer the
+ *    smallest id by strictCompare wins. The BFS measures nearness, not a march route: this is
+ *    the event's breakout placement, not Engine Invariants §14.5a (unimplemented at 1.0).
+ *  - null when the graph reaches no friendly cell (the caller disbands the formation).
  *  Deterministic: no RNG, and the pick does not depend on iteration order. */
 function resolveEnclaveReformOsid(
     state: GameState,
@@ -362,7 +364,12 @@ function resolveEnclaveReformOsid(
     const pc = state.political?.political_controllers ?? {};
     if (pc[destination] === faction) return destination;
 
-    const isFriendly = (osid: string): boolean => pc[osid] === faction && !excluded.has(osid);
+    // Never a cell of a named enclave (operations seat R1): the survivors keep their `enclave` tag,
+    // so re-forming inside another pocket (Žepa, Teočak, Goražde...) would confine them there.
+    const inAnyEnclave = (osid: string): boolean =>
+        ENCLAVE_DEFINITIONS.some((enclave) => osidBelongsToEnclave(osid, enclave));
+    const isFriendly = (osid: string): boolean =>
+        pc[osid] === faction && !excluded.has(osid) && !inAnyEnclave(osid);
     const corpsTerritory = new Set<string>();
     if (corpsId) {
         const sectors = state.military.corps_front_sectors ?? {};
@@ -395,10 +402,8 @@ function resolveEnclaveReformOsid(
             frontier = next;
         }
     }
-    for (const accept of filters) {
-        const found = Object.keys(pc).filter(accept).sort(strictCompare)[0];
-        if (found != null) return found;
-    }
+    // No friendly cell the graph reaches: there is no nearest ground. No pick by id order alone
+    // (Engine Invariants §14.5, canon seat 2026-11-26); the caller disbands the formation.
     return null;
 }
 
