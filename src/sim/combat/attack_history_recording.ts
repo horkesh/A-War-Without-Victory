@@ -102,9 +102,19 @@ export function recordBattleHistory(params: {
         attackerEquipData, battleId, attackerAppliedById,
     );
     if (defenderFormation) {
-        const defenderGroup = sectorDefenseBrigades && sectorDefenseBrigades.length > 1
-            ? [...sectorDefenseBrigades].sort((a, b) => strictCompare(a.id, b.id))
-            : [defenderFormation];
+        // CAS-REPORT-3: every brigade that actually lost men in this battle gets a row, even
+        // one outside the engaged group (a zero-weight primary still takes the absorption
+        // extra). Brigades already in the engaged group keep their row as before.
+        const groupById = new Map<string, FormationState>();
+        for (const b of (sectorDefenseBrigades && sectorDefenseBrigades.length > 1 ? sectorDefenseBrigades : [defenderFormation])) {
+            groupById.set(b.id, b);
+        }
+        for (const [id, cas] of defenderAppliedById ?? []) {
+            if (cas <= 0 || groupById.has(id)) continue;
+            const f = id === defenderFormation.id ? defenderFormation : state.military.formations[id];
+            if (f) groupById.set(id, f);
+        }
+        const defenderGroup = [...groupById.values()].sort((a, b) => strictCompare(a.id, b.id));
         if (defenderGroup.length > 1 && sectorBrigadeWeights) {
             const weightById = new Map<string, number>();
             for (const b of defenderGroup) weightById.set(b.id, sectorBrigadeWeights.get(b.id) ?? 0);
@@ -138,7 +148,8 @@ export function recordBattleHistory(params: {
             );
             recordDefenderEngagement(
                 defenderFormation, currentTurn, targetOsid, outcome,
-                attackerFaction, flip, finalDefenderCas, finalAttackerCas, isConcentrated, state,
+                attackerFaction, flip, defenderAppliedById?.get(defenderFormation.id) ?? finalDefenderCas,
+                finalAttackerCas, isConcentrated, state,
                 defenderEquipData, battleId,
             );
         }
