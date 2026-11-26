@@ -1649,7 +1649,6 @@
     "source_tier": "icty_icj_un",
     "trigger": {
       "turn_min": 54,
-      "turn_max": 70,
       "phase": "war",
       "requires_events": [
         "croat_bosniak_war_begins_1993"
@@ -1657,6 +1656,11 @@
       "condition": {
         "type": "and",
         "conditions": [
+          {
+            "type": "week_since_event",
+            "event_id": "croat_bosniak_war_begins_1993",
+            "max_weeks": 16
+          },
           {
             "type": "territory_control",
             "osid": "op:vitez:vitez_2",

@@ -6277,7 +6277,7 @@ export const enMessages = {
     'eventDecision.decisionRequired': 'Decision Required',
     // §6 stills are never decorative: each carries a factual alt (D8 panel, 2026-11-06).
     'eventArt.alt.event_concentration_camps_revealed_1992': 'Camp perimeter seen from outside the wire, Prijedor area, 1992',
-    'eventArt.alt.event_ahmici_massacre_1993': 'Burned houses and a felled minaret, Ahmići, April 1993',
+    'eventArt.alt.event_ahmici_massacre_1993': 'Burned houses and a felled minaret, Ahmići, 1993',
     'eventArt.alt.event_drina_valley_ethnic_cleansing_1992': 'Emptied houses on the Drina, 1992',
     'eventArt.alt.event_markale_shelling': 'Market stalls after the shelling, Markale, Sarajevo',
     'eventArt.alt.event_srebrenica_falls_1995': 'Abandoned belongings on a factory floor, Srebrenica, July 1995',

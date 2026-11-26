@@ -32,7 +32,9 @@ Scenario runner (`src/scenario/scenario_runner.ts`) routes to whichever pipeline
   permitted to set `calibration_scenario: true`.
 - Checkpoint scorer/replay validator: `tools/verify_checkpoints.cjs <run-dir>`. Only
   checkpoints actually reached by the run are evidence; a week-39 save must not be quoted as
-  an April 1994/1995 or October 1995 result.
+  an April 1994/1995 or October 1995 result. Its Farz receipts print in three tiers (§26):
+  GATE and TRIPWIRE rows exit 1; SHAPE rows are recorded for the calibration pass and exit 0.
+  `--no-farz-guard` makes the Farz gates (G1 included, as the old P-B was) and the tripwire informational.
 - Painted references: `data/source/calibration/painted_control_{jan1993,apr1994,apr1995,oct1995}.json`.
 - Self-contained mobile map wrapper:
   `node tools/build_calibration_map_html.mjs <map.png> <out.html> <title> <score> [footer]`.

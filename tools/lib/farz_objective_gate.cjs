@@ -122,7 +122,6 @@ function checkFarzObjectiveCaptures({ cells, at188, events, battleById, aars, co
   const jointStart = aar && aar.started_turn >= windowStart
     ? Math.min(aar.started_turn, partner ? partner.started_turn : Infinity)
     : null;
-  const JOINT_CORPS = ['arbih_2nd_corps', 'arbih_3rd_corps'];
   const jointOperationOf = (e, osid) => (classifyCombatCapture(e, battleById.get(e.battle_id)).operation_ids ?? [])
     .find((id) => {
       const op = opById.get(id);
@@ -163,4 +162,153 @@ function checkFarzObjectiveCaptures({ cells, at188, events, battleById, aars, co
     mode: emergent ? 'emergent' : 'historical', ok: authoredOk && rows.every((row) => row.ok) };
 }
 
-module.exports = { checkFarzObjectiveCaptures, registeredFarzAarIds };
+// ─────────────────────────────────────────────────────────────────────────────
+// RECEIPT TIERS (Fable consult 10, orchestrator ruling §26, 2026-11-26).
+//
+// The Farz receipts split into GATES, checked at every merge in both modes, and SHAPE rows, which
+// are recorded now and must be green at the end of the calibration pass. A TRIPWIRE, set from the
+// 57 distinct 188-week runs on disk, bounds how far the shape may drift before a merge holds.
+// The §6 half (the nine eastern municipalities) is NOT loosened: it now covers every ARBiH corps.
+//
+// The stopping line reads BOTH corps of the joint offensive (the old P-B read the 2nd Corps
+// only and missed the 3rd Corps' Jelen 2 at Boljanić and Petrovo). A capture is warranted when the
+// October 1995 reference has the cell RBiH, so a retake of a cell the reference keeps RBiH is not
+// a stopping-line row (the old test flagged Maglaj Jablanica).
+
+const JOINT_CORPS = ['arbih_2nd_corps', 'arbih_3rd_corps'];
+const LATE_SCAN_START = 160;
+// P-A liveness and the early-fall row both read week 177, the week of the Farz planning order
+// (seats' ruling 2026-11-17; Uragan 95 ran 10-14 Sep 1995, BB1 file p.423).
+const FARZ_LIVENESS_TURN = 177;
+const TRIPWIRE_BOUNDS = Object.freeze({ maxEarlyFarzCells: 1, maxStoppingLineCells: 3, minFarzCellsAt188: 3, minAnchorsPassed: 29 });
+
+const battleOperationIds = (battle) => {
+  if (!battle) return [];
+  const ids = Array.isArray(battle.contributing_operation_ids)
+    ? battle.contributing_operation_ids.filter((id) => typeof id === 'string' && id.length > 0) : [];
+  if (typeof battle.operation_id === 'string' && battle.operation_id.length > 0) ids.push(battle.operation_id);
+  return [...new Set(ids)].sort();
+};
+const munOf = (osid) => String(osid).split(':')[1];
+const distinct = (rows) => [...new Set(rows.map((r) => r.osid))].sort();
+
+/**
+ * GATE (§6, not loosened): a late RBiH combat capture in the nine eastern municipalities by a
+ * formation of ANY ARBiH corps. The warrant is unchanged (RS in April 1995 and RBiH in October
+ * 1995); the painted reference records no such cell there, so in practice every capture is a red,
+ * and a red goes to the §6 panel.
+ */
+function easternCaptureGate({ events, ref, factionOf, easternMuns, fromTurn = LATE_SCAN_START }) {
+  return events.filter((e) => (e.turn ?? -1) >= fromTurn && e.to === 'RBiH' && e.mechanism === 'combat'
+    && easternMuns.includes(munOf(e.settlement_id)) && factionOf(e.attacker_brigade) === 'RBiH'
+    && !(ref.apr1995[e.settlement_id] === 'RS' && ref.oct1995[e.settlement_id] === 'RBiH'))
+    .map((e) => ({ osid: e.settlement_id, turn: e.turn, attacker: e.attacker_brigade }));
+}
+
+/**
+ * GATE: every capture of a Farz cell (any week, any mechanism) and every late combat capture by a
+ * 2nd or 3rd Corps formation is combat owned by an operation (`classifyCombatCapture`).
+ */
+function operationOwnershipGate({ events, battleById, cells, corpsOf, fromTurn = LATE_SCAN_START }) {
+  const farzCells = cells.map(([, osid]) => osid);
+  const out = [];
+  for (const e of events) {
+    if (e.to !== 'RBiH') continue;
+    const isFarz = farzCells.includes(e.settlement_id);
+    const isLateJoint = (e.turn ?? -1) >= fromTurn && e.mechanism === 'combat' && JOINT_CORPS.includes(corpsOf(e.attacker_brigade));
+    if (!isFarz && !isLateJoint) continue;
+    const p = classifyCombatCapture(e, battleById.get(e.battle_id));
+    if (p.kind !== 'operation_owned') out.push({ osid: e.settlement_id, turn: e.turn, attacker: e.attacker_brigade, kind: p.kind, farz_cell: isFarz });
+  }
+  return out;
+}
+
+/**
+ * GATE, P-A liveness: if any Farz objective is still not RBiH when week 177 begins, the authored
+ * Farz must start in its window (from week 160) with a roster. Each such objective must then be
+ * attacked by it (a battle at the cell owned by Farz or by its authored 2nd Corps half, Uragan 95),
+ * or taken from week 177 by an operation-owned combat capture by a 2nd or 3rd Corps operation (the
+ * joint offensive's other operations). Main's emergent run has Farz target only gornja Bočinja and the 2nd Corps' Slap 2 take
+ * Spreča at t182; that capture is held to the ownership gate (G2), and which operation got the
+ * credit is a SHAPE row. What fails here is a Farz that never starts, has no roster, or leaves an
+ * objective neither attacked nor taken.
+ * `battles` are `{ turn, battle }` rows; `stateAt(turn)` is the controller map at the end of `turn`.
+ */
+function farzLivenessGate({ cells, stateAt, farz, battles, events, battleById, windowStart = LATE_SCAN_START, livenessTurn = FARZ_LIVENESS_TURN }) {
+  const aar = farz && farz.aar;
+  const owners = [aar?.operation_id, farz?.partner?.operation_id].filter(Boolean);
+  const before = stateAt(livenessTurn - 1);
+  const started = !!aar && Number.isFinite(aar.started_turn) && aar.started_turn >= windowStart;
+  const roster = !!aar && Array.isArray(aar.participating_brigades) && aar.participating_brigades.length > 0;
+  const rows = [];
+  for (const [name, osid] of cells) {
+    if (before[osid] === 'RBiH') continue;
+    if (!started || !roster) {
+      rows.push({ name, osid, ok: false, reason: !aar ? 'no_authored_farz' : !started ? 'farz_not_started_in_window' : 'farz_has_no_roster' });
+      continue;
+    }
+    const attack = battles.find(({ turn, battle }) => battle.target_osid === osid
+      && turn >= aar.started_turn && battleOperationIds(battle).some((id) => owners.includes(id)));
+    if (attack) { rows.push({ name, osid, ok: true, reason: 'attacked', attack_turn: attack.turn }); continue; }
+    const taken = (events || []).find((e) => e.settlement_id === osid && e.to === 'RBiH' && e.mechanism === 'combat'
+      && (e.turn ?? -1) >= livenessTurn && (classifyCombatCapture(e, battleById.get(e.battle_id)).operation_ids ?? [])
+        .some((id) => JOINT_CORPS.some((c) => id.startsWith(`${c}:`))));
+    rows.push(taken
+      ? { name, osid, ok: true, reason: 'taken_by_operation', taken_turn: taken.turn,
+        operation_ids: classifyCombatCapture(taken, battleById.get(taken.battle_id)).operation_ids }
+      : { name, osid, ok: false, reason: 'neither_attacked_nor_taken' });
+  }
+  return { started, roster, rows, ok: rows.every((r) => r.ok) };
+}
+
+/** SHAPE: an RBiH capture of a Farz cell before week 177, from week 0, any mechanism. */
+function earlyFarzFalls({ cells, events, battleById, before = FARZ_LIVENESS_TURN }) {
+  const farzCells = cells.map(([, osid]) => osid);
+  return events.filter((e) => e.to === 'RBiH' && farzCells.includes(e.settlement_id) && (e.turn ?? -1) < before)
+    .map((e) => ({ osid: e.settlement_id, turn: e.turn, attacker: e.attacker_brigade,
+      operation_ids: classifyCombatCapture(e, battleById.get(e.battle_id)).operation_ids ?? [] }));
+}
+
+/**
+ * SHAPE, the stopping line: a late combat capture by a 2nd or 3rd Corps formation, outside the nine
+ * eastern municipalities (those are the §6 gate), of a cell the October 1995 reference does not
+ * have RBiH.
+ */
+function stoppingLineRows({ events, battleById, ref, corpsOf, easternMuns, fromTurn = LATE_SCAN_START }) {
+  return events.filter((e) => (e.turn ?? -1) >= fromTurn && e.to === 'RBiH' && e.mechanism === 'combat'
+    && JOINT_CORPS.includes(corpsOf(e.attacker_brigade)) && !easternMuns.includes(munOf(e.settlement_id))
+    && ref.oct1995[e.settlement_id] !== 'RBiH')
+    .map((e) => ({ osid: e.settlement_id, turn: e.turn, attacker: e.attacker_brigade, corps: corpsOf(e.attacker_brigade),
+      operation_ids: classifyCombatCapture(e, battleById.get(e.battle_id)).operation_ids ?? [] }));
+}
+
+/** SHAPE: the run's anchor contract (`run_summary.json`), failed anchors named. Missing = unknown. */
+function anchorContract(runSummary) {
+  const ev = runSummary && runSummary.anchor_contract_evaluation;
+  const checks = ev && Array.isArray(ev.anchor_checks) ? ev.anchor_checks : null;
+  if (!checks || checks.length === 0) return { known: false, passed: null, total: null, failed: [] };
+  const failed = checks.filter((a) => a.passed !== true).map((a) => a.anchor_id).sort();
+  return { known: true, passed: checks.length - failed.length, total: checks.length, failed };
+}
+
+/**
+ * TRIPWIRE ("hold and trace"): more than one Farz cell early, more than three stopping-line cells,
+ * fewer than three Farz cells RBiH at week 188, or anchors under 29. An unknown anchor contract
+ * trips (fail closed).
+ */
+function receiptTripwire({ earlyCells, stoppingCells, farzCellsAt188, anchors, bounds = TRIPWIRE_BOUNDS }) {
+  const trips = [];
+  if (earlyCells.length > bounds.maxEarlyFarzCells) trips.push(`${earlyCells.length} Farz cells fell early (bound ${bounds.maxEarlyFarzCells})`);
+  if (stoppingCells.length > bounds.maxStoppingLineCells) trips.push(`${stoppingCells.length} stopping-line cells (bound ${bounds.maxStoppingLineCells})`);
+  if (farzCellsAt188 < bounds.minFarzCellsAt188) trips.push(`${farzCellsAt188} Farz cells RBiH at w188 (bound ${bounds.minFarzCellsAt188})`);
+  if (!anchors.known) trips.push('anchor contract missing from run_summary.json');
+  else if (anchors.passed < bounds.minAnchorsPassed) trips.push(`anchors ${anchors.passed}/${anchors.total} (bound ${bounds.minAnchorsPassed})`);
+  return trips;
+}
+
+module.exports = {
+  checkFarzObjectiveCaptures, registeredFarzAarIds,
+  JOINT_CORPS, LATE_SCAN_START, FARZ_LIVENESS_TURN, TRIPWIRE_BOUNDS,
+  easternCaptureGate, operationOwnershipGate, farzLivenessGate, earlyFarzFalls, stoppingLineRows,
+  anchorContract, receiptTripwire, distinctCells: distinct,
+};

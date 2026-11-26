@@ -31,6 +31,8 @@ import type { GameState, FactionId } from '../src/state/game_state.js';
 /** Minimal state stub. The builder reads only a small slice; we type-cast
  *  via `unknown` to avoid pulling in the full GameState constructor surface. */
 interface MakeStateOptions {
+    /** When present, lifted onto state.political.rbih_hrhb_state.war_started_turn; absent leaves no alliance record. */
+    alliance_war_started_turn?: number | null;
     /** Lifted onto state.military.event_flags. */
     event_flags?: Record<string, string | number | boolean>;
     /** Lifted onto state.military.event_fire_counts. */
@@ -81,7 +83,9 @@ function makeState(options: MakeStateOptions = {}): GameState {
         meta: { turn: 40, phase: 'war', player_faction: options.player_faction ?? ('RBiH' as FactionId) },
         factions: [{ id: 'RBiH' }, { id: 'RS' }, { id: 'HRHB' }],
         military,
-        political: {},
+        political: options.alliance_war_started_turn === undefined
+            ? {}
+            : { rbih_hrhb_state: { war_started_turn: options.alliance_war_started_turn } },
     };
     return baseState as unknown as GameState;
 }
@@ -134,8 +138,8 @@ function makeBreakdown(warCrimes: number, authored = 0) {
 describe('LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE — T1: deterministic section ordering', () => {
     it('emits ghost entries in deterministic strictCompare order across runs', () => {
         const state = makeState({
+            alliance_war_started_turn: null,
             event_flags: {
-                federation_never_fractured: true,
                 vrs_quality_inverted: true,
                 patron_pressure_refused: 5,
                 vance_owen_accepted: true,
@@ -166,8 +170,8 @@ describe('LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE — T2: faction-agnostic', () => {
     it('predicates fire identically for any player faction (RBiH/RS/HRHB)', () => {
         function stateForFaction(faction: FactionId): GameState {
             return makeState({
+                alliance_war_started_turn: null,
                 event_flags: {
-                    federation_never_fractured: true,
                     patron_pressure_refused: 3,
                     vrs_quality_inverted: true,
                 },
@@ -196,21 +200,36 @@ describe('LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE — T3: ghost-entry conditionality
         expect(buildGhostEntries(state, 50)).toEqual([]);
     });
 
-    it('alliance_held requires turn >= 70 AND federation_never_fractured AND no croat_bosniak_war_begins_1993', () => {
-        const beforeTurn = makeState({ event_flags: { federation_never_fractured: true } });
+    // AH-2 (§6 bright-line sitting 2026-11-26, 8/8; round 3 8/8 on operand A): the
+    // federation_never_fractured flag read is retired (no writer exists); the claim is the
+    // alliance record (war_started_turn null) plus the onset event not fired, from t70.
+    it('alliance_held requires turn >= 70 AND alliance war_started_turn null AND no croat_bosniak_war_begins_1993', () => {
+        // The retired flag alone no longer matters either way.
+        const flagOnly = makeState({ event_flags: { federation_never_fractured: true } });
+        expect(buildGhostEntries(flagOnly, 80).find((g) => g.ghost_id === 'alliance_held')).toBeUndefined();
+
+        // Fails closed when the alliance record is absent, and hides once the alliance fell to war.
+        const noRecord = makeState();
+        expect(buildGhostEntries(noRecord, 80).find((g) => g.ghost_id === 'alliance_held')).toBeUndefined();
+        const allianceFell = makeState({ alliance_war_started_turn: 49 });
+        expect(buildGhostEntries(allianceFell, 80).find((g) => g.ghost_id === 'alliance_held')).toBeUndefined();
+
+        const beforeTurn = makeState({ alliance_war_started_turn: null });
         expect(buildGhostEntries(beforeTurn, 60).find((g) => g.ghost_id === 'alliance_held')).toBeUndefined();
 
         const fired = makeState({
-            event_flags: { federation_never_fractured: true },
+            alliance_war_started_turn: null,
             event_fire_counts: { croat_bosniak_war_begins_1993: 1 },
         });
         expect(buildGhostEntries(fired, 80).find((g) => g.ghost_id === 'alliance_held')).toBeUndefined();
 
-        const passes = makeState({ event_flags: { federation_never_fractured: true } });
+        const passes = makeState({ alliance_war_started_turn: null });
         const got = buildGhostEntries(passes, 80).find((g) => g.ghost_id === 'alliance_held');
         expect(got).toBeDefined();
         expect(got?.ring_classification).toBe(2);
         expect(got?.path).toBe('data/codex/ghost_entries/alliance_held.md');
+        expect(got?.claim_predicate.owner_paths).toContain('state.political.rbih_hrhb_state.war_started_turn');
+        expect(got?.claim_predicate.expression).not.toContain('federation_never_fractured');
     });
 
     it('cleansing_refused requires policy=always_deny, no authored war crime, turn>=100', () => {
@@ -289,8 +308,8 @@ describe('LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE — T3: ghost-entry conditionality
 describe('LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE — T4: save/load round-trip', () => {
     it('serialises and deserialises state-derived ghost output identically', () => {
         const stateOriginal = makeState({
+            alliance_war_started_turn: null,
             event_flags: {
-                federation_never_fractured: true,
                 patron_pressure_refused: 4,
             },
             event_fire_counts: {},
@@ -313,8 +332,8 @@ describe('LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE — T4: save/load round-trip', () 
 describe('LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE — T5: integration with CostLedger', () => {
     it('builder is read-only — does not mutate state.military.negotiation or any cost-ledger surface', () => {
         const state = makeState({
+            alliance_war_started_turn: null,
             event_flags: {
-                federation_never_fractured: true,
                 patron_pressure_refused: 4,
             },
             paramilitary_policy: 'always_deny',
@@ -501,8 +520,8 @@ describe('LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE — T6: Ring guard refuses §6 fla
 
     it('does not throw when no §6 refused flags are present', () => {
         const benign = makeState({
+            alliance_war_started_turn: null,
             event_flags: {
-                federation_never_fractured: true,
                 vrs_quality_inverted: true,
             },
         });
@@ -530,9 +549,9 @@ describe('LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE — T7: Srebrenica defended emits 
             makeState({ event_flags: { enclave_held_through_turn: 1 } }),
             makeState({ event_flags: { enclave_held_through_turn: 'yes' } }),
             makeState({
+                alliance_war_started_turn: null,
                 event_flags: {
                     enclave_held_through_turn: true,
-                    federation_never_fractured: true,
                     patron_pressure_refused: 9,
                 },
             }),
@@ -557,8 +576,8 @@ describe('LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE — T7: Srebrenica defended emits 
 describe('LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE — T8: deterministic body resolution', () => {
     it('produces the same conditional_on diagnostic strings on identical inputs', () => {
         const state = makeState({
+            alliance_war_started_turn: null,
             event_flags: {
-                federation_never_fractured: true,
                 patron_pressure_refused: 5,
                 vrs_quality_inverted: true,
             },
@@ -588,8 +607,8 @@ describe('LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE — T8: deterministic body resolut
 describe('R4 Phase 4 - dynamic claims name their truth owner', () => {
     it('attaches a named state or receipt predicate to every emitted section and ghost', () => {
         const state = makeState({
+            alliance_war_started_turn: null,
             event_flags: {
-                federation_never_fractured: true,
                 patron_pressure_refused: 3,
             },
             event_decision_log: [{
@@ -613,8 +632,8 @@ describe('R4 Phase 4 - dynamic claims name their truth owner', () => {
 
     it('reserves missed-condition proof for path-not-taken ghosts and keeps context records honest', () => {
         const state = makeState({
+            alliance_war_started_turn: null,
             event_flags: {
-                federation_never_fractured: true,
                 winter_held_through_turn: true,
                 corridor_blocked_through_turn: true,
             },
@@ -662,7 +681,7 @@ describe('R4 Phase 4 - dynamic claims name their truth owner', () => {
             ['negotiation_capital_recovered', 'path_not_taken'],
         ]);
         const fixtures: Array<{ ghostId: string; state: GameState; turn: number }> = [
-            { ghostId: 'alliance_held', state: makeState({ event_flags: { federation_never_fractured: true } }), turn: 70 },
+            { ghostId: 'alliance_held', state: makeState({ alliance_war_started_turn: null }), turn: 70 },
             {
                 ghostId: 'cleansing_refused',
                 state: withOwnDeny(makeState({
@@ -788,7 +807,7 @@ describe('R4 Phase 4 - dynamic claims name their truth owner', () => {
     });
 
     it('fails closed for every ghost when the selected player is absent', () => {
-        const state = makeState({ event_flags: { federation_never_fractured: true } });
+        const state = makeState({ alliance_war_started_turn: null });
         (state.meta as { player_faction?: string }).player_faction = undefined;
         expect(buildGhostEntries(state, 200)).toEqual([]);
     });

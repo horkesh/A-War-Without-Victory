@@ -94,11 +94,14 @@ describe('Event timeline historical integrity', () => {
 
         expect(ahmici).toBeDefined();
         expect(ahmici.trigger.turn_min).toBe(54);
-        expect(ahmici.trigger.turn_max).toBe(70);
+        // §6 bright-line sitting 2026-11-26 (AH-1, 8/8): the window runs from the war's onset,
+        // [max(54, onset+1), onset+16], instead of the fixed t54-70 calendar window.
+        expect(ahmici.trigger).not.toHaveProperty('turn_max');
         expect(ahmici.trigger.requires_events).toEqual(['croat_bosniak_war_begins_1993']);
         expect(ahmici.trigger.condition).toEqual({
             type: 'and',
             conditions: [
+                { type: 'week_since_event', event_id: 'croat_bosniak_war_begins_1993', max_weeks: 16 },
                 { type: 'territory_control', osid: 'op:vitez:vitez_2', faction: 'HRHB' },
                 { type: 'flag_equals', flag: 'hvo_arbih_tensions_rising', value: true },
                 // §6 panel 2026-11-16 (Ahmići windows and H6): withheld after H6 evacuate/federate_early.

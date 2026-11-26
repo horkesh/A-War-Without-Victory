@@ -329,6 +329,14 @@ These rules are faction-blind and add no state.
   - Zvezda 94 at Goražde (28 Mar-10 Apr 1994): run by the Herzegovina Corps with the Drina Corps (BB2 Annex 49, print pp. 459-463).
   - Unverified: the ICTY Galić and D. Milošević judgements (no ICTY text in the repository), the name "Operation T", Skok-1 and Ilidža/Hrasnica in 1994-95.
 
+**The Farz receipts are read in three tiers (Fable consult 10, orchestrator ruling §26, 2026-11-26; `tools/verify_checkpoints.cjs`, `tools/lib/farz_objective_gate.cjs`):**
+- **Gates, checked at every merge in both modes (exit 1):**
+  - The nine eastern municipalities: a combat capture there from week 160 by any RBiH formation, unless the reference has the cell RS in April 1995 and RBiH in October 1995 (no such cell exists today). This is the §6 ruling and is not loosened; a red goes to the §6 panel.
+  - Operation ownership: every capture of a Farz cell, and every capture from week 160 by the 2nd or 3rd Corps, is combat owned by an operation.
+  - Farz liveness: if a Farz cell is not RBiH when week 177 begins, the authored Farz starts from week 160 with a roster and attacks it. The tool also accepts the cell's being taken from week 177 by another operation of the 2nd or 3rd Corps (main's emergent run: the 2nd Corps' Slap 2 takes Spreča); that capture is held to the ownership gate.
+- **Shape rows, recorded and not gating, green by the end of the calibration pass:** the four Farz cells RBiH at week 188; no Farz cell taken before week 177, in any week; the stopping line, meaning no capture from week 160 by the 2nd or 3rd Corps of a cell the October 1995 reference does not have RBiH (outside the nine municipalities); and anchors 31 of 31.
+- **Tripwire, hold and trace (exit 1):** more than one Farz cell taken early, more than three stopping-line cells, fewer than three Farz cells RBiH at week 188, or fewer than 29 anchors. As a tool rule, an unreadable anchor contract also trips (fail closed). The bounds come from the 57 distinct 188-week runs measured in consult 10.
+
 **Owner-directed 102nd Odžak→Orašje evacuation (2026-10-28):** when the capture-triggered
 salient lifecycle would evacuate `hrhb_102nd_brigade` from the Odžak/Bosanski Šamac neck, the
 brigade is placed in its own held Orašje pocket and retains `hvo_northwest_bosnia` rather than

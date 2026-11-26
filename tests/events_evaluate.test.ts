@@ -61,9 +61,11 @@ function seedEventReadiness(state: GameState, event: EventDefinition): void {
     state.military.event_readiness[event.id] = event.pressure.threshold;
 }
 
-function makeAhmiciState(turn: number): GameState {
+/** `onset` is the turn `croat_bosniak_war_begins_1993` fired (t49 on main, both modes). */
+function makeAhmiciState(turn: number, onset = 49): GameState {
     const state = minimalState('war', turn);
     state.military.fired_event_ids = ['croat_bosniak_war_begins_1993'];
+    state.military.event_last_fired_turn = { croat_bosniak_war_begins_1993: onset };
     state.military.event_flags = { hvo_arbih_tensions_rising: true };
     state.military.negotiation = {
         capital: {
@@ -930,6 +932,58 @@ test('Ahmici fires from the HRHB Vitez basing cell at turn 54 and applies its di
     assert.strictEqual((eligible.military.negotiation as any).capital.HRHB.war_crimes_events, 3);
     assert.strictEqual((eligible.military.negotiation as any).capital.HRHB.international_credibility, 50);
     assert.strictEqual((eligible.military.negotiation as any).strategic_dimensions.HRHB.international_standing.event_modifier, -25);
+});
+
+/**
+ * AH-1 (§6 bright-line sitting 2026-11-26, 8/8): the Ahmići window is [max(54, onset+1), onset+16].
+ * Runs the real onset event and the real Ahmići row through `evaluateEvents` turn by turn, so the
+ * onset fires on its own turn and Ahmići sees it only from the next turn (candidates are collected
+ * before any event fires). Returns the turn Ahmići fired, or null.
+ */
+function ahmiciFiringTurn(onset: number | null, lastTurn: number, conditionsFrom = 0): number | null {
+    const war = loadedEventById('croat_bosniak_war_begins_1993');
+    const ahmici = loadedEventById('ahmici_massacre_1993');
+    const state = makeAhmiciState(Math.min(onset ?? 54, 54));
+    state.military.fired_event_ids = [];
+    state.military.event_last_fired_turn = {};
+    state.military.event_flags = {};
+    state.political.political_controllers = {
+        'op:vitez:vitez_2': 'HRHB',
+        'op:vitez:kruscica': 'RBiH',
+        'op:vitez:preocica_3': 'RBiH',
+    };
+    (state.political as any).war_alliance_rbih_hrhb = 0.05;
+    let fired: number | null = null;
+    for (let turn = 40; turn <= lastTurn; turn++) {
+        state.meta.turn = turn;
+        if (turn >= conditionsFrom) state.military.event_flags!.hvo_arbih_tensions_rising = true;
+        state.military.event_readiness ??= {};
+        state.military.event_readiness[war.id] = turn === onset ? war.pressure!.threshold : 0;
+        const ids = evaluateEvents(state, rejectRandomness, turn, [war, ahmici]).fired.map((e) => e.id);
+        if (turn === onset) assert.ok(ids.includes(war.id), `onset should fire at t${onset}`);
+        if (ids.includes(ahmici.id)) {
+            assert.strictEqual(fired, null, 'Ahmići fires once');
+            fired = turn;
+        }
+    }
+    return fired;
+}
+
+test('AH-1: the Ahmići window runs from the Croat-Bosniak war onset, [max(54, onset+1), onset+16]', () => {
+    assert.strictEqual(ahmiciFiringTurn(40, 120), 54, 'onset t40 → t54');
+    assert.strictEqual(ahmiciFiringTurn(49, 120), 54, 'onset t49 (main) → t54');
+    assert.strictEqual(ahmiciFiringTurn(75, 120), 76, 'onset t75 → t76, never on the onset turn');
+    // The other conditions come true late: it still fires at onset+16, and never after.
+    assert.strictEqual(ahmiciFiringTurn(49, 120, 65), 65, 'conditions true at onset+16 → fires');
+    assert.strictEqual(ahmiciFiringTurn(49, 120, 66), null, 'nothing after onset+16');
+    assert.strictEqual(ahmiciFiringTurn(75, 120, 92), null, 'nothing after onset+16 (late onset)');
+    assert.strictEqual(ahmiciFiringTurn(null, 120), null, 'never when the war did not fire');
+});
+
+test('AH-1: the loader accepts the Ahmići trigger with no turn_max', () => {
+    const event = loadedEventById('ahmici_massacre_1993');
+    assert.strictEqual(event.trigger.turn_max, undefined);
+    assert.strictEqual(event.trigger.turn_min, 54);
 });
 
 test('Ahmici stays blocked when RBiH holds the Vitez basing cell despite HRHB control elsewhere in Vitez', () => {

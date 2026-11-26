@@ -224,13 +224,14 @@ function rawCodexState(options: {
         political: {
             political_controllers: {},
             initial_political_controllers: {},
+            rbih_hrhb_state: { war_started_turn: null },
         },
         military: {
             formations: {},
             fired_event_ids: ['rbih_consequence', 'rs_consequence'],
             enabled_event_ids: [],
             closed_event_ids: [],
-            event_flags: { federation_never_fractured: true },
+            event_flags: {},
             event_fire_counts: {},
             event_last_fired_turn: { rbih_consequence: 54, rs_consequence: 55 },
             event_decision_log: decisions,
@@ -261,7 +262,7 @@ describe('CodexPanel dynamic essay proof', () => {
 
         const ghost = screen.getByTestId('codex-live-ghost');
         expect(ghost.getAttribute('data-ghost-id')).toBe('alliance_held');
-        expect(ghost.getAttribute('data-claim-predicate')).toContain('federation_never_fractured');
+        expect(ghost.getAttribute('data-claim-predicate')).toContain('rbih_hrhb_state.war_started_turn');
 
         const receipt = screen.getByTestId('codex-realized-receipt');
         expect(receipt.getAttribute('data-receipt-record-id')).toBe(
@@ -342,6 +343,8 @@ describe('CodexPanel dynamic essay proof', () => {
     it('renders divergence context without inherited path-not-taken metadata', () => {
         const raw = rawCodexState();
         raw.military.event_flags = { vrs_quality_inverted: true };
+        // The alliance fell to war (t49), so the alliance_held path-not-taken ghost stays hidden.
+        raw.political.rbih_hrhb_state = { war_started_turn: 49 };
         raw.military.event_decision_log = [];
         raw.military.event_causality_log = [];
         raw.military.fired_event_ids = [];
@@ -362,6 +365,8 @@ describe('CodexPanel dynamic essay proof', () => {
         setLocale('bcs');
         const raw = rawCodexState();
         raw.military.event_flags = { vrs_quality_inverted: true };
+        // The alliance fell to war (t49), so the alliance_held path-not-taken ghost stays hidden.
+        raw.political.rbih_hrhb_state = { war_started_turn: 49 };
         raw.military.event_decision_log = [];
         raw.military.event_causality_log = [];
         raw.military.fired_event_ids = [];
