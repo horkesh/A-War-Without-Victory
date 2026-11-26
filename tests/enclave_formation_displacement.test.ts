@@ -338,9 +338,14 @@ describe('E-fall: authored destination not friendly-held', () => {
         withFlag(undefined, () => {
             const f = encFormation();
             const state = divergentState(f, [ring2[0]!]);
-            // A stale friendly source cell (the control flip already ran) is not a candidate.
-            state.political.political_controllers!['op:srebrenica:srebrenica_2'] = 'RBiH';
-            applyEventEffects(state, [srebEffect]);
+            // A stale friendly source cell ONE hop from the destination (red-team A1: the exclusion
+            // must be what keeps it out, not distance). Without the exclusion it would win ring 1.
+            const nearSource = ring1[0]!;
+            state.political.political_controllers![nearSource] = 'RBiH';
+            applyEventEffects(state, [{
+                ...srebEffect,
+                source_osids: ['op:srebrenica:srebrenica_2', nearSource],
+            } as EventEffect]);
             expect(f.location_osid).toBe(ring2[0]);
         });
     });
