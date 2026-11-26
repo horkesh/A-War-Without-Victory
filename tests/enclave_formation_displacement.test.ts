@@ -13,6 +13,7 @@ import type { EventEffect } from '../src/sim/events/event_types.js';
 import type { GameState } from '../src/state/game_state.js';
 import { getSettlementAdjacency } from '../src/sim/negotiation/peace_settlement.js';
 import { strictCompare } from '../src/state/validateGameState.js';
+import { displaceFormationsInEnemyTerritory } from '../src/sim/combat/attack_retreat_displacement.js';
 
 const FLAG = 'AWWV_ENCLAVE_COLUMN_DISPLACEMENT';
 function withFlag(v: string | undefined, fn: () => void): void {
@@ -363,6 +364,39 @@ describe('E-fall: authored destination not friendly-held', () => {
             expect(f.status).toBe('inactive');
             expect(f.lifecycle_status).toBe('disbanded');
             expect(f.location_osid).toBe('op:srebrenica:srebrenica_2');
+        });
+    });
+});
+
+// E-fall, the defect path itself (scenario-tester seat): on main the survivors were written onto the
+// enemy-held destination, and the turn's enemy-territory safety net then dissolved them. With the fix
+// they stand on friendly ground, so the safety net leaves them alone, and a save round-trip keeps them.
+describe('E-fall: the enemy-territory safety net after the fall', () => {
+    const DEST = 'op:zivinice:gracanica_2';
+    const adjacency = getSettlementAdjacency();
+    const ring1 = [...(adjacency.get(DEST) ?? [])].sort(strictCompare);
+    const ring2 = [...new Set(ring1.flatMap((o) => adjacency.get(o) ?? []))]
+        .filter((o) => o !== DEST && !ring1.includes(o))
+        .sort(strictCompare);
+
+    it('survivors stay active at the friendly cell through displace-enemy-territory and save/load (red on main)', () => {
+        withFlag(undefined, () => {
+            const f = encFormation({ kind: 'brigade', cohesion: 60 });
+            const state = makeState(f);
+            const pc: Record<string, string> = { 'op:srebrenica:srebrenica_2': 'RS', [DEST]: 'RS' };
+            for (const o of ring1) pc[o] = 'RS';
+            pc[ring2[0]!] = 'RBiH';
+            state.political.political_controllers = pc as any;
+
+            applyEventEffects(state, [srebEffect]);
+            displaceFormationsInEnemyTerritory(state, [], new Map(), adjacency);
+            const loaded = deserializeState(serializeState(state));
+            const g = loaded.military.formations?.[f.id as string];
+
+            expect(g?.status).toBe('active');
+            expect(g?.location_osid).toBe(ring2[0]);
+            expect(g?.personnel).toBe(400);
+            expect(loaded.political.political_controllers?.[g?.location_osid as string]).toBe('RBiH');
         });
     });
 });
