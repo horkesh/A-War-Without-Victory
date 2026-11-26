@@ -11,6 +11,9 @@ import { applyEventEffects } from '../src/sim/events/apply_effects.js';
 import { deserializeState, serializeState } from '../src/state/serialize.js';
 import type { EventEffect } from '../src/sim/events/event_types.js';
 import type { GameState } from '../src/state/game_state.js';
+import { getSettlementAdjacency } from '../src/sim/negotiation/peace_settlement.js';
+import { strictCompare } from '../src/state/validateGameState.js';
+import { displaceFormationsInEnemyTerritory } from '../src/sim/combat/attack_retreat_displacement.js';
 
 const FLAG = 'AWWV_ENCLAVE_COLUMN_DISPLACEMENT';
 function withFlag(v: string | undefined, fn: () => void): void {
@@ -257,6 +260,173 @@ describe('enclave_formation_displacement', () => {
 
             expect(loaded.military.formations?.[f.id as string]?.location_osid).toBe('op:zivinice:gracanica_2');
             expect((loaded.military as any).brigade_movement_state?.[f.id as string]).toBeUndefined();
+        });
+    });
+});
+
+// E-fall (2026-11-26, freeze inventory §1): in a divergent game the enemy may hold the authored
+// destination. The survivors re-form at the nearest friendly-held cell, own corps territory first,
+// and are never placed on enemy ground (they used to be, and the enemy-territory safety net then
+// disbanded them silently).
+describe('E-fall: authored destination not friendly-held', () => {
+    const DEST = 'op:zivinice:gracanica_2';
+    const adjacency = getSettlementAdjacency();
+    const ring1 = [...(adjacency.get(DEST) ?? [])].sort(strictCompare);
+    const ring2 = [...new Set(ring1.flatMap((o) => adjacency.get(o) ?? []))]
+        .filter((o) => o !== DEST && !ring1.includes(o))
+        .sort(strictCompare);
+
+    function divergentState(f: Record<string, unknown>, rbih: string[]): GameState {
+        const state = makeState(f);
+        const pc: Record<string, string> = { 'op:srebrenica:srebrenica_2': 'RS', [DEST]: 'RS' };
+        for (const o of ring1) pc[o] = 'RS';
+        for (const o of rbih) pc[o] = 'RBiH';
+        state.political.political_controllers = pc as any;
+        return state;
+    }
+
+    it('the graph around the destination has two rings (test premise)', () => {
+        expect(ring1.length).toBeGreaterThan(0);
+        expect(ring2.length).toBeGreaterThan(1);
+    });
+
+    it('re-forms at the nearest friendly cell, not on the enemy-held destination (red on main)', () => {
+        withFlag(undefined, () => {
+            const f = encFormation();
+            const target = ring2[ring2.length - 1]!;
+            const state = divergentState(f, [target, 'op:far:away_cell']);
+            applyEventEffects(state, [srebEffect]);
+            expect(f.location_osid).toBe(target);
+            expect(f.home_osid).toBe(target);
+            expect(state.political.political_controllers?.[f.location_osid as string]).toBe('RBiH');
+            expect(f.status).toBe('active');
+            expect(f.personnel).toBe(400);
+            expect(f.assignment).toBeNull();
+        });
+    });
+
+    it('prefers its own corps territory over a nearer friendly cell of another corps', () => {
+        withFlag(undefined, () => {
+            const f = encFormation();
+            const near = ring1[0]!;
+            const own = ring2[ring2.length - 1]!;
+            const state = divergentState(f, [own]);
+            state.political.political_controllers![near] = 'RBiH';
+            (state.military as any).corps_front_sectors = {
+                'sector:arbih_2nd_corps:0': { corps_id: 'arbih_2nd_corps', territory_osids: [own] },
+                'sector:arbih_3rd_corps:0': { corps_id: 'arbih_3rd_corps', territory_osids: [near] },
+            };
+            applyEventEffects(state, [srebEffect]);
+            expect(f.location_osid).toBe(own);
+        });
+    });
+
+    it('within one ring, the smallest id wins (strictCompare), whatever the key order', () => {
+        withFlag(undefined, () => {
+            const a = encFormation();
+            const b = encFormation();
+            const s1 = divergentState(a, [...ring2].reverse());
+            const s2 = divergentState(b, ring2);
+            applyEventEffects(s1, [srebEffect]);
+            applyEventEffects(s2, [srebEffect]);
+            expect(a.location_osid).toBe(ring2[0]);
+            expect(b.location_osid).toBe(ring2[0]);
+        });
+    });
+
+    it('never re-forms in a fallen source cell', () => {
+        withFlag(undefined, () => {
+            const f = encFormation();
+            const state = divergentState(f, [ring2[0]!]);
+            // A stale friendly source cell ONE hop from the destination (red-team A1: the exclusion
+            // must be what keeps it out, not distance). Without the exclusion it would win ring 1.
+            const nearSource = ring1[0]!;
+            state.political.political_controllers![nearSource] = 'RBiH';
+            applyEventEffects(state, [{
+                ...srebEffect,
+                source_osids: ['op:srebrenica:srebrenica_2', nearSource],
+            } as EventEffect]);
+            expect(f.location_osid).toBe(ring2[0]);
+        });
+    });
+
+    it('a faction with no cell left: disbanded (not destroyed), never on enemy ground', () => {
+        withFlag(undefined, () => {
+            const f = encFormation();
+            const state = divergentState(f, []);
+            applyEventEffects(state, [srebEffect]);
+            expect(f.status).toBe('inactive');
+            expect(f.lifecycle_status).toBe('disbanded');
+            expect(f.personnel).toBe(0);
+        });
+    });
+
+    it('never re-forms inside another named enclave, even in its own corps territory (operations seat R1)', () => {
+        withFlag(undefined, () => {
+            const f = encFormation();
+            const other = ring2[ring2.length - 1]!;
+            const state = divergentState(f, [other, 'op:rogatica:zepa_2']);
+            (state.military as any).corps_front_sectors = {
+                'sector:arbih_2nd_corps:0': { corps_id: 'arbih_2nd_corps', territory_osids: ['op:rogatica:zepa_2'] },
+            };
+            applyEventEffects(state, [srebEffect]);
+            expect(f.location_osid).toBe(other);
+            expect(f.status).toBe('active');
+        });
+    });
+
+    it('a held cell the contact graph never reaches is not a pick by id order: disbanded (canon seat, EI §14.5)', () => {
+        withFlag(undefined, () => {
+            const f = encFormation();
+            const state = divergentState(f, ['op:aaa:not_in_graph']);
+            applyEventEffects(state, [srebEffect]);
+            expect(f.location_osid).not.toBe('op:aaa:not_in_graph');
+            expect(f.status).toBe('inactive');
+            expect(f.lifecycle_status).toBe('disbanded');
+        });
+    });
+
+    it("the 'none' branch (Žepa) is unchanged in a divergent game", () => {
+        withFlag(undefined, () => {
+            const f = encFormation();
+            const state = divergentState(f, [ring2[0]!]);
+            applyEventEffects(state, [{ ...srebEffect, reconstitute_as: 'none', casualty_fraction: 0.15 }]);
+            expect(f.status).toBe('inactive');
+            expect(f.lifecycle_status).toBe('disbanded');
+            expect(f.location_osid).toBe('op:srebrenica:srebrenica_2');
+        });
+    });
+});
+
+// E-fall, the defect path itself (scenario-tester seat): on main the survivors were written onto the
+// enemy-held destination, and the turn's enemy-territory safety net then dissolved them. With the fix
+// they stand on friendly ground, so the safety net leaves them alone, and a save round-trip keeps them.
+describe('E-fall: the enemy-territory safety net after the fall', () => {
+    const DEST = 'op:zivinice:gracanica_2';
+    const adjacency = getSettlementAdjacency();
+    const ring1 = [...(adjacency.get(DEST) ?? [])].sort(strictCompare);
+    const ring2 = [...new Set(ring1.flatMap((o) => adjacency.get(o) ?? []))]
+        .filter((o) => o !== DEST && !ring1.includes(o))
+        .sort(strictCompare);
+
+    it('survivors stay active at the friendly cell through displace-enemy-territory and save/load (red on main)', () => {
+        withFlag(undefined, () => {
+            const f = encFormation({ kind: 'brigade', cohesion: 60 });
+            const state = makeState(f);
+            const pc: Record<string, string> = { 'op:srebrenica:srebrenica_2': 'RS', [DEST]: 'RS' };
+            for (const o of ring1) pc[o] = 'RS';
+            pc[ring2[0]!] = 'RBiH';
+            state.political.political_controllers = pc as any;
+
+            applyEventEffects(state, [srebEffect]);
+            displaceFormationsInEnemyTerritory(state, [], new Map(), adjacency);
+            const loaded = deserializeState(serializeState(state));
+            const g = loaded.military.formations?.[f.id as string];
+
+            expect(g?.status).toBe('active');
+            expect(g?.location_osid).toBe(ring2[0]);
+            expect(g?.personnel).toBe(400);
+            expect(loaded.political.political_controllers?.[g?.location_osid as string]).toBe('RBiH');
         });
     });
 });

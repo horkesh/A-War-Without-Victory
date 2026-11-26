@@ -6825,7 +6825,7 @@ export const enMessages = {
     'verdict.basis.combatLosses': 'Killed, wounded and missing, summed over this side\'s engagements; this campaign',
     'verdict.basis.populationHeld': 'Population of municipalities where this side held at least one settlement at the end; a shared municipality counts for every side',
     'verdict.basis.displacedBooked': 'Displaced or killed in areas this side took, held or besieged, this campaign',
-    'verdict.basis.refugeesReceived': 'Displaced people who arrived in this side\'s territory, this campaign',
+    'verdict.basis.refugeesReceived': 'Displaced people who reached this side\'s territory from their own homes, this campaign; people driven out when an enclave fell and those evacuated by convoy are not counted here',
     'verdict.basis.campaignRecord': 'This campaign\'s record',
     'verdict.basis.campaignAllSides': 'All sides, this campaign; deaths from shelling and sieges are not counted',
     'verdict.basis.displacedAllSides': 'All sides, this campaign; people displaced from their homes and those killed, counted together',
