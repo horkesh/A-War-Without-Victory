@@ -36,6 +36,7 @@ import { collectAverageDefenseRoster, collectSectorDefenseBrigades } from './sec
 import type { EdgeRecord } from '../../map/settlements.js';
 import type { TerrainScalarsData } from '../../map/terrain_scalars.js';
 import { recordBattleHistory } from './attack_history_recording.js';
+import { recordTgDonorLoss } from './brigade_history_recorder.js';
 import { updateSectorIntelFromCombat } from './sector_intel.js';
 import {
     initializeCasualtyLedger,
@@ -1123,9 +1124,14 @@ export function resolveAttackOrdersOsid(
         );
         const casShares = computeAttackerCasualtyShares(attackerShareInputs, personnelAttacker, finalAttackerCas);
         const appliedAttackerById = new Map<FormationId, number>();
+        // CAS-REPORT-4 (§22): a TG anchor's own applied loss, apart from its donors', and
+        // each donor's applied loss, so brigade history credits each brigade its own men.
+        const ownAppliedAttackerById = new Map<FormationId, number>();
+        const tgDonorLosses: Array<{ donor: FormationState; casualties: number }> = [];
         for (const a of attackerFormations) {
             const cas = casShares.get(a.id) ?? 0;
             let appliedCas = 0;
+            let ownAppliedCas: number | null = null;
             // ADR-0005 v2.2b: TG anchor distributes casualties to donors per pro-rata
             // math. Anchor floor ≥50% (Hard Inv); donor cap = personnel_lent (Hard Inv #5).
             // Flag-off: falls through to the original single-brigade applyPersonnelLoss.
@@ -1133,7 +1139,8 @@ export function resolveAttackOrdersOsid(
                 const tg = findTgForAnchor(state, a.id);
                 if (tg && tg.donor_contributions.length > 0) {
                     const dist = distributeCasualtiesAcrossTg(cas, a.id, tg.donor_contributions);
-                    appliedCas += applyPersonnelLoss(a, dist.anchor_casualties);
+                    ownAppliedCas = applyPersonnelLoss(a, dist.anchor_casualties);
+                    appliedCas += ownAppliedCas;
                     for (const donorContrib of tg.donor_contributions) {
                         const donorCas = dist.donor_casualties[donorContrib.brigade_id] ?? 0;
                         if (donorCas <= 0) continue;
@@ -1144,6 +1151,7 @@ export function resolveAttackOrdersOsid(
                         const donorApplied = donor ? applyPersonnelLoss(donor, donorCas) : 0;
                         appliedCas += donorApplied;
                         donorContrib.casualties_so_far += donorApplied;
+                        if (donor && donorApplied > 0) tgDonorLosses.push({ donor, casualties: donorApplied });
                     }
                 } else {
                     appliedCas = applyPersonnelLoss(a, cas);
@@ -1152,6 +1160,7 @@ export function resolveAttackOrdersOsid(
                 appliedCas = applyPersonnelLoss(a, cas);
             }
             appliedAttackerById.set(a.id, appliedCas);
+            ownAppliedAttackerById.set(a.id, ownAppliedCas ?? appliedCas);
             a.cohesion = Math.max(0, Math.min(100, (a.cohesion ?? 60) + (COHESION_ATTACKER[outcome] ?? 0)));
 
             // ADR-0005 v2.2c #2 / Hard Invariant #6: anchor destroyed mid-op → dissolve its TG
@@ -1466,12 +1475,12 @@ export function resolveAttackOrdersOsid(
             if (primary) primary.casualties_taken += extraDefenderApplied;
         }
         // CAS-REPORT-3 (§21): per-brigade applied losses for brigade history (and through it
-        // the turn summary and compute_capital). Attackers: the applied share (a TG anchor's
-        // includes its donors' applied loss) plus the absorption extra. Defenders: the applied
-        // share, the primary also taking the extra.
+        // the turn summary and compute_capital). Attackers: their own applied share (a TG
+        // anchor's excludes its donors', CAS-REPORT-4 §22) plus the absorption extra.
+        // Defenders: the applied share, the primary also taking the extra.
         const attackerAppliedById = new Map<FormationId, number>();
         for (const a of attackerFormations) {
-            attackerAppliedById.set(a.id, (appliedAttackerById.get(a.id) ?? 0) + (extraAttackerByBrigade.get(a.id) ?? 0));
+            attackerAppliedById.set(a.id, (ownAppliedAttackerById.get(a.id) ?? 0) + (extraAttackerByBrigade.get(a.id) ?? 0));
         }
         const defenderAppliedById = new Map<FormationId, number>(defenderCasualtyShares ?? []);
         if (defenderFormation && extraDefenderApplied > 0) {
@@ -1725,6 +1734,12 @@ export function resolveAttackOrdersOsid(
             battleEquipCapturedTanks,
             battleEquipCapturedArt,
         });
+        // CAS-REPORT-4 (§22): each TG donor's history records the men it lost. A donor is
+        // not credited with the battle (no engagement row, no battles_fought): lending men
+        // is not fighting the battle as a unit.
+        for (const { donor, casualties } of tgDonorLosses) {
+            recordTgDonorLoss(donor, casualties, currentTurn, state);
+        }
 
         // === SECTOR INTEL: RECON BY FORCE ===
         updateSectorIntelFromCombat(state, firstAttackerPreBattleOsid ?? targetOsid, targetOsid, currentTurn);
