@@ -227,8 +227,8 @@ function operationOwnershipGate({ events, battleById, cells, corpsOf, fromTurn =
  * GATE, P-A liveness: if any Farz objective is still not RBiH when week 177 begins, the authored
  * Farz must start in its window (from week 160) with a roster. Each such objective must then be
  * attacked by it (a battle at the cell owned by Farz or by its authored 2nd Corps half, Uragan 95),
- * or taken from week 177 by an operation-owned combat capture of the joint offensive's other
- * operations. Main's emergent run has Farz target only gornja Bočinja and the 2nd Corps' Slap 2 take
+ * or taken from week 177 by an operation-owned combat capture by a 2nd or 3rd Corps operation (the
+ * joint offensive's other operations). Main's emergent run has Farz target only gornja Bočinja and the 2nd Corps' Slap 2 take
  * Spreča at t182; that capture is held to the ownership gate (G2), and which operation got the
  * credit is a SHAPE row. What fails here is a Farz that never starts, has no roster, or leaves an
  * objective neither attacked nor taken.
@@ -251,7 +251,8 @@ function farzLivenessGate({ cells, stateAt, farz, battles, events, battleById, w
       && turn >= aar.started_turn && battleOperationIds(battle).some((id) => owners.includes(id)));
     if (attack) { rows.push({ name, osid, ok: true, reason: 'attacked', attack_turn: attack.turn }); continue; }
     const taken = (events || []).find((e) => e.settlement_id === osid && e.to === 'RBiH' && e.mechanism === 'combat'
-      && (e.turn ?? -1) >= livenessTurn && classifyCombatCapture(e, battleById.get(e.battle_id)).kind === 'operation_owned');
+      && (e.turn ?? -1) >= livenessTurn && (classifyCombatCapture(e, battleById.get(e.battle_id)).operation_ids ?? [])
+        .some((id) => JOINT_CORPS.some((c) => id.startsWith(`${c}:`))));
     rows.push(taken
       ? { name, osid, ok: true, reason: 'taken_by_operation', taken_turn: taken.turn,
         operation_ids: classifyCombatCapture(taken, battleById.get(taken.battle_id)).operation_ids }

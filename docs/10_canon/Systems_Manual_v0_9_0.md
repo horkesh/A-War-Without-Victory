@@ -329,12 +329,11 @@ These rules are faction-blind and add no state.
 
 **The Farz receipts are read in three tiers (Fable consult 10, orchestrator ruling §26, 2026-11-26; `tools/verify_checkpoints.cjs`, `tools/lib/farz_objective_gate.cjs`):**
 - **Gates, checked at every merge in both modes (exit 1):**
-  - The nine eastern municipalities: a capture there from week 160 by any ARBiH corps. This is the §6 ruling and is not loosened; a red goes to the §6 panel.
+  - The nine eastern municipalities: a combat capture there from week 160 by any RBiH formation, unless the reference has the cell RS in April 1995 and RBiH in October 1995 (no such cell exists today). This is the §6 ruling and is not loosened; a red goes to the §6 panel.
   - Operation ownership: every capture of a Farz cell, and every capture from week 160 by the 2nd or 3rd Corps, is combat owned by an operation.
-  - Farz liveness: if a Farz cell is not RBiH when week 177 begins, the authored Farz starts from week 160 with a roster, and the cell is either attacked by Farz or Uragan 95 or taken by an operation.
+  - Farz liveness: if a Farz cell is not RBiH when week 177 begins, the authored Farz starts from week 160 with a roster and attacks it. The tool also accepts the cell's being taken from week 177 by another operation of the offensive (main's emergent run: the 2nd Corps' Slap 2 takes Spreča); that capture is held to the ownership gate.
 - **Shape rows, recorded and not gating, green by the end of the calibration pass:** the four Farz cells RBiH at week 188; no Farz cell taken before week 177, in any week; the stopping line, meaning no capture from week 160 by the 2nd or 3rd Corps of a cell the October 1995 reference does not have RBiH (outside the nine municipalities); and anchors 31 of 31.
-- **Tripwire, hold and trace (exit 1):** more than one Farz cell taken early, more than three stopping-line cells, fewer than three Farz cells RBiH at week 188, or fewer than 29 anchors (an unreadable anchor contract also trips). The bounds come from the 57 distinct 188-week runs measured in consult 10.
-- The old P-B read the 2nd Corps alone. It missed the 3rd Corps' Jelen 2 at Doboj Boljanić and Petrovo in main's emergent run, and it flagged a retake of a cell the reference keeps RBiH (Maglaj Jablanica).
+- **Tripwire, hold and trace (exit 1):** more than one Farz cell taken early, more than three stopping-line cells, fewer than three Farz cells RBiH at week 188, or fewer than 29 anchors. As a tool rule, an unreadable anchor contract also trips (fail closed). The bounds come from the 57 distinct 188-week runs measured in consult 10.
 
 **Owner-directed 102nd Odžak→Orašje evacuation (2026-10-28):** when the capture-triggered
 salient lifecycle would evacuate `hrhb_102nd_brigade` from the Odžak/Bosanski Šamac neck, the

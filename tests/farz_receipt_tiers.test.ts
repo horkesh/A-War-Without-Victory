@@ -119,6 +119,15 @@ describe('Farz receipt tiers: GATE rows', () => {
         expect(res.rows.map((r: { reason: string }) => r.reason)).toEqual(['attacked', 'attacked', 'taken_by_operation']);
     });
 
+    it('liveness does not accept a capture by an operation outside the 2nd and 3rd Corps', () => {
+        const caps = [cap(BRIJESNICA, 182, 'b1', 'arbih_1st_corps:Operacija X:t181')];
+        const res = gate.farzLivenessGate({
+            cells: [['Spreča', BRIJESNICA]], stateAt: () => allRs(), farz: { aar: farzAar },
+            battles: caps.map((c) => ({ turn: c.turn, battle: c.battle })), events: caps.map((c) => c.event), battleById: battleMap(caps),
+        });
+        expect(res.rows[0].reason).toBe('neither_attacked_nor_taken');
+    });
+
     it('liveness fails when Farz never starts, starts before t160, has no roster, or leaves an objective alone', () => {
         const base = { cells: CELLS, stateAt: () => allRs(), battles: [], events: [], battleById: new Map() };
         expect(gate.farzLivenessGate({ ...base, farz: { aar: null } }).rows[0].reason).toBe('no_authored_farz');
