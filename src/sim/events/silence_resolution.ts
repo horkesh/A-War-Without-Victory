@@ -237,8 +237,16 @@ export async function settlePlayerEventDecisionsThisTurn(
         resolvePausedDecision(state, answer.eventId, answer.responseId);
     };
     const atSlots = answers.filter((answer) => primary?.hasPlayerSlot(answer.eventId) === true);
+    // An answer to a card with no slot lands now, unless its card exists only because an answer
+    // still waiting for its slot queued it on the copy (an answer that opens a further card): that
+    // one lands after the slots, in the order given.
+    const isPending = (eventId: string): boolean => (state.military.pending_event_decisions ?? [])
+        .some((decision) => decision.event_id === eventId);
+    const afterSlots: PauseAnswer[] = [];
     for (const answer of answers) {
-        if (!atSlots.includes(answer)) land(answer);
+        if (atSlots.includes(answer)) continue;
+        if (afterSlots.length === 0 && isPending(answer.eventId)) land(answer);
+        else afterSlots.push(answer);
     }
     primary?.settleAnswers((eventId) => {
         for (const answer of atSlots) {
@@ -246,5 +254,6 @@ export async function settlePlayerEventDecisionsThisTurn(
         }
         resolvePlayerEventDecisionsBySilence(state, eventDefinitions, turn, eventId);
     });
+    for (const answer of afterSlots) land(answer);
     resolvePlayerEventDecisionsBySilence(state, eventDefinitions, turn);
 }

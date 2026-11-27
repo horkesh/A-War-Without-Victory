@@ -161,4 +161,27 @@ describe('PAUSE-ANSWER-ORDER: an in-person pause answer lands at its slot in fir
         await runStep(headless, defs);
         expect(mods(live)).toEqual(mods(headless));
     });
+
+    it('a resolver that swaps every top-level object (the desktop one) mid-drain: later slots still land', async () => {
+        // The player's card fires first, so a bot slot runs after the answer has replaced the state's contents.
+        const defs = ORDERS[1]![1];
+        const swapResolver = (state: GameState, eventId: string, responseId: string): void => {
+            const next = structuredClone(state);
+            resolveEventDecision(next, eventId, responseId);
+            for (const key of Object.keys(state)) Reflect.deleteProperty(state, key);
+            Object.assign(state, next);
+        };
+        for (const morale of [99, 90]) {
+            const headless = st(null, 0, morale);
+            await runStep(headless, defs);
+            const live = st('HRHB', 0, morale);
+            await runStep(live, defs, {
+                onPlayerDecisionsPending: inPersonHook({ effectVisible: [], pendingAfter: [] }),
+                resolvePausedDecision: swapResolver,
+            });
+            expect(mods(live)).toEqual(mods(headless));
+            expect(live.military.formations.b1!.morale).toBe(headless.military.formations.b1!.morale);
+            expect(rows(live)).toEqual(rows(headless));
+        }
+    });
 });

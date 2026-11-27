@@ -32,10 +32,14 @@ const READER_SHAPES: RegExp[] = [
     new RegExp(String.raw`\bcase\s+${LABEL}`),
     // A list or Set of labels is a reader's shape (includes / has); writers set one label.
     new RegExp(String.raw`${LABEL}\s*,\s*${LABEL}`),
-    // A prefix or pattern test of the field for "bot".
-    /(?:decision_source|decisionSource)\b[^;\n]*\.(?:startsWith|includes|match|test)\(\s*['"`/]?\^?bot/,
+    // A table keyed by label (indexed by the field); writers never use a label as a key.
+    /[{,]\s*['"`]?(?:bot_political|bot_v1|bot_ai_default)['"`]?\s*:/,
+    // A prefix, shape or pattern test of the field for "bot".
+    /(?:decision_source|decisionSource)\b[^;\n]*\.(?:startsWith|endsWith|includes|indexOf|match|test|slice|substring|split)\(\s*['"`/]?\^?(?:bot|_)/,
     /\/\^?bot_?[^/\n]*\/[a-z]*\.test\([^)\n]*(?:decision_source|decisionSource)/,
 ];
+/** The shapes a formatter may split over lines: checked again on the file with its whitespace collapsed. */
+const MULTI_LINE_SHAPES = READER_SHAPES.slice(0, 5);
 
 /** Comments removed (line and block), strings kept: a doc line that quotes a comparison is not code. */
 function stripComments(source: string): string {
@@ -47,9 +51,17 @@ function stripComments(source: string): string {
 /** The reader-shaped lines of one file, as `line: text`. */
 function botLabelReaderLines(source: string): string[] {
     const hits: string[] = [];
-    stripComments(source).split('\n').forEach((line, index) => {
+    const code = stripComments(source);
+    code.split('\n').forEach((line, index) => {
         if (READER_SHAPES.some((shape) => shape.test(line))) hits.push(`${index + 1}: ${line.trim()}`);
     });
+    if (hits.length === 0) {
+        const collapsed = code.replace(/\s+/g, ' ');
+        for (const shape of MULTI_LINE_SHAPES) {
+            const match = shape.exec(collapsed);
+            if (match) hits.push(`(over lines): ${collapsed.slice(Math.max(0, match.index - 60), match.index + 60).trim()}`);
+        }
+    }
     return hits;
 }
 
@@ -73,8 +85,12 @@ describe('OBSERVER-LABEL guard: no src reader compares decision_source with a bo
             `const BOTS = new Set(['bot_political', 'bot_v1']);`,
             `if (row.decision_source.startsWith('bot')) x();`,
             `if (/^bot_/.test(row.decision_source)) x();`,
+            `const weight = { bot_v1: 1, player: 2 }[row.decision_source];`,
+            `if (row.decision_source.endsWith('_default')) x();`,
+            `if (row.decision_source ===\n    'bot_v1') x();`,
+            `const BOTS = new Set([\n    'bot_political',\n    'bot_v1',\n]);`,
         ];
-        for (const line of readers) expect(botLabelReaderLines(line), line).toHaveLength(1);
+        for (const line of readers) expect(botLabelReaderLines(line), line.length > 0 ? line : 'empty').not.toEqual([]);
         const writers = [
             `decisionSource: 'bot_ai_default',`,
             `return { chosen, decisionSource: scored ? 'bot_political' : 'bot_ai_default' };`,
