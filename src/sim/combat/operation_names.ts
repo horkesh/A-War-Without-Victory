@@ -248,8 +248,8 @@ export function simpleHash(s: string): number {
  *
  * Sequential consumption: hash determines starting index, then scans
  * forward for the first name not in `state.used_operation_names`.
- * Each name is used at most once per game. If pool is exhausted,
- * appends a numeric suffix to recycle from the top.
+ * Each name is used at most once per game. If the pool is exhausted, it
+ * recycles from the top with a generation suffix (" 2", " 3", ...).
  */
 export function pickOperationName(
     corpsId: string,
@@ -277,13 +277,21 @@ export function pickOperationName(
         if (!used[name] && !isHistoricalOperationNameReserved(name)) return markUsed(name);
     }
 
-    // Pool exhausted — recycle with numeric suffix
-    for (let i = 0; i < pool.length; i++) {
-        const idx = (startIdx + i) % pool.length;
-        const name = `${pool[idx]!} 2`;
-        if (!used[name] && !isHistoricalOperationNameReserved(name)) return markUsed(name);
+    // Pool exhausted: recycle with a generation suffix ("<name> 2", then "<name> 3", ...).
+    // OP-NAME-GARBLE (rulings §43): a long game does use every name twice (ARBiH 2nd Corps,
+    // week 177). The old fallback after generation 2 cut the corps id into the name
+    // ("Operacija 177-orps"). Each generation adds `pool.length` new names and only
+    // `usedCount` names are taken, so generation `usedCount + 2` at the latest has a free one.
+    const usedCount = Object.keys(used).length;
+    for (let gen = 2; gen <= usedCount + 2; gen++) {
+        for (let i = 0; i < pool.length; i++) {
+            const idx = (startIdx + i) % pool.length;
+            const name = `${pool[idx]!} ${gen}`;
+            if (!used[name] && !isHistoricalOperationNameReserved(name)) return markUsed(name);
+        }
     }
 
-    // Absolute fallback (should never reach in practice with 40+ names)
-    return markUsed(`Operacija ${turn}-${corpsId.slice(-4)}`);
+    // Unreachable while the pool holds one name that is not reserved
+    // (tests/operation_name_collision.test.ts); still a pool name, never a corps-id fragment.
+    return markUsed(`${pool[startIdx]!} ${usedCount + 3}`);
 }
