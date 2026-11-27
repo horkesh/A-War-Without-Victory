@@ -40,7 +40,9 @@ const LIVE_ONLY = [
  * (event, faction, response) in both branches. Order, turn and decision_source may differ only on the
  * rows the live player answered in person (decision_source 'player'): the bot_equivalent harness answers
  * as a player at the pause and files opening answers at campaign birth (turn 0), where headless the bot
- * answers in the settle step. Every non-player row must match a headless row exactly.
+ * answers in the settle step. Every non-player row must match a headless row exactly and in order: with the
+ * in-person rows taken out of the headless log one for one by answer, the rest of the two logs are identical
+ * sequences (PARITY-ORDER, rulings §65).
  */
 const NORMALISED = 'military.event_decision_log';
 
@@ -74,10 +76,27 @@ function decisionLogProblems(headlessLog, playerLog) {
     if (JSON.stringify(a) !== JSON.stringify(b)) {
         problems.push(`${NORMALISED}: answers differ (headless ${a.length} rows, player ${b.length} rows)`);
     }
-    const headlessStrict = new Set((headlessLog ?? []).map(strict));
+    // PARITY-ORDER (rulings §65, Codex r4720444796): remove the live player's in-person rows from the headless log
+    // one for one by (event, faction, response), first unmatched occurrence. What remains must equal the player
+    // save's non-player rows exactly and IN ORDER (the firing order #905 fixed), not merely as a set.
+    const remaining = [...(headlessLog ?? [])];
     for (const row of playerLog ?? []) {
-        if (row.decision_source === 'player') continue;
-        if (!headlessStrict.has(strict(row))) problems.push(`${NORMALISED}: non-player row has no exact headless twin: ${strict(row).slice(0, 200)}`);
+        if (row.decision_source !== 'player') continue;
+        const i = remaining.findIndex((h) => key(h) === key(row));
+        if (i < 0) problems.push(`${NORMALISED}: in-person player row has no headless answer: ${strict(row).slice(0, 200)}`);
+        else remaining.splice(i, 1);
+    }
+    const nonPlayer = (playerLog ?? []).filter((row) => row.decision_source !== 'player');
+    if (remaining.length !== nonPlayer.length) {
+        problems.push(`${NORMALISED}: non-player rows differ in count (headless ${remaining.length}, player ${nonPlayer.length})`);
+    }
+    for (let i = 0; i < Math.max(remaining.length, nonPlayer.length); i += 1) {
+        const h = remaining[i] === undefined ? 'none' : strict(remaining[i]);
+        const p = nonPlayer[i] === undefined ? 'none' : strict(nonPlayer[i]);
+        if (h !== p) {
+            problems.push(`${NORMALISED}: non-player row ${i} differs (order or content): headless=${h.slice(0, 160)} player=${p.slice(0, 160)}`);
+            break;
+        }
     }
     return problems;
 }
