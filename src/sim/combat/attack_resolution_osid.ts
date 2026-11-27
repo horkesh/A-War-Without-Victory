@@ -1469,6 +1469,11 @@ export function resolveAttackOrdersOsid(
         for (const a of attackerFormations) {
             attackerAppliedById.set(a.id, (appliedAttackerById.get(a.id) ?? 0) + (extraAttackerByBrigade.get(a.id) ?? 0));
         }
+        // CAS-ATTACKER-SHARES (§42): the record names each attacker's own applied loss, so
+        // `attacker_casualties` (the stack's) is never read as `attacker_brigade`'s.
+        battleRecord.attacker_contributions = [...attackerAppliedById.keys()]
+            .sort(strictCompare)
+            .map((id) => ({ brigade_id: id, casualties_taken: attackerAppliedById.get(id) ?? 0 }));
         const defenderAppliedById = new Map<FormationId, number>(defenderCasualtyShares ?? []);
         if (defenderFormation && extraDefenderApplied > 0) {
             defenderAppliedById.set(defenderFormation.id, (defenderAppliedById.get(defenderFormation.id) ?? 0) + extraDefenderApplied);
