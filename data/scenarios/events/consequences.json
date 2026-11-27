@@ -879,10 +879,10 @@
   {
     "id": "csq_srebrenica_stalemate_1995",
     "title": "The Enclave Holds",
-    "narrative": "The enclave persists into the summer of 1995. UNPROFOR's Dutch detachment continues its patrols; RS forces continue their checkpoints and their occasional shellings. The attack that in the historical record overran the perimeter does not come. Drina Corps reports from the field describe the arithmetic frankly: a sustained final operation against the enclave is possible but would require force concentrations the corps cannot spare from its other defensive commitments. The operation is deferred, and then deferred again.",
+    "narrative": "The enclave is still held in the autumn of 1995. UNPROFOR's Dutch detachment continues its patrols; RS forces continue their checkpoints and their occasional shellings. The attack that in the historical record overran the perimeter in July never came. Drina Corps reports describe the arithmetic frankly: a sustained final operation was possible only by concentrating forces the corps could not spare from its other defensive commitments. The operation was deferred, and then deferred again.",
     "category": "military",
     "trigger": {
-      "turn_min": 170,
+      "turn_min": 186,
       "turn_max": 190,
       "phase": "war",
       "condition": {
@@ -896,6 +896,11 @@
           {
             "type": "flag_not_set",
             "flag": "srebrenica_fell"
+          },
+          {
+            "type": "territory_control",
+            "osid": "op:srebrenica:srebrenica_2",
+            "faction": "RBiH"
           }
         ]
       }
@@ -932,10 +937,10 @@
     "id": "csq_enclave_drain_continues_1995",
     "image": "event_siege_city_RS.webp",
     "title": "Fixed on Interior Lines",
-    "narrative": "What had been assumed to be a three-month operational detour becomes a permanent commitment. The forces Drina Corps tasked against Srebrenica cannot be withdrawn without collapsing the siege perimeter, and the perimeter cannot be collapsed without either taking the enclave or withdrawing from the eastern axis. Neither option is available. The formations remain in place: fixed, frustrated, and unavailable to the wider war.",
+    "narrative": "What had been planned as a short operational detour becomes a standing commitment. The forces Drina Corps tasked against Srebrenica cannot be withdrawn without collapsing the siege perimeter, and the perimeter cannot be collapsed without either taking the enclave or withdrawing from the eastern axis. Neither option is available. The formations remain in place: fixed, frustrated, and unavailable to the wider war.",
     "category": "military",
     "trigger": {
-      "turn_min": 170,
+      "turn_min": 186,
       "turn_max": 200,
       "phase": "war",
       "requires_events": [
