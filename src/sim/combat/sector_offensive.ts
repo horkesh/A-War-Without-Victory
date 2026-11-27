@@ -1945,7 +1945,17 @@ export function advanceSectorOffensives(
                     && prepResult.force_ratio_estimate < launchFloorForOp(op)
                 ) {
                     op.force_ratio_estimate = prepResult.force_ratio_estimate;
-                    beginRecovery(op, turn, 'defender_power_too_high', state);
+                    // PRIM-A2 (rulings §25.3): a closed political gate is read before the
+                    // estimate, so an operation whose cells are all combat-blocked ends as
+                    // political_blocked (no failure cooldown), not defender_power_too_high.
+                    beginRecovery(
+                        op,
+                        turn,
+                        hasOnlyPoliticallyBlockedCurrentObjectives(state, corpsId, faction, op)
+                            ? 'political_blocked'
+                            : 'defender_power_too_high',
+                        state,
+                    );
                     continue;
                 }
 
@@ -1996,20 +2006,21 @@ export function advanceSectorOffensives(
             const elapsed = turn - op.phase_started_turn;
             const planDuration = op.planning_duration
                 ?? (multiAxis ? computeMultiAxisPlanningDuration(op.axes!) : 1);
+            // A foreign-controlled objective can be temporarily or permanently
+            // combat-blocked without being completed. Retain it during objective
+            // reconciliation, but never consume launch readiness or create a
+            // failed-objective cooldown while the political gate is closed.
+            // PRIM-A2 (rulings §25.3): this runs before the estimate floor below.
+            if (hasOnlyPoliticallyBlockedCurrentObjectives(state, corpsId, faction, op)) {
+                beginRecovery(op, turn, 'political_blocked', state);
+                continue;
+            }
             if (
                 op.force_launch !== true
                 && typeof op.force_ratio_estimate === 'number'
                 && op.force_ratio_estimate < launchFloorForOp(op)
             ) {
                 beginRecovery(op, turn, 'defender_power_too_high', state);
-                continue;
-            }
-            // A foreign-controlled objective can be temporarily or permanently
-            // combat-blocked without being completed. Retain it during objective
-            // reconciliation, but never consume launch readiness or create a
-            // failed-objective cooldown while the political gate is closed.
-            if (hasOnlyPoliticallyBlockedCurrentObjectives(state, corpsId, faction, op)) {
-                beginRecovery(op, turn, 'political_blocked', state);
                 continue;
             }
             emitSanaPlanningTraceReceipt(
