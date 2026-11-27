@@ -45,8 +45,12 @@ export function recordBattleHistory(params: {
     controller: FactionId | null;
     flip: boolean;
     finalAttackerCas: number;
+    /** Battle-record totals (applied loss, including the morale-absorption extras). */
     finalDefenderCas: number;
-    defenderCasualtyShares?: Map<FormationId, number>;
+    /** CAS-REPORT-3: each attacker brigade's applied loss (share + absorption extra). */
+    attackerAppliedById?: Map<FormationId, number>;
+    /** Each defending brigade's applied loss (share; the primary also takes the extra). */
+    defenderAppliedById?: Map<FormationId, number>;
     state: GameState;
     battleId: string;
     // Equipment loss accumulators
@@ -71,7 +75,8 @@ export function recordBattleHistory(params: {
         flip,
         finalAttackerCas,
         finalDefenderCas,
-        defenderCasualtyShares,
+        attackerAppliedById,
+        defenderAppliedById,
         state,
         battleId,
         battleEquipDefenderTanksLost,
@@ -94,12 +99,22 @@ export function recordBattleHistory(params: {
     recordAttackerEngagements(
         attackerFormations, currentTurn, targetOsid, outcome,
         defFaction, flip, finalAttackerCas, finalDefenderCas, isConcentrated, state,
-        attackerEquipData, battleId,
+        attackerEquipData, battleId, attackerAppliedById,
     );
     if (defenderFormation) {
-        const defenderGroup = sectorDefenseBrigades && sectorDefenseBrigades.length > 1
-            ? [...sectorDefenseBrigades].sort((a, b) => strictCompare(a.id, b.id))
-            : [defenderFormation];
+        // CAS-REPORT-3: every brigade that actually lost men in this battle gets a row, even
+        // one outside the engaged group (a zero-weight primary still takes the absorption
+        // extra). Brigades already in the engaged group keep their row as before.
+        const groupById = new Map<string, FormationState>();
+        for (const b of (sectorDefenseBrigades && sectorDefenseBrigades.length > 1 ? sectorDefenseBrigades : [defenderFormation])) {
+            groupById.set(b.id, b);
+        }
+        for (const [id, cas] of defenderAppliedById ?? []) {
+            if (cas <= 0 || groupById.has(id)) continue;
+            const f = id === defenderFormation.id ? defenderFormation : state.military.formations[id];
+            if (f) groupById.set(id, f);
+        }
+        const defenderGroup = [...groupById.values()].sort((a, b) => strictCompare(a.id, b.id));
         if (defenderGroup.length > 1 && sectorBrigadeWeights) {
             const weightById = new Map<string, number>();
             for (const b of defenderGroup) weightById.set(b.id, sectorBrigadeWeights.get(b.id) ?? 0);
@@ -120,7 +135,7 @@ export function recordBattleHistory(params: {
                 };
                 recordDefenderEngagement(
                     b, currentTurn, targetOsid, outcome,
-                    attackerFaction, flip, defenderCasualtyShares?.get(b.id) ?? takenById.get(b.id) ?? 0, inflictedById.get(b.id) ?? 0, isConcentrated, state,
+                    attackerFaction, flip, defenderAppliedById?.get(b.id) ?? takenById.get(b.id) ?? 0, inflictedById.get(b.id) ?? 0, isConcentrated, state,
                     defenderEquipData, battleId,
                 );
             }
@@ -133,7 +148,8 @@ export function recordBattleHistory(params: {
             );
             recordDefenderEngagement(
                 defenderFormation, currentTurn, targetOsid, outcome,
-                attackerFaction, flip, finalDefenderCas, finalAttackerCas, isConcentrated, state,
+                attackerFaction, flip, defenderAppliedById?.get(defenderFormation.id) ?? finalDefenderCas,
+                finalAttackerCas, isConcentrated, state,
                 defenderEquipData, battleId,
             );
         }
