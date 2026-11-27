@@ -67,6 +67,7 @@ import {
     type EliteRecallReason,
 } from '../../state/elite_loan_types.js';
 import { isSectorAssignmentExemptCorpsId } from './corps_front_sectors_constants.js';
+import { launchAxisObjectiveView } from './sector_offensive_launch_helpers.js';
 import { computeOsidGraphDistance } from './home_distance.js';
 import {
     isEliteAuthoredForHistoricalOperation,
@@ -417,18 +418,34 @@ function firstFriendlySectorOsid(state: GameState, faction: FactionId, brigadeId
     return null;
 }
 
-function currentAxisObjective(axis: OperationAxis): string | null {
+function currentAxisObjective(
+    state: GameState,
+    corpsId: FormationId,
+    faction: FactionId,
+    operation: CorpsOperation,
+    axis: OperationAxis,
+): string | null {
+    // PRIM-RAW-AXIS (rulings §31/§34): planning reads the launch view's objectives[0] (null view =
+    // dropped axis). No static map here, so a pre-planned non-preserve op may prune differently.
+    if (operation.phase !== 'execution') {
+        return launchAxisObjectiveView(state, corpsId, faction, operation, axis)?.objectives[0] ?? null;
+    }
     const objectives = axis.objectives ?? [];
     if (objectives.length === 0) return null;
     const index = Math.max(0, Math.min(axis.current_objective_index ?? 0, objectives.length - 1));
     return objectives[index] ?? null;
 }
 
-function currentOperationObjective(operation: CorpsOperation): string | null {
+function currentOperationObjective(
+    state: GameState,
+    corpsId: FormationId,
+    faction: FactionId,
+    operation: CorpsOperation,
+): string | null {
     const axisObjectives = (operation.axes ?? [])
         .filter((axis) => axis.status !== 'complete')
         .sort((a, b) => strictCompare(a.axis_id, b.axis_id))
-        .map(currentAxisObjective)
+        .map((axis) => currentAxisObjective(state, corpsId, faction, operation, axis))
         .find((objective): objective is string => objective != null);
     if (axisObjectives) return axisObjectives;
 
@@ -543,7 +560,7 @@ function nearestSectorTarget(
     return candidates[0]!.osid;
 }
 
-function resolveEliteDeploymentTarget(
+export function resolveEliteDeploymentTarget(
     state: GameState,
     formation: FormationState,
     brigadeId: FormationId,
@@ -573,7 +590,9 @@ function resolveEliteDeploymentTarget(
         if (isEligibleEliteTarget(state, faction, brigadeId, operation.staging_osid)) return operation.staging_osid!;
 
         const primarySector = operation.sector_id ? sectorById.get(operation.sector_id) : undefined;
-        const objective = axis ? currentAxisObjective(axis) : currentOperationObjective(operation);
+        const objective = axis
+            ? currentAxisObjective(state, corpsId, faction, operation, axis)
+            : currentOperationObjective(state, corpsId, faction, operation);
         if (primarySector) {
             const objectiveFront = sectorFrontForEnemyObjective(state, faction, brigadeId, primarySector, objective);
             if (objectiveFront) return objectiveFront;
