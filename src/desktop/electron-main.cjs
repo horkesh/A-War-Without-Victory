@@ -2572,6 +2572,10 @@ app.whenReady().then(() => {
       try {
         result = await sim.advanceTurn(state, getBaseDir(), {
           onPlayerDecisionsPending: (workingState, decisions) => pausedTurn.pause(workingState, decisions),
+          // PAUSE-ANSWER-ORDER (rulings §69): the pause answers on a copy of the working state; each
+          // answer lands on the working state at its card's slot through the same resolver.
+          resolvePausedDecision: (workingState, eventId, responseId) =>
+            sim.resolveDesktopEventDecisionInPlace(workingState, eventId, responseId, getBaseDir()),
         });
       } finally {
         // The turn is over (finished or failed): no pause can outlive it.

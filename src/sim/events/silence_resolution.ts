@@ -31,11 +31,13 @@
  */
 
 import type { FactionId, GameState } from '../../state/game_state.js';
+import { cloneGameState } from '../../state/clone.js';
 import { recordSilenceReceipt, selectLivePlayerFaction } from '../player_override.js';
 import { selectInPersonParamilitaryOrderResponse } from './ai_default_response.js';
 import { isAnswerAheadOfFiringDecision } from './answer_ahead_of_firing.js';
 import { applyChosenEventResponse, isMinorityPolicyHaltCardId, selectBotEventResponse, type BotEventResponseSelection, type PrimaryEventsPass } from './evaluate_events.js';
 import type { EventDefinition, EventResponseOption, PendingEventDecision } from './event_types.js';
+import { resolveEventDecision } from './resolve_decision.js';
 import { PARAMILITARY_POLICY_CARD_ID_BY_FACTION } from './paramilitary_policy_flag.js';
 
 function isParamilitaryPolicyCard(eventId: string): boolean {
@@ -162,31 +164,86 @@ export type PlayerDecisionPauseHook = (
 ) => Promise<void> | void;
 
 /**
+ * The resolver an answer given in person at the pause lands through, on the turn's working state
+ * (`TurnInput.resolvePausedDecision`). It must be the one the pause hook answered with: the desktop
+ * passes its own (`resolveDesktopEventDecisionInPlace`); the default is the sim's.
+ */
+export type PausedDecisionResolver = (state: GameState, eventId: string, responseId: string) => void;
+
+/** One answer the President gave in person at the pause, in the order given. */
+interface PauseAnswer {
+    eventId: string;
+    responseId: string;
+}
+
+/**
+ * Run the pause on a copy of the working state and return the answers given there, in order.
+ *
+ * PAUSE-ANSWER-ORDER (rulings §58.2, §69): the hook answers on its copy as before, so the paused
+ * screen shows each answer and its effect at once, and the card leaves the queue there. The working
+ * state is not touched: the caller lands each answer at its card's slot. Every in-person answer
+ * writes exactly one `player` row to the decision log (resolve_decision_core.ts, the filing path
+ * included), so the rows the copy appended are the answers. Only the answer IPC can change the
+ * paused state (ipc_mutation_policy.cjs PAUSED_TURN_IPC_CHANNELS), so nothing else is lost.
+ */
+async function takePauseAnswers(
+    state: GameState,
+    turn: number,
+    onPlayerDecisionsPending: PlayerDecisionPauseHook,
+): Promise<PauseAnswer[]> {
+    const pauseView = cloneGameState(state);
+    const logLength = (state.military.event_decision_log ?? []).length;
+    await onPlayerDecisionsPending(
+        pauseView,
+        (pauseView.military.pending_event_decisions ?? []).filter((decision) => decision.turn_fired === turn),
+    );
+    return (pauseView.military.event_decision_log ?? []).slice(logLength)
+        .filter((row) => row.decision_source === 'player')
+        .map((row) => ({ eventId: row.event_id, responseId: row.response_id }));
+}
+
+/**
  * Settle this turn's player decisions inside `evaluate-events`, after the primary firing pass and
- * BEFORE the same-turn follow-up snapshot (#865 r4693814641): first the pause, where the President's
- * explicit answer lands (called at most once, only when a decision fired this turn), then silence,
- * resolved as the staff default. A follow-up row then sees an answered decision in a live game, as
- * it does in headless. Inert in headless (no hook, no player).
+ * BEFORE the same-turn follow-up snapshot (#865 r4693814641): first the pause, where the President
+ * answers (called at most once, only when a decision fired this turn), then silence, resolved as the
+ * staff default. A follow-up row then sees an answered decision in a live game, as it does in
+ * headless. Inert in headless (no hook, no player).
  *
  * LIVE-HIDDEN-SPLIT (rulings §53): with `primary`, every answer of the primary pass lands here in
  * firing order: the bot's and the Observer's answers and a filed answer at their cards' slots, the
  * staff default by silence at the player's slot. Headless lands the same answers in the same order,
  * so a hands-off live turn equals a headless one. Anything still eligible afterwards (a card with no
  * slot this pass) is resolved by silence last, as before.
+ *
+ * PAUSE-ANSWER-ORDER (rulings §69): the President's in-person answer is taken at the pause and lands
+ * at its card's slot too, through `resolvePausedDecision`, so its effect sits where the bot's answer
+ * to the same card sits headless. An answer to a card with no slot this pass (an older card) lands
+ * right after the pause, as before.
  */
 export async function settlePlayerEventDecisionsThisTurn(
     state: GameState,
     eventDefinitions: readonly EventDefinition[],
     turn: number,
     onPlayerDecisionsPending: PlayerDecisionPauseHook | undefined,
-    primary?: Pick<PrimaryEventsPass, 'settleAnswers'>,
+    primary?: Pick<PrimaryEventsPass, 'settleAnswers' | 'hasPlayerSlot'>,
+    resolvePausedDecision: PausedDecisionResolver = resolveEventDecision,
 ): Promise<void> {
     const firedThisTurn = (state.military.pending_event_decisions ?? [])
         .filter((decision) => decision.turn_fired === turn);
-    if (firedThisTurn.length > 0 && onPlayerDecisionsPending) {
-        await onPlayerDecisionsPending(state, firedThisTurn);
+    const answers = firedThisTurn.length > 0 && onPlayerDecisionsPending
+        ? await takePauseAnswers(state, turn, onPlayerDecisionsPending)
+        : [];
+    const land = (answer: PauseAnswer): void => {
+        resolvePausedDecision(state, answer.eventId, answer.responseId);
+    };
+    const atSlots = answers.filter((answer) => primary?.hasPlayerSlot(answer.eventId) === true);
+    for (const answer of answers) {
+        if (!atSlots.includes(answer)) land(answer);
     }
     primary?.settleAnswers((eventId) => {
+        for (const answer of atSlots) {
+            if (answer.eventId === eventId) land(answer);
+        }
         resolvePlayerEventDecisionsBySilence(state, eventDefinitions, turn, eventId);
     });
     resolvePlayerEventDecisionsBySilence(state, eventDefinitions, turn);
