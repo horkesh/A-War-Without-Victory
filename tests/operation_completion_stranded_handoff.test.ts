@@ -98,7 +98,8 @@ function fixture(): { state: GameState; edges: EdgeRecord[]; context: TurnContex
                         started_turn: 10,
                         phase_started_turn: 13,
                         participating_brigades: ['released_disconnected'],
-                        objectives: ['op:front:enemy'],
+                        // FARZ-END (§26): a 'completed' op must hold its objective, or it reopens. The front cell stays enemy.
+                        objectives: ['op:front:taken'],
                         current_objective_index: 1,
                         attack_attempt_count: 1,
                         objective_capture_count: 1,
@@ -122,6 +123,7 @@ function fixture(): { state: GameState; edges: EdgeRecord[]; context: TurnContex
             political_controllers: {
                 'op:front:line': 'RS',
                 'op:front:enemy': 'RBiH',
+                'op:front:taken': 'RS',
                 'op:pocket:held': 'RS',
                 'op:pocket:enemy': 'RBiH',
                 'op:home:home': 'RS',

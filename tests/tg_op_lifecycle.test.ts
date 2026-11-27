@@ -616,7 +616,8 @@ describe('Tactical Group operation lifecycle', () => {
         const finalSource = readFileSync(resolve('src/sim/combat/final_operation_truth_reconciliation.ts'), 'utf8');
         const corpsSource = readFileSync(resolve('src/sim/combat/corps_command.ts'), 'utf8');
 
-        expect(sectorSource.match(/markOperationExecuting\(state, corps(?:Id|\.id), op\)/g)).toHaveLength(2);
+        // FARZ-END (§26): the completed-recovery reopen is the third canonical writer.
+        expect(sectorSource.match(/markOperationExecuting\(state, corps(?:Id|\.id), op\)/g)).toHaveLength(3);
         expect(sectorSource.match(/evaluateOperationTacticalGroupExhaustion\(state, corps(?:Id|\.id), op, turn\)/g)).toHaveLength(2);
         expect(sectorSource.match(/case 'tg_cohesion_exhausted':/g)).toHaveLength(2);
         expect(sectorSource.match(/case 'tg_max_lifecycle':/g)).toHaveLength(2);
