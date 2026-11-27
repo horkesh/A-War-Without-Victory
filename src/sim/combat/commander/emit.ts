@@ -2912,9 +2912,12 @@ function buildOperationsImpl(
     // Per-corps probe cooldown: probes are recon-by-force, not a continuous
     // pressure tool. Without this gate, a corps with a stable surplus brigade
     // re-emits a probe every ~2 turns against whichever enemy OSID is adjacent,
-    // turning probes into a probe-spam attrition channel. Considers both
-    // in-flight probes (active_operations) and previously-completed probes
-    // (previous_state.operation_history) to bridge the recovery transition.
+    // turning probes into a probe-spam attrition channel. In effect it sees only
+    // in-flight probes (active_operations): the commander's operation_history
+    // holds planned operations only (type 'sector_attack', written below), so the
+    // history scan never finds a probe, and a corps probes every two to three
+    // weeks rather than every four. Accepted as final (Fable consult 11; ruling
+    // §35): wiring the history in would be a launch-delaying rule.
     const PROBE_COOLDOWN_TURNS = 4;
     const probeOnCooldown = botOrdersPerfTime(
         `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.cooldown`,
@@ -3301,10 +3304,12 @@ function buildOperationsImpl(
                                         // approach node for the target this turn and the brigade can
                                         // already clear the probe threshold on that exact target.
                                                 .filter((candidate) => candidate.direct && candidate.reachable && candidate.predictedViable);
+                                        // Every survivor is direct with approach distance 0, so the
+                                        // target is the first viable neighbour by id. Intel is kept per
+                                        // sector pair, not per cell, so nothing honest ranks them
+                                        // (Fable consult 11; ruling §35: accepted as final).
                                         const ranked = filteredTargets.sort((a, b) =>
-                                            Number(b.direct) - Number(a.direct)
-                                            || a.approachDistance - b.approachDistance
-                                            || strictCompare(a.target, b.target)
+                                            strictCompare(a.target, b.target)
                                         );
                                         if (targetSelectionDetail && targetDetailByOsid) {
                                             targetSelectionDetail.targets = [...targetDetailByOsid.values()];

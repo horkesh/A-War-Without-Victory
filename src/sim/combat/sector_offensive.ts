@@ -1725,13 +1725,21 @@ export function advanceSectorOffensives(
     for (const cid of allCorpsIds) {
         const cmd = corpsCommand[cid];
         if (!cmd || cmd.corps_exhaustion <= 0) continue;
-        // Faster recovery when idle (no active op), slower when operating
-        const decayRate = cmd.active_operations.length > 0 ? EXHAUSTION_DECAY_ACTIVE : EXHAUSTION_DECAY_IDLE;
+        // Faster recovery when idle, slower when operating. PROBE-LOCK (ruling §35, Fable consult 11
+        // appendix A): a one-brigade fallback probe (`probe` without `preparation_probe_link`) is not
+        // operating for the decay. Before, a corps refused a plan for exhaustion probed instead, and
+        // the probe held it at the active rate, so it never got back under the plan threshold.
+        // A preparation probe sits beside its parent operation, so that corps stays active.
+        const probeOnly = cmd.active_operations.length > 0
+            && cmd.active_operations.every((o) => o.type === 'probe' && !o.preparation_probe_link);
+        const active = cmd.active_operations.length > 0 && !probeOnly;
+        const decayRate = active ? EXHAUSTION_DECAY_ACTIVE : EXHAUSTION_DECAY_IDLE;
         const exhBefore = cmd.corps_exhaustion;
         cmd.corps_exhaustion = Math.max(0, Math.round((cmd.corps_exhaustion - decayRate) * 10) / 10);
         emitCorpsExhaustionRecord(() => ({
             turn: state.meta?.turn ?? null, corps_id: cid,
-            source: cmd.active_operations.length > 0 ? 'decay_active' : 'decay_idle',
+            source: active ? 'decay_active' : 'decay_idle',
+            ...(probeOnly ? { probe_only: true } : {}),
             before: exhBefore, after: cmd.corps_exhaustion,
         }));
     }
@@ -1943,7 +1951,7 @@ export function advanceSectorOffensives(
                     beginRecovery(
                         op,
                         turn,
-                        hasOnlyPoliticallyBlockedCurrentObjectives(state, corpsId, faction, op)
+                        hasOnlyPoliticallyBlockedCurrentObjectives(state, corpsId, faction, op, operationStaticAdjacency)
                             ? 'political_blocked'
                             : 'defender_power_too_high',
                         state,
@@ -2003,7 +2011,7 @@ export function advanceSectorOffensives(
             // reconciliation, but never consume launch readiness or create a
             // failed-objective cooldown while the political gate is closed.
             // PRIM-A2 (rulings §25.3): this runs before the estimate floor below.
-            if (hasOnlyPoliticallyBlockedCurrentObjectives(state, corpsId, faction, op)) {
+            if (hasOnlyPoliticallyBlockedCurrentObjectives(state, corpsId, faction, op, operationStaticAdjacency)) {
                 beginRecovery(op, turn, 'political_blocked', state);
                 continue;
             }
@@ -2079,7 +2087,7 @@ export function advanceSectorOffensives(
             // turn, then let the existing readiness and opening-attack gates decide.
             const plannedLaunchReady = elapsed >= 1 && (preparationReady || stagedEarly);
             if (plannedLaunchReady || elapsed > planDuration || forcedLaunch) {
-                if (hasOnlyPoliticallyBlockedCurrentObjectives(state, corpsId, faction, op)) {
+                if (hasOnlyPoliticallyBlockedCurrentObjectives(state, corpsId, faction, op, operationStaticAdjacency)) {
                     beginRecovery(op, turn, 'political_blocked', state);
                     continue;
                 }
@@ -2785,17 +2793,25 @@ function updateMultiAxisResults(
     }
 }
 
-function hasOnlyPoliticallyBlockedCurrentObjectives(
+export function hasOnlyPoliticallyBlockedCurrentObjectives(
     state: GameState,
     corpsId: FormationId,
     faction: FactionId,
     op: CorpsOperation,
+    staticAdjacency?: Map<string, string[]>,
 ): boolean {
     if (isMultiAxis(op) && op.axes) {
+        // PRIM-RAW-AXIS (rulings §31/§34): in planning read each axis's launch view objectives[0]
+        // and skip axes the reconcile would drop; execution reads the stored index.
+        const planning = op.phase !== 'execution';
         const activeAxes = op.axes.filter((axis) => axis.status === 'executing');
-        if (activeAxes.length === 0) return false;
-        return activeAxes.every((axis) => {
-            const objective = axis.objectives[axis.current_objective_index ?? 0];
+        const currentObjectives = planning
+            ? activeAxes
+                .map((axis) => launchAxisObjectiveView(state, corpsId, faction, op, axis, staticAdjacency)?.objectives[0])
+                .filter((objective): objective is string => objective !== undefined)
+            : activeAxes.map((axis) => axis.objectives[axis.current_objective_index ?? 0]);
+        if (currentObjectives.length === 0) return false;
+        return currentObjectives.every((objective) => {
             if (!objective) return false;
             return isObjectivePoliticallyBlocked(state, corpsId, faction, objective);
         });

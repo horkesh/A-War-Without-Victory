@@ -359,6 +359,7 @@ export function reconcileStaleOperationMarchOrders(
         if (observer) observer.guards.participating = membership.participating;
         if (!membership.participating) { if (observer) finishReconciliationCandidate(observer, 'not_participating'); continue; }
         const operation = membership.operation;
+        // PRIM-RAW-AXIS (rulings §31/§34): a planning op fails closed below: its index is 0, so it can never pass `currentIndex > priorIndex`.
         const activePhase = operation.phase === 'planning' || operation.phase === 'execution';
         if (observer) observer.guards.operation_phase_active = activePhase;
         if (!activePhase) { if (observer) finishReconciliationCandidate(observer, 'operation_phase'); continue; }

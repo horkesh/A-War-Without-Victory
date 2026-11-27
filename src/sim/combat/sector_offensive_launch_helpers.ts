@@ -630,7 +630,9 @@ export function areParticipantsReadyForExecution(
     if (isMultiAxis(operation) && operation.axes) {
         let readyAxisCount = 0;
         for (const axis of operation.axes) {
-            const currentObjective = axis.objectives[axis.current_objective_index ?? 0];
+            // PRIM-RAW-AXIS (rulings §31): the launch resets the index to 0 right after this
+            // check, so readiness is judged at the first objective of the reconciled axis.
+            const currentObjective = axis.objectives[0];
             if (typeof currentObjective !== 'string' || currentObjective.length === 0) continue;
             const axisApproachOsids = collectObjectiveApproachOsids(state, corpsId, faction, [currentObjective], operationStaticAdjacency);
             if (axisApproachOsids.size === 0) {
@@ -1095,6 +1097,9 @@ function classifyAxisOpeningAttack(
     debugOpName?: string,
     predictionContext?: OpeningAttackPredictionContext,
     convergingBrigades?: readonly FormationId[],
+    // PRIM-RAW-AXIS (rulings §31/§34): a planning caller passes the launch view's first
+    // objective; absent (execution), the stored index is read.
+    launchObjective?: string,
 ): OpeningAttackReadinessResult {
     // REASON-CODE INSTRUMENTATION (topic `axis_reject`): clear any detail from a
     // PREVIOUS evaluation before this one decides anything.
@@ -1112,7 +1117,7 @@ function classifyAxisOpeningAttack(
     // default run — where the key is never written — this changes nothing.
     delete axis.launch_blocker_detail;
     delete axis.launch_readiness_detail;
-    const objective = axis.objectives[axis.current_objective_index ?? 0];
+    const objective = launchObjective ?? axis.objectives[axis.current_objective_index ?? 0];
     if (typeof objective !== 'string' || objective.length === 0) {
         axis.launch_blocker = 'zero_eligible_axis';
         // `approaching: false` is EXPLICIT, not incidental (determinism review,
@@ -1393,11 +1398,29 @@ export function evaluateOpeningAttackReadiness(
         // Re-measure Brcko if this gate is touched again.
         let anyApproaching = false;
         let anyBlockingApproach = false;
+        // PRIM-RAW-AXIS (rulings §31/§34): in planning the first battle is at the launch view's
+        // objectives[0] (an axis with no view is dropped by the reconcile); execution reads the
+        // stored index. Views are computed once, in authored axis order.
+        const planning = op.phase !== 'execution';
+        const planningObjectives = new Map<NonNullable<CorpsOperation['axes']>[number], string | undefined>();
+        if (planning) {
+            for (const axis of op.axes) {
+                if (axis.status === 'complete' || axis.status === 'stalled') continue;
+                const view = launchAxisObjectiveView(state, corpsId, faction, op, axis, operationStaticAdjacency);
+                planningObjectives.set(axis, view?.objectives[0]);
+            }
+        }
+        const objectiveOf = planning
+            ? (axis: NonNullable<CorpsOperation['axes']>[number]) => planningObjectives.get(axis)
+            : undefined;
         for (const axis of op.axes) {
             if (axis.status === 'complete' || axis.status === 'stalled') continue;
-            const objective = axis.objectives[axis.current_objective_index ?? 0];
+            if (planning && planningObjectives.get(axis) === undefined) continue;
+            const objective = planning
+                ? planningObjectives.get(axis)
+                : axis.objectives[axis.current_objective_index ?? 0];
             const convergingBrigades = typeof objective === 'string'
-                ? getSynchronizedOperationBrigadesAtObjective(state, op, faction, objective)
+                ? getSynchronizedOperationBrigadesAtObjective(state, op, faction, objective, objectiveOf)
                 : axis.assigned_brigades;
             const result = classifyAxisOpeningAttack(
                 state,
@@ -1410,6 +1433,7 @@ export function evaluateOpeningAttackReadiness(
                 op.name,
                 predictionContext,
                 convergingBrigades,
+                planning ? objective : undefined,
             );
             // TEMPORARY DIAGNOSTIC — see src/sim/combat/axis_readiness_debug.ts. Inert
             // unless AWWV_DEBUG_AXIS_READINESS is set; remove with that file.
@@ -1443,7 +1467,11 @@ export function evaluateOpeningAttackReadiness(
         return { executable: false, blocker: rankOpeningAttackBlocker(blockers) };
     }
 
-    const objective = op.objectives?.[op.current_objective_index ?? 0];
+    // PRIM-RAW-AXIS (rulings §31/§34): in planning the launch resets the index to 0, so read
+    // objectives[0]. Flat ops have no pure view helper: the reconcile's filter/prune is not applied.
+    const objective = op.phase !== 'execution'
+        ? op.objectives?.[0]
+        : op.objectives?.[op.current_objective_index ?? 0];
     if (typeof objective !== 'string' || objective.length === 0) {
         return { executable: false, blocker: 'zero_eligible_axis' };
     }
