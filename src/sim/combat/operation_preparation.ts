@@ -763,8 +763,10 @@ function selectMainEffortCell(
         for (const id of ids) {
             const f = activeById.get(id)!;
             men += f.personnel ?? 0;
+            // PRIM-MULTI-TB (rulings §37): the power is read AT the cell, so the per-target
+            // multipliers (the urban tank floor, dated external attack support) enter the tie-break.
             power += computeAttackerPower(
-                state, f, supplyByOsid, 'attack', terrainCache[cell] ?? 1.0, undefined, contextLocationFor(f));
+                state, f, supplyByOsid, 'attack', terrainCache[cell] ?? 1.0, cell, contextLocationFor(f));
         }
         ranked.push({ cell, men, power, firstAxisIndex: entry.firstAxisIndex });
     }
