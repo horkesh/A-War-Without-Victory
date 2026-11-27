@@ -1691,8 +1691,8 @@
   {
     "id": "csq_enclave_held_alt_intervention",
     "image": "event_un_presence.webp",
-    "title": "Safe Areas Outlast the Summer",
-    "narrative": "In late October 1995 Srebrenica, Žepa and Goražde are still held by the Bosnian government, and the war is in its last weeks. The three eastern enclaves were declared UN Safe Areas in 1993 and have lived since then on thin supplies and under constant threat. The summer has passed and none of them has been taken. Their survival gives the government a stronger hand in whatever settlement is now being drawn up.",
+    "title": "Safe Areas Still Held",
+    "narrative": "In late October 1995 Srebrenica, Žepa and Goražde are all held by the Bosnian government. The three eastern enclaves were declared UN Safe Areas in 1993 and have lived since then on thin supplies and under constant threat. Their garrisons and civilians are still inside the Safe Area designation.",
     "category": "humanitarian",
     "trigger": {
       "turn_min": 186,
@@ -1701,6 +1701,11 @@
       "condition": {
         "type": "and",
         "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "srebrenica_enclave_formed",
+            "value": true
+          },
           {
             "type": "flag_not_set",
             "flag": "srebrenica_fell"
@@ -1737,13 +1742,13 @@
     "priority": 80,
     "effect": {
       "kind": "narrative",
-      "text": "Srebrenica, Žepa and Goražde are still held in late October 1995."
+      "text": "Srebrenica, Žepa and Goražde are all held in late October 1995."
     },
     "effects": [
       {
         "kind": "cost_ledger_annotation",
         "tag": "un_safe_areas_intact",
-        "text": "Counterfactual note. In this game Srebrenica, Žepa and Goražde were all still held by the Bosnian government in late October 1995. Historically, Srebrenica fell on 11 July 1995 and Žepa on 25 July 1995, and Goražde was held until the Dayton settlement. UN Security Council Resolution 824 (6 May 1993) and Resolution 836 (4 June 1993) established and extended the Safe Area regime for Sarajevo, Tuzla, Žepa, Goražde, Bihać and Srebrenica under the UNPROFOR mandate. The ICTY Trial Chamber in Prosecutor v. Krstić (IT-98-33-T, 2 August 2001) and Prosecutor v. Mladić (IT-09-92-T, 22 November 2017) made findings on the fall of Srebrenica; see those judgments and their appeal judgments for the findings and their procedural posture. This note records a run in which the enclaves survived the summer of 1995. It describes the documented institutional regime and attributes no culpability for any specific event."
+        "text": "Counterfactual note. In this game Srebrenica, Žepa and Goražde were all still held by the Bosnian government in late October 1995. Historically, Srebrenica fell on 11 July 1995 and Žepa on 25 July 1995, and Goražde was held until the Dayton settlement. UN Security Council Resolution 824 (6 May 1993) and Resolution 836 (4 June 1993) established and extended the Safe Area regime for Sarajevo, Tuzla, Žepa, Goražde, Bihać and Srebrenica under the UNPROFOR mandate. The ICTY Trial Chamber in Prosecutor v. Krstić (IT-98-33-T, 2 August 2001) and Prosecutor v. Mladić (IT-09-92-T, 22 November 2017) made findings on the fall of Srebrenica; see those judgments and their appeal judgments for the findings and their procedural posture. This note records a run in which all three enclaves were held in late October 1995. It describes the documented institutional regime and attributes no culpability for any specific event."
       }
     ],
     "sets_flags": {
