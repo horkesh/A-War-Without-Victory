@@ -11,6 +11,7 @@ import { lookupStepCurve } from '../../state/war_timeline.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getEnclaveCohesionRecovery } from './enclave_resilience.js';
 import { getFactionCohesionCeiling, getFactionCohesionFloor } from './faction_progression.js';
+import { emitReserveStrainRecord } from './reason_code_debug.js';
 // ADR-0005 v3.0 Phase D: Army HQ donor recovery-suppression (zero positive drift only).
 // v2.3 (ENABLE_TG_RECOVERY_SUPPRESSION): the same lock for regular (non-Army-HQ) TG donors.
 import { ENABLE_TG_ARMY_HQ_OPS, ENABLE_TG_RECOVERY_SUPPRESSION } from './tactical_group_config.js';
@@ -35,8 +36,18 @@ const CRITICAL_EXHAUSTION_PENALTY = -1.5;
  * counts `strategic_reserves[faction]` as available. Reader-only; the thresholds are unchanged.
  */
 function getFactionExhaustionRatio(state: GameState, faction: FactionId): number {
+    const { committed, available, reserve } = getFactionStrainParts(state, faction);
+    const total = committed + available;
+    if (total <= 0) return 0;
+    return Math.max(0, committed - reserve) / total;
+}
+
+function getFactionStrainParts(
+    state: GameState,
+    faction: FactionId,
+): { committed: number; available: number; reserve: number } {
     const pools = state.military.militia_pools;
-    if (!pools || typeof pools !== 'object') return 0;
+    if (!pools || typeof pools !== 'object') return { committed: 0, available: 0, reserve: 0 };
     let committed = 0;
     let available = 0;
     const keys = (Object.keys(pools) as string[]).sort(strictCompare);
@@ -46,10 +57,8 @@ function getFactionExhaustionRatio(state: GameState, faction: FactionId): number
         committed += p.committed ?? 0;
         available += p.available ?? 0;
     }
-    const total = committed + available;
-    if (total <= 0) return 0;
     const reserve = state.military.strategic_reserves?.[faction] ?? 0;
-    return Math.max(0, committed - reserve) / total;
+    return { committed, available, reserve };
 }
 
 function isFormationInOpsecSector(state: GameState, formation: FormationState): boolean {
@@ -142,6 +151,20 @@ export function runCohesionDrift(
         const threshold = EXHAUSTION_COHESION_THRESHOLD[fid] ?? 0.80;
         if (ratio >= CRITICAL_EXHAUSTION_THRESHOLD) exhaustionPenaltyByFaction[fid] = CRITICAL_EXHAUSTION_PENALTY;
         else if (ratio >= threshold) exhaustionPenaltyByFaction[fid] = EXHAUSTION_COHESION_PENALTY;
+        emitReserveStrainRecord(() => {
+            const parts = getFactionStrainParts(state, fid);
+            const total = parts.committed + parts.available;
+            return {
+                kind: 'strain_ratio',
+                turn,
+                faction: fid,
+                ...parts,
+                ratio_committed_only: total <= 0 ? 0 : parts.committed / total,
+                ratio,
+                threshold,
+                penalty: exhaustionPenaltyByFaction[fid] ?? 0,
+            };
+        });
     }
     if (Object.keys(exhaustionPenaltyByFaction).length > 0) report.exhaustion_penalties_applied = exhaustionPenaltyByFaction;
 

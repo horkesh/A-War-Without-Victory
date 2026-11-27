@@ -332,6 +332,22 @@ export function emitCorpsExhaustionRecord(build: () => Record<string, unknown>):
     }
 }
 
+/**
+ * Default-off stdout receipts for the faction strain ratio (cohesion_drift.ts) and the weekly
+ * strategic-reserve collection, orphan drain included (topic `corps_plan`; RESERVE-AS-SPENT,
+ * rulings §45). The payload is a thunk, built only when the topic is on. Never writes GameState
+ * or reports.
+ */
+export const RESERVE_STRAIN_PREFIX = '[reserve_strain]';
+export function emitReserveStrainRecord(build: () => Record<string, unknown>): void {
+    if (!isReasonCodeTopicEnabled('corps_plan')) return;
+    try {
+        console.log(`${RESERVE_STRAIN_PREFIX} ${stableStringify({ schema_version: 1, ...build() })}`);
+    } catch {
+        // Observation and stdout failures cannot affect the strain ratio.
+    }
+}
+
 /** Default-off stdout receipts for OG (sector) stances. Never writes GameState or reports. */
 export const SECTOR_STANCE_PREFIX = '[sector_stance]';
 export function emitSectorStanceRecord(record: Record<string, unknown>): void {

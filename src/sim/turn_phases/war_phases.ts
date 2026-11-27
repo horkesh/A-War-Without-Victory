@@ -233,7 +233,7 @@ import {
 import { generateCorpsStanceOrders } from '../combat/bot_corps_stance.js';
 import { accrueRecruitmentResources, runOngoingRecruitment } from '../recruitment_turn.js';
 // REASON-CODE INSTRUMENTATION: env-gated, inert by default. See reason_code_debug.ts.
-import { emitSectorStanceRecord, isReasonCodeTopicEnabled } from '../combat/reason_code_debug.js';
+import { emitReserveStrainRecord, emitSectorStanceRecord, isReasonCodeTopicEnabled } from '../combat/reason_code_debug.js';
 import type { EmergentFormationRefusalRecord } from '../../state/recruitment_types.js';
 import { reroutePoolSurplus } from '../recruitment_engine.js';
 import { computeHomeDefenseActive } from '../compute_home_defense.js';
@@ -3784,7 +3784,17 @@ export const warPhases: NamedPhase[] = [
         name: 'strategic-reserve-collection',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            context.report.strategic_reserve_collection = collectStrategicReserves(context.state);
+            const collection = collectStrategicReserves(context.state);
+            context.report.strategic_reserve_collection = collection;
+            // RESERVE-AS-SPENT (rulings §45): default-off receipt of the orphan drain, the one reserve
+            // inflow that never passed through `committed`.
+            emitReserveStrainRecord(() => ({
+                kind: 'collection',
+                turn: context.state.meta.turn,
+                by_faction: collection.by_faction,
+                orphan_by_faction: collection.orphan_by_faction,
+                reserves: { ...(context.state.military.strategic_reserves ?? {}) },
+            }));
         }
     },
     {
