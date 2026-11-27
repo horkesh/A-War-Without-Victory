@@ -163,8 +163,15 @@ describe('LANE-NIGHTSHIFT-ROUND2: divergence event seeds', () => {
     it('csq_enclave_held_alt_intervention: predicate + cost_ledger_annotation', () => {
         const def = getEvent('csq_enclave_held_alt_intervention');
         const cond = def.trigger.condition!;
-        const fires = baseState(145, {
+        // ZEPA-ALT-PREFIRE (ruling §60): autumn 1995 (t186), and the three enclave towns held.
+        const held = {
+            'op:srebrenica:srebrenica_2': 'RBiH',
+            'op:rogatica:zepa_2': 'RBiH',
+            'op:gorazde:gorazde_2': 'RBiH',
+        };
+        const fires = baseState(186, {
             political: {
+                political_controllers: held,
                 enclave_resilience: {
                     srebrenica: { resilience: 0.35, isolation_turns: 0, hardening_active: false },
                     zepa: 0.40,
@@ -173,12 +180,20 @@ describe('LANE-NIGHTSHIFT-ROUND2: divergence event seeds', () => {
             },
         });
         expect(evaluateCondition(cond, fires)).toBe(true);
-        const lapsed = baseState(145, {
+        const lapsed = baseState(186, {
             political: {
+                political_controllers: held,
                 enclave_resilience: { srebrenica: 0.10, zepa: 0.10, gorazde: 0.10 },
             },
         });
         expect(evaluateCondition(cond, lapsed)).toBe(false);
+        const lost = baseState(186, {
+            political: {
+                political_controllers: { ...held, 'op:gorazde:gorazde_2': 'RS' },
+                enclave_resilience: { srebrenica: 0.50, zepa: 0.50, gorazde: 0.50 },
+            },
+        });
+        expect(evaluateCondition(cond, lost)).toBe(false);
         applyEventEffects(fires, effectsOf(def));
         expect(fires.military.cost_ledger_annotations?.[0]?.tag).toBe('un_safe_areas_intact');
         const ledger = buildCostLedger(fires);
