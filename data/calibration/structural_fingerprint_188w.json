@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "fingerprint": "f7cae0a6c5a48f0d",
+  "fingerprint": "bbc8ff9d62081998",
   "fields": {
     "schema_version": 2,
     "scenario_id": "apr1992_definitive_188w",
@@ -8,8 +8,8 @@
     "final_turn": 40,
     "control_counts": {
       "HRHB": 87,
-      "RBiH": 262,
-      "RS": 363
+      "RBiH": 261,
+      "RS": 364
     },
     "control_flips": [
       {
@@ -165,6 +165,12 @@
       {
         "settlement_id": "op:brcko:skakava_donja",
         "municipality_id": "brcko",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:breza:podgora",
+        "municipality_id": "breza",
         "from": "RBiH",
         "to": "RS"
       },

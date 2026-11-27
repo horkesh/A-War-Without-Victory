@@ -106,11 +106,15 @@ gates:
       trace): more than one Farz cell taken early, more than three stopping-line cells in a
       run, fewer than three Farz cells at week 188, or anchors under 29. The rule comes from
       Fable consult 10 and orchestrator ruling 2026-11-26 §26; it replaces the interim
-      rule of §12. NOT MET while the checkpoint tool lacks these tiers.
-      P5 is closed: the package (#826, #828) gave the 1st to 4th Corps operations again, and
-      the probe-exhaustion lock that remains is ACCEPT AS FINAL (#841, orchestrator ruling
-      2026-11-22, Systems Manual "Defence of a held line"); the probe gate and the unlock
-      instrument do not ship. Shipping the passive ARBiH as final behaviour is not an option. (2) Every roadmap §4.1 RF row is disposed: BC14 merged, BC15 with SE6 retired at
+      rule of §12. NOT MET while the checkpoint tool lacks these tiers. The gates are
+      measured on main with the PROBE-LOCK + OZ-ENGINE unit merged (orchestrator rulings
+      2026-11-26 §35 and 2026-11-27 §43). PROBE-LOCK merged is part of this condition.
+      P5 is closed: the package (#826, #828) gave the 1st to 4th Corps operations again. The
+      probe-exhaustion lock that remained, once ACCEPT AS FINAL (#841, ruling 2026-11-22), is
+      a must-fix (Fable consult 11, ruling §35): a corps holding only one-brigade fallback
+      probes recovers exhaustion at the idle rate. It merges as one change with OZ-ENGINE
+      (Fable consult 12, ruling §43). The probe gate and the unlock instrument do not ship.
+      Shipping the passive ARBiH as final behaviour is not an option. (2) Every roadmap §4.1 RF row is disposed: BC14 merged, BC15 with SE6 retired at
       its archive tag and SE10 decided by a band re-check on main after P3-EST and P2.4 merge:
       built if still above the 20-40% band, retired if in it (orchestrator ruling 2026-11-26;
       on main 2b7761822 the 1st-4th Corps take 70.6% of targeted objectives in weeks 99-178
@@ -119,10 +123,11 @@ gates:
       its row. (3) One 188-week run at the candidate commit, repeated once for determinism:
       strict health PASS, enclave 9/9, the Farz gates in both modes with the tripwire clear
       and the shape rows listed, consistency 0, baselines re-blessed; its scores become the
-      freeze figures. Before the freeze, one data-only configuration is measured in both
-      modes with every Farz shape row green (OZ-DATA: the RS starting pools of the Ozren home
-      municipalities, so that the Ozren-line brigades stay manned). If no data change keeps
-      those brigades manned, the Ozren defence becomes a pre-freeze engine item.
+      freeze figures, measured on main with the PROBE-LOCK + OZ-ENGINE unit merged. The
+      data-only configuration (OZ-DATA) was measured in both modes and FAILED its manning
+      target (ruling 2026-11-27 §38), so the Ozren defence became the pre-freeze engine item
+      OZ-ENGINE: idle men go to depleted brigades (Systems Manual "Idle replacement"; Fable
+      consult 12, ruling §43), merged as one change with PROBE-LOCK.
       (4) Live = headless at that commit,
       0 cells differing: hands-off live equals headless at EVERY autonomy level, for all three
       factions, in historical mode and in emergent mode (owner, 2026-11-25). Met on aa76f6fc3
@@ -145,7 +150,8 @@ gates:
       revert to history; the Drina "restrained" pick (t11) is recorded as a section 6
       artefact. That proof predates #867 and #877. Main's emergent run now loses Petrovo and
       Boljanić at weeks 176-177 to the 3rd Corps' Jelen 2, so under the §26 tiers it is
-      re-run at the frozen commit.
+      re-run at the frozen commit, measured on main with the PROBE-LOCK + OZ-ENGINE unit
+      merged (ruling §43).
       From that commit the freeze is a byte test: a change merges freely if the 188-week
       headless final_state_hash is unchanged, and a change that moves the hash needs the
       owner's OK. The one calibration pass then runs on the frozen engine under the
