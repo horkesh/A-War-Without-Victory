@@ -491,6 +491,8 @@ export function estimateForceRatio(
     // axis current objective in the preparation view, the lowest objective as before.
     // Operations seat (lane B s24): an axis's first battle is at its first objective, from the
     // current index on, that is still contested (`firstContestedAxisObjective`).
+    // PRIM-MULTI (rulings §26 Q2): of those cells, the main effort (most men committed), not
+    // the lowest-sorted (`selectMainEffortCell`, below).
     const attackerFaction: FactionId = attackerFormations[0]!.faction || 'RBiH';
     // PRIM-A3 + A4 (rulings §25.5-6): every axis read below uses the launch step's view of
     // the axis (`launchAxisObjectiveView`: the reconcile's foreign-cell filter and its cut of
@@ -509,17 +511,10 @@ export function estimateForceRatio(
         return launchViews.get(ax)!;
     };
     const sortedObjectives = Array.from(objectives).sort(strictCompare);
-    const liveCurrentObjectives = (op.axes ?? [])
-        .filter((ax) => !isAxisExcludedFromPreparation(ax))
-        .map((ax) => firstContestedAxisObjective(state, ax, attackerFaction, objectives, launchViewFor(ax)))
-        .filter((o): o is string => o !== undefined)
-        .sort(strictCompare);
-    const primaryTargetOsid = liveCurrentObjectives[0] ?? sortedObjectives[0];
 
     // LANE-2026-05-02: backward-compatible neutral terrain lookup when caller
     // does not pass terrainMultByOsid. Matches combat_math.ts default.
     const terrainCache = terrainMultByOsid ?? {};
-    const targetTerrainMult = primaryTargetOsid ? (terrainCache[primaryTargetOsid] ?? 1.0) : 1.0;
 
     // LANE-2026-05-02: sum attacker COMBAT POWER (override posture to 'attack' so
     // dig_in / defend brigades contribute their offensive value). Each brigade
@@ -598,6 +593,16 @@ export function estimateForceRatio(
             && isCommittedInTransitTo(state, a.id as FormationId, relevanceOsids)
             ? overrideOsid
             : undefined;
+
+    // PRIM-MULTI (rulings §26 Q2; Fable consult 10 appendix B; corps seat, lane B s24): with
+    // live axes the estimate is taken at the operation's MAIN EFFORT, the first-battle cell with
+    // the most men committed (`selectMainEffortCell`), not the lowest-sorted cell, which was a
+    // name. Without a live axis, the lowest objective as before.
+    const primaryTargetOsid = selectMainEffortCell(
+        state, op, attackerFormations, attackerFaction, objectives, launchViewFor,
+        supplyByOsid, terrainCache, contextLocationFor,
+    ) ?? sortedObjectives[0];
+    const targetTerrainMult = primaryTargetOsid ? (terrainCache[primaryTargetOsid] ?? 1.0) : 1.0;
 
     // LANE-2026-05-02: sentinel — no objective. Confidence-gated, not an unconditional 3.0.
     // Zero when every attacker has no attack power (postureMult <= 0 or base power 0).
@@ -699,6 +704,73 @@ export function estimateForceRatio(
     // confidence and competence still act through the confidence gate, the required ratio
     // and the assessment score.
     return ownStrength / defencePower;
+}
+
+/**
+ * PRIM-MULTI (rulings §26 Q2; Fable consult 10 appendix B, with its two amendments; corps seat
+ * spec, lane B s24): the operation's main effort, the cell its estimate is taken at. Each live
+ * axis (authored order, excluded axes skipped) is grouped by its first battle
+ * (`firstContestedAxisObjective`); a cell counts the distinct active participating brigades of
+ * its own axes only. Cells are ranked by men committed (summed `personnel`), then by summed
+ * attack power at the cell, then by the lowest authored axis index. No string compare. With no
+ * cell carrying an active brigade, the first live cell in authored order; with no live cell,
+ * undefined (the caller falls back to the lowest objective). Pure: reads only.
+ */
+function selectMainEffortCell(
+    state: GameState,
+    op: CorpsOperation,
+    attackerFormations: FormationState[],
+    attackerFaction: FactionId,
+    allowed: ReadonlySet<string>,
+    launchViewFor: (ax: OperationAxis) => LaunchAxisObjectiveView | null,
+    supplyByOsid: SupplyStateByOsidReport | null | undefined,
+    terrainCache: Record<string, number>,
+    contextLocationFor: (a: FormationState) => string | undefined,
+): string | undefined {
+    const axes = op.axes ?? [];
+    if (axes.length === 0) return undefined;
+    const activeById = new Map<string, FormationState>();
+    for (const f of attackerFormations) activeById.set(f.id, f);
+    const cells = new Map<string, { brigades: Set<string>; firstAxisIndex: number }>();
+    for (let i = 0; i < axes.length; i++) {
+        const ax = axes[i]!;
+        if (isAxisExcludedFromPreparation(ax)) continue;
+        const cell = firstContestedAxisObjective(state, ax, attackerFaction, allowed, launchViewFor(ax));
+        if (cell === undefined) continue;
+        let entry = cells.get(cell);
+        if (!entry) {
+            entry = { brigades: new Set<string>(), firstAxisIndex: i };
+            cells.set(cell, entry);
+        }
+        for (const bid of ax.assigned_brigades ?? []) {
+            if (activeById.has(bid)) entry.brigades.add(bid);
+        }
+    }
+    if (cells.size === 0) return undefined;
+    type Ranked = { cell: string; men: number; power: number; firstAxisIndex: number };
+    const ranked: Ranked[] = [];
+    let firstLive: { cell: string; firstAxisIndex: number } | undefined;
+    // Map iteration is insertion order (authored axis order), so this pass is deterministic.
+    for (const [cell, entry] of cells) {
+        if (!firstLive || entry.firstAxisIndex < firstLive.firstAxisIndex) {
+            firstLive = { cell, firstAxisIndex: entry.firstAxisIndex };
+        }
+        if (entry.brigades.size === 0) continue;
+        // Summed in strict ID order for a stable float sum.
+        const ids = [...entry.brigades].sort(strictCompare);
+        let men = 0;
+        let power = 0;
+        for (const id of ids) {
+            const f = activeById.get(id)!;
+            men += f.personnel ?? 0;
+            power += computeAttackerPower(
+                state, f, supplyByOsid, 'attack', terrainCache[cell] ?? 1.0, undefined, contextLocationFor(f));
+        }
+        ranked.push({ cell, men, power, firstAxisIndex: entry.firstAxisIndex });
+    }
+    if (ranked.length === 0) return firstLive?.cell;
+    ranked.sort((a, b) => (b.men - a.men) || (b.power - a.power) || (a.firstAxisIndex - b.firstAxisIndex));
+    return ranked[0]!.cell;
 }
 
 /**
