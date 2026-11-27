@@ -253,6 +253,10 @@ export function reinforceFromStrategicReserves(
         if (ra !== rb) return ra - rb;
         return strictCompare(a, b);
     });
+    // IDLE-SNAPSHOT (§48, Codex r4717315272): idleness is judged BEFORE the reserve loop.
+    // A pool whose last under-cap home brigade is topped up from the reserve this turn was not
+    // idle this turn (Systems Manual "Idle replacement").
+    const idleKeysBeforeReserve = wearinessLossByPool ? findIdlePoolKeys(state) : [];
     const servedByReserve = new Set<string>();
     for (const id of sortedFormationIds) {
         const f = formations[id] as FormationState | undefined;
@@ -303,7 +307,18 @@ export function reinforceFromStrategicReserves(
     }
 
     if (wearinessLossByPool) {
-        placeIdleReplacements(state, sortedFormationIds, servedByReserve, wearinessLossByPool, baseDir, report);
+        if (isReasonCodeTopicEnabled('reinforcement_allocation')) {
+            // Receipt: pools that are idle only because of this turn's reserve top-up (excluded).
+            const before = new Set(idleKeysBeforeReserve);
+            const flipped = findIdlePoolKeys(state).filter((key) => !before.has(key));
+            if (flipped.length > 0) {
+                console.log(`${REINFORCEMENT_ALLOCATION_PREFIX} idle_snapshot ${stableStringify({
+                    turn: currentTurn, reserve_flipped: flipped,
+                    with_loss: flipped.filter((key) => (wearinessLossByPool[key] ?? 0) > 0),
+                })}`);
+            }
+        }
+        placeIdleReplacements(state, sortedFormationIds, servedByReserve, idleKeysBeforeReserve, wearinessLossByPool, baseDir, report);
     }
     return report;
 }
@@ -322,6 +337,7 @@ function placeIdleReplacements(
     state: GameState,
     tierSortedIds: readonly string[],
     servedByReserve: ReadonlySet<string>,
+    idlePoolKeys: readonly string[],
     wearinessLossByPool: Readonly<Record<string, number>>,
     baseDir: string | undefined,
     report: StrategicReserveReinforcementReport
@@ -340,7 +356,7 @@ function placeIdleReplacements(
     }
 
     const offers: Record<string, Array<{ key: string; left: number }>> = {};
-    for (const key of findIdlePoolKeys(state)) {
+    for (const key of idlePoolKeys) {
         const fa = pools[key].faction;
         if (!fa) continue;
         const fr = factionReport(fa);
