@@ -34,6 +34,15 @@
  *    are printed and do not fail it: they are the calibration pass's target. TRIPWIRE rows
  *    fail it (exit 1, "hold and trace") when the shape drifts past bounds set from the 57
  *    runs measured in consult 10. The tier logic lives in tools/lib/farz_objective_gate.cjs.
+ *
+ *  - EVENT-ANCHORS (SHAPE, orchestrator ruling §61): every Type 2 event anchor in
+ *    src/scenario/historical_anchors.ts, read from that file at run time, judged on the save's fire
+ *    turns. Hands-off historical runs must take the primary leg on time and not the alternative;
+ *    emergent and player runs pass on either leg. Printed, never changes the exit code.
+ *
+ *  - AREA-BANDS (RECORDED, ruling §63): every HISTORICAL_AREA_BANDS_* band, the faction's area
+ *    share at the band week replayed from the run's flip log. Recorded under the calibration hold,
+ *    not a merge bar; never changes the exit code. Both rows: tools/lib/historical_anchor_rows.cjs.
  */
 const fs = require('fs');
 const path = require('path');
@@ -43,6 +52,9 @@ const {
   easternCaptureGate, operationOwnershipGate, farzLivenessGate, earlyFarzFalls, stoppingLineRows,
   anchorContract, receiptTripwire, distinctCells,
 } = require('./lib/farz_objective_gate.cjs');
+const {
+  loadHistoricalAnchors, printEventAnchorsRow, printAreaBandsRow, loadOsidAreas,
+} = require('./lib/historical_anchor_rows.cjs');
 
 const runDir = process.argv[2];
 if (!runDir) {
@@ -153,6 +165,8 @@ const contestCount = {};
 const battleById = new Map();
 // Every battle with its turn (the weekly row's `week_index` is the turn), for the Farz liveness gate.
 const battlesWithTurn = [];
+// First week each event appears in `events_fired`, for the EVENT-ANCHORS row (recurring events only).
+const weeklyFirstFire = new Map();
 try {
   const wrPath = path.join(runDir, 'weekly_report.jsonl');
   let lineNo = 0;
@@ -162,6 +176,10 @@ try {
     let rec;
     try { rec = JSON.parse(line); } catch { continue; }
     const turn = Number.isFinite(rec.week_index) ? rec.week_index : lineNo;
+    for (const ev of rec.events_fired || []) {
+      const id = ev && (typeof ev === 'string' ? ev : ev.id);
+      if (typeof id === 'string' && !weeklyFirstFire.has(id)) weeklyFirstFire.set(id, turn);
+    }
     for (const b of rec.battles || []) {
       if (!b || !b.target_osid) continue;
       contestCount[b.target_osid] = (contestCount[b.target_osid] || 0) + 1;
@@ -548,6 +566,21 @@ if (cascadeBase != null) {
 } else {
   console.log('  (no --cascade-base supplied — reported, not gated)');
 }
+
+// ---- EVENT-ANCHORS (SHAPE, §61) and AREA-BANDS (RECORDED, §63) ----
+// Both read their lists from src/scenario/historical_anchors.ts at run time (tools/lib/historical_anchor_rows.cjs).
+// Neither touches `breached`, `tripped` or `regressed`: like the Farz SHAPE tier they are printed and
+// do not fail the run, and their reds are counted on their own summary lines, not in `shapeRed`.
+let historicalAnchors = null;
+let anchorsLoadError = null;
+try { historicalAnchors = loadHistoricalAnchors(); } catch (err) { anchorsLoadError = String((err && err.message) || err).split('\n')[0]; }
+printEventAnchorsRow({
+  log: console.log, anchors: historicalAnchors ? historicalAnchors.eventAnchors : [], save, weeklyFirstFire, loadError: anchorsLoadError,
+});
+printAreaBandsRow({
+  log: console.log, bands: historicalAnchors ? historicalAnchors.areaBands : [], save, stateAt,
+  loadError: anchorsLoadError, osidAreas: historicalAnchors ? loadOsidAreas() : null,
+});
 
 // ---- exit status ----
 // Previously `process.exit(breached ? 1 : 0)` with `breached` set by the Teočak loop

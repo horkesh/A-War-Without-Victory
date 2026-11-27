@@ -315,7 +315,9 @@ export const HISTORICAL_EVENT_ANCHORS_OCT1995: readonly HistoricalEventAnchor[] 
 ];
 
 export const HISTORICAL_AREA_BANDS_OCT1995: readonly HistoricalAreaShareBand[] = [
-    // RS Dayton band: authoritative PASS/FAIL (sim already passes at 50.6%; treaty target 49%)
+    // RS Dayton band: the authoritative band (not diagnostic_only), treaty target 49%. Nothing gates on it:
+    // tools/verify_checkpoints.cjs prints it in the AREA-BANDS row, RECORDED under the calibration hold
+    // (ruling §63), never a merge bar. The old "sim already passes at 50.6%" note is stale; read the row.
     { at_week: 188, faction: 'RS',   min_share: 0.47, max_share: 0.51, citation: 'Dayton/Contact Group 51/49; BB1 p.57' },
     // RBiH and HRHB bands diagnostic-only (sim fails by 8-9pp from missing Mistral/Sana mechanics)
     { at_week: 188, faction: 'RBiH', min_share: 0.28, max_share: 0.33, citation: 'SCRT — Federation internal split fluid Sep-Oct 1995', diagnostic_only: true },

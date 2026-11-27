@@ -29,12 +29,13 @@ import {
  * SCOPE (this commit): contract tests only — shape, uniqueness, and reference
  * validity (event IDs exist in authored event JSON, OSIDs exist in painted maps).
  *
- * DEFERRED (follow-on): runtime evaluation against final_save.json artifacts.
- * The runner already evaluates the Dec 1992 OSID anchor set inline
- * (scenario_runner.ts:610); extending the runner or this test to evaluate the
- * new Type 1 / Type 2 / Type 3 anchor types is a separate lane. Until that
- * lands, these tests validate the anchor data is well-formed; they do NOT
- * validate the simulation produces them.
+ * RUNTIME EVALUATION lives in tools/verify_checkpoints.cjs, not here: its
+ * EVENT-ANCHORS row (Type 2, SHAPE, ruling §61) and AREA-BANDS row (Type 1,
+ * RECORDED under the calibration hold, ruling §63) read these lists at run time
+ * and judge a run directory's final_save.json; neither changes the tool's exit
+ * code. The runner evaluates the Dec 1992 OSID anchor set inline. These tests
+ * validate the anchor data is well-formed; they do NOT validate the simulation
+ * produces them.
  */
 
 const PAINTED_JAN1993 = join(process.cwd(), 'data', 'source', 'calibration', 'painted_control_jan1993.json');
