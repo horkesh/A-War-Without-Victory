@@ -105,8 +105,6 @@ function compileBattles(
     const rawBattles = report.attack_resolution_osid?.battles;
     if (!rawBattles?.length) return [];
 
-    const formations = state.military.formations ?? {};
-
     // Group raw battle entries by target_osid
     const byOsid = new Map<string, typeof rawBattles>();
     for (const b of rawBattles) {
@@ -115,19 +113,16 @@ function compileBattles(
         byOsid.set(b.target_osid, existing);
     }
 
-    // Build per-OSID casualty map from brigade_history engagements
-    // No sort — Map insertion order is irrelevant here
+    // Per-OSID casualties from the battle records, which report the applied loss on both
+    // sides (CAS-REPORT §15/§16). CAS-REPORT-4 (§22): a tactical-group donor's loss has no
+    // engagement row, so summing brigade_history engagements would drop it; the record
+    // counts it. No sort — Map insertion order is irrelevant here.
     const casualtiesByOsid = new Map<string, { att: number; def: number }>();
-    for (const fid of Object.keys(formations)) {
-        const f = formations[fid];
-        if (!f?.brigade_history?.engagements) continue;
-        for (const eng of f.brigade_history.engagements) {
-            if (eng.turn !== turn) continue;
-            const entry = casualtiesByOsid.get(eng.osid) ?? { att: 0, def: 0 };
-            if (eng.role === 'attacker') entry.att += eng.casualties_taken;
-            else entry.def += eng.casualties_taken;
-            casualtiesByOsid.set(eng.osid, entry);
-        }
+    for (const b of rawBattles) {
+        const entry = casualtiesByOsid.get(b.target_osid) ?? { att: 0, def: 0 };
+        entry.att += b.attacker_casualties;
+        entry.def += b.defender_casualties;
+        casualtiesByOsid.set(b.target_osid, entry);
     }
 
     // Build flipped OSID set and mun_id lookup from pre-filtered control_events

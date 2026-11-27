@@ -150,6 +150,39 @@ export function recordBrigadeEngagement(
 }
 
 /**
+ * CAS-REPORT-4 (§22): record the men a tactical-group donor lost in its anchor's battle.
+ *
+ * The donor's history records the loss (total, worst single battle, personnel nadir and an
+ * open elite-loan episode's casualty tally), but the donor is NOT credited with the battle:
+ * no engagement row, no battles_fought, no outcome tallies. Record line: "A brigade that
+ * lends men to a tactical group is not credited with the group's battles; its history
+ * records the men it lost."
+ */
+export function recordTgDonorLoss(
+    donor: FormationState,
+    casualties: number,
+    turn: number,
+    state?: GameState,
+): void {
+    if (casualties <= 0) return;
+    const h = ensureBrigadeHistory(donor);
+    h.total_casualties_taken += casualties;
+    if (casualties > h.worst_single_battle_casualties) {
+        h.worst_single_battle_casualties = casualties;
+        h.worst_single_battle_turn = turn;
+    }
+    const currentPersonnel = donor.personnel ?? 1000;
+    if (currentPersonnel < h.nadir_personnel) h.nadir_personnel = currentPersonnel;
+
+    const eliteLoanState = donor.elite_loan_state;
+    if (state && eliteLoanState?.on_loan && eliteLoanState.current_episode_id != null) {
+        const tracker = state.military.elite_brigade_tracker?.[donor.id ?? ''];
+        const episode = tracker?.episodes[eliteLoanState.current_episode_id];
+        if (episode && episode.loan_end_turn == null) episode.casualties_taken += casualties;
+    }
+}
+
+/**
  * Record engagement for all attackers in a concentrated assault.
  */
 export function recordAttackerEngagements(
