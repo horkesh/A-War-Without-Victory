@@ -81,16 +81,22 @@ export function getAllAxisBrigades(op: CorpsOperation): FormationId[] {
     return result.sort(strictCompare);
 }
 
+/**
+ * The objectives the first battles of a launch are fought at. Read after the launch reconcile
+ * (which leaves each axis holding its launch view) and before the launch resets every index to
+ * 0, so the first objective is read, not the index carried through a re-preparation
+ * (PRIM-RAW-AXIS, rulings §31).
+ */
 export function getCurrentLaunchObjectives(op: CorpsOperation): string[] {
     if (!isMultiAxis(op)) {
-        const currentObjective = op.objectives?.[op.current_objective_index ?? 0];
+        const currentObjective = op.objectives?.[0];
         return currentObjective ? [currentObjective] : [];
     }
 
     const seen = new Set<string>();
     const objectives: string[] = [];
     for (const axis of op.axes!) {
-        const currentObjective = axis.objectives[axis.current_objective_index ?? 0];
+        const currentObjective = axis.objectives[0];
         if (!currentObjective || seen.has(currentObjective)) continue;
         seen.add(currentObjective);
         objectives.push(currentObjective);
