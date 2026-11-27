@@ -40,7 +40,9 @@ const LIVE_ONLY = [
  * (event, faction, response) in both branches. Order, turn and decision_source may differ only on the
  * rows the live player answered in person (decision_source 'player'): the bot_equivalent harness answers
  * as a player at the pause and files opening answers at campaign birth (turn 0), where headless the bot
- * answers in the settle step. Every non-player row must match a headless row exactly.
+ * answers in the settle step. Every non-player row must match a headless row exactly and in order: with the
+ * in-person rows taken out of the headless log one for one by answer, the rest of the two logs are identical
+ * sequences (PARITY-ORDER, rulings §65).
  */
 const NORMALISED = 'military.event_decision_log';
 
@@ -65,7 +67,7 @@ function diffLeaves(a, b, path, out, max) {
     out.push(`${path}  headless=${String(JSON.stringify(a)).slice(0, 160)}  player=${String(JSON.stringify(b)).slice(0, 160)}`);
 }
 
-function decisionLogProblems(headlessLog, playerLog) {
+function decisionLogProblems(headlessLog, playerLog, playerFaction) {
     const key = (r) => `${r.event_id}|${r.faction}|${r.response_id}`;
     const strict = (r) => JSON.stringify(r);
     const problems = [];
@@ -74,10 +76,34 @@ function decisionLogProblems(headlessLog, playerLog) {
     if (JSON.stringify(a) !== JSON.stringify(b)) {
         problems.push(`${NORMALISED}: answers differ (headless ${a.length} rows, player ${b.length} rows)`);
     }
-    const headlessStrict = new Set((headlessLog ?? []).map(strict));
+    // PARITY-ORDER (rulings §65, Codex r4720444796): remove the live player's in-person rows from the headless log
+    // one for one by (event, faction, response), first unmatched occurrence. What remains must equal the player
+    // save's non-player rows exactly and IN ORDER (the firing order #905 fixed), not merely as a set.
+    const remaining = [...(headlessLog ?? [])];
     for (const row of playerLog ?? []) {
-        if (row.decision_source === 'player') continue;
-        if (!headlessStrict.has(strict(row))) problems.push(`${NORMALISED}: non-player row has no exact headless twin: ${strict(row).slice(0, 200)}`);
+        if (row.decision_source !== 'player') continue;
+        const i = remaining.findIndex((h) => key(h) === key(row));
+        if (i < 0) problems.push(`${NORMALISED}: in-person player row has no headless answer: ${strict(row).slice(0, 200)}`);
+        else remaining.splice(i, 1);
+    }
+    const nonPlayer = (playerLog ?? []).filter((row) => row.decision_source !== 'player');
+    if (remaining.length !== nonPlayer.length) {
+        problems.push(`${NORMALISED}: non-player rows differ in count (headless ${remaining.length}, player ${nonPlayer.length})`);
+    }
+    // OBSERVER-LABEL (PARITY-EMER, lane B s35): an automatic answer for the live player's own seat (Observer at
+    // answer time, or the staff by silence) is logged 'bot_ai_default' where headless logs the bot's own label for
+    // the same answer. Every src reader tests decision_source only against 'player', so the bot labels are
+    // interchangeable there; on the live faction's rows they are compared as one class. Answer, turn and order stay exact.
+    const BOT = new Set(['bot_political', 'bot_v1', 'bot_ai_default']);
+    const rowKey = (r) => (playerFaction !== undefined && r && r.faction === playerFaction && BOT.has(r.decision_source)
+        ? strict({ ...r, decision_source: 'bot' }) : strict(r));
+    for (let i = 0; i < Math.max(remaining.length, nonPlayer.length); i += 1) {
+        const h = remaining[i] === undefined ? 'none' : rowKey(remaining[i]);
+        const p = nonPlayer[i] === undefined ? 'none' : rowKey(nonPlayer[i]);
+        if (h !== p) {
+            problems.push(`${NORMALISED}: non-player row ${i} differs (order or content): headless=${h.slice(0, 160)} player=${p.slice(0, 160)}`);
+            break;
+        }
     }
     return problems;
 }
@@ -85,7 +111,8 @@ function decisionLogProblems(headlessLog, playerLog) {
 function compareSaves(headless, player, max = 200) {
     const out = [];
     diffLeaves(headless, player, '', out, max);
-    out.push(...decisionLogProblems(headless?.military?.event_decision_log, player?.military?.event_decision_log));
+    const playerFaction = typeof player?.meta?.player_faction === 'string' ? player.meta.player_faction : undefined;
+    out.push(...decisionLogProblems(headless?.military?.event_decision_log, player?.military?.event_decision_log, playerFaction));
     return out;
 }
 

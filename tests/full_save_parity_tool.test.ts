@@ -55,6 +55,67 @@ describe('full_save_parity.cjs', () => {
         expect(compareSaves(base(), answer).some((l) => l.includes('answers differ'))).toBe(true);
         const botTurn = base();
         botTurn.military.event_decision_log[0] = { ...botTurn.military.event_decision_log[0]!, turn: 5 };
-        expect(compareSaves(base(), botTurn).some((l) => l.includes('no exact headless twin'))).toBe(true);
+        expect(compareSaves(base(), botTurn).some((l) => l.includes('non-player row 0 differs'))).toBe(true);
+    });
+
+    // PARITY-ORDER (rulings §65, Codex r4720444796): non-player rows are compared in order, multiset-exact.
+    it('Codex repro: two bot rows swapped in the player save DIFFER (the firing order #905 fixed)', () => {
+        const swapped = base();
+        swapped.military.event_decision_log = [...swapped.military.event_decision_log].reverse();
+        const problems = compareSaves(base(), swapped);
+        expect(problems.some((l) => l.includes('non-player row 0 differs'))).toBe(true);
+    });
+
+    it('a duplicated non-player row DIFFERS', () => {
+        const dup = base();
+        dup.military.event_decision_log = [...dup.military.event_decision_log, dup.military.event_decision_log[1]!];
+        const problems = compareSaves(base(), dup);
+        expect(problems.some((l) => l.includes('answers differ'))).toBe(true);
+        expect(problems.some((l) => l.includes('non-player rows differ in count'))).toBe(true);
+    });
+
+    it('an in-person player row at a different turn or position still passes; the bot rows around it keep their order', () => {
+        const headless = base();
+        headless.military.event_decision_log.push({ event_id: 'e3', faction: 'HRHB', response_id: 'w', turn: 6, decision_source: 'bot_political' });
+        const player = base();
+        player.military.event_decision_log = [
+            { event_id: 'e2', faction: 'RBiH', response_id: 'y', turn: 9, decision_source: 'player' },
+            { event_id: 'e1', faction: 'RS', response_id: 'x', turn: 3, decision_source: 'bot_political' },
+            { event_id: 'e3', faction: 'HRHB', response_id: 'w', turn: 6, decision_source: 'bot_political' },
+        ];
+        expect(compareSaves(headless, player)).toEqual([]);
+        // The same in-person row, but with the two bot rows around it out of order: DIFFERS.
+        player.military.event_decision_log = [player.military.event_decision_log[0]!, player.military.event_decision_log[2]!, player.military.event_decision_log[1]!];
+        expect(compareSaves(headless, player).some((l) => l.includes('differs (order or content)'))).toBe(true);
+    });
+
+    it('OBSERVER-LABEL: the live seat\'s automatic answer may carry another bot label; any other change still DIFFERS', () => {
+        const headless = base();
+        const player = base();
+        player.meta = { ...player.meta, player_faction: 'RBiH' } as typeof player.meta;
+        // The live RBiH seat at Observer: same answer, turn and position, logged as the staff default.
+        player.military.event_decision_log[1] = { ...player.military.event_decision_log[1]!, decision_source: 'bot_ai_default' };
+        expect(compareSaves(headless, player)).toEqual([]);
+        // The same relabel on another faction's row is a real difference.
+        const other = base();
+        other.meta = { ...other.meta, player_faction: 'RBiH' } as typeof other.meta;
+        other.military.event_decision_log[0] = { ...other.military.event_decision_log[0]!, decision_source: 'bot_ai_default' };
+        expect(compareSaves(base(), other).some((l) => l.includes('non-player row 0 differs'))).toBe(true);
+        // With no player faction on record the label is compared exactly.
+        const none = base();
+        none.military.event_decision_log[1] = { ...none.military.event_decision_log[1]!, decision_source: 'bot_ai_default' };
+        expect(compareSaves(base(), none).some((l) => l.includes('non-player row 1 differs'))).toBe(true);
+        // The live seat's row at another turn still DIFFERS.
+        player.military.event_decision_log[1] = { ...player.military.event_decision_log[1]!, turn: 8 };
+        expect(compareSaves(headless, player).some((l) => l.includes('non-player row 1 differs'))).toBe(true);
+    });
+
+    it('an in-person player row with no headless answer DIFFERS', () => {
+        const player = base();
+        player.military.event_decision_log = [
+            ...player.military.event_decision_log,
+            { event_id: 'e9', faction: 'RBiH', response_id: 'q', turn: 7, decision_source: 'player' },
+        ];
+        expect(compareSaves(base(), player).some((l) => l.includes('no headless answer'))).toBe(true);
     });
 });
