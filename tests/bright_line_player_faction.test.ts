@@ -1,22 +1,23 @@
 /**
- * §6 bright line for the human player's own faction in ANY decision mode (panel ruling 2026-11-16).
+ * §6 bright line: every faction, in every decision mode (BRIGHTLINE-MODE, §6 panel 8/8, 2026-11-27;
+ * SENSITIVE_HISTORY_DESIGN_GATE.md §2a(i)). Supersedes the 2026-11-16 mode/seat gate.
  *
- * Atrocity must never produce a better end-state. The atrocity counters are written in every mode, but the
- * consequences (the §2a `authorized_cleansing_condemnation` flag, its display freshening, the atrocity cost
- * term) used to apply on `decision_mode === 'emergent'` alone, and "Replay the record" (historical) is one
- * menu click. They now apply to a faction when `isBrightLineFaction(state, faction)`: every faction in
- * emergent mode, and the human player's own faction in any mode. A headless / no-human historical run has no
- * player faction, so it is unchanged by construction.
+ * Atrocity must never produce a better end-state, and silence is never cheaper than an explicit order (G5).
+ * The consequences (the §2a `authorized_cleansing_condemnation` flag, its display freshening, the atrocity
+ * cost term) apply to a faction whenever its own modelled acts trigger them: in emergent and historical mode,
+ * live or headless, at every autonomy level, with or without a player faction. Nothing in the verdict reads
+ * decision_mode, player_faction, autonomy_level or headless_scenario_auto_control, so a hands-off live game
+ * reads exactly like the headless run. The trigger is the act, never the faction: a side with no modelled
+ * act is not flagged.
  *
  * Out of scope on purpose (pinned below): the patron state update. Its per-turn emergent-only defiance term
  * was retired by the patron-defiance panel (2026-11-17); a defiance answer now carries its own
  * `patron_supply_cut` event effect, which no decision mode gates.
  */
 
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { computeFactionVerdict, computeWarCostIndex, currentCondemnationFlags } from '../src/sim/negotiation/scoring.js';
-import { isBrightLineFaction } from '../src/state/atrocity_accountability.js';
 import { createEmptyCapital, createDefaultPatronRelationship } from '../src/state/negotiation_types.js';
 import type { NegotiationBreakdown } from '../src/state/negotiation_types.js';
 import type { GameState } from '../src/state/game_state.js';
@@ -61,101 +62,84 @@ function makeState(setup: Setup = {}): GameState {
     } as unknown as GameState;
 }
 
-/** One authorized sweep booked to every faction (the act is the same; who is accountable differs). */
+/** One authorized sweep booked to every faction. */
 const SWEEP_EVERYWHERE = { war_crimes_events: 1, war_crimes_events_emergent: 1 };
 const ALL_SWEEP = { RBiH: SWEEP_EVERYWHERE, RS: SWEEP_EVERYWHERE, HRHB: SWEEP_EVERYWHERE };
+const FACTIONS = ['RS', 'RBiH', 'HRHB'];
 
-describe('isBrightLineFaction truth table', () => {
-    const modes: Mode[] = ['emergent', 'historical', undefined];
-    const players: unknown[] = [undefined, null, 'RS', 'RBiH', '', 42];
-    for (const mode of modes) {
-        for (const player of players) {
-            for (const faction of ['RS', 'RBiH', 'HRHB']) {
-                const expected = mode === 'emergent' || (typeof player === 'string' && player === faction);
-                it(`mode=${String(mode)} player=${JSON.stringify(player) ?? 'undefined'} faction=${faction} -> ${expected}`, () => {
-                    const state = makeState({ mode, player_faction: player });
-                    expect(isBrightLineFaction(state, faction)).toBe(expected);
-                });
+/** Every run-context combination the old gate distinguished. */
+const CONTEXTS: Setup[] = [];
+for (const mode of ['emergent', 'historical', undefined] as Mode[]) {
+    for (const player of [undefined, null, 'RS', 'RBiH', 'HRHB', '', 42]) {
+        for (const headless of [undefined, true, false]) {
+            for (const autonomy_level of [undefined, 0, 1, 2, 3]) {
+                const setup: Setup = { mode, headless, autonomy_level };
+                if (player !== undefined) setup.player_faction = player;
+                CONTEXTS.push(setup);
             }
         }
     }
+}
 
-    it('fails closed with no meta at all and never defaults a faction', () => {
-        expect(isBrightLineFaction({ meta: undefined } as unknown as GameState, 'RBiH')).toBe(false);
-        expect(isBrightLineFaction({ meta: {} } as unknown as GameState, 'RBiH')).toBe(false);
-    });
-
-    it('headless auto-control with player_faction set is the same as unset (the runner marker wins)', () => {
-        for (const faction of ['RS', 'RBiH', 'HRHB']) {
-            const withPlayer = makeState({ mode: 'historical', player_faction: 'RS', headless: true });
-            const without = makeState({ mode: 'historical', headless: true });
-            expect(isBrightLineFaction(withPlayer, faction)).toBe(false);
-            expect(isBrightLineFaction(without, faction)).toBe(false);
+describe('the verdict does not read the run context', () => {
+    it('one authorized sweep condemns every faction in every mode, seat, autonomy and headless setting', () => {
+        for (const setup of CONTEXTS) {
+            const state = makeState({ ...setup, capital: ALL_SWEEP });
+            for (const faction of FACTIONS) {
+                const v = computeFactionVerdict(state, faction);
+                expect(v.condemnation_flags, JSON.stringify({ setup, faction })).toContain('authorized_cleansing_condemnation');
+                expect(['C', 'D', 'F']).toContain(v.grade);
+                expect(v.outcome_class).toBe('hollow_victory');
+            }
         }
-        // Emergent mode is not touched by the marker: every faction still bears the consequences.
-        expect(isBrightLineFaction(makeState({ mode: 'emergent', player_faction: 'RS', headless: true }), 'HRHB')).toBe(true);
     });
 
-    it('headless harness: a headless historical state is byte-identical in the verdict whether or not a player faction is authored', () => {
-        const a = makeState({ mode: 'historical', headless: true, capital: ALL_SWEEP });
-        const b = makeState({ mode: 'historical', headless: true, player_faction: 'RS', capital: ALL_SWEEP });
-        for (const faction of ['RS', 'RBiH', 'HRHB']) {
-            expect(JSON.stringify(computeFactionVerdict(b, faction))).toBe(JSON.stringify(computeFactionVerdict(a, faction)));
-            expect(computeWarCostIndex(b, faction)).toBe(computeWarCostIndex(a, faction));
+    it('the verdict, the flags and the cost index are byte-identical across every run context (hands-off live = headless)', () => {
+        const reference = makeState({ mode: 'historical', headless: true, capital: ALL_SWEEP });
+        for (const setup of CONTEXTS) {
+            const state = makeState({ ...setup, capital: ALL_SWEEP });
+            for (const faction of FACTIONS) {
+                expect(JSON.stringify(computeFactionVerdict(state, faction))).toBe(JSON.stringify(computeFactionVerdict(reference, faction)));
+                expect(currentCondemnationFlags(state, faction)).toEqual(currentCondemnationFlags(reference, faction));
+                expect(computeWarCostIndex(state, faction)).toBe(computeWarCostIndex(reference, faction));
+            }
+        }
+    });
+
+    it('a faction with no modelled act is never flagged, in any context (the trigger is the act, not the faction)', () => {
+        for (const setup of CONTEXTS) {
+            const state = makeState(setup);
+            for (const faction of FACTIONS) {
+                expect(computeFactionVerdict(state, faction).condemnation_flags ?? []).not.toContain('authorized_cleansing_condemnation');
+            }
         }
     });
 });
 
-describe('historical mode: the human player\'s own atrocity carries the consequences', () => {
-    it('player RS + one authorized sweep: flag, grade capped at C, hollow_victory; the bot factions in the same state are untouched', () => {
-        const state = makeState({ mode: 'historical', player_faction: 'RS', capital: ALL_SWEEP });
-        const rs = computeFactionVerdict(state, 'RS');
-        expect(rs.condemnation_flags).toContain('authorized_cleansing_condemnation');
-        expect(['C', 'D', 'F']).toContain(rs.grade);
-        expect(rs.outcome_class).toBe('hollow_victory');
-        for (const bot of ['RBiH', 'HRHB']) {
-            const v = computeFactionVerdict(state, bot);
-            expect(v.condemnation_flags ?? []).not.toContain('authorized_cleansing_condemnation');
-            expect(v.outcome_class).not.toBe('hollow_victory');
+describe('historical mode judges the modelled record like an emergent campaign', () => {
+    it('headless historical (no player faction): the sweep is condemned for each faction that carried it out, and only that faction', () => {
+        const state = makeState({ mode: 'historical', headless: true, capital: { HRHB: SWEEP_EVERYWHERE } });
+        expect(computeFactionVerdict(state, 'HRHB').condemnation_flags).toContain('authorized_cleansing_condemnation');
+        for (const other of ['RS', 'RBiH']) {
+            expect(computeFactionVerdict(state, other).condemnation_flags ?? []).not.toContain('authorized_cleansing_condemnation');
         }
     });
 
-    it('the same sweep with no player faction (headless-style state) is not condemned, as before', () => {
-        const state = makeState({ mode: 'historical', capital: ALL_SWEEP });
-        for (const faction of ['RS', 'RBiH', 'HRHB']) {
-            expect(computeFactionVerdict(state, faction).condemnation_flags ?? []).not.toContain('authorized_cleansing_condemnation');
-        }
-    });
-
-    it('human RBiH is accountable the same way (the rule is faction-neutral)', () => {
-        const state = makeState({ mode: 'historical', player_faction: 'RBiH', capital: ALL_SWEEP });
-        expect(computeFactionVerdict(state, 'RBiH').condemnation_flags).toContain('authorized_cleansing_condemnation');
-        expect(computeFactionVerdict(state, 'RS').condemnation_flags ?? []).not.toContain('authorized_cleansing_condemnation');
-    });
-
-    it('currentCondemnationFlags (the Dayton room and delegation folder reading) follows the same predicate', () => {
-        const state = makeState({ mode: 'historical', player_faction: 'RS', capital: ALL_SWEEP });
-        expect(currentCondemnationFlags(state, 'RS')).toContain('authorized_cleansing_condemnation');
-        expect(currentCondemnationFlags(state, 'HRHB')).not.toContain('authorized_cleansing_condemnation');
-    });
-
-    it('15,000 civilian-harm arm: reads the fresh displacement aggregate for the player, not the stale capital snapshot', () => {
-        const build = (harm: number) => {
-            const state = makeState({ mode: 'historical', player_faction: 'RS', capital: { RS: { civilian_casualties_caused: 0 } } });
+    it('15,000 civilian-harm arm: reads the fresh displacement aggregate, for a player or a bot faction alike', () => {
+        const build = (harm: number, player?: string) => {
+            const state = makeState({ mode: 'historical', ...(player ? { player_faction: player } : {}), capital: { RS: { civilian_casualties_caused: 0 } } });
             (state as unknown as { displacement: unknown }).displacement = {
                 displacement_humanitarian_aggregates: { RS: { bosniak: { refugees_created: 1000, refugees_received: 0, civilian_casualties_caused: harm } } },
             };
             return state;
         };
-        expect(computeFactionVerdict(build(15000), 'RS').condemnation_flags).toContain('authorized_cleansing_condemnation');
-        expect(computeFactionVerdict(build(14999), 'RS').condemnation_flags ?? []).not.toContain('authorized_cleansing_condemnation');
-        // The same harm booked to a bot faction (the recorded takeover history) is not condemned in historical mode.
-        const bot = build(20000);
-        (bot as unknown as { meta: { player_faction: string } }).meta.player_faction = 'RBiH';
-        expect(computeFactionVerdict(bot, 'RS').condemnation_flags ?? []).not.toContain('authorized_cleansing_condemnation');
+        for (const player of [undefined, 'RS', 'RBiH']) {
+            expect(computeFactionVerdict(build(15000, player), 'RS').condemnation_flags).toContain('authorized_cleansing_condemnation');
+            expect(computeFactionVerdict(build(14999, player), 'RS').condemnation_flags ?? []).not.toContain('authorized_cleansing_condemnation');
+        }
     });
 
-    it('a final-turn takeover that pushes harm over 15,000 is displayed fresh for the player and raw for a bot', () => {
+    it('a final-turn takeover that pushes harm up is displayed fresh for every faction', () => {
         const state = makeState({
             mode: 'historical',
             player_faction: 'RS',
@@ -167,45 +151,36 @@ describe('historical mode: the human player\'s own atrocity carries the conseque
                 HRHB: { bosniak: { refugees_created: 50000, refugees_received: 0, civilian_casualties_caused: 5000 } },
             },
         };
-        const rs = computeFactionVerdict(state, 'RS');
-        const hrhb = computeFactionVerdict(state, 'HRHB');
-        expect(rs.capital_breakdown?.refugees_created).toBe(50000);
-        expect(rs.capital_breakdown?.civilian_casualties_caused).toBe(5000);
-        expect(hrhb.capital_breakdown?.refugees_created).toBe(0);
-        expect(hrhb.capital_breakdown?.civilian_casualties_caused).toBe(0);
+        for (const faction of ['RS', 'HRHB']) {
+            const v = computeFactionVerdict(state, faction);
+            expect(v.capital_breakdown?.refugees_created).toBe(50000);
+            expect(v.capital_breakdown?.civilian_casualties_caused).toBe(5000);
+        }
     });
 
-    it('cost term (legacy path): raised for the player faction, unchanged for a bot and for a no-player state', () => {
-        const atrocity = { RS: { war_crimes_events: 3, refugees_created: 50000, civilian_casualties_caused: 20000 }, RBiH: { war_crimes_events: 3, refugees_created: 50000, civilian_casualties_caused: 20000 } };
-        const noPlayer = makeState({ mode: 'historical', capital: atrocity });
-        const withPlayer = makeState({ mode: 'historical', player_faction: 'RS', capital: atrocity });
-        expect(computeWarCostIndex(withPlayer, 'RS')).toBeGreaterThan(computeWarCostIndex(noPlayer, 'RS'));
-        expect(computeWarCostIndex(withPlayer, 'RBiH')).toBe(computeWarCostIndex(noPlayer, 'RBiH'));
-    });
-
-    it('a restrained human player is not condemned (the gate is the act, not the mode)', () => {
-        const state = makeState({ mode: 'historical', player_faction: 'RBiH' });
-        expect(computeFactionVerdict(state, 'RBiH').condemnation_flags ?? []).not.toContain('authorized_cleansing_condemnation');
+    it('cost term (legacy path, non-saturated fixture): atrocity raises the index for every faction, with or without a player', () => {
+        const atrocity = { war_crimes_events: 3, refugees_created: 50000, civilian_casualties_caused: 20000 };
+        const clean = makeState({ mode: 'historical' });
+        for (const setup of [{ mode: 'historical' as Mode }, { mode: 'historical' as Mode, player_faction: 'RS' }, { mode: 'historical' as Mode, headless: true }]) {
+            const dirty = makeState({ ...setup, capital: { RS: atrocity, RBiH: atrocity, HRHB: atrocity } });
+            for (const faction of FACTIONS) {
+                expect(computeWarCostIndex(clean, faction)).toBeLessThan(1);
+                expect(computeWarCostIndex(dirty, faction)).toBeGreaterThan(computeWarCostIndex(clean, faction));
+            }
+        }
     });
 });
 
 describe('autonomy and saves', () => {
-    it('handing the faction to staff (autonomy 3) keeps it accountable: player_faction stays set', () => {
+    it('handing the faction to staff (autonomy 3) keeps it accountable', () => {
         const state = makeState({ mode: 'historical', player_faction: 'RS', autonomy_level: 3, capital: ALL_SWEEP });
         expect(computeFactionVerdict(state, 'RS').condemnation_flags).toContain('authorized_cleansing_condemnation');
     });
 
-    it('a legacy save (decision_mode defaulted to historical by migration 35) with a player faction and an existing counter is condemned at its next verdict', () => {
-        const state = makeState({ mode: 'historical', player_faction: 'RBiH', capital: { RBiH: { war_crimes_events_emergent: 2 } } });
-        expect(computeFactionVerdict(state, 'RBiH').condemnation_flags).toContain('authorized_cleansing_condemnation');
-    });
-
-    it('emergent mode is unchanged: every faction, with or without a player faction', () => {
-        for (const player of [undefined, 'RS']) {
-            const state = makeState({ mode: 'emergent', player_faction: player, capital: ALL_SWEEP });
-            for (const faction of ['RS', 'RBiH', 'HRHB']) {
-                expect(computeFactionVerdict(state, faction).condemnation_flags).toContain('authorized_cleansing_condemnation');
-            }
+    it('a legacy save (decision_mode defaulted to historical by migration 35) with an existing counter is condemned at its next verdict, player or bot', () => {
+        for (const player of [undefined, 'RBiH', 'RS']) {
+            const state = makeState({ mode: 'historical', ...(player ? { player_faction: player } : {}), capital: { RBiH: { war_crimes_events_emergent: 2 } } });
+            expect(computeFactionVerdict(state, 'RBiH').condemnation_flags).toContain('authorized_cleansing_condemnation');
         }
     });
 });
@@ -213,10 +188,14 @@ describe('autonomy and saves', () => {
 describe('static guards', () => {
     const code = (path: string) => withoutComments(readFileSync(path, 'utf8'));
 
-    it('scoring.ts has no bare decision_mode gate: every atrocity gate goes through isBrightLineFaction', () => {
+    it('the verdict layer reads no run-context field and has no bright-line predicate', () => {
         const source = code('src/sim/negotiation/scoring.ts');
         expect(source).not.toMatch(/decision_mode/);
-        expect(source.match(/isBrightLineFaction\(/g)?.length).toBe(3);
+        expect(source).not.toMatch(/player_faction/);
+        expect(source).not.toMatch(/headless_scenario_auto_control/);
+        expect(source).not.toMatch(/autonomy_level/);
+        expect(source).not.toMatch(/isBrightLineFaction/);
+        expect(existsSync('src/state/atrocity_accountability.ts')).toBe(false);
     });
 
     it('the patron state update carries no defiance term and no bright-line gate (patron-defiance panel)', () => {
@@ -227,13 +206,6 @@ describe('static guards', () => {
         expect(source).not.toMatch(/isBrightLineFaction/);
     });
 
-    it('the predicate does not default the faction and needs the headless marker check', () => {
-        const source = code('src/state/atrocity_accountability.ts');
-        expect(source).not.toMatch(/\?\?\s*'RBiH'/);
-        expect(source).toMatch(/headless_scenario_auto_control !== true/);
-        expect(source).toMatch(/typeof meta\?\.player_faction === 'string'/);
-    });
-
     it('no shipped scenario authors player_faction, and the scenario runner always marks the run headless', () => {
         const walk = (dir: string): string[] => readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
             const path = `${dir}/${entry.name}`;
@@ -242,5 +214,14 @@ describe('static guards', () => {
         const authors = walk('data/scenarios').filter((path) => /"player_faction"\s*:/.test(readFileSync(path, 'utf8')));
         expect(authors).toEqual([]);
         expect(code('src/scenario/scenario_runner.ts')).toMatch(/state\.meta\.headless_scenario_auto_control = true/);
+    });
+
+    it('no src file references the retired predicate', () => {
+        const walk = (dir: string): string[] => readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+            const path = `${dir}/${entry.name}`;
+            return entry.isDirectory() ? walk(path) : /\.(ts|tsx)$/.test(path) ? [path] : [];
+        });
+        const hits = walk('src').filter((path) => /isBrightLineFaction|atrocity_accountability/.test(code(path)));
+        expect(hits).toEqual([]);
     });
 });

@@ -192,4 +192,72 @@ describe('CAS-REPORT §15: attacker casualties are recorded as applied', () => {
         expect(ledgerTotal(fx.state, 'RS')).toBe(drop);
         expect(Math.abs(report.battles[0]!.attacker_casualties - drop)).toBeLessThanOrEqual(1);
     });
+
+    it('TG-LOAN (§17): a donor near its floor books only the loss actually removed in casualties_so_far', () => {
+        const fx = makeScenario(3000);
+        const donor = addTg(fx, fx.small, 400);
+        donor.personnel = MIN_COMBAT_PERSONNEL + 3;
+        resolve(fx);
+        const tg = (fx.state.military as unknown as {
+            tactical_groups: Record<string, { donor_contributions: { casualties_so_far: number }[] }>;
+        }).tactical_groups.tg_1;
+        const donorDrop = MIN_COMBAT_PERSONNEL + 3 - (donor.personnel ?? 0);
+        expect(donor.personnel).toBeGreaterThanOrEqual(MIN_COMBAT_PERSONNEL);
+        expect(donorDrop).toBeGreaterThan(0);
+        expect(tg.donor_contributions[0]!.casualties_so_far).toBe(donorDrop);
+    });
+
+    it('CAS-REPORT-4 (§22): the anchor\'s history records only its own loss; the donor\'s records its men, with no battle credit', () => {
+        const fx = makeScenario(3000);
+        const donor = addTg(fx, fx.small, 400);
+        const smallBefore = fx.small.personnel ?? 0;
+        const donorBefore = donor.personnel ?? 0;
+        const report = resolve(fx);
+        const donorDrop = donorBefore - (donor.personnel ?? 0);
+        const anchorDrop = smallBefore - (fx.small.personnel ?? 0);
+        expect(donorDrop).toBeGreaterThan(0);
+        const anchorRows = fx.small.brigade_history!.engagements.filter((e) => e.turn === 5);
+        expect(anchorRows).toHaveLength(1);
+        expect(anchorRows[0]!.casualties_taken).toBe(anchorDrop);
+        // The donor lent men; it did not fight the battle as a unit.
+        expect(donor.brigade_history!.total_casualties_taken).toBe(donorDrop);
+        expect(donor.brigade_history!.battles_fought).toBe(0);
+        expect(donor.brigade_history!.engagements).toHaveLength(0);
+        // The battle record still counts every man the attack lost, donor included.
+        const bigDrop = 5000 - (fx.big.personnel ?? 0);
+        expect(Math.abs(report.battles[0]!.attacker_casualties - (bigDrop + anchorDrop + donorDrop))).toBeLessThanOrEqual(1);
+    });
+});
+
+describe('CAS-ATTACKER-SHARES §42: the battle record carries each attacker\'s applied loss', () => {
+    it('lists every attacker once, sorted by id, with its own personnel drop; the shares sum to the stack total', () => {
+        const fx = makeScenario(3000);
+        const bigBefore = fx.big.personnel ?? 0;
+        const smallBefore = fx.small.personnel ?? 0;
+        const report = resolve(fx);
+        const battle = report.battles[0]!;
+        expect(battle.attacker_brigade).toBe(fx.big.id);
+        expect(battle.attacker_contributions).toEqual([
+            { brigade_id: fx.big.id, casualties_taken: bigBefore - (fx.big.personnel ?? 0) },
+            { brigade_id: fx.small.id, casualties_taken: smallBefore - (fx.small.personnel ?? 0) },
+        ]);
+        const sum = battle.attacker_contributions!.reduce((n, c) => n + c.casualties_taken, 0);
+        expect(Math.abs(sum - battle.attacker_casualties)).toBeLessThanOrEqual(1);
+        // The lead brigade's own loss is not the stack total: the second brigade lost men too.
+        expect(battle.attacker_contributions![1]!.casualties_taken).toBeGreaterThan(0);
+        expect(battle.attacker_contributions![0]!.casualties_taken).toBeLessThan(battle.attacker_casualties);
+    });
+
+    // The TG fought as one, so the anchor's entry carries the lent men's loss and the entries
+    // sum to the stack total. Brigade history books the donor's own loss apart (CAS-REPORT-4 §22).
+    it('a TG anchor\'s entry counts the applied loss of the men its donor lent it', () => {
+        const fx = makeScenario(3000);
+        const donor = addTg(fx, fx.small, 400);
+        const smallBefore = fx.small.personnel ?? 0;
+        const donorBefore = donor.personnel ?? 0;
+        const report = resolve(fx);
+        const entry = report.battles[0]!.attacker_contributions!.find(c => c.brigade_id === fx.small.id);
+        expect(entry?.casualties_taken).toBe((smallBefore - (fx.small.personnel ?? 0)) + (donorBefore - (donor.personnel ?? 0)));
+        expect(report.battles[0]!.attacker_contributions!.map(c => c.brigade_id)).toEqual([fx.big.id, fx.small.id]);
+    });
 });

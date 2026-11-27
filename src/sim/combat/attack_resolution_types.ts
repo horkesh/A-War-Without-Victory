@@ -101,8 +101,17 @@ export interface AttackResolutionOsidReport {
         /** Canonical `${mun_id}:${faction}` pool key militia losses were recorded against. */
         defender_militia_pool_key?: string;
         snap_events: AttackResolutionOsidSnapEvent[];
-        /** Actual total attacker casualties (KIA+WIA+MIA) from this battle. */
+        /**
+         * Actual total attacker casualties (KIA+WIA+MIA) from this battle: the WHOLE
+         * attacking stack's applied loss, not `attacker_brigade`'s (CAS-ATTACKER-SHARES §42).
+         */
         attacker_casualties: number;
+        /**
+         * Each attacker's own applied loss, sorted by brigade id (CAS-ATTACKER-SHARES §42).
+         * A TG anchor's entry includes its donors' applied loss, as in brigade history.
+         * Report-only: never copied into GameState.
+         */
+        attacker_contributions?: AttackerContribution[];
         /** Actual total defender casualties (KIA+WIA+MIA) from this battle. */
         defender_casualties: number;
         /** Per-brigade defender contributions (Layer A distance-weighted). */
@@ -194,6 +203,12 @@ export interface BattlePowerBreakdown {
     reactive_response: number;
     /** True when the `avgBrigadePower × MIN_DEFENSE_FLOOR_FRACTION` floor beat the sum. */
     min_floor_applied: boolean;
+}
+
+/** One attacker's applied loss in one battle (CAS-ATTACKER-SHARES §42). */
+export interface AttackerContribution {
+    brigade_id: FormationId;
+    casualties_taken: number;
 }
 
 export interface DefenderContribution {

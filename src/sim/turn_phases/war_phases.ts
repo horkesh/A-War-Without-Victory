@@ -1214,9 +1214,10 @@ export const warPhases: NamedPhase[] = [
             // PAUSE BEFORE COMBAT (#865 r4693814641): the primary pass fires; this turn's player
             // decisions are settled (the President's answer at the pause, then silence as the
             // staff default); only then does the same-turn follow-up snapshot run, so a hands-off
-            // live turn sees the answered state headless sees. Inert in headless.
+            // live turn sees the answered state headless sees. LIVE-HIDDEN-SPLIT (rulings §53): every
+            // answer of the pass, bot and player alike, lands in that settle step in firing order.
             const primary = beginEvaluateEvents(context.state, context.rng, turn, definitions);
-            await settlePlayerEventDecisionsThisTurn(context.state, definitions, turn, context.input.onPlayerDecisionsPending);
+            await settlePlayerEventDecisionsThisTurn(context.state, definitions, turn, context.input.onPlayerDecisionsPending, primary);
             const result = primary.finish();
             context.report.events_fired = result.fired;
             // Graz Accords: fires at week 4 (6 May 1992), sets state.political.vienna_declaration_turn
@@ -3801,7 +3802,12 @@ export const warPhases: NamedPhase[] = [
         name: 'strategic-reserve-reinforcement',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            context.report.strategic_reserve_reinforcement = reinforceFromStrategicReserves(context.state, context.input.dataBaseDir);
+            // OZ-ENGINE: this turn's weariness loss by pool feeds the idle-replacement stage.
+            context.report.strategic_reserve_reinforcement = reinforceFromStrategicReserves(
+                context.state,
+                context.input.dataBaseDir,
+                context.report.pool_war_weariness_decay?.by_pool
+            );
         }
     },
     {

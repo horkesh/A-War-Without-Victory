@@ -28,7 +28,7 @@ import { initializeCorpsCommand } from '../sim/combat/corps_command.js';
 import { initStrategicDepth } from '../sim/combat/strategic_depth.js';
 import { findBrigadeOperation } from '../sim/combat/corps_operation_helpers.js';
 // REASON-CODE INSTRUMENTATION: env-gated, inert by default. See reason_code_debug.ts.
-import { sortedIds, whenReasonCodeTopic } from '../sim/combat/reason_code_debug.js';
+import { whenReasonCodeTopic } from '../sim/combat/reason_code_debug.js';
 import { injectPrePlannedOperations } from '../sim/combat/pre_planned_operations.js';
 import { spawnJnaPhantomBrigades } from '../sim/combat/jna_phantom_brigades.js';
 import {
@@ -186,7 +186,7 @@ import type {
     WeeklyCorpsSummaryEntry,
     WeeklyReportRow
 } from './scenario_reporting.js';
-import { attachBotOrderDiagnosticsToWeeklyReport, attachFrontDistributionDiagnosticsToWeeklyReport, attachMovementPhaseDiagnosticsToWeeklyReport, buildWeeklyReport } from './scenario_reporting.js';
+import { attachBotOrderDiagnosticsToWeeklyReport, attachFrontDistributionDiagnosticsToWeeklyReport, attachMovementPhaseDiagnosticsToWeeklyReport, buildWeeklyReport, weeklyAttackerStackFields } from './scenario_reporting.js';
 import { buildBrigadeTemporalRows } from './brigade_temporal_emit.js';
 // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: per-turn full-state snapshot
 // stream + end-of-run consolidated `replay_save_sequence.json` artifact powering
@@ -3365,24 +3365,14 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                         ...(b.execution_friction ? { execution_friction: b.execution_friction } : {}),
                         ...(b.equipment ? { equipment: b.equipment } : {}),
                         ...(operation_id ? { operation_id, operation_name } : {}),
+                        // CAS-ATTACKER-SHARES (§42): the stack and each attacker's applied
+                        // loss are always on the row, so `attacker_casualties` (the stack's)
+                        // is never read against `attacker_brigade` (the lead) alone. The
+                        // weekly_report.jsonl pin moved with this change.
+                        ...weeklyAttackerStackFields(b),
                         // ── REASON-CODE INSTRUMENTATION — item 1 ────────────────────
-                        // THIS PROJECTION IS THE DEFECT. It enumerates its output fields
-                        // explicitly, and `attacker_brigades` / `defender_contributions`
-                        // are BUILT by `attack_resolution_osid.ts` and dropped right here.
-                        // Their absence is what let a seat read `attacker_casualties` (a
-                        // STACK total) against ONE named brigade and publish a 10x
-                        // inflation that does not exist.
-                        //
-                        // Restored under `AWWV_DEBUG_REASON_CODES=battle_stack` rather
-                        // than unconditionally, because `weekly_report.jsonl` is a
-                        // BASELINED artifact: an unconditional restore moves the golden
-                        // manifest, which is already mismatched, and would make this
-                        // observation change unmergeable behind a calibration dispute.
-                        // Sorting is the engine's own (`attackerBrigadeIds` is already
-                        // strictCompare-sorted at construction); re-sorted here anyway so
-                        // the artifact's ordering does not depend on an upstream promise.
+                        // `defender_contributions` stays under `battle_stack`.
                         ...whenReasonCodeTopic('battle_stack', () => ({
-                            ...(b.attacker_brigades ? { attacker_brigades: sortedIds(b.attacker_brigades) } : {}),
                             ...(b.defender_contributions ? { defender_contributions: b.defender_contributions } : {}),
                         })),
                         // ── REASON-CODE INSTRUMENTATION — item 2 ────────────────────

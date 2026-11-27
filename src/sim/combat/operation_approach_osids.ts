@@ -21,6 +21,10 @@
 
 import type { CorpsOperation, FormationId, GameState, OperationAxis } from '../../state/game_state.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
+import { strictCompare } from '../../state/validateGameState.js';
+// Function-only use at call time: launch helpers reach this module back through
+// combat_predictor / osid_column_movement, an import cycle that is safe because nothing here runs at load.
+import { launchAxisObjectiveView } from './sector_offensive_launch_helpers.js';
 import type { Osid } from './osid_adjacency.js';
 import { getTacticalAdjacentOsids } from './tactical_adjacency.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
@@ -42,6 +46,15 @@ export function isOperationParticipant(op: CorpsOperation, brigadeId: FormationI
     return op.participating_brigades.includes(brigadeId);
 }
 
+/** The corps whose command holds `op` (sorted corps ids), or undefined for a detached copy. */
+function findOperationHostCorpsId(state: GameState, op: CorpsOperation): FormationId | undefined {
+    const commands = state.military.corps_command ?? {};
+    for (const corpsId of Object.keys(commands).sort(strictCompare)) {
+        if (commands[corpsId]?.active_operations?.includes(op)) return corpsId;
+    }
+    return undefined;
+}
+
 export function getSectorOffensiveApproachOsids(
     state: GameState,
     activeOp: CorpsOperation,
@@ -55,16 +68,42 @@ export function getSectorOffensiveApproachOsids(
     adjacency: Map<Osid, Osid[]>,
     reverseMap: OperationalToCanonicalReverseMap,
     brigadeId?: FormationId,
+    staticAdjacency?: Map<string, string[]>,
 ): Set<Osid> {
+    // PRIM-RAW-AXIS (rulings §31). In execution the raw index is right: launch reset it, so it is
+    // the live objective, and the preserve-sequence slice keys on the authored order (march
+    // correction's synthetic axes set index 0 themselves). In planning the stored index is not
+    // where the first battle is: the launch resets it to 0 after the reconcile, so a planning
+    // march reads from the reconciled axis's first objective.
+    const indexOf = (stored: number | undefined): number =>
+        activeOp.phase === 'execution' ? (stored ?? 0) : 0;
     const axis = brigadeId ? getBrigadeAxis(activeOp, brigadeId) : null;
+    const axisIndex = axis ? indexOf(axis.current_objective_index) : 0;
+    // PRIM-RAW-AXIS (rulings §31/§34): in planning an axis is read through its launch view (a null
+    // view = no approach). No caller holds the static map today, so for a pre-planned non-preserve
+    // op the prune here can differ from the reconcile's.
+    const axisObjectives: readonly string[] = !axis
+        ? []
+        : activeOp.phase === 'execution'
+            ? axis.objectives
+            : (launchAxisObjectiveView(
+                state,
+                findOperationHostCorpsId(state, activeOp)
+                    ?? (brigadeId ? state.military.formations?.[brigadeId]?.corps_id : undefined)
+                    ?? '',
+                faction,
+                activeOp,
+                axis,
+                activeOp.is_pre_planned === true ? staticAdjacency : undefined,
+            )?.objectives ?? []);
     const objectives = axis
         ? axis.preserve_objective_sequence === true
-            ? axis.objectives.slice(axis.current_objective_index, axis.current_objective_index + 1)
-            : axis.objectives
+            ? axisObjectives.slice(axisIndex, axisIndex + 1)
+            : axisObjectives
         : (activeOp.objectives ?? []);
     const currentIdx = axis
-        ? axis.preserve_objective_sequence === true ? 0 : axis.current_objective_index
-        : (activeOp.current_objective_index ?? 0);
+        ? axis.preserve_objective_sequence === true ? 0 : axisIndex
+        : indexOf(activeOp.current_objective_index);
     const approachOsids = new Set<Osid>();
     for (const objective of objectives.slice(currentIdx)) {
         for (const neighbor of getTacticalAdjacentOsids(state, objective as Osid, adjacency)) {

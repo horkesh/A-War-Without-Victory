@@ -321,3 +321,51 @@ describe('FARZ-END: completion reopens when a credited objective is lost', () =>
         expect(op.failure_count).toBe(1);
     });
 });
+
+// FARZ-END-RECEIPT (ruling §41, Codex thread r4714464848 on #894): when a completed operation
+// loses an objective in recovery and the reopen is REFUSED, the end-rule receipt must not keep
+// "objectives taken". The rider re-derives on a recovery week whose reason changed.
+describe('FARZ-END-RECEIPT: a refused reopen in recovery re-derives the end-rule receipt', () => {
+    function refusedReceipt(prepare: (state: GameState, op: CorpsOperation) => void) {
+        const op = farzOperation();
+        const state = makeState(op, { [A]: 'RS', [B]: 'RBiH' });
+        prepare(state, op);
+        const priors = snapshotOperationEndRulePriors(state);
+        const operationId = operationEndRuleKey('corps_1', op);
+        const sink = new Map<string, OperationEndRuleReceipt>([[operationId, { end_rule: 'objectives_taken' }]]);
+        advanceSectorOffensives(state, null);
+        buildOperationCombatDiagnostics(state, undefined, undefined, { priors, sink });
+        return { op, state, receipt: sink.get(operationId) };
+    }
+
+    it('the failure cap: a reopen that would reach the cap is refused and the receipt is re-derived', () => {
+        const { op, state, receipt } = refusedReceipt((_state, o) => {
+            // Single-axis cap is 4: booking the reopen's failure would reach it, so it is spent.
+            o.axes![0]!.failure_count = 3;
+        });
+        expect(hostedOperation(state)).toBe(op);
+        expect(op.phase).toBe('recovery');
+        expect(op.recovery_reason).not.toBe('completed');
+        expect(op.axes![0]!.status).toBe('stalled');
+        expect(receipt?.end_rule).toBeDefined();
+        expect(receipt?.end_rule).not.toBe('objectives_taken');
+        expect(deriveOperationEndRule(op, { turn: 41 }).end_rule).not.toBe('objectives_taken');
+    });
+
+    it('an occupied corps: another live non-probe operation refuses the reopen and the receipt is re-derived', () => {
+        const { op, state, receipt } = refusedReceipt((s) => {
+            (s.military.formations as any).b3 = brigade('b3', 'corps_1', 'RBiH');
+            s.military.corps_command!.corps_1!.active_operations.push({
+                name: 'Other Live Op', type: 'sector_attack', phase: 'execution', started_turn: 39, phase_started_turn: 40,
+                participating_brigades: ['b3'], objectives: [], objective_capture_count: 0, attack_attempt_count: 0,
+            } as unknown as CorpsOperation);
+        });
+        expect(hostedOperation(state)).toBe(op);
+        expect(op.phase).toBe('recovery');
+        expect(op.recovery_reason).not.toBe('completed');
+        expect(op.axes![0]!.status).toBe('stalled');
+        expect(receipt?.end_rule).toBeDefined();
+        expect(receipt?.end_rule).not.toBe('objectives_taken');
+        expect(deriveOperationEndRule(op, { turn: 41 }).end_rule).not.toBe('objectives_taken');
+    });
+});

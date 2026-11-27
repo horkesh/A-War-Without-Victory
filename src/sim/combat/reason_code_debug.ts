@@ -74,9 +74,9 @@ import { stableStringify } from '../../utils/stable_json.js';
 /**
  * Diagnostic topics.
  *
- *  battle_stack      — item 1. `attacker_brigades` + `defender_contributions` on the
- *                      weekly battle entry. Answers: is this casualty figure a
- *                      stack total or one brigade's?
+ *  battle_stack      — item 1. `defender_contributions` on the weekly battle entry.
+ *                      (`attacker_brigades` and `attacker_contributions` are always
+ *                      emitted since CAS-ATTACKER-SHARES §42.)
  *  battle_power      — item 2. The power ratio's two halves plus the sector context
  *                      that built the denominator. Answers: did the defender get
  *                      stronger, or did the sector get repartitioned?
