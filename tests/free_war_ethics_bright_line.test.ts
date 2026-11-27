@@ -389,10 +389,8 @@ describe('Free War — ethics bright line: atrocity never yields a better end-st
         expect(verdict.capital_breakdown?.war_crimes_events).toBe(3);
     });
 
-    it('display freshness is BRIGHT-LINE-GATED: in historical mode with no player faction the breakdown keeps the raw capital snapshot', () => {
-        // The atrocity term (and its display correction) is off for a faction with no human behind it.
-        // In historical mode with no player faction the displayed breakdown must be the UNCHANGED capital
-        // snapshot, so the byte-identical 52w baseline is preserved by construction.
+    it('display freshness applies in every mode: in historical mode with no player faction the breakdown is freshened too (BRIGHTLINE-MODE)', () => {
+        // The atrocity term and its display correction apply to every faction in every mode (2026-11-27).
         const state = makeVerdictState(
             {
                 RS: {
@@ -411,31 +409,33 @@ describe('Free War — ethics bright line: atrocity never yields a better end-st
         };
 
         const verdict = computeFactionVerdict(state, 'RS');
-        // Historical mode: displayed breakdown stays the raw (stale=0) snapshot.
-        expect(verdict.capital_breakdown?.refugees_created).toBe(0);
-        expect(verdict.capital_breakdown?.civilian_casualties_caused).toBe(0);
+        // Historical mode, no player: the displayed breakdown is the fresh aggregate, as in emergent mode.
+        expect(verdict.capital_breakdown?.refugees_created).toBe(30000);
+        expect(verdict.capital_breakdown?.civilian_casualties_caused).toBe(3000);
     });
 
-    it('gating: the SAME cleansing end-state in HISTORICAL mode with no player faction is NOT atrocity-capped', () => {
-        // Proves the term is gated (isBrightLineFaction). In historical mode with no player faction the atrocity
-        // fields do not raise the cost index, so the cleansing state keeps its
-        // territory-earned grade — guaranteeing the 52w baseline is unaffected.
-        const histCleansing = computeFactionVerdict(
+    it('no mode gate: the SAME cleansing end-state in HISTORICAL mode with no player faction is atrocity-capped exactly as in emergent mode', () => {
+        // BRIGHTLINE-MODE (2026-11-27): the term applies in every mode, so the historical cleansing state is
+        // capped exactly like the emergent one (mode can never make an atrocity cheaper).
+        const verdictIn = (mode: 'historical' | 'emergent', withAtrocity: boolean) => computeFactionVerdict(
             makeVerdictState(
                 {
                     RS: {
                         territory_controlled_pct: 58,
-                        war_crimes_events: 3,
-                        refugees_created: 50000,
-                        civilian_casualties_caused: 5000,
+                        war_crimes_events: withAtrocity ? 3 : 0,
+                        war_crimes_events_emergent: withAtrocity ? 3 : 0,
+                        refugees_created: withAtrocity ? 50000 : 0,
+                        civilian_casualties_caused: withAtrocity ? 5000 : 0,
                     },
                 },
-                { ...SHARED_COST, decision_mode: 'historical' },
+                { ...SHARED_COST, decision_mode: mode },
             ),
             'RS',
         );
-        const emergentCleansing = computeFactionVerdict(cleansingState(), 'RS');
-        // Historical keeps the high grade; emergent is capped strictly worse.
-        expect(gradeRank(emergentCleansing.grade)).toBeGreaterThan(gradeRank(histCleansing.grade));
+        const histCleansing = verdictIn('historical', true);
+        const emergentCleansing = verdictIn('emergent', true);
+        expect(JSON.stringify(histCleansing)).toBe(JSON.stringify(emergentCleansing));
+        // And the atrocity is never free in historical mode: strictly worse than the same war without it.
+        expect(gradeRank(histCleansing.grade)).toBeGreaterThan(gradeRank(verdictIn('historical', false).grade));
     });
 });

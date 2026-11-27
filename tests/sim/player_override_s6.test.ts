@@ -30,7 +30,7 @@ import { CURRENT_SCHEMA_VERSION } from '../../src/state/game_state.js';
 import { initializeCasualtyLedger } from '../../src/state/casualty_ledger.js';
 import { createEmptyCapital } from '../../src/state/negotiation_types.js';
 import { serializeState, deserializeState } from '../../src/state/serialize.js';
-import { isBrightLineFaction } from '../../src/state/atrocity_accountability.js';
+import { computeFactionVerdict } from '../../src/sim/negotiation/scoring.js';
 import { countBlockingPlayerDecisions } from '../../src/state/player_decision_manifest.js';
 import {
     MINORITY_POLICY_CARD_ID_BY_FACTION,
@@ -225,9 +225,10 @@ describe('H-14 + H-21: silence is the bot\'s order at every level (paramilitary)
         expect(count(live)).toBeGreaterThan(0);
         expect(count(live)).toBe(count(bot));
         expect(live.political.political_controllers).toEqual(bot.political.political_controllers);
-        // The penalty is keyed on the seat (H-17): the hands-off live seat bears it, headless does not.
-        expect(isBrightLineFaction(live, 'RS')).toBe(true);
-        expect(isBrightLineFaction(bot, 'RS')).toBe(false);
+        // BRIGHTLINE-MODE (2026-11-27): the verdict has no seat or mode gate, so the hands-off live seat and the
+        // headless run read the same verdict, condemned for the same act.
+        expect(computeFactionVerdict(live, 'RS').condemnation_flags).toContain('authorized_cleansing_condemnation');
+        expect(JSON.stringify(computeFactionVerdict(live, 'RS'))).toBe(JSON.stringify(computeFactionVerdict(bot, 'RS')));
     });
 });
 
