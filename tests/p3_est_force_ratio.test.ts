@@ -197,12 +197,13 @@ describe('P3-EST §11: the attack side mirrors the battle', () => {
         // a1's current objective 'A0' (HRHB-held) sorts first; the battle refuses it and the results
         // pass does not credit it, so a1 parks: no first battle, not one at its depth cell 'C3'.
         // a2 fights at 'D'. So the estimate is a2's brigade alone at 'D'.
+        // PRIM-MULTI: a1 carries the larger brigade, so in open war A0 is the main effort.
         const twoAxes = {
             ...op(),
             objectives: [],
             axes: [
-                { axis_id: 'a1', objectives: ['A0', 'C3'], assigned_brigades: ['attacker_2'], current_objective_index: 0 },
-                { axis_id: 'a2', objectives: ['D'], assigned_brigades: ['attacker'], current_objective_index: 0 },
+                { axis_id: 'a1', objectives: ['A0', 'C3'], assigned_brigades: ['attacker'], current_objective_index: 0 },
+                { axis_id: 'a2', objectives: ['D'], assigned_brigades: ['attacker_2'], current_objective_index: 0 },
             ],
         } as unknown as CorpsOperation;
         const at = (alliance: number, rhs: Record<string, unknown>) => {
@@ -211,7 +212,7 @@ describe('P3-EST §11: the attack side mirrors the battle', () => {
             (s.political as any).political_controllers.A0 = 'HRHB';
             (s.political as any).war_alliance_rbih_hrhb = alliance;
             (s.political as any).rbih_hrhb_state = rhs;
-            const p = predictCombatOutcome(s, 'attacker' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack');
+            const p = predictCombatOutcome(s, 'attacker_2' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack');
             return { est: estimateForceRatio(s, twoAxes, 3, 0.9, null, {}, adjacency()), aloneAtD: p!.attacker_power / (p!.defender_power / PREDICTOR_FOG_WITHOUT_INTEL) };
         };
         // At war, under a ceasefire: not allied (so `isFriendlyFaction` alone called A0 contested), but combat is blocked.
