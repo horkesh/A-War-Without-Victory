@@ -101,6 +101,8 @@ export interface OperationEndRulePrior {
     phase: CorpsOperation['phase'];
     phase_started_turn: number;
     silent_execution_turn_streak?: number;
+    /** Recorded reason while in recovery; a change re-derives the receipt (FARZ-END, §26). */
+    recovery_reason?: CorpsOperation['recovery_reason'];
 }
 
 export interface OperationEndRuleContext {
@@ -130,6 +132,7 @@ export function snapshotOperationEndRulePrior(op: CorpsOperation): OperationEndR
         phase: op.phase,
         phase_started_turn: op.phase_started_turn,
         ...(streak > 0 ? { silent_execution_turn_streak: streak } : {}),
+        ...(op.phase === 'recovery' && op.recovery_reason !== undefined ? { recovery_reason: op.recovery_reason } : {}),
     };
 }
 
