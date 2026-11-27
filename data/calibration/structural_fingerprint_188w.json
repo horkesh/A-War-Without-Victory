@@ -1,15 +1,15 @@
 {
   "schema_version": 2,
-  "fingerprint": "4140917935231859",
+  "fingerprint": "bbc8ff9d62081998",
   "fields": {
     "schema_version": 2,
     "scenario_id": "apr1992_definitive_188w",
     "weeks": 40,
     "final_turn": 40,
     "control_counts": {
-      "HRHB": 86,
-      "RBiH": 263,
-      "RS": 363
+      "HRHB": 87,
+      "RBiH": 261,
+      "RS": 364
     },
     "control_flips": [
       {
@@ -169,6 +169,12 @@
         "to": "RS"
       },
       {
+        "settlement_id": "op:breza:podgora",
+        "municipality_id": "breza",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
         "settlement_id": "op:capljina:tasovcici_2",
         "municipality_id": "capljina",
         "from": "RS",
@@ -196,6 +202,12 @@
         "settlement_id": "op:doboj:kotorsko_2",
         "municipality_id": "doboj",
         "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:donji_vakuf:donji_vakuf_2",
+        "municipality_id": "donji_vakuf",
+        "from": "RBiH",
         "to": "RS"
       },
       {
@@ -328,12 +340,6 @@
         "settlement_id": "op:jajce:kruscica",
         "municipality_id": "jajce",
         "from": "RBiH",
-        "to": "RS"
-      },
-      {
-        "settlement_id": "op:jajce:lupnica",
-        "municipality_id": "jajce",
-        "from": "HRHB",
         "to": "RS"
       },
       {
