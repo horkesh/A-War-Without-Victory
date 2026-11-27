@@ -170,6 +170,7 @@ describe('LANE-NIGHTSHIFT-ROUND2: divergence event seeds', () => {
             'op:gorazde:gorazde_2': 'RBiH',
         };
         const fires = baseState(186, {
+            military: { event_flags: { srebrenica_enclave_formed: true } },
             political: {
                 political_controllers: held,
                 enclave_resilience: {
@@ -181,6 +182,7 @@ describe('LANE-NIGHTSHIFT-ROUND2: divergence event seeds', () => {
         });
         expect(evaluateCondition(cond, fires)).toBe(true);
         const lapsed = baseState(186, {
+            military: { event_flags: { srebrenica_enclave_formed: true } },
             political: {
                 political_controllers: held,
                 enclave_resilience: { srebrenica: 0.10, zepa: 0.10, gorazde: 0.10 },
@@ -188,6 +190,7 @@ describe('LANE-NIGHTSHIFT-ROUND2: divergence event seeds', () => {
         });
         expect(evaluateCondition(cond, lapsed)).toBe(false);
         const lost = baseState(186, {
+            military: { event_flags: { srebrenica_enclave_formed: true } },
             political: {
                 political_controllers: { ...held, 'op:gorazde:gorazde_2': 'RS' },
                 enclave_resilience: { srebrenica: 0.50, zepa: 0.50, gorazde: 0.50 },
