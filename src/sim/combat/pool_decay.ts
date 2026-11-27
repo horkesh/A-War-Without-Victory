@@ -35,6 +35,11 @@ export interface PoolDecayReport {
     by_faction: Record<string, number>;
     pools_affected: number;
     enclaves_skipped: number;
+    /**
+     * This turn's weariness loss by pool key (only pools debited). Read by the
+     * idle-replacement stage of the strategic reserve pass (OZ-ENGINE); not state.
+     */
+    by_pool: Record<string, number>;
 }
 
 /**
@@ -48,6 +53,7 @@ export function applyPoolWarWearinessDecay(state: GameState): PoolDecayReport {
         by_faction: {},
         pools_affected: 0,
         enclaves_skipped: 0,
+        by_pool: {},
     };
 
     if (!state.military.militia_pools || typeof state.military.militia_pools !== 'object') return report;
@@ -81,6 +87,7 @@ export function applyPoolWarWearinessDecay(state: GameState): PoolDecayReport {
             rate, debit: decayed,
         }, 'decay');
 
+        report.by_pool[key] = decayed;
         report.total_decayed += decayed;
         report.by_faction[faction] = (report.by_faction[faction] ?? 0) + decayed;
         report.pools_affected++;

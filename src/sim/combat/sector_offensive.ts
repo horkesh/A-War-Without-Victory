@@ -1725,13 +1725,21 @@ export function advanceSectorOffensives(
     for (const cid of allCorpsIds) {
         const cmd = corpsCommand[cid];
         if (!cmd || cmd.corps_exhaustion <= 0) continue;
-        // Faster recovery when idle (no active op), slower when operating
-        const decayRate = cmd.active_operations.length > 0 ? EXHAUSTION_DECAY_ACTIVE : EXHAUSTION_DECAY_IDLE;
+        // Faster recovery when idle, slower when operating. PROBE-LOCK (ruling §35, Fable consult 11
+        // appendix A): a one-brigade fallback probe (`probe` without `preparation_probe_link`) is not
+        // operating for the decay. Before, a corps refused a plan for exhaustion probed instead, and
+        // the probe held it at the active rate, so it never got back under the plan threshold.
+        // A preparation probe sits beside its parent operation, so that corps stays active.
+        const probeOnly = cmd.active_operations.length > 0
+            && cmd.active_operations.every((o) => o.type === 'probe' && !o.preparation_probe_link);
+        const active = cmd.active_operations.length > 0 && !probeOnly;
+        const decayRate = active ? EXHAUSTION_DECAY_ACTIVE : EXHAUSTION_DECAY_IDLE;
         const exhBefore = cmd.corps_exhaustion;
         cmd.corps_exhaustion = Math.max(0, Math.round((cmd.corps_exhaustion - decayRate) * 10) / 10);
         emitCorpsExhaustionRecord(() => ({
             turn: state.meta?.turn ?? null, corps_id: cid,
-            source: cmd.active_operations.length > 0 ? 'decay_active' : 'decay_idle',
+            source: active ? 'decay_active' : 'decay_idle',
+            ...(probeOnly ? { probe_only: true } : {}),
             before: exhBefore, after: cmd.corps_exhaustion,
         }));
     }

@@ -44,6 +44,15 @@ function getFactionExhaustionRatio(state: GameState, faction: FactionId): number
     return total <= 0 ? 0 : committed / total;
 }
 
+/**
+ * Whether the faction is under its own manpower-exhaustion penalty this turn (ratio at or
+ * over its threshold). One owner of the thresholds: the idle-replacement route
+ * (strategic_reserve.ts, OZ-ENGINE) is closed while this holds.
+ */
+export function isUnderManpowerExhaustionPenalty(state: GameState, faction: FactionId): boolean {
+    return getFactionExhaustionRatio(state, faction) >= (EXHAUSTION_COHESION_THRESHOLD[faction] ?? 0.80);
+}
+
 function isFormationInOpsecSector(state: GameState, formation: FormationState): boolean {
     const opsecSectors = state.military.opsec_sectors ?? [];
     if (opsecSectors.length === 0 || !formation.location_osid || !state.military.corps_front_sectors) return false;
