@@ -160,11 +160,21 @@ export interface TurnInput {
      * decisions on it in place (it must mutate `state`, not replace it); the pipeline then
      * continues with the next step. Called at most once per turn. Unset (scenario runner,
      * headless, tests) ⇒ the pipeline is unchanged.
+     *
+     * PAUSE-ANSWER-ORDER (rulings §69): in the settle step the callback answers on a COPY of
+     * the working state, so the paused screen shows each answer and its effect at once. Each
+     * answer then lands on the working state at its card's slot, in firing order, through
+     * `resolvePausedDecision`, where the bot's answer to the same card lands headless.
      */
     onPlayerDecisionsPending?: (
         state: GameState,
         decisions: import('./events/event_types.js').PendingEventDecision[],
     ) => Promise<void> | void;
+    /**
+     * The resolver an answer given at the pause lands through (PAUSE-ANSWER-ORDER). It must be
+     * the one `onPlayerDecisionsPending` answers with. Unset ⇒ `resolveEventDecision`.
+     */
+    resolvePausedDecision?: (state: GameState, eventId: string, responseId: string) => void;
 }
 
 export interface TurnReport {

@@ -772,6 +772,11 @@ export interface PrimaryEventsPass {
      * unanswered). Call once, after the pause before combat; `finish()` calls it if not.
      */
     settleAnswers(resolvePlayerDecision?: (eventId: string) => void): void;
+    /**
+     * True when the card has the live player's answer slot in this pass. PAUSE-ANSWER-ORDER (rulings
+     * §69): an answer the President gives in person at the pause lands at that slot, in firing order.
+     */
+    hasPlayerSlot(eventId: string): boolean;
     finish(): EventsEvaluationReport;
 }
 
@@ -798,7 +803,7 @@ export function beginEvaluateEvents(
     if (phase !== 'war') {
         state.military.event_overflow_queue = [];
         const report: EventsEvaluationReport = { fired, candidates_considered: 0, overflowed: false, overflowed_ids: [], mutex_suppressed_ids: [] };
-        return { settleAnswers: () => undefined, finish: () => report };
+        return { settleAnswers: () => undefined, hasPlayerSlot: () => false, finish: () => report };
     }
 
     // Ensure fired_event_ids array exists
@@ -944,6 +949,7 @@ export function beginEvaluateEvents(
 
     // LIVE-HIDDEN-SPLIT: decision answers wait here, in firing order, until `settleAnswers`.
     let answerSlots: DecisionAnswerSlot[] = [];
+    const playerSlotEventIds = new Set<string>();
     let settled = false;
     const drainAnswerSlots = (resolvePlayerDecision?: (eventId: string) => void): void => {
         while (answerSlots.length > 0) {
@@ -1069,6 +1075,7 @@ export function beginEvaluateEvents(
                 // LIVE-HIDDEN-SPLIT: its slot, where silence takes the staff default if it is still
                 // unanswered after the pause.
                 answerSlots.push({ kind: 'player', eventId: def.id });
+                playerSlotEventIds.add(def.id);
             } else if (mustShowPlayer) {
                 // Player faction (levels 0-2) OR high-stakes event at any level: queue as pending decision
                 if (!state.military.pending_event_decisions) {
@@ -1107,6 +1114,7 @@ export function beginEvaluateEvents(
                         : {}),
                 });
                 answerSlots.push({ kind: 'player', eventId: def.id });
+                playerSlotEventIds.add(def.id);
             } else {
                 // No player faction (headless/spectator) OR Observer (level 3) for non-required events: bot auto-responds.
                 // Every selection route applies the chosen response the same way (effects, then
@@ -1209,5 +1217,5 @@ export function beginEvaluateEvents(
             mutex_suppressed_ids: mutexFiltered.mutex_suppressed_ids,
         };
     };
-    return { settleAnswers, finish };
+    return { settleAnswers, hasPlayerSlot: (eventId) => playerSlotEventIds.has(eventId), finish };
 }

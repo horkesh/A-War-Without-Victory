@@ -1217,7 +1217,11 @@ export const warPhases: NamedPhase[] = [
             // live turn sees the answered state headless sees. LIVE-HIDDEN-SPLIT (rulings §53): every
             // answer of the pass, bot and player alike, lands in that settle step in firing order.
             const primary = beginEvaluateEvents(context.state, context.rng, turn, definitions);
-            await settlePlayerEventDecisionsThisTurn(context.state, definitions, turn, context.input.onPlayerDecisionsPending, primary);
+            // PAUSE-ANSWER-ORDER (rulings §69): the President's in-person answer lands at its slot too.
+            await settlePlayerEventDecisionsThisTurn(
+                context.state, definitions, turn, context.input.onPlayerDecisionsPending, primary,
+                context.input.resolvePausedDecision,
+            );
             const result = primary.finish();
             context.report.events_fired = result.fired;
             // Graz Accords: fires at week 4 (6 May 1992), sets state.political.vienna_declaration_turn

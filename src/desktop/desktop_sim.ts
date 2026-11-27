@@ -452,8 +452,15 @@ export interface DesktopAdvanceTurnOptions {
      * queued player decisions this turn; resolve them in place with
      * `resolveDesktopEventDecisionInPlace` (or `resolveEventDecision`) and the rest of the
      * turn (movement, combat, ...) runs on the answered state. Unset ⇒ unchanged behaviour.
+     * PAUSE-ANSWER-ORDER (rulings §69): the callback answers on a copy; each answer lands on
+     * the working state at its card's slot through `resolvePausedDecision`.
      */
     onPlayerDecisionsPending?: TurnInput['onPlayerDecisionsPending'];
+    /**
+     * Forwarded as `TurnInput.resolvePausedDecision`: the resolver the callback answers with
+     * (`resolveDesktopEventDecisionInPlace` on the desktop). Unset ⇒ `resolveEventDecision`.
+     */
+    resolvePausedDecision?: TurnInput['resolvePausedDecision'];
 }
 
 export async function advanceTurn(
@@ -550,6 +557,9 @@ export async function advanceTurn(
                 eventDefinitions: loadDesktopEventDefinitions(baseDir),
                 ...(options.onPlayerDecisionsPending
                     ? { onPlayerDecisionsPending: options.onPlayerDecisionsPending }
+                    : {}),
+                ...(options.resolvePausedDecision
+                    ? { resolvePausedDecision: options.resolvePausedDecision }
                     : {}),
             });
             assertTurnSuccess(result);

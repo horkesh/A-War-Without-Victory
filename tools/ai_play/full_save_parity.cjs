@@ -94,6 +94,8 @@ function decisionLogProblems(headlessLog, playerLog, playerFaction) {
     // answer time, or the staff by silence) is logged 'bot_ai_default' where headless logs the bot's own label for
     // the same answer. Every src reader tests decision_source only against 'player', so the bot labels are
     // interchangeable there; on the live faction's rows they are compared as one class. Answer, turn and order stay exact.
+    // tests/decision_source_bot_label_guard.test.ts keeps that premise true (§68): it fails if any src reader compares
+    // decision_source with a bot label. If it ever fails, remove this rule and unify the label in the engine instead.
     const BOT = new Set(['bot_political', 'bot_v1', 'bot_ai_default']);
     const rowKey = (r) => (playerFaction !== undefined && r && r.faction === playerFaction && BOT.has(r.decision_source)
         ? strict({ ...r, decision_source: 'bot' }) : strict(r));
