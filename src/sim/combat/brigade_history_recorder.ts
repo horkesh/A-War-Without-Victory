@@ -165,6 +165,12 @@ export function recordAttackerEngagements(
     state?: GameState,
     equipmentData?: { destroyed: { tanks: number; artillery: number }; captured: { tanks: number; artillery: number } },
     battleId?: string,
+    /**
+     * CAS-REPORT-3 (§21): each attacker's applied loss. When given, casualties_taken is the
+     * brigade's own applied loss, not an even split of the total (which charged a small
+     * brigade beside a large one the same as the large one).
+     */
+    appliedById?: ReadonlyMap<string, number>,
 ): void {
     const n = attackerFormations.length;
     const perAttackerCas = n > 0 ? Math.floor(totalAttackerCasualties / n) : 0;
@@ -180,7 +186,9 @@ export function recordAttackerEngagements(
             osid: targetOsid,
             role: 'attacker',
             outcome,
-            casualties_taken: perAttackerCas + (i < casRemainder ? 1 : 0),
+            casualties_taken: appliedById
+                ? (appliedById.get(atk.id) ?? 0)
+                : perAttackerCas + (i < casRemainder ? 1 : 0),
             casualties_inflicted: perInflicted + (i < inflictRemainder ? 1 : 0),
             enemy_faction: defenderFaction,
             territory_flipped: territoryFlipped,
