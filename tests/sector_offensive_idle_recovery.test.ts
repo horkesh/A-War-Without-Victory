@@ -1313,3 +1313,107 @@ describe('sector offensive idle recovery', () => {
         expect(op?.recovery_reason).toBe('zero_eligible_axis');
     });
 });
+
+// PROBE-LOCK (ruling §35, Fable consult 11 appendix A): a corps decays at the active rate only if
+// at least one of its active operations is not a one-brigade fallback probe. A probe is
+// `type === 'probe'` without `preparation_probe_link`; a preparation probe sits beside its parent.
+describe('corps exhaustion decay: a fallback probe is not activity (PROBE-LOCK)', () => {
+    type OpShape = Record<string, unknown>;
+    // Recovery that started this turn: the lifecycle leaves it in place (turnsInPhase 0), so the
+    // only exhaustion change in the call is the per-turn decay.
+    function recoveringOp(name: string, type: string, extra: OpShape = {}): OpShape {
+        return {
+            name,
+            type,
+            phase: 'recovery',
+            started_turn: 10,
+            phase_started_turn: 12,
+            participating_brigades: ['b1'],
+            objectives: ['op:target:objective'],
+            current_objective_index: 0,
+            attack_attempt_count: 1,
+            objective_capture_count: 0,
+            movement_only_execution_turns: 0,
+            idle_execution_turn_streak: 0,
+            failure_count: 0,
+            consecutive_failures_on_current: 0,
+            recovery_reason: 'probe_complete',
+            sector_id: 'rs_sector',
+            ...extra,
+        };
+    }
+    function stateWith(exhaustion: number, ops: OpShape[]): GameState {
+        return {
+            schema_version: CURRENT_SCHEMA_VERSION,
+            meta: { turn: 12, phase: 'war', seed: 'probe-lock-decay' } as any,
+            military: {
+                formations: {
+                    rs_corps: {
+                        id: 'rs_corps', faction: 'RS', name: 'Corps', created_turn: 1, status: 'active',
+                        assignment: null, kind: 'corps', personnel: 50, cohesion: 80, hq_sid: 'S1', tags: [],
+                    },
+                    b1: makeBrigade('b1', 'op:front:approach'),
+                },
+                corps_front_sectors: {
+                    rs_sector: makeSector('rs_sector', 'rs_corps', 'RS', ['e1'], ['op:front:approach'], ['op:target:objective']),
+                },
+                corps_command: {
+                    rs_corps: {
+                        command_span: 5, subordinate_count: 1, og_slots: 1, active_ogs: [],
+                        corps_exhaustion: exhaustion, stance: 'balanced', active_operations: ops,
+                    },
+                },
+            } as any,
+            political: {
+                political_controllers: { 'op:target:objective': 'RBiH', 'op:front:approach': 'RS' },
+            } as any,
+        } as unknown as GameState;
+    }
+    function decayedExhaustion(exhaustion: number, ops: OpShape[]): number | undefined {
+        const state = stateWith(exhaustion, ops);
+        advanceSectorOffensives(state, null);
+        return state.military.corps_command?.rs_corps?.corps_exhaustion;
+    }
+    const prepLink = {
+        parent_operation_name: 'Parent Attack', parent_started_turn: 10, request_started_turn: 11,
+        target_osid: 'op:target:objective', source_axes: [{ brigade_id: 'b1' }],
+    };
+
+    it('a fallback probe alone decays at the idle rate (3)', () => {
+        expect(decayedExhaustion(20, [recoveringOp('Probe', 'probe')])).toBe(17);
+    });
+
+    it('a probe beside a sector attack decays at the active rate (1)', () => {
+        expect(decayedExhaustion(20, [
+            recoveringOp('Probe', 'probe'),
+            recoveringOp('Parent Attack', 'sector_attack', { recovery_reason: 'objectives_taken' }),
+        ])).toBe(19);
+    });
+
+    it('a preparation probe with its parent decays at the active rate (1)', () => {
+        expect(decayedExhaustion(20, [
+            recoveringOp('Parent Attack', 'sector_attack', { recovery_reason: 'objectives_taken' }),
+            recoveringOp('Prep Probe', 'probe', { preparation_probe_link: prepLink }),
+        ])).toBe(19);
+    });
+
+    it('no operation decays at the idle rate (3), as before', () => {
+        expect(decayedExhaustion(20, [])).toBe(17);
+    });
+
+    it('the loop test: a corps at 49 that probes every two weeks is under 30 inside 40 weeks', () => {
+        // Each fallback probe books +5 when it completes (sector_offensive.ts, probe completion cost)
+        // and is live one week of every two. Before PROBE-LOCK that week decayed at 1, so the corps
+        // gained +5 -1 -3 = +1 every two weeks and never left the planning lock (> 30).
+        let exhaustion = 49;
+        let under30Week: number | null = null;
+        for (let week = 1; week <= 40; week++) {
+            const probeWeek = week % 2 === 1;
+            exhaustion = decayedExhaustion(exhaustion, probeWeek ? [recoveringOp('Probe', 'probe')] : [])!;
+            if (probeWeek) exhaustion = Math.min(100, exhaustion + 5);
+            if (exhaustion < 30 && under30Week === null) under30Week = week;
+        }
+        expect(under30Week).not.toBeNull();
+        expect(under30Week!).toBeLessThanOrEqual(40);
+    });
+});

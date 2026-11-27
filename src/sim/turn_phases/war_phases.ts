@@ -3791,7 +3791,12 @@ export const warPhases: NamedPhase[] = [
         name: 'strategic-reserve-reinforcement',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            context.report.strategic_reserve_reinforcement = reinforceFromStrategicReserves(context.state, context.input.dataBaseDir);
+            // OZ-ENGINE: this turn's weariness loss by pool feeds the idle-replacement stage.
+            context.report.strategic_reserve_reinforcement = reinforceFromStrategicReserves(
+                context.state,
+                context.input.dataBaseDir,
+                context.report.pool_war_weariness_decay?.by_pool
+            );
         }
     },
     {
