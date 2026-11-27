@@ -54,6 +54,8 @@ export interface MoraleAbsorptionResult {
      */
     extraAttackerApplied: number;
     extraDefenderApplied: number;
+    /** CAS-REPORT-3: extra loss actually removed from each attacker brigade (brigades that lost men). */
+    extraAttackerByBrigade: Map<FormationId, number>;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -155,6 +157,7 @@ export function evaluateAndApplyMoraleAbsorption(params: {
     // and the totals are returned so the battle record reports the applied loss.
     let extraAttackerApplied = 0;
     let extraDefenderApplied = 0;
+    const extraAttackerByBrigade = new Map<FormationId, number>();
     if (moraleAbsorbed && defenderFormation) {
         const extraMult = MORALE_ABSORPTION_CAS_MULT - 1.0;
         const extraAttackerTotal = Math.round(finalAttackerCas * extraMult);
@@ -168,6 +171,7 @@ export function evaluateAndApplyMoraleAbsorption(params: {
                         report.casualty_attacker += applied;
                         recordBattleCasualties(casualtyLedger, a.faction, a.id, splitKiaWiaMia(applied));
                         extraAttackerApplied += applied;
+                        extraAttackerByBrigade.set(a.id, (extraAttackerByBrigade.get(a.id) ?? 0) + applied);
                     }
                 }
             }
@@ -186,5 +190,5 @@ export function evaluateAndApplyMoraleAbsorption(params: {
         }
     }
 
-    return { moraleAbsorbed, flip, extraAttackerApplied, extraDefenderApplied };
+    return { moraleAbsorbed, flip, extraAttackerApplied, extraDefenderApplied, extraAttackerByBrigade };
 }
