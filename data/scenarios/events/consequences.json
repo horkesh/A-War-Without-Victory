@@ -999,7 +999,7 @@
     "narrative": "The case for sustained NATO air operations over Bosnia is assembled from the evidence the war has produced rather than from a single catalysing atrocity. Markale's shelling, the accumulated ICTY record, the hostage crisis of May, the repositioning of the Rapid Reaction Force — the arguments line up differently without the fall of Srebrenica, and they line up more slowly, but they line up. Brussels, Paris, and Washington coordinate the plan that the historical record assembled around the massacre. It takes longer. It arrives with less political momentum. It arrives.",
     "category": "diplomatic",
     "trigger": {
-      "turn_min": 175,
+      "turn_min": 186,
       "turn_max": 210,
       "phase": "war",
       "condition": {
@@ -1008,6 +1008,11 @@
           {
             "type": "flag_not_set",
             "flag": "srebrenica_fell"
+          },
+          {
+            "type": "territory_control",
+            "osid": "op:srebrenica:srebrenica_2",
+            "faction": "RBiH"
           },
           {
             "type": "war_crimes_above",
@@ -1056,7 +1061,7 @@
     "narrative": "Three summers of war without the turning point that in the historical record closed it. Populations in Sarajevo, Banja Luka, and Mostar cross into the fourth year of casualty lists, shortages, and negotiations that settle nothing. Conscription offices on every side report longer queues for deferments and shorter ones at the intake desk. This is not judgement; it is exhaustion. Every faction's field army is holding the line it held in the spring, and every faction's politicians are having the same conversations in different cities about how a war this expensive ends.",
     "category": "political",
     "trigger": {
-      "turn_min": 180,
+      "turn_min": 186,
       "turn_max": 210,
       "phase": "war",
       "condition": {
@@ -1065,6 +1070,11 @@
           {
             "type": "flag_not_set",
             "flag": "srebrenica_fell"
+          },
+          {
+            "type": "territory_control",
+            "osid": "op:srebrenica:srebrenica_2",
+            "faction": "RBiH"
           },
           {
             "type": "flag_not_set",
