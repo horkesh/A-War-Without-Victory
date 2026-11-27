@@ -301,7 +301,7 @@ export function buildOperationCombatDiagnostics(
     endRules?: {
         /** Previous week's operation views (snapshotOperationEndRulePriors). */
         priors?: ReadonlyMap<string, OperationEndRulePrior>;
-        /** Filled with each recovery-entry receipt, keyed by operation id; first write wins. */
+        /** Filled with each recovery-entry (or changed-reason) receipt, keyed by operation id; last write wins. */
         sink?: Map<string, OperationEndRuleReceipt>;
     }
 ): OperationCombatDiagnostic[] {
@@ -538,13 +538,18 @@ export function buildOperationCombatDiagnostics(
             const silentExecutionStreak = operation.phase === 'execution'
                 ? (operation.silent_execution_turn_streak ?? 0)
                 : 0;
-            // End-rule receipt rider (report-only): name the rule on the recovery-entry week.
+            // End-rule receipt rider (report-only): name the rule on the recovery-entry week, and
+            // again on a recovery week whose reason changed (FARZ-END refused reopen, §26).
             let endRule: OperationEndRuleReceipt | undefined;
-            if (enteredRecoveryThisTurn) {
+            const endRulePrior = endRules?.priors?.get(operationId);
+            const recoveryReasonChanged = operation.phase === 'recovery'
+                && endRulePrior?.phase === 'recovery'
+                && endRulePrior.recovery_reason !== operation.recovery_reason;
+            if (enteredRecoveryThisTurn || recoveryReasonChanged) {
                 const sectors = state.military.corps_front_sectors;
                 endRule = deriveOperationEndRule(operation, {
                     turn: currentTurn,
-                    prior: endRules?.priors?.get(operationId),
+                    prior: endRulePrior,
                     sector_missing: typeof operation.sector_id === 'string'
                         && sectors !== undefined
                         && sectors[operation.sector_id] === undefined,
@@ -554,7 +559,8 @@ export function buildOperationCombatDiagnostics(
                         .map((axis) => axis.axis_id)
                         .sort(strictCompare),
                 });
-                if (endRules?.sink && !endRules.sink.has(operationId)) endRules.sink.set(operationId, endRule);
+                // Last write wins: a FARZ-END reopened operation enters recovery a second time.
+                if (endRules?.sink) endRules.sink.set(operationId, endRule);
             }
 
             diagnostics.push({
