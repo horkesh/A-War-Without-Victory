@@ -751,16 +751,41 @@ export function evaluateEvents(
     return beginEvaluateEvents(state, rng, currentTurn, registry).finish();
 }
 
-/** The primary firing pass of `evaluateEvents`; `finish()` runs the same-turn follow-up snapshot. */
+/**
+ * The primary firing pass of `evaluateEvents`. `settleAnswers()` applies this pass's decision
+ * answers in firing order; `finish()` settles them if the caller did not, then runs the same-turn
+ * follow-up snapshot.
+ *
+ * LIVE-HIDDEN-SPLIT (rulings §53, 2026-11-27): every answer to a decision event, the bot's, the
+ * Observer's, a filed answer ahead of firing and the player's silence alike, lands AFTER the
+ * primary firing pass, in firing order. Base effects still land at fire time. Before this the bot
+ * answered at fire time, between the other events' base effects, while a live player's answer
+ * (silence included) landed after the whole pass. With clamped accumulators the order changed the
+ * result: at t54 the Srebrenica demilitarization answer (RBiH morale -2) and UN Resolution 819
+ * (+3) fire in one turn, so a brigade at 100 ended at 100 headless and 98 live. One landing point
+ * gives a hands-off live turn the deltas headless gives, in the same order.
+ */
 export interface PrimaryEventsPass {
+    /**
+     * Apply the pass's decision answers in firing order. A decision queued for the live player
+     * calls `resolvePlayerDecision(eventId)` at its slot (the staff default by silence, if still
+     * unanswered). Call once, after the pause before combat; `finish()` calls it if not.
+     */
+    settleAnswers(resolvePlayerDecision?: (eventId: string) => void): void;
     finish(): EventsEvaluationReport;
 }
 
+/** One decision's answer slot in firing order (LIVE-HIDDEN-SPLIT). */
+type DecisionAnswerSlot =
+    | { kind: 'apply'; eventId: string; apply: () => void }
+    | { kind: 'player'; eventId: string };
+
 /**
- * `evaluateEvents` in two halves (#865 r4693814641). The turn pipeline settles this turn's player
- * decisions (the PAUSE BEFORE COMBAT, then silence as the staff default) between them, so the
- * same-turn follow-up rows see an answered decision, as they do in headless, where the bot answers
- * at fire time. Headless runs nothing in between, so it is byte-identical to one call.
+ * `evaluateEvents` in two halves (#865 r4693814641). The turn pipeline runs the PAUSE BEFORE
+ * COMBAT between them and then settles every decision answer in firing order (the President's
+ * explicit answer, if any, has already landed at the pause; silence gives the staff default at the
+ * player's slot), so the same-turn follow-up rows see answered decisions in both modes. Headless
+ * runs no pause, so it equals one call.
  */
 export function beginEvaluateEvents(
     state: GameState,
@@ -773,7 +798,7 @@ export function beginEvaluateEvents(
     if (phase !== 'war') {
         state.military.event_overflow_queue = [];
         const report: EventsEvaluationReport = { fired, candidates_considered: 0, overflowed: false, overflowed_ids: [], mutex_suppressed_ids: [] };
-        return { finish: () => report };
+        return { settleAnswers: () => undefined, finish: () => report };
     }
 
     // Ensure fired_event_ids array exists
@@ -917,6 +942,20 @@ export function beginEvaluateEvents(
     const cappedDecisions = decisionCandidates.slice(0, MAX_EVENTS_PER_TURN);
     const toFire = [...autoCandidates, ...cappedDecisions].sort(compareEventCandidates);
 
+    // LIVE-HIDDEN-SPLIT: decision answers wait here, in firing order, until `settleAnswers`.
+    let answerSlots: DecisionAnswerSlot[] = [];
+    let settled = false;
+    const drainAnswerSlots = (resolvePlayerDecision?: (eventId: string) => void): void => {
+        while (answerSlots.length > 0) {
+            const slots = answerSlots;
+            answerSlots = [];
+            for (const slot of slots) {
+                if (slot.kind === 'apply') slot.apply();
+                else resolvePlayerDecision?.(slot.eventId);
+            }
+        }
+    };
+
     // Phase 3: Fire selected events through one shared effect/receipt writer.
     const fireEvent = (def: EventDefinition): void => {
         // Read before this firing is receipted: an answer filed ahead of the event's first firing.
@@ -1014,8 +1053,9 @@ export function beginEvaluateEvents(
                 // opening decision at campaign birth (or, for the RBiH policy card, before the first
                 // Advance) and it was filed then. Apply it now, where and as a bot's answer is applied
                 // below; the decision is already in the log. It is checked before Observer's automatic
-                // answer, so a filed answer wins at Observer too.
-                applyChosenEventResponse(state, {
+                // answer, so a filed answer wins at Observer too. LIVE-HIDDEN-SPLIT: it lands at its
+                // slot after the primary pass, where the bot's answer to the same card lands headless.
+                answerSlots.push({ kind: 'apply', eventId: def.id, apply: () => applyChosenEventResponse(state, {
                     eventId: def.id,
                     chosen: answeredAhead,
                     decisionSource: null,
@@ -1023,9 +1063,12 @@ export function beginEvaluateEvents(
                     turn: currentTurn,
                     answeredBy: 'in_person',
                     notifications: def.notifications_to_other_factions,
-                });
+                }) });
             } else if (mustShowPlayer && birthCardPending) {
                 // Unanswered birth card: it stays pending and resolves normally when answered.
+                // LIVE-HIDDEN-SPLIT: its slot, where silence takes the staff default if it is still
+                // unanswered after the pause.
+                answerSlots.push({ kind: 'player', eventId: def.id });
             } else if (mustShowPlayer) {
                 // Player faction (levels 0-2) OR high-stakes event at any level: queue as pending decision
                 if (!state.military.pending_event_decisions) {
@@ -1063,6 +1106,7 @@ export function beginEvaluateEvents(
                         ? { notifications_to_other_factions: def.notifications_to_other_factions }
                         : {}),
                 });
+                answerSlots.push({ kind: 'player', eventId: def.id });
             } else {
                 // No player faction (headless/spectator) OR Observer (level 3) for non-required events: bot auto-responds.
                 // Every selection route applies the chosen response the same way (effects, then
@@ -1071,30 +1115,34 @@ export function beginEvaluateEvents(
                 // answered with the order the player already gave that side in person, if any, at
                 // that order's price; it is read here, before any part of the answer is applied.
                 // Still logged `bot_ai_default` (an automatic answer). Bots and headless never reach it.
-                const inPersonOrder = observerAutoResolves
-                    ? selectInPersonParamilitaryOrderResponse(state, def)
-                    : null;
-                const { chosen, decisionSource } = inPersonOrder
-                    ? { chosen: inPersonOrder, decisionSource: 'bot_ai_default' as const }
-                    : selectBotEventResponse(state, def, respondingFaction, observerAutoResolves);
-                // Phase B Sub-slice B3: the bot path applies response-level runtime causality and
-                // notifications through the same applier as the player path (packet §3.3, §3.5), so
-                // both produce identical deltas for the same choice.
-                applyChosenEventResponse(state, {
-                    eventId: def.id,
-                    chosen,
-                    decisionSource,
-                    faction: respondingFaction,
-                    turn: currentTurn,
-                    answeredBy: 'automatic',
-                    notifications: def.notifications_to_other_factions,
-                });
-                if (isPlayerRespondent && openingFirstFiring && state.military.pending_event_decisions) {
-                    // Observer resolved an opening event whose birth card was never answered:
-                    // drop that card, the decision is now made.
-                    state.military.pending_event_decisions = state.military.pending_event_decisions
-                        .filter((pending) => pending.event_id !== def.id);
-                }
+                // LIVE-HIDDEN-SPLIT: chosen and applied at the card's slot after the primary pass,
+                // where a live player's silence is chosen and applied, so both read the same state.
+                answerSlots.push({ kind: 'apply', eventId: def.id, apply: () => {
+                    const inPersonOrder = observerAutoResolves
+                        ? selectInPersonParamilitaryOrderResponse(state, def)
+                        : null;
+                    const { chosen, decisionSource } = inPersonOrder
+                        ? { chosen: inPersonOrder, decisionSource: 'bot_ai_default' as const }
+                        : selectBotEventResponse(state, def, respondingFaction, observerAutoResolves);
+                    // Phase B Sub-slice B3: the bot path applies response-level runtime causality and
+                    // notifications through the same applier as the player path (packet §3.3, §3.5), so
+                    // both produce identical deltas for the same choice.
+                    applyChosenEventResponse(state, {
+                        eventId: def.id,
+                        chosen,
+                        decisionSource,
+                        faction: respondingFaction,
+                        turn: currentTurn,
+                        answeredBy: 'automatic',
+                        notifications: def.notifications_to_other_factions,
+                    });
+                    if (isPlayerRespondent && openingFirstFiring && state.military.pending_event_decisions) {
+                        // Observer resolved an opening event whose birth card was never answered:
+                        // drop that card, the decision is now made.
+                        state.military.pending_event_decisions = state.military.pending_event_decisions
+                            .filter((pending) => pending.event_id !== def.id);
+                    }
+                } });
             }
         }
 
@@ -1108,10 +1156,17 @@ export function beginEvaluateEvents(
         fireEvent(def);
     }
 
+    const settleAnswers = (resolvePlayerDecision?: (eventId: string) => void): void => {
+        if (settled) throw new Error('beginEvaluateEvents: settleAnswers() called twice');
+        settled = true;
+        drainAnswerSlots(resolvePlayerDecision);
+    };
+
     let finished = false;
     const finish = (): EventsEvaluationReport => {
         if (finished) throw new Error('beginEvaluateEvents: finish() called twice');
         finished = true;
+        if (!settled) settleAnswers();
         // One bounded post-primary snapshot lets explicitly opted-in automatic rows
         // observe receipts and flags written above. The snapshot is collected in
         // canonical order before any of its members fire, so it cannot recurse into
@@ -1142,6 +1197,9 @@ export function beginEvaluateEvents(
         for (const def of followUpSnapshot) {
             fireEvent(def);
         }
+        // The follow-up rows' answers land after their own pass, in firing order, as the primary
+        // pass's do. A live player's follow-up decision stays queued (the pause has passed), as before.
+        drainAnswerSlots();
 
         return {
             fired,
@@ -1151,5 +1209,5 @@ export function beginEvaluateEvents(
             mutex_suppressed_ids: mutexFiltered.mutex_suppressed_ids,
         };
     };
-    return { finish };
+    return { settleAnswers, finish };
 }
