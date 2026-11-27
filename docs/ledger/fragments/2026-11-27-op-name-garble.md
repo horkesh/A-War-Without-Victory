@@ -7,4 +7,4 @@ Authority: ruling §43 (Fable consult 12 register, item 3); lane B s31.
 - Canon: Systems Manual, the named-operations implementation note, one clause.
 - Tests: `tests/op_name_pool_exhaustion.test.ts` (3; 2 red on main).
 
-**Measured.** See the PR: 188w pair on main dae338dfb.
+**Measured.** 188w pair `onm` on main dae338dfb: hist `da0df7577544c3c0` / emer `7284a48cc5a2befa`, equal to the pins (hash-neutral); the fallback is not reached on the hands-off runs. Canon panel (systems-programmer, canon-compliance-reviewer, narrative-designer): unanimous APPROVE, with the narrative seat's wording adopted.
