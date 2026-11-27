@@ -12,7 +12,7 @@ import type { FrontDistributionDiagnostics } from '../sim/combat/front_distribut
 import type { EmergentFormationRefusalRecord } from '../state/recruitment_types.js';
 import type { CombatOutcome } from '../sim/combat/combat_math.js';
 import type { Osid } from '../sim/combat/osid_adjacency.js';
-import type { BattlePowerBreakdown, DefenderContribution, PublicIntelFrictionAnnotation } from '../sim/combat/attack_resolution_types.js';
+import type { AttackerContribution, BattlePowerBreakdown, DefenderContribution, PublicIntelFrictionAnnotation } from '../sim/combat/attack_resolution_types.js';
 import { getFactionLiveSupplyCondition } from '../sim/combat/supply_condition.js';
 
 /** Phase H1.7: Per-week activity diagnostics (counts only; derived reporting). */
@@ -211,6 +211,11 @@ export interface WeeklyBattleEntry {
     defender_kind?: 'militia' | 'none';
     /** Canonical `${mun_id}:${faction}` pool key militia losses were recorded against. */
     defender_militia_pool_key?: string;
+    /**
+     * The WHOLE attacking stack's applied loss (every brigade in `attacker_brigades`),
+     * not `attacker_brigade`'s, which names only the lead. Each brigade's own loss is in
+     * `attacker_contributions` (CAS-ATTACKER-SHARES §42).
+     */
     attacker_casualties: number;
     defender_casualties: number;
     /** Public-safe execution-friction annotation; no hidden enemy truth. */
@@ -220,8 +225,6 @@ export interface WeeklyBattleEntry {
     /** Human-readable operation name. */
     operation_name?: string;
     /**
-     * REASON-CODE INSTRUMENTATION, topic `battle_stack` — item 1.
-     *
      * EVERY validated attacker that contributed to this battle, sorted by id.
      * `attacker_brigade` above names only `firstAttacker`, while
      * `attacker_casualties` sums the WHOLE STACK. Reading those two as a pair is
@@ -229,10 +232,12 @@ export interface WeeklyBattleEntry {
      * produced one published false finding ("the casualty field is inflated 10x").
      * This field is what makes the pair legible.
      *
-     * Absent unless `AWWV_DEBUG_REASON_CODES` requests it: `weekly_report.jsonl`
-     * is a baselined artifact and this must not move the golden manifest.
+     * Always emitted since CAS-ATTACKER-SHARES (§42); it was once gated behind the
+     * `battle_stack` reason-code topic. The weekly_report.jsonl pin moved with it.
      */
     attacker_brigades?: FormationId[];
+    /** Each attacker's own applied loss, sorted by brigade id (CAS-ATTACKER-SHARES §42). */
+    attacker_contributions?: AttackerContribution[];
     /**
      * REASON-CODE INSTRUMENTATION, topic `battle_stack` — item 1.
      *
@@ -400,4 +405,25 @@ export function buildWeeklyReport(
         row.brigade_reconstitution = reconstitutionEntries;
     }
     return row;
+}
+
+/**
+ * CAS-ATTACKER-SHARES (§42): the attacking stack and each brigade's applied loss for a
+ * `weekly_report.jsonl` battle row, emitted unconditionally and sorted by brigade id so
+ * the artifact never depends on an upstream ordering promise.
+ */
+export function weeklyAttackerStackFields(b: {
+    attacker_brigades?: readonly FormationId[];
+    attacker_contributions?: readonly AttackerContribution[];
+}): Pick<WeeklyBattleEntry, 'attacker_brigades' | 'attacker_contributions'> {
+    return {
+        ...(b.attacker_brigades ? { attacker_brigades: [...b.attacker_brigades].sort(strictCompare) } : {}),
+        ...(b.attacker_contributions
+            ? {
+                attacker_contributions: [...b.attacker_contributions]
+                    .sort((x, y) => strictCompare(x.brigade_id, y.brigade_id))
+                    .map((c) => ({ brigade_id: c.brigade_id, casualties_taken: c.casualties_taken })),
+            }
+            : {}),
+    };
 }
