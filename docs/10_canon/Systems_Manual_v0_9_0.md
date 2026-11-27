@@ -280,6 +280,15 @@ Absent, empty, stale, newly-stranded, reconnected, tagged-enclave, active or
 queued-owned receipts keep existing behavior. Runtime/full-campaign/save/native
 validation remains pending.
 
+**Manpower exhaustion penalty reads the reserve as available (RESERVE-AS-SPENT, rulings §45,
+2026-11-27):** the faction strain ratio behind the exhaustion cohesion penalty (RS 0.92, RBiH
+0.80, HRHB 0.85; critical 0.97) is max(0, committed − strategic reserve) / (committed +
+available) over the faction's militia pools. Men moved into the strategic reserve stay in
+`committed` for the mobilization and population caps, but they are not spent in the field until
+the reserve hands them to a brigade, so the ratio counts the faction's reserve balance as
+available. It applies to every faction alike. The thresholds, the reserve and the caps are
+unchanged.
+
 **Own-origin salient retention (2026-10-28):** automatic capture-triggered salient withdrawal
 retains any component holding the displaced faction's OWN configured, currently held supply
 origin. Being separate from a larger component is not by itself sufficient grounds for automatic

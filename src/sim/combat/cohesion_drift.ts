@@ -27,7 +27,13 @@ const EXHAUSTION_COHESION_PENALTY = -0.5;
 const CRITICAL_EXHAUSTION_THRESHOLD = 0.97;
 const CRITICAL_EXHAUSTION_PENALTY = -1.5;
 
-/** Compute faction exhaustion ratio: committed / (committed + available). Deterministic. */
+/**
+ * Compute faction exhaustion ratio: max(0, committed - reserve) / (committed + available). Deterministic.
+ * RESERVE-AS-SPENT (rulings §45): `pool.committed` also carries the strategic-reserve overflow
+ * (strategic_reserve.ts collection), which is right for the mobilization and population caps. Those
+ * men are not spent in the field until the reserve hands them to a brigade, so the strain ratio
+ * counts `strategic_reserves[faction]` as available. Reader-only; the thresholds are unchanged.
+ */
 function getFactionExhaustionRatio(state: GameState, faction: FactionId): number {
     const pools = state.military.militia_pools;
     if (!pools || typeof pools !== 'object') return 0;
@@ -41,7 +47,9 @@ function getFactionExhaustionRatio(state: GameState, faction: FactionId): number
         available += p.available ?? 0;
     }
     const total = committed + available;
-    return total <= 0 ? 0 : committed / total;
+    if (total <= 0) return 0;
+    const reserve = state.military.strategic_reserves?.[faction] ?? 0;
+    return Math.max(0, committed - reserve) / total;
 }
 
 function isFormationInOpsecSector(state: GameState, formation: FormationState): boolean {
