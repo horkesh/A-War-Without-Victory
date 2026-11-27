@@ -89,6 +89,27 @@ describe('full_save_parity.cjs', () => {
         expect(compareSaves(headless, player).some((l) => l.includes('differs (order or content)'))).toBe(true);
     });
 
+    it('OBSERVER-LABEL: the live seat\'s automatic answer may carry another bot label; any other change still DIFFERS', () => {
+        const headless = base();
+        const player = base();
+        player.meta = { ...player.meta, player_faction: 'RBiH' } as typeof player.meta;
+        // The live RBiH seat at Observer: same answer, turn and position, logged as the staff default.
+        player.military.event_decision_log[1] = { ...player.military.event_decision_log[1]!, decision_source: 'bot_ai_default' };
+        expect(compareSaves(headless, player)).toEqual([]);
+        // The same relabel on another faction's row is a real difference.
+        const other = base();
+        other.meta = { ...other.meta, player_faction: 'RBiH' } as typeof other.meta;
+        other.military.event_decision_log[0] = { ...other.military.event_decision_log[0]!, decision_source: 'bot_ai_default' };
+        expect(compareSaves(base(), other).some((l) => l.includes('non-player row 0 differs'))).toBe(true);
+        // With no player faction on record the label is compared exactly.
+        const none = base();
+        none.military.event_decision_log[1] = { ...none.military.event_decision_log[1]!, decision_source: 'bot_ai_default' };
+        expect(compareSaves(base(), none).some((l) => l.includes('non-player row 1 differs'))).toBe(true);
+        // The live seat's row at another turn still DIFFERS.
+        player.military.event_decision_log[1] = { ...player.military.event_decision_log[1]!, turn: 8 };
+        expect(compareSaves(headless, player).some((l) => l.includes('non-player row 1 differs'))).toBe(true);
+    });
+
     it('an in-person player row with no headless answer DIFFERS', () => {
         const player = base();
         player.military.event_decision_log = [
