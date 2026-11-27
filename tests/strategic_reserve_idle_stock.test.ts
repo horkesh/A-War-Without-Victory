@@ -237,4 +237,21 @@ describe('idle replacement (OZ-ENGINE)', () => {
         expect(r.idle_replacement_by_faction.RBiH.route_open).toBe(false);
         expect(state.military.formations.arbih_weak.personnel).toBe(100);
     });
+
+    it('IDLE-SNAPSHOT (§48, Codex r4717315272): a pool made idle only by this turn\'s reserve top-up offers nothing', () => {
+        // Lopare's only brigade is one man short; the reserve's one man fills it this turn.
+        // Idleness is judged before the reserve loop, so Lopare's 80-man loss is not offered.
+        const rear = brigade('rs_lopare', { tags: ['mun:lopare'], personnel: 1999, max_personnel: 2000 });
+        const hollow = brigade('rs_ozren', { tags: ['mun:doboj'], personnel: 300, max_personnel: 2000 });
+        const state = makeState([rear, hollow], {
+            'lopare:RS': pool('lopare', 'RS', 5000),
+            'doboj:RS': pool('doboj', 'RS', 0),
+        }, { RS: 1 });
+        const r = reinforceFromStrategicReserves(state, undefined, { 'lopare:RS': 80 });
+        expect(state.military.formations.rs_lopare.personnel).toBe(2000);
+        expect(state.military.strategic_reserves!.RS).toBe(0);
+        expect(state.military.formations.rs_ozren.personnel).toBe(300);
+        expect(r.idle_replacement_by_faction.RS?.idle_pools ?? 0).toBe(0);
+        expect(r.idle_replacement_by_faction.RS?.placed ?? 0).toBe(0);
+    });
 });
