@@ -1057,8 +1057,8 @@
   {
     "id": "csq_prolonged_war_exhaustion_1995",
     "image": "event_siege_city_RBiH.webp",
-    "title": "A Fourth Summer",
-    "narrative": "Three summers of war without the turning point that in the historical record closed it. Populations in Sarajevo, Banja Luka, and Mostar cross into the fourth year of casualty lists, shortages, and negotiations that settle nothing. Conscription offices on every side report longer queues for deferments and shorter ones at the intake desk. This is not judgement; it is exhaustion. Every faction's field army is holding the line it held in the spring, and every faction's politicians are having the same conversations in different cities about how a war this expensive ends.",
+    "title": "The Fourth Year",
+    "narrative": "Three summers of war without the turning point that in the historical record closed it. Populations in Sarajevo, Banja Luka, and Mostar have crossed into the fourth year of casualty lists, shortages, and negotiations that settle nothing. Conscription offices on every side report longer queues for deferments and shorter ones at the intake desk. This is not judgement; it is exhaustion. Every faction's field army is holding the line it held in the spring, and every faction's politicians are having the same conversations in different cities about how a war this expensive ends.",
     "category": "political",
     "trigger": {
       "turn_min": 186,
@@ -1088,7 +1088,7 @@
     "responding_faction": "RBiH",
     "effect": {
       "kind": "narrative",
-      "text": "Without a decisive catalyst, the war enters its fourth summer as emergent exhaustion rather than resolution."
+      "text": "Without a decisive catalyst, the war is in its fourth year as emergent exhaustion rather than resolution."
     },
     "effects": [
       {
