@@ -188,8 +188,14 @@ export function attributeOperationCasualties(
         // attacking side, the distance-weighted contributions on the defending side), with the
         // record total preserved exactly. A one-brigade side reduces to the old figures.
         const atk = sharesPreservingTotal(attacker_casualties, battle.attacker_contributions, attacker_brigade);
+        // OP-CAS-NONPARTICIPANT (§55): only engaged defenders are credited. Attacker rows
+        // are built from the attacking stack itself, so every one of them took part.
         const def = defender_brigade
-            ? sharesPreservingTotal(defender_casualties, battle.defender_contributions, defender_brigade)
+            ? sharesPreservingTotal(
+                defender_casualties,
+                engagedDefenderContributions(battle.defender_contributions, defender_brigade),
+                defender_brigade,
+            )
             : [];
         const atkW = atk.map((s) => s.casualties);
         const defW = def.map((s) => s.casualties);
@@ -235,6 +241,25 @@ export function attributeOperationCasualties(
 
 type Tally = { killed: number; wounded: number };
 type Equip = { tanks: number; artillery: number };
+
+/**
+ * OP-CAS-NONPARTICIPANT (§55): `defender_contributions` keeps a diagnostic row for every
+ * sector defender, including an unreachable reserve (reactive weight 0). A row is engaged
+ * when it is the named defender, has a non-zero reactive weight, or absorbed casualties
+ * (a personnel-share weight can round to 0.00 in the record). A row with no weight field
+ * (an older record) counts as engaged. Casualties never exclude a participant: a row with
+ * weight that lost no one is engaged.
+ */
+export function engagedDefenderContributions<
+    T extends { brigade_id: FormationId; casualties_taken: number; reactive_weight?: number },
+>(contributions: ReadonlyArray<T> | undefined, leadId: FormationId): T[] | undefined {
+    if (!contributions) return undefined;
+    return contributions.filter((c) =>
+        c.brigade_id === leadId
+        || c.reactive_weight === undefined
+        || c.reactive_weight > 0
+        || c.casualties_taken > 0);
+}
 
 /** One brigade's applied loss on one side of one battle. */
 export interface BrigadeCasualtyShare {

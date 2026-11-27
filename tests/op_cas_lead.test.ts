@@ -150,3 +150,60 @@ describe('attributeOperationCasualties: OP-CAS-LEAD', () => {
         expect(opD1.pending_casualties!.inflicted.wounded + opD2.pending_casualties!.inflicted.wounded).toBe(74);
     });
 });
+
+/**
+ * OP-CAS-NONPARTICIPANT (ruling §55, Codex r4719094397): `defender_contributions` keeps a
+ * diagnostic row for every sector defender, including an unreachable reserve (reactive
+ * weight 0, 99 hops). Such a row took no part in the battle, so its operation gets no
+ * `attacks` credit. Eligibility is engagement (a non-zero reactive weight, or the named
+ * defender), never casualties: a participant that lost no one is still credited.
+ */
+describe('attributeOperationCasualties: OP-CAS-NONPARTICIPANT', () => {
+    it('an unreachable reserve row with zero weight gets no attacks credit; a zero-loss participant still does', () => {
+        const opD1 = op('Op D1', ['bde_d1']);
+        const opD2 = op('Op D2', ['bde_d2']);
+        const opR = op('Op R', ['bde_reserve']);
+        const st = stateWith({ corps_d1: opD1, corps_d2: opD2, corps_r: opR }, {
+            bde_att: { personnel: 3000, corps_id: 'corps_x' },
+            bde_d1: { personnel: 2000, corps_id: 'corps_d1' },
+            bde_d2: { personnel: 2000, corps_id: 'corps_d2' },
+            bde_reserve: { personnel: 2000, corps_id: 'corps_r' },
+        });
+        attributeOperationCasualties(st, report({
+            attacker_brigade: 'bde_att', attacker_casualties: 100,
+            defender_brigade: 'bde_d1', defender_casualties: 200,
+            defender_contributions: [
+                { brigade_id: 'bde_d1', distance_hops: 0, is_home_municipality: true, reactive_weight: 1, casualties_taken: 200 },
+                { brigade_id: 'bde_d2', distance_hops: 2, is_home_municipality: false, reactive_weight: 0.36, casualties_taken: 0 },
+                { brigade_id: 'bde_reserve', distance_hops: 99, is_home_municipality: false, reactive_weight: 0, casualties_taken: 0 },
+            ],
+        }));
+        expect(opR.pending_casualties?.attacks ?? 0).toBe(0);
+        expect(opD2.pending_casualties!.attacks).toBe(1);
+        expect(opD2.pending_casualties!.suffered).toEqual({ killed: 0, wounded: 0 });
+        expect(opD1.pending_casualties!.attacks).toBe(1);
+        expect(opD1.pending_casualties!.suffered).toEqual({ killed: 44, wounded: 148 });
+        // What the defence inflicted stays with the engaged brigades.
+        expect(opD1.pending_casualties!.inflicted.killed + opD2.pending_casualties!.inflicted.killed).toBe(22);
+        expect(opD1.pending_casualties!.inflicted.wounded + opD2.pending_casualties!.inflicted.wounded).toBe(74);
+    });
+
+    it('a zero-loss attacker in the stack is still credited with the attack', () => {
+        const opA = op('Op A', ['bde_a']);
+        const opB = op('Op B', ['bde_b']);
+        const st = stateWith({ corps_a: opA, corps_b: opB }, {
+            bde_a: { personnel: 3000, corps_id: 'corps_a' },
+            bde_b: { personnel: 1000, corps_id: 'corps_b' },
+        });
+        attributeOperationCasualties(st, report({
+            attacker_brigade: 'bde_a', attacker_brigades: ['bde_a', 'bde_b'],
+            attacker_contributions: [
+                { brigade_id: 'bde_a', casualties_taken: 50 },
+                { brigade_id: 'bde_b', casualties_taken: 0 },
+            ],
+            attacker_casualties: 50, defender_casualties: 0,
+        }));
+        expect(opA.pending_casualties!.attacks).toBe(1);
+        expect(opB.pending_casualties!.attacks).toBe(1);
+    });
+});
