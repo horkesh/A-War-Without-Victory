@@ -1483,10 +1483,16 @@ export function resolveAttackOrdersOsid(
             attackerAppliedById.set(a.id, (ownAppliedAttackerById.get(a.id) ?? 0) + (extraAttackerByBrigade.get(a.id) ?? 0));
         }
         // CAS-ATTACKER-SHARES (§42): the record names each attacker's own applied loss, so
-        // `attacker_casualties` (the stack's) is never read as `attacker_brigade`'s.
+        // `attacker_casualties` (the stack's) is never read as `attacker_brigade`'s. A TG
+        // anchor's entry includes the loss of the men its donors lent it: they fought inside
+        // the TG, and the entries then sum to the stack total. Brigade history books each
+        // donor its own loss (CAS-REPORT-4 §22), so it reads `attackerAppliedById` instead.
         battleRecord.attacker_contributions = [...attackerAppliedById.keys()]
             .sort(strictCompare)
-            .map((id) => ({ brigade_id: id, casualties_taken: attackerAppliedById.get(id) ?? 0 }));
+            .map((id) => ({
+                brigade_id: id,
+                casualties_taken: (appliedAttackerById.get(id) ?? 0) + (extraAttackerByBrigade.get(id) ?? 0),
+            }));
         const defenderAppliedById = new Map<FormationId, number>(defenderCasualtyShares ?? []);
         if (defenderFormation && extraDefenderApplied > 0) {
             defenderAppliedById.set(defenderFormation.id, (defenderAppliedById.get(defenderFormation.id) ?? 0) + extraDefenderApplied);

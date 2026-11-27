@@ -248,7 +248,9 @@ describe('CAS-ATTACKER-SHARES §42: the battle record carries each attacker\'s a
         expect(battle.attacker_contributions![0]!.casualties_taken).toBeLessThan(battle.attacker_casualties);
     });
 
-    it('a TG anchor\'s entry counts its donor\'s applied loss, as brigade history does (CAS-REPORT-3)', () => {
+    // The TG fought as one, so the anchor's entry carries the lent men's loss and the entries
+    // sum to the stack total. Brigade history books the donor's own loss apart (CAS-REPORT-4 §22).
+    it('a TG anchor\'s entry counts the applied loss of the men its donor lent it', () => {
         const fx = makeScenario(3000);
         const donor = addTg(fx, fx.small, 400);
         const smallBefore = fx.small.personnel ?? 0;
