@@ -476,6 +476,7 @@ function makeChain1State(
         flags?: Record<string, string | number | boolean>;
         firedEvents?: string[];
         rsTerritoryShare?: number; // 0..1 fraction of OSIDs assigned to RS
+        controllers?: Record<string, string>; // named OSIDs added to the synthetic map
     } = {},
 ): GameState {
     const share = opts.rsTerritoryShare ?? 0.60;
@@ -484,6 +485,7 @@ function makeChain1State(
     for (let i = 0; i < 10; i++) {
         pc[`op:syn:${i}`] = i < Math.round(share * 10) ? 'RS' : 'RBiH';
     }
+    Object.assign(pc, opts.controllers ?? {});
     return {
         schema_version: 1,
         meta: { turn, phase: 'war', scenario_id: 'test', player_faction: 'RS', seed: 'csq1' } as GameState['meta'],
@@ -651,21 +653,112 @@ describe('Chain 3 — Srebrenica Survives: historical path fires nothing', () =>
     });
 });
 
-describe('Chain 3 — Srebrenica Survives: ahistorical path fires chain', () => {
-    it('csq_srebrenica_stalemate_1995 fires w170-w190 when enclave formed but not fallen', () => {
-        const state = makeChain1State(175, {
-            flags: { srebrenica_enclave_formed: true },
+// SREB-STALEMATE-PREFIRE (ruling §51, §6 panel 2026-11-27): the stalemate chain opens only
+// once the scripted fall can no longer fire, the turn after `srebrenica_falls_1995`'s
+// window closes, and only while RBiH still holds the enclave town. Before the fix it opened
+// at t170 and fired the week before the scripted fall in every hands-off game.
+const SREB_HELD = { 'op:srebrenica:srebrenica_2': 'RBiH' };
+
+describe('Chain 3 — SREB-STALEMATE-PREFIRE: the chain waits for the fall\'s window to close', () => {
+    it('the stalemate and drain windows open the turn after the scripted fall\'s window closes', () => {
+        const fall = EVENT_BY_ID.get('srebrenica_falls_1995')!;
+        const stalemate = EVENT_BY_ID.get('csq_srebrenica_stalemate_1995')!;
+        const drain = EVENT_BY_ID.get('csq_enclave_drain_continues_1995')!;
+        expect(typeof fall.trigger.turn_max).toBe('number');
+        expect(stalemate.trigger.turn_min).toBe(fall.trigger.turn_max! + 1);
+        expect(drain.trigger.turn_min).toBe(stalemate.trigger.turn_min);
+    });
+
+    // Ruling §56: every Chain 3 event that reads "Srebrenica has not fallen" opens only once
+    // the scripted fall can no longer fire, and only while RBiH holds the enclave town.
+    it('every csq_ event reading flag_not_set srebrenica_fell opens after the fall\'s window and checks srebrenica_2', () => {
+        const fall = EVENT_BY_ID.get('srebrenica_falls_1995')!;
+        const conds = (c: any): any[] => (c ? [c, ...(c.conditions ?? []).flatMap(conds), ...conds(c.condition)] : []);
+        const readers = CSQ_EVENTS.filter(e => conds(e.trigger.condition)
+            .some(c => c.type === 'flag_not_set' && c.flag === 'srebrenica_fell'));
+        expect(readers.map(e => e.id).sort()).toEqual([
+            'csq_alternative_nato_trigger_1995',
+            'csq_enclave_held_alt_intervention',
+            'csq_prolonged_war_exhaustion_1995',
+            'csq_srebrenica_stalemate_1995',
+        ]);
+        for (const e of readers) {
+            // csq_enclave_held_alt_intervention is the January 1995 (t145) audit, before the
+            // fall's window opens; its hands-off firing is traced separately (ZEPA-ALT-PREFIRE).
+            if (e.id === 'csq_enclave_held_alt_intervention') {
+                expect(e.trigger.turn_max!).toBeLessThan(fall.trigger.turn_min!);
+                continue;
+            }
+            expect(e.trigger.turn_min).toBe(fall.trigger.turn_max! + 1);
+            expect(conds(e.trigger.condition)).toContainEqual({
+                type: 'territory_control', osid: 'op:srebrenica:srebrenica_2', faction: 'RBiH',
+            });
+        }
+    });
+
+    it('inside the fall\'s window neither alternative-path event fires', () => {
+        const fall = EVENT_BY_ID.get('srebrenica_falls_1995')!;
+        for (const turn of [175, 180, fall.trigger.turn_max!]) {
+            const state = makeChain1State(turn, {
+                flags: { srebrenica_enclave_formed: true, rrf_deployed: true },
+                controllers: SREB_HELD,
+            });
+            evaluateEvents(state, rng, turn, CSQ_EVENTS);
+            expect(state.military.fired_event_ids).not.toContain('csq_prolonged_war_exhaustion_1995');
+            expect(state.military.fired_event_ids).not.toContain('csq_alternative_nato_trigger_1995');
+        }
+    });
+
+    it('inside the fall\'s window the stalemate does not fire, although the enclave has not fallen yet', () => {
+        const fall = EVENT_BY_ID.get('srebrenica_falls_1995')!;
+        for (const turn of [170, fall.trigger.turn_max!]) {
+            const state = makeChain1State(turn, {
+                flags: { srebrenica_enclave_formed: true },
+                controllers: SREB_HELD,
+            });
+            evaluateEvents(state, rng, turn, CSQ_EVENTS);
+            expect(state.military.fired_event_ids).not.toContain('csq_srebrenica_stalemate_1995');
+        }
+    });
+
+    it('after the scripted fall (t171) neither chain event fires at t186', () => {
+        const state = makeChain1State(186, {
+            flags: { srebrenica_enclave_formed: true, srebrenica_fell: true },
+            firedEvents: ['srebrenica_falls_1995'],
+            controllers: { 'op:srebrenica:srebrenica_2': 'RS' },
         });
-        evaluateEvents(state, rng, 175, CSQ_EVENTS);
+        evaluateEvents(state, rng, 186, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).not.toContain('csq_srebrenica_stalemate_1995');
+        expect(state.military.fired_event_ids).not.toContain('csq_enclave_drain_continues_1995');
+    });
+
+    it('an enclave town lost in combat (no scripted fall) does not read as "The Enclave Holds"', () => {
+        const state = makeChain1State(186, {
+            flags: { srebrenica_enclave_formed: true },
+            controllers: { 'op:srebrenica:srebrenica_2': 'RS' },
+        });
+        evaluateEvents(state, rng, 186, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).not.toContain('csq_srebrenica_stalemate_1995');
+    });
+});
+
+describe('Chain 3 — Srebrenica Survives: ahistorical path fires chain', () => {
+    it('csq_srebrenica_stalemate_1995 fires from w186 when the enclave outlived its scripted fall', () => {
+        const state = makeChain1State(186, {
+            flags: { srebrenica_enclave_formed: true },
+            controllers: SREB_HELD,
+        });
+        evaluateEvents(state, rng, 186, CSQ_EVENTS);
         expect(state.military.fired_event_ids).toContain('csq_srebrenica_stalemate_1995');
         expect(state.military.event_flags?.srebrenica_stalemate).toBe(true);
     });
 
     it('csq_srebrenica_stalemate_1995 does NOT grant RBiH +5 international_standing (canon gate)', () => {
-        const state = makeChain1State(175, {
+        const state = makeChain1State(186, {
             flags: { srebrenica_enclave_formed: true },
+            controllers: SREB_HELD,
         });
-        evaluateEvents(state, rng, 175, CSQ_EVENTS);
+        evaluateEvents(state, rng, 186, CSQ_EVENTS);
         // Dimension_shift side channel reflects in military.dimension_shifts_log
         // (applyEventEffects pathway). Alternative: inspect CSQ_EVENTS registry.
         const stalemate = CSQ_EVENTS.find(e => e.id === 'csq_srebrenica_stalemate_1995')!;
@@ -681,11 +774,12 @@ describe('Chain 3 — Srebrenica Survives: ahistorical path fires chain', () => 
     });
 
     it('csq_enclave_drain_continues_1995 requires prior stalemate and pins Drina Corps', () => {
-        const withPrior = makeChain1State(180, {
+        const withPrior = makeChain1State(187, {
             flags: { srebrenica_enclave_formed: true },
             firedEvents: ['csq_srebrenica_stalemate_1995'],
+            controllers: SREB_HELD,
         });
-        evaluateEvents(withPrior, rng, 180, CSQ_EVENTS);
+        evaluateEvents(withPrior, rng, 187, CSQ_EVENTS);
         expect(withPrior.military.fired_event_ids).toContain('csq_enclave_drain_continues_1995');
         const restrictions = withPrior.military.event_constraints?.scope_restrictions ?? [];
         const rsBlock = restrictions.find(r =>
@@ -695,10 +789,11 @@ describe('Chain 3 — Srebrenica Survives: ahistorical path fires chain', () => 
     });
 
     it('csq_prolonged_war_exhaustion_1995 fires when both srebrenica_fell and nato_deliberate_force_occurred are unset', () => {
-        const state = makeChain1State(185, {
+        const state = makeChain1State(186, {
             flags: { srebrenica_enclave_formed: true },
+            controllers: SREB_HELD,
         });
-        evaluateEvents(state, rng, 185, CSQ_EVENTS);
+        evaluateEvents(state, rng, 186, CSQ_EVENTS);
         expect(state.military.fired_event_ids).toContain('csq_prolonged_war_exhaustion_1995');
         // Three-faction exhaustion: recruitment_modifier 0.80 for each faction
         const mods = state.military.recruitment_modifiers ?? [];
