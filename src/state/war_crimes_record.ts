@@ -5,7 +5,7 @@ import type { FactionId, GameState } from './game_state.js';
  *
  * Increments `war_crimes_events` and the in-war counter `war_crimes_events_emergent` in EVERY
  * decision mode (the counter is mode-independent; who bears its consequences is decided at the
- * verdict by `isBrightLineFaction`, see atrocity_accountability.ts). This is the sole writer of
+ * verdict for every faction in every mode, SENSITIVE_HISTORY_DESIGN_GATE.md §2a(i)). This is the sole writer of
  * that counter, which feeds the §2a `authorized_cleansing_condemnation` flag
  * (SENSITIVE_HISTORY_DESIGN_GATE.md §2a(ii)(a)). Scripted `humanitarian_impact` effects deliberately
  * do NOT call this, so the counter stays free of calendar-driven contamination.

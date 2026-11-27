@@ -1116,6 +1116,10 @@ function prepTwoAxisState(state: GameState): GameState {
     state.military.corps_front_sectors = {};
     state.political!.political_controllers!['op:test:approach_a'] = 'TEST_FACTION';
     state.political!.political_controllers!['op:test:approach_b'] = 'TEST_FACTION';
+    // Axis B's objective is hostile, like objective_a. Without a controller the planning gate
+    // now reads the launch view (PRIM-RAW-AXIS, rulings §34), which drops the axis as the
+    // launch reconcile would; every production OSID has a controller.
+    state.political!.political_controllers!['op:test:objective_b'] = 'OTHER_FACTION';
     return state;
 }
 

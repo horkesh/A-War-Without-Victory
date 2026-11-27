@@ -34,7 +34,7 @@ import type { FactionId, GameState } from '../../state/game_state.js';
 import { recordSilenceReceipt, selectLivePlayerFaction } from '../player_override.js';
 import { selectInPersonParamilitaryOrderResponse } from './ai_default_response.js';
 import { isAnswerAheadOfFiringDecision } from './answer_ahead_of_firing.js';
-import { applyChosenEventResponse, isMinorityPolicyHaltCardId, selectBotEventResponse, type BotEventResponseSelection } from './evaluate_events.js';
+import { applyChosenEventResponse, isMinorityPolicyHaltCardId, selectBotEventResponse, type BotEventResponseSelection, type PrimaryEventsPass } from './evaluate_events.js';
 import type { EventDefinition, EventResponseOption, PendingEventDecision } from './event_types.js';
 import { PARAMILITARY_POLICY_CARD_ID_BY_FACTION } from './paramilitary_policy_flag.js';
 
@@ -84,11 +84,13 @@ function silenceReceiptText(
 /**
  * Resolve, as the bot's choice, every eligible player decision still pending at the end of
  * `evaluate-events` (after the desktop pause, if any). Returns the resolved event ids in order.
+ * With `onlyEventId`, only that card's decisions (the card's slot in firing order, LIVE-HIDDEN-SPLIT).
  */
 export function resolvePlayerEventDecisionsBySilence(
     state: GameState,
     eventDefinitions: readonly EventDefinition[],
     turn: number,
+    onlyEventId?: string,
 ): string[] {
     const playerFaction: FactionId | null = selectLivePlayerFaction(state);
     if (playerFaction == null) return [];
@@ -109,6 +111,7 @@ export function resolvePlayerEventDecisionsBySilence(
     const resolvedRows = new Set<PendingEventDecision>();
     // A snapshot: an applied answer may queue a further card, which waits for its own turn.
     for (const decision of [...pending]) {
+        if (onlyEventId !== undefined && decision.event_id !== onlyEventId) continue;
         const def = defsById.get(decision.event_id);
         const eligible = def != null
             && (!observer || isMinorityPolicyHaltCard(decision.event_id))
@@ -163,18 +166,28 @@ export type PlayerDecisionPauseHook = (
  * BEFORE the same-turn follow-up snapshot (#865 r4693814641): first the pause, where the President's
  * explicit answer lands (called at most once, only when a decision fired this turn), then silence,
  * resolved as the staff default. A follow-up row then sees an answered decision in a live game, as
- * it does in headless, where the bot answers at fire time. Inert in headless (no hook, no player).
+ * it does in headless. Inert in headless (no hook, no player).
+ *
+ * LIVE-HIDDEN-SPLIT (rulings §53): with `primary`, every answer of the primary pass lands here in
+ * firing order: the bot's and the Observer's answers and a filed answer at their cards' slots, the
+ * staff default by silence at the player's slot. Headless lands the same answers in the same order,
+ * so a hands-off live turn equals a headless one. Anything still eligible afterwards (a card with no
+ * slot this pass) is resolved by silence last, as before.
  */
 export async function settlePlayerEventDecisionsThisTurn(
     state: GameState,
     eventDefinitions: readonly EventDefinition[],
     turn: number,
     onPlayerDecisionsPending: PlayerDecisionPauseHook | undefined,
+    primary?: Pick<PrimaryEventsPass, 'settleAnswers'>,
 ): Promise<void> {
     const firedThisTurn = (state.military.pending_event_decisions ?? [])
         .filter((decision) => decision.turn_fired === turn);
     if (firedThisTurn.length > 0 && onPlayerDecisionsPending) {
         await onPlayerDecisionsPending(state, firedThisTurn);
     }
+    primary?.settleAnswers((eventId) => {
+        resolvePlayerEventDecisionsBySilence(state, eventDefinitions, turn, eventId);
+    });
     resolvePlayerEventDecisionsBySilence(state, eventDefinitions, turn);
 }

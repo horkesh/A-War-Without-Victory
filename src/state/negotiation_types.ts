@@ -32,8 +32,8 @@ export interface NegotiationBreakdown {
     operations_successful: number;
     war_crimes_events: number;
     /**
-     * In-war war-crimes count (written in every decision mode; the verdict applies it to a
-     * faction per `isBrightLineFaction`): incremented ONLY by `recordWarCrime()`
+     * In-war war-crimes count (written in every decision mode; the verdict applies it to every
+     * faction in every mode, §2a(i)): incremented ONLY by `recordWarCrime()`
      * (genuine in-war paramilitary sweeps the faction's command or staff authorized), NEVER by
      * scripted `humanitarian_impact` narrative effects (`applyHumanitarianImpact`).
      * The shared `war_crimes_events` above conflates both; this counter is the clean
