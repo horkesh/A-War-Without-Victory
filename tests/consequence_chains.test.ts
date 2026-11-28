@@ -476,6 +476,7 @@ function makeChain1State(
         flags?: Record<string, string | number | boolean>;
         firedEvents?: string[];
         rsTerritoryShare?: number; // 0..1 fraction of OSIDs assigned to RS
+        controllers?: Record<string, string>; // named OSIDs added to the synthetic map
     } = {},
 ): GameState {
     const share = opts.rsTerritoryShare ?? 0.60;
@@ -484,6 +485,7 @@ function makeChain1State(
     for (let i = 0; i < 10; i++) {
         pc[`op:syn:${i}`] = i < Math.round(share * 10) ? 'RS' : 'RBiH';
     }
+    Object.assign(pc, opts.controllers ?? {});
     return {
         schema_version: 1,
         meta: { turn, phase: 'war', scenario_id: 'test', player_faction: 'RS', seed: 'csq1' } as GameState['meta'],
@@ -648,6 +650,125 @@ describe('Chain 3 — Srebrenica Survives: historical path fires nothing', () =>
         });
         evaluateEvents(state, rng, 185, CSQ_EVENTS);
         expect(state.military.fired_event_ids).not.toContain('csq_prolonged_war_exhaustion_1995');
+    });
+});
+
+// ZEPA-ALT-PREFIRE + GORAZDE-FELL-NO-WRITER (ruling §60, §6 panel 2026-11-27): "Safe Areas Still
+// Standing" is the counterfactual partner of the Žepa fall. Before the fix it fired at t145 in
+// every hands-off game, before either scripted fall, and its three fall-flag guards could not be
+// set by then (gorazde_fell had no writer at all). It now opens after Srebrenica's fall window
+// closes and reads control of the three eastern enclave towns.
+const ENCLAVE_TOWNS = ['op:srebrenica:srebrenica_2', 'op:rogatica:zepa_2', 'op:gorazde:gorazde_2'] as const;
+const ENCLAVES_HELD = Object.fromEntries(ENCLAVE_TOWNS.map(osid => [osid, 'RBiH']));
+const ALT_ID = 'csq_enclave_held_alt_intervention';
+
+function makeEnclaveAltState(turn: number, opts: { controllers?: Record<string, string>; flags?: Record<string, boolean | undefined>; resilience?: number } = {}): GameState {
+    // The Srebrenica chain formed in 1992 (srebrenica_enclave_forms_1992), as in every intact run.
+    const flags = { srebrenica_enclave_formed: true, ...(opts.flags ?? {}) };
+    const state = makeChain1State(turn, { flags, controllers: { ...ENCLAVES_HELD, ...(opts.controllers ?? {}) } });
+    const r = opts.resilience ?? 0.5;
+    (state.political as any).enclave_resilience = {
+        srebrenica: { resilience: r, isolation_turns: 0, hardening_active: false },
+        zepa: { resilience: r, isolation_turns: 0, hardening_active: false },
+        gorazde: { resilience: r, isolation_turns: 0, hardening_active: false },
+    };
+    return state;
+}
+
+describe('ZEPA-ALT-PREFIRE: "Safe Areas Still Standing" waits for the falls\' windows and reads control', () => {
+    const conds = (c: any): any[] => (c ? [c, ...(c.conditions ?? []).flatMap(conds), ...conds(c.condition)] : []);
+
+    it('opens the turn after the Srebrenica fall\'s window closes, once', () => {
+        const fall = EVENT_BY_ID.get('srebrenica_falls_1995')!;
+        const zepa = EVENT_BY_ID.get('zepa_falls_1995')!;
+        const alt = EVENT_BY_ID.get(ALT_ID)!;
+        expect(alt.trigger.turn_min).toBe(fall.trigger.turn_max! + 1);
+        expect(alt.trigger.turn_min!).toBeGreaterThan(zepa.trigger.turn_min!);
+        expect(alt.trigger.turn_max).toBe(188);
+        expect(alt.once).toBe(true);
+    });
+
+    it('checks RBiH control of all three enclave towns, the OSIDs the falls and anchors use', () => {
+        const alt = EVENT_BY_ID.get(ALT_ID)!;
+        const all = conds(alt.trigger.condition);
+        for (const osid of ENCLAVE_TOWNS) {
+            expect(all).toContainEqual({ type: 'territory_control', osid, faction: 'RBiH' });
+        }
+        expect(conds(EVENT_BY_ID.get('srebrenica_falls_1995')!.trigger.condition))
+            .toContainEqual({ type: 'territory_control', osid: ENCLAVE_TOWNS[0], faction: 'RBiH' });
+        expect(conds(EVENT_BY_ID.get('zepa_falls_1995')!.trigger.condition))
+            .toContainEqual({ type: 'territory_control', osid: ENCLAVE_TOWNS[1], faction: 'RBiH' });
+    });
+
+    it('keeps the srebrenica_fell and zepa_fell guards; gorazde_fell is not read (no writer exists)', () => {
+        const all = conds(EVENT_BY_ID.get(ALT_ID)!.trigger.condition);
+        expect(all).toContainEqual({ type: 'flag_not_set', flag: 'srebrenica_fell' });
+        expect(all).toContainEqual({ type: 'flag_not_set', flag: 'zepa_fell' });
+        // Red-team round 1: a run whose 1992 enclave chain never formed has no scripted falls;
+        // the counterfactual must not fire there (same guard as csq_srebrenica_stalemate_1995).
+        expect(all).toContainEqual({ type: 'flag_equals', flag: 'srebrenica_enclave_formed', value: true });
+        const readers = ALL_EVENTS.filter(e => JSON.stringify(e.trigger).includes('"gorazde_fell"'));
+        expect(readers.map(e => e.id)).toEqual([]);
+    });
+
+    it('does not fire at t145 or anywhere inside the falls\' windows, with all three towns held', () => {
+        const fall = EVENT_BY_ID.get('srebrenica_falls_1995')!;
+        for (const turn of [145, 170, 172, fall.trigger.turn_max!]) {
+            const state = makeEnclaveAltState(turn);
+            evaluateEvents(state, rng, turn, CSQ_EVENTS);
+            expect(state.military.fired_event_ids, `turn ${turn}`).not.toContain(ALT_ID);
+        }
+    });
+
+    it('fires at t186 when all three towns are held and resilience is above the floor', () => {
+        const state = makeEnclaveAltState(186);
+        evaluateEvents(state, rng, 186, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).toContain(ALT_ID);
+        expect(state.military.event_flags?.un_safe_areas_intact).toBe(true);
+        expect(state.military.cost_ledger_annotations?.map((a: any) => a.tag)).toContain('un_safe_areas_intact');
+    });
+
+    it.each(ENCLAVE_TOWNS)('does not fire at t186 when %s is lost, with no fall flag set', (osid) => {
+        const state = makeEnclaveAltState(186, { controllers: { [osid]: 'RS' } });
+        evaluateEvents(state, rng, 186, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).not.toContain(ALT_ID);
+    });
+
+    it('does not fire at t186 after the scripted falls (hands-off path)', () => {
+        const state = makeEnclaveAltState(186, {
+            flags: { srebrenica_fell: true, zepa_fell: true },
+            controllers: { [ENCLAVE_TOWNS[0]]: 'RS', [ENCLAVE_TOWNS[1]]: 'RS' },
+        });
+        evaluateEvents(state, rng, 186, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).not.toContain(ALT_ID);
+    });
+
+    it('fires at the window end t188 and not at t189', () => {
+        const at188 = makeEnclaveAltState(188);
+        evaluateEvents(at188, rng, 188, CSQ_EVENTS);
+        expect(at188.military.fired_event_ids).toContain(ALT_ID);
+        const at189 = makeEnclaveAltState(189);
+        evaluateEvents(at189, rng, 189, CSQ_EVENTS);
+        expect(at189.military.fired_event_ids).not.toContain(ALT_ID);
+    });
+
+    it.each(['srebrenica_fell', 'zepa_fell'])('does not fire at t186 with all three towns held but %s set', (flag) => {
+        const state = makeEnclaveAltState(186, { flags: { [flag]: true } });
+        evaluateEvents(state, rng, 186, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).not.toContain(ALT_ID);
+    });
+
+    it('does not fire at t186 when the Srebrenica enclave chain never formed (no scripted falls possible)', () => {
+        const state = makeEnclaveAltState(186, { flags: { srebrenica_enclave_formed: undefined } });
+        delete (state.military.event_flags as any).srebrenica_enclave_formed;
+        evaluateEvents(state, rng, 186, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).not.toContain(ALT_ID);
+    });
+
+    it('does not fire at t186 when the resilience mean is at or below the floor', () => {
+        const state = makeEnclaveAltState(186, { resilience: 0.2 });
+        evaluateEvents(state, rng, 186, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).not.toContain(ALT_ID);
     });
 });
 
