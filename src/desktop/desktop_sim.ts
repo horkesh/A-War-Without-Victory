@@ -31,6 +31,7 @@ import { setForestOsidSet, setUrbanOsidSet } from '../sim/combat/combat_math.js'
 import { loadForestOsidSet, loadUrbanOsidSet } from '../sim/combat/combat_terrain_sets_node.js';
 import { computeFrontWidthMetrics } from '../sim/combat/front_width_metrics.js';
 import { computeSectorCombatRatings } from '../sim/combat/sector_combat_rating.js';
+import { refreshActiveOffensivesAgainstCorps } from '../sim/combat/active_offensives_count.js';
 import { applyRecruitment, evaluateRecruitmentEligibility, initializeRecruitmentResources, recruitBrigade } from '../sim/recruitment_engine.js';
 import { setPlayerRecruitmentHold } from '../sim/recruitment_turn.js';
 import { buildRecruitmentContext } from '../sim/recruitment_context.js';
@@ -437,6 +438,9 @@ export async function loadStateFromPath(statePath: string, baseDir: string): Pro
     const content = await readFile(statePath, 'utf8');
     const state = deserializeState(content);
     primeCombatTerrain(baseDir);
+    // FRESH-COUNT (rulings §75): the transient multi-axis count is not saved; derive it before
+    // the ratings read it (`computeDefenderPower`). The next turn derives it again per step.
+    refreshActiveOffensivesAgainstCorps(state);
     computeSectorCombatRatings(state, null);
     return { state };
 }

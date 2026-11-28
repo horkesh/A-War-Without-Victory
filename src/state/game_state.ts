@@ -3332,9 +3332,10 @@ home_distance_cache?: Record<string, number>;
 /** Fall-1995 mechanic E-A3 (multi-axis simultaneity penalty): count of active
  *  enemy offensive CorpsOperations (phase==='execution') whose objectives
  *  include at least one OSID currently controlled by this defender corps's
- *  faction. Built turn-start in `war_phases.ts` before combat resolution;
+ *  faction. Derived from state before every war step (`runNamedPhase`) and by
+ *  between-turn forecast readers (`active_offensives_count.ts`, FRESH-COUNT §75);
  *  read in `combat_math.ts` `computeDefenderPowerBreakdown`. Keyed by defender
- *  corps FormationId. Derived each turn (transient cache; safe to drop). @persistence derived/transient */
+ *  corps FormationId. Transient: never saved, safe to drop. @persistence derived/transient */
 active_offensives_against_corps?: Record<FormationId, number>;
 /** Player-issued permanent sector assignments. Overrides bot assignment in classifyBrigadesByTerritory.
  *  Keyed by brigadeId → sector_id. Persists until manually cleared. */

@@ -1781,8 +1781,9 @@ export function computeDefenderPowerBreakdown(
     // offensive operations, it cannot laterally redeploy and effective
     // power degrades by 10% per additional offensive, capped at 4+ offensives
     // (i.e. min(n-1, 3) → 1.0× / 0.9× / 0.8× / 0.7×).
-    // Source cache: `state.military.active_offensives_against_corps` (built
-    // turn-start in war_phases.ts `build-active-offensives-cache`).
+    // Source: `state.military.active_offensives_against_corps`, a transient count derived
+    // from state before every war step (`runNamedPhase`, turn_pipeline.ts) and by
+    // between-turn forecast readers (active_offensives_count.ts; FRESH-COUNT, rulings §75).
     // Byte-stability: gated `if (multiAxisMult !== 1.0)` so the historical
     // single-offensive path is untouched.
     let multiAxisMult = 1.0;

@@ -26,6 +26,7 @@ import type { OsidEthnicComposition } from './ethnic_defense.js';
 import type { Osid } from './osid_adjacency.js';
 import { getPlayerSafeOperationBalancePresentation } from '../../shared/playerSafeOperationBalance';
 import { predictCombatOutcome, type CombatPrediction } from './combat_predictor.js';
+import { withFreshActiveOffensivesCount } from './active_offensives_count.js';
 import {
     getPreparationMaxTurns,
     getRequiredForceRatio,
@@ -334,7 +335,7 @@ export function generateCommanderAssessment(
  * All inputs are read-only — no mutation of GameState.
  */
 export function computeOperationPrediction(
-    state: GameState,
+    snapshot: GameState,
     request: OperationPredictionRequest,
     adjacency: Map<Osid, Osid[]>,
     reverseMap: OperationalToCanonicalReverseMap,
@@ -344,6 +345,9 @@ export function computeOperationPrediction(
     slopeByOsid?: Record<string, number> | null,
     ethnicComposition?: OsidEthnicComposition | null,
 ): OperationPredictionResponse {
+    // FRESH-COUNT (rulings §75): a between-turn forecast reads the multi-axis count derived
+    // from this snapshot, not last turn's value or none after a load. The snapshot is not mutated.
+    const state = withFreshActiveOffensivesCount(snapshot);
     const axisPredictions: AxisPrediction[] = [];
     for (const axis of request.axes) {
         const pred = predictAxisOutcome(

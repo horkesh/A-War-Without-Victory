@@ -7,6 +7,7 @@
  * Types, context helpers, and caches live in turn_pipeline_types.ts.
  */
 
+import { refreshActiveOffensivesAgainstCorps } from './combat/active_offensives_count.js';
 import { computeFrontEdges } from '../map/front_edges.js';
 import { registerImmutableSettlementEdges } from '../map/adjacency_map.js';
 import { EdgeRecord, loadSettlementGraph } from '../map/settlements.js';
@@ -261,6 +262,10 @@ export async function runNamedPhase(context: TurnContext, step: NamedPhase, phas
         if (poolFlowBoundary) poolFlowObserver?.afterPhase(context.state, poolFlowBoundary, 'skipped', skipReason);
         return;
     }
+    // FRESH-COUNT (rulings §75): the multi-axis count is derived from state before every
+    // executed step, so no reader sees last turn's value, or none after a load, and a step
+    // added later cannot read it stale. The field stays transient (never serialized).
+    refreshActiveOffensivesAgainstCorps(context.state);
     await step.run(context);
     movementObserver?.afterPhase(context.state, movementBoundary, 'executed', null);
     personnelObserver?.afterPhase(context.state, personnelBoundary, 'executed', null);
