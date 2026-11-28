@@ -7,6 +7,7 @@
  * Types, context helpers, and caches live in turn_pipeline_types.ts.
  */
 
+import { FABLE_PHASE, fableFlush, fableRebuildActiveOffensives } from './combat/fable_fg.js';
 import { computeFrontEdges } from '../map/front_edges.js';
 import { registerImmutableSettlementEdges } from '../map/adjacency_map.js';
 import { EdgeRecord, loadSettlementGraph } from '../map/settlements.js';
@@ -261,7 +262,9 @@ export async function runNamedPhase(context: TurnContext, step: NamedPhase, phas
         if (poolFlowBoundary) poolFlowObserver?.afterPhase(context.state, poolFlowBoundary, 'skipped', skipReason);
         return;
     }
+    if (FABLE_PHASE && step.name !== 'resolve-attack-orders' && step.name !== 'apply-brcko-tactical-group-relocation') fableRebuildActiveOffensives(context.state);
     await step.run(context);
+    if (step.name === 'resolve-attack-orders') fableFlush();
     movementObserver?.afterPhase(context.state, movementBoundary, 'executed', null);
     personnelObserver?.afterPhase(context.state, personnelBoundary, 'executed', null);
     if (poolFlowBoundary) poolFlowObserver?.afterPhase(context.state, poolFlowBoundary, 'executed', null);

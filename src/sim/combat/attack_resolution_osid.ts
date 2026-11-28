@@ -1,3 +1,4 @@
+import { fableLog } from './fable_fg.js';
 import { isSupportBrigadeOnActiveOp } from './sector_offensive_axis_helpers.js';
 import {computeAttackForcePower, findTgForAnchor} from './attack_force_power.js';
 import { getAttackIntelConfidence } from './attack_intel_context.js';
@@ -979,6 +980,11 @@ export function resolveAttackOrdersOsid(
         );
 
         const powerRatio = defenderPower <= 0 ? 10 : effectiveAttackerPower / defenderPower;
+        fableLog({
+            k: 'battle', t: currentTurn, af: attackerFaction, df: controller, a: firstAttacker.id, n: attackerFormations.length,
+            tgt: targetOsid, op: opMatch?.op?.name ?? null, type: opMatch?.op?.type ?? null, thr: opMatch?.op?.min_attack_outcome ?? null,
+            d: firepowerDeficitMult, r: powerRatio,
+        });
         // Snap: Surrender Cascade
         const surrenderCascade = defenderFormation !== null
             && (defenderFormation.cohesion ?? 60) < 10

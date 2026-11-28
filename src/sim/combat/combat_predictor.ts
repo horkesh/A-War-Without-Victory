@@ -79,6 +79,7 @@ import {
     selectWeightedPrimaryDefender,
     HOME_DEFENSE_REACTIVE_BONUS,
     SECTOR_STANCE_REACTIVE_BONUS,
+    getAttackerFirepowerDeficitMult,
 } from './combat_math.js';
 import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sectors.js';
 import { getEnclaveGarrisonPower } from './enclave_resilience.js';
@@ -533,6 +534,12 @@ export function predictCombatOutcome(
         getAttackIntelConfidence(state, attackerFormations[0]?.location_osid ?? attackerLoc, defendingSectorId, targetOsid),
         false,
     ).attackerPowerMult;
+    // FABLE-14 instrument: the resolver's firepower deficit, read on the same roster.
+    const fableDeficit = getAttackerFirepowerDeficitMult(
+        state, attackerFormations,
+        sectorDefBrigades ?? (defenderFormation ? [defenderFormation] : []),
+    );
+    const fableMirror = (process.env.AWWV_FABLE_FG ?? '').includes('mirror');
     const attackerPower = predictorPerfTime(
         profilePrefix,
         '.attackerPower',
@@ -540,6 +547,7 @@ export function predictCombatOutcome(
             state, attackerFormations, targetOsid, adjacency, targetTerrainMult,
             seasonal.attack_mult, supplyStateByOsid,
             attackerPosture ? new Map([[attackerId, attackerPosture]]) : undefined,
+            fableMirror ? fableDeficit : 1,
         ) * ownExecutionMult,
     );
     defenderPower *= seasonal.defense_mult;
@@ -620,7 +628,8 @@ export function predictCombatOutcome(
         defender_disrupted: defenderDisrupted,
         defender_cohesion: defenderCohesion,
         defending_sub_segment_id: defendingSubSegmentId,
-    };
+        fable_deficit: fableDeficit,
+    } as CombatPrediction;
 }
 
 /**
