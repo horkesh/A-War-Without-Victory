@@ -206,6 +206,41 @@ function easternCaptureGate({ events, ref, factionOf, easternMuns, fromTurn = LA
 }
 
 /**
+ * G1 EXPECTED-RED (orchestrator ruling §77, 2026-11-28; §6 panel (b) 4/4). A DATED, SINGLE-CELL
+ * record of a G1 red that a named engine row owns. It is NOT a waiver, and G1 is never reported
+ * green while it fires: the report prints it as RED-EXPECTED.
+ *
+ * The one entry: in the historical run, the 2nd Corps takes Šekovići Kastijelj at week 176
+ * (Biser 2). The §76 cross-over replays it on main's code, so it is an engine row on main, and
+ * the panel named its driver DRINA-HOME-DEFENCE: displaced Drina Corps home brigades get no
+ * home-return or home-defence pressure. That row gates the freeze and 1.0.
+ *
+ * Matching is exact: cell, week, mode AND corps. Any other G1 row (a second cell, another week,
+ * the other mode, another corps) stays red and needs a fresh §6 ruling. §26 is not loosened.
+ * EXPIRY: DRINA-HOME-DEFENCE's PR deletes this entry. An entry that does not fire is reported as
+ * unused, so a stale record stays visible.
+ */
+const G1_EXPECTED_RED = Object.freeze([
+  Object.freeze({
+    osid: 'op:sekovici:kastijelj_2', turn: 176, mode: 'historical', corps: 'arbih_2nd_corps',
+    recorded: '2026-11-28', ruling: '§77', row: 'DRINA-HOME-DEFENCE',
+  }),
+]);
+
+function splitG1ExpectedRed(rows, { mode, corpsOf, expected = G1_EXPECTED_RED }) {
+  const used = new Set();
+  const matched = [];
+  const unexpected = [];
+  for (const r of rows) {
+    const i = expected.findIndex((x, k) => !used.has(k) && x.osid === r.osid && x.turn === r.turn
+      && x.mode === mode && x.corps === corpsOf(r.attacker));
+    if (i >= 0) { used.add(i); matched.push({ ...r, entry: expected[i] }); } else unexpected.push(r);
+  }
+  const unused = expected.filter((x, k) => !used.has(k) && x.mode === mode);
+  return { matched, unexpected, unused };
+}
+
+/**
  * GATE: every capture of a Farz cell (any week, any mechanism) and every late combat capture by a
  * 2nd or 3rd Corps formation is combat owned by an operation (`classifyCombatCapture`).
  */
@@ -310,5 +345,6 @@ module.exports = {
   checkFarzObjectiveCaptures, registeredFarzAarIds,
   JOINT_CORPS, LATE_SCAN_START, FARZ_LIVENESS_TURN, TRIPWIRE_BOUNDS,
   easternCaptureGate, operationOwnershipGate, farzLivenessGate, earlyFarzFalls, stoppingLineRows,
+  G1_EXPECTED_RED, splitG1ExpectedRed,
   anchorContract, receiptTripwire, distinctCells: distinct,
 };
