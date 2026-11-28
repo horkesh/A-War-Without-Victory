@@ -167,6 +167,7 @@ describe('FARZ-ROUTING: the routine bot march does not overwrite a live-op parti
             { arbih_327th: routine(OFF_AXIS), arbih_999th: routine(OFF_AXIS) } as never,
             false,
             () => false,
+            () => false,
         );
 
         assert.equal(state.military.brigade_movement_orders!['arbih_327th' as never], staged);
@@ -188,6 +189,7 @@ describe('FARZ-ROUTING: the routine bot march does not overwrite a live-op parti
             { arbih_328th: routine(OFF_AXIS), arbih_351st: routine(OFF_AXIS) } as never,
             false,
             () => false,
+            () => false,
         );
 
         assert.equal(state.military.brigade_movement_orders!['arbih_328th' as never], untagged);
@@ -197,11 +199,36 @@ describe('FARZ-ROUTING: the routine bot march does not overwrite a live-op parti
         );
     });
 
+    it("a bot march to the operation's own staging or approach cell is operation movement and still replaces", () => {
+        // Kotor Varos shape: the authored staging is the enemy-held objective, and the bot's
+        // approach march (an operation-authorized destination) is what actually stages it.
+        const APPROACH = 'op:gracanica:cinovici';
+        const state = makeState(true);
+        prestageBrigadesForTriggeredOp(state, DEF);
+
+        mergeBotMovementOrders(
+            state,
+            { arbih_327th: routine(APPROACH), arbih_351st: routine(OFF_AXIS) } as never,
+            false,
+            () => false,
+            (_bid, order) => order.destination_sids.includes(APPROACH as never),
+        );
+
+        assert.deepEqual(
+            (state.military.brigade_movement_orders!['arbih_327th' as never] as BrigadeMovementOrder).destination_sids,
+            [APPROACH],
+        );
+        assert.deepEqual(
+            (state.military.brigade_movement_orders!['arbih_351st' as never] as BrigadeMovementOrder).destination_sids,
+            [STAGING],
+        );
+    });
+
     it('outside a live operation, replacement mode behaves as before (the bot march wins)', () => {
         const state = makeState(false);
         state.military.brigade_movement_orders!['arbih_328th' as never] = { destination_sids: [STAGING] } as never;
 
-        mergeBotMovementOrders(state, { arbih_328th: routine(OFF_AXIS) } as never, false, () => false);
+        mergeBotMovementOrders(state, { arbih_328th: routine(OFF_AXIS) } as never, false, () => false, () => false);
 
         assert.deepEqual(
             (state.military.brigade_movement_orders!['arbih_328th' as never] as BrigadeMovementOrder).destination_sids,
@@ -214,7 +241,7 @@ describe('FARZ-ROUTING: the routine bot march does not overwrite a live-op parti
         const existing = { destination_sids: [STAGING] };
         state.military.brigade_movement_orders!['arbih_328th' as never] = existing as never;
 
-        mergeBotMovementOrders(state, { arbih_328th: routine(OFF_AXIS) } as never, true, () => false);
+        mergeBotMovementOrders(state, { arbih_328th: routine(OFF_AXIS) } as never, true, () => false, () => false);
 
         assert.equal(state.military.brigade_movement_orders!['arbih_328th' as never], existing);
     });

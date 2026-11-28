@@ -64,6 +64,7 @@ import { getSeasonalModifiers } from './seasonal_effects.js';
 import { getAllAxisBrigades, isMultiAxis } from './sector_offensive_axis_helpers.js';
 import { buildOfficerCombatLookup, getCorpsStance } from './combat_math.js';
 import { findBrigadeOperation, findBrigadeOperationAnywhere, findBrigadeLiveOperationAnywhere } from './corps_operation_helpers.js';
+import { getOperationAuthorizedDestinations } from './brigade_routine_scope.js';
 import { canAdoptPosture } from './brigade_posture.js';
 import { isBrigadeAssignedToFront } from './front_assignment.js';
 import { isVlasicCohaExceptionAttackOrder } from './coha_operation_exception.js';
@@ -1049,12 +1050,16 @@ function executeFactionDirectivesImpl(
  * order of a brigade in a live (planning/execution) operation. A live-op participant's
  * non-discretionary order now stands; the bot's own discretionary output for it is
  * still replaced as before, and brigades outside a live operation are unchanged.
+ * A bot order to a destination the brigade's own live operation authorizes (its staging
+ * or approach cells, `getOperationAuthorizedDestinations`) is operation movement, not a
+ * routine march, and still replaces the order (`isOperationMovement`).
  */
 export function mergeBotMovementOrders(
     state: GameState,
     mergedMovement: Record<FormationId, BrigadeMovementOrder>,
     mergeWithExistingOrders: boolean,
     isUnprocessedFactionOrder: (brigadeId: string) => boolean,
+    isOperationMovement: (brigadeId: string, order: BrigadeMovementOrder) => boolean,
 ): void {
     if (Object.keys(mergedMovement).length === 0) return;
     if (mergeWithExistingOrders) {
@@ -1073,7 +1078,8 @@ export function mergeBotMovementOrders(
         }
         if (order.owner !== 'bot_discretionary'
             && mergedMovement[bid as FormationId] !== undefined
-            && findBrigadeLiveOperationAnywhere(state, bid) != null) {
+            && findBrigadeLiveOperationAnywhere(state, bid) != null
+            && !isOperationMovement(bid, mergedMovement[bid as FormationId]!)) {
             liveOperationOrders[bid as FormationId] = order as BrigadeMovementOrder;
         }
     }
@@ -1603,7 +1609,21 @@ export function generateAllBotOrdersOsid(
             owner: 'bot_discretionary',
         };
     }
-    mergeBotMovementOrders(state, mergedMovement, options.mergeWithExistingOrders === true, isUnprocessedFactionOrder);
+    const isOperationMovement = (brigadeId: string, order: BrigadeMovementOrder): boolean => {
+        const live = findBrigadeLiveOperationAnywhere(state, brigadeId)?.op ?? null;
+        if (!live) return false;
+        const authorized = getOperationAuthorizedDestinations(
+            state, brigadeId, live, adjacency as Map<string, string[]>, ctx.reverseMap,
+        );
+        return order.destination_sids.some((destination) => authorized.has(destination));
+    };
+    mergeBotMovementOrders(
+        state,
+        mergedMovement,
+        options.mergeWithExistingOrders === true,
+        isUnprocessedFactionOrder,
+        isOperationMovement,
+    );
 
     return {
         eligible_attackers_by_corps: allEligibleAttackersByCorps,
