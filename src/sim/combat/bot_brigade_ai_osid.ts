@@ -1037,6 +1037,53 @@ function executeFactionDirectivesImpl(
  *
  * Deterministic: faction processing in sorted order, brigades sorted by ID.
  */
+/**
+ * Write the bot pass's movement orders (all tagged `bot_discretionary`) into state.
+ *
+ * Merge mode keeps every existing order. Replacement mode owns only its own tagged
+ * discretionary routing: untagged orders come from player/operation/reserve systems
+ * and are preserved, and so is a discretionary order of an unprocessed faction.
+ *
+ * FARZ-ROUTING (§73, 2026-11-28): in replacement mode a fresh bot order used to win
+ * over a preserved order for the same brigade, so a routine march replaced the staging
+ * order of a brigade in a live (planning/execution) operation. A live-op participant's
+ * non-discretionary order now stands; the bot's own discretionary output for it is
+ * still replaced as before, and brigades outside a live operation are unchanged.
+ */
+export function mergeBotMovementOrders(
+    state: GameState,
+    mergedMovement: Record<FormationId, BrigadeMovementOrder>,
+    mergeWithExistingOrders: boolean,
+    isUnprocessedFactionOrder: (brigadeId: string) => boolean,
+): void {
+    if (Object.keys(mergedMovement).length === 0) return;
+    if (mergeWithExistingOrders) {
+        state.military.brigade_movement_orders = {
+            ...mergedMovement,
+            ...(state.military.brigade_movement_orders ?? {}),
+        };
+        return;
+    }
+    const preservedMovementOrders: Record<FormationId, BrigadeMovementOrder> = {};
+    const liveOperationOrders: Record<FormationId, BrigadeMovementOrder> = {};
+    for (const [bid, order] of Object.entries(state.military.brigade_movement_orders ?? {})) {
+        if (order == null) continue;
+        if (order.owner !== 'bot_discretionary' || isUnprocessedFactionOrder(bid)) {
+            preservedMovementOrders[bid as FormationId] = order as BrigadeMovementOrder;
+        }
+        if (order.owner !== 'bot_discretionary'
+            && mergedMovement[bid as FormationId] !== undefined
+            && findBrigadeLiveOperationAnywhere(state, bid) != null) {
+            liveOperationOrders[bid as FormationId] = order as BrigadeMovementOrder;
+        }
+    }
+    const next: Record<FormationId, BrigadeMovementOrder> = { ...preservedMovementOrders, ...mergedMovement };
+    for (const bid of Object.keys(liveOperationOrders).sort(strictCompare)) {
+        next[bid as FormationId] = liveOperationOrders[bid as FormationId]!;
+    }
+    state.military.brigade_movement_orders = next;
+}
+
 export function generateAllBotOrdersOsid(
     state: GameState,
     botFactions: FactionId[],
@@ -1556,24 +1603,7 @@ export function generateAllBotOrdersOsid(
             owner: 'bot_discretionary',
         };
     }
-    if (Object.keys(mergedMovement).length > 0) {
-        const preservedMovementOrders: Record<FormationId, BrigadeMovementOrder> = {};
-        if (!options.mergeWithExistingOrders) {
-            for (const [bid, order] of Object.entries(state.military.brigade_movement_orders ?? {})) {
-                // Replacement mode owns only its own tagged discretionary
-                // routing. Untagged orders come from player/operation/reserve
-                // systems and remain authoritative even for a processed bot
-                // faction; otherwise the next bot pass silently erases an
-                // authored operation's staging march.
-                if (order != null && (order.owner !== 'bot_discretionary' || isUnprocessedFactionOrder(bid))) {
-                    preservedMovementOrders[bid as FormationId] = order as BrigadeMovementOrder;
-                }
-            }
-        }
-        state.military.brigade_movement_orders = options.mergeWithExistingOrders
-            ? { ...mergedMovement, ...(state.military.brigade_movement_orders ?? {}) }
-            : { ...preservedMovementOrders, ...mergedMovement };
-    }
+    mergeBotMovementOrders(state, mergedMovement, options.mergeWithExistingOrders === true, isUnprocessedFactionOrder);
 
     return {
         eligible_attackers_by_corps: allEligibleAttackersByCorps,

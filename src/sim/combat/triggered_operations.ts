@@ -1157,6 +1157,12 @@ function deployTriggeredEliteLoans(
  *      written an order, that owner has reason for it (e.g. emergency
  *      defensive deployment, commander correction of a wrong march, army-
  *      reserve recall). Silent overwrite would corrupt those owners.
+ *      FARZ-ROUTING (§73, 2026-11-28) exception to rules 2 and 3: routine bot
+ *      output (`owner: 'bot_discretionary'`) is NOT such an owner. A pending
+ *      discretionary order is replaced, and a discretionary transit not bound
+ *      for staging is reclaimed, so the operation's staging order takes
+ *      precedence (Farz 95 at t179 marched off-axis on a routine order). The
+ *      written order carries `owner: 'authored_preplanned'`.
  *   4. Otherwise (no transit, no order, not at staging) → write the column-
  *      march order toward the axis `staging_osid`.
  *
@@ -1185,22 +1191,40 @@ export function prestageBrigadesForTriggeredOp(
             if (!formation) continue; // LANE-2026-05-02-KRIVAJA: roster lists brigade absent from OOB at this turn
             if (!isEligibleOperationFormation(formation)) continue; // LANE-2026-05-02-KRIVAJA: skip inactive / non-brigade kinds
             if (formation.location_osid === stagingOsid) continue; // LANE-2026-05-02-KRIVAJA: already at staging
-            // LANE-2026-05-02-KRIVAJA contract rule 2: do not reset in_transit brigades.
-            // Re-issuing a movement order resets transit state per architecture lesson 2026-04-01.
-            if (movementState[brigadeId]?.status === 'in_transit') continue;
-            // LANE-2026-05-02-KRIVAJA contract rule 3: do not silently stomp an existing order.
-            // Other owners (commander correction, emergency defense, army reserve recall) have priority.
-            if (state.military.brigade_movement_orders?.[brigadeId]) continue;
+            // FARZ-ROUTING (§73): a `bot_discretionary` order or transit is routine
+            // bot output that a higher operation owner may supersede (game_state.ts
+            // BrigadeMovementOwner). The operation's staging order takes precedence
+            // over it, as the dated pre-planned concentration does
+            // (pre_planned_operations.ts prestageReservedPrePlannedElites).
+            const transit = movementState[brigadeId];
+            const pendingOrder = state.military.brigade_movement_orders?.[brigadeId];
+            const discretionaryTransitAway = transit?.status === 'in_transit'
+                && transit.owner === 'bot_discretionary'
+                && !(transit.destination_sids ?? []).includes(stagingOsid as SettlementId);
+            if (discretionaryTransitAway) {
+                delete state.military.brigade_movement_state?.[brigadeId];
+                delete state.military.brigade_movement_orders?.[brigadeId];
+            } else {
+                // LANE-2026-05-02-KRIVAJA contract rule 2: do not reset in_transit brigades.
+                // Re-issuing a movement order resets transit state per architecture lesson 2026-04-01.
+                if (transit?.status === 'in_transit') continue;
+                // LANE-2026-05-02-KRIVAJA contract rule 3: do not silently stomp an existing order.
+                // Other owners (commander correction, emergency defense, army reserve recall) have
+                // priority; only routine bot output yields (FARZ-ROUTING).
+                if (pendingOrder && pendingOrder.owner !== 'bot_discretionary') continue;
+            }
             if (!state.military.brigade_movement_orders) { // LANE-2026-05-02-KRIVAJA
                 state.military.brigade_movement_orders = {}; // LANE-2026-05-02-KRIVAJA
             }
             // LANE-2026-05-02-KRIVAJA: stance:'column' is mandatory for multi-hop destinations
             // (architecture lesson 2026-04-04: omitting stance routes to wrong movement system).
-            // Cast mirrors brigade_front_distribution.ts:255-257 / commander_march_correction.ts:113-116.
+            // FARZ-ROUTING: the order is op-owned (`authored_preplanned`, the authored
+            // catalog commitment), so discretionary routing and march correction leave it.
             state.military.brigade_movement_orders[brigadeId] = {
                 destination_sids: [stagingOsid as SettlementId], // LANE-2026-05-02-KRIVAJA
                 stance: 'column', // LANE-2026-05-02-KRIVAJA
-            } as { destination_sids: SettlementId[] };
+                owner: 'authored_preplanned',
+            };
         }
     }
 }
