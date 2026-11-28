@@ -2,8 +2,9 @@
  * sole_defender_gate.ts — SOLE-DEFENDER-STRIP (rulings §73, §78.3).
  *
  * One geometric question, shared by the operation roster draw and the post-operation return: is
- * a brigade the LAST of its faction standing on an own cell that touches hostile ground? A corps commander does not take the last rifle off such a cell to feed an
- * offensive, and he re-mans the line when the offensive ends.
+ * a brigade the LAST of its faction standing on an own cell that touches hostile ground?
+ * A corps commander does not take the last rifle off such a cell to feed an offensive, and he
+ * re-mans the line when the offensive ends.
  *
  * The phased-axis handoff (applyGateHandoff) carries no refusal: under the soft rule a sole defender
  * is admitted whenever its axis would otherwise field nobody, and a handoff destination axis has no
