@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { loadStateFromPath, primeCombatTerrain } from '../src/desktop/desktop_sim.js';
+import { countActiveOffensivesAgainstCorps } from '../src/sim/combat/active_offensives_count.js';
 import { computeSectorCombatRatings } from '../src/sim/combat/sector_combat_rating.js';
 import {
     getForestMult,
@@ -58,8 +59,14 @@ describe('desktop loaded-save sector ratings', () => {
         );
 
         expect(serializeState(loaded)).toBe(canonicalBefore);
+        // FRESH-COUNT (rulings §75): the load also derives the transient multi-axis count, which
+        // is never saved. It must equal the count derived from the canonical state.
+        expect(loaded.military.active_offensives_against_corps).toEqual(
+            countActiveOffensivesAgainstCorps(canonicalState),
+        );
         const loadedWithoutRatings = structuredClone(loaded);
         delete loadedWithoutRatings.military.sector_combat_ratings;
+        delete loadedWithoutRatings.military.active_offensives_against_corps;
         expect(loadedWithoutRatings).toEqual(canonicalState);
 
         const visibleState = JSON.parse(

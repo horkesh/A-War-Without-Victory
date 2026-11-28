@@ -1,4 +1,5 @@
 import {buildSlopeByOsid} from '../combat/attack_retreat_displacement.js';
+import {refreshActiveOffensivesAgainstCorps} from '../combat/active_offensives_count.js';
 import {selectStaffControlledFactions as selectBotBrigadeOrderFactions} from '../bot/staff_control.js';
 export {selectStaffControlledFactions as selectBotBrigadeOrderFactions} from '../bot/staff_control.js';
 import {turnDataFilePath} from '../turn_pipeline_types.js';
@@ -3054,82 +3055,17 @@ export const warPhases: NamedPhase[] = [
     },
     {
         // ── Fall-1995 mechanic E-A3: multi-axis simultaneity penalty ──────
-        // Build the turn-start cache `active_offensives_against_corps`:
-        // map<defender corps FormationId, count of enemy CorpsOperations whose
-        //   phase==='execution' and whose objectives include at least one OSID
-        //   controlled by the defender corps's faction>.
+        // `active_offensives_against_corps`: the count of enemy offensives in execution
+        // against each defender corps's faction (active_offensives_count.ts).
         // Consumer: `computeDefenderPowerBreakdown` in combat_math.ts applies a
         //   multiplier (1.0× / 0.9× / 0.8× / 0.7× capped) to defender power.
-        // Determinism: iterates corps_command keys via strictCompare; multiplier
-        //   itself is a deterministic function of the count.
-        // Byte-stability: when no corps has >1 enemy offensives against it, the
-        //   cache contains only 0/1 values and combat_math gates the multiplier
-        //   `if (multiplier !== 1.0)` — historical (single-offensive) path is
-        //   untouched.
+        // FRESH-COUNT (rulings §75): `runNamedPhase` (turn_pipeline.ts) already derives the
+        //   count before every war step, this one included, so this step only re-derives
+        //   it. It is kept so the step list and phase report are unchanged.
         // See docs/40_reports/proposals/20260523_ENGINE_SYNTHESIS_FALL_1995.md §3 E-A3.
         name: 'build-active-offensives-cache',
         run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            const corpsCommand = context.state.military.corps_command;
-            const formations = context.state.military.formations ?? {};
-            const pc = context.state.political.political_controllers ?? {};
-            const cache: Record<string, number> = {};
-            if (!corpsCommand) {
-                context.state.military.active_offensives_against_corps = cache;
-                return;
-            }
-
-            // Pre-build a list of "active enemy offensives": each entry is
-            // {attackerFaction, objectives: string[]}. Sorted iteration of
-            // corps_command keys for determinism.
-            const activeOffensives: Array<{ attackerFaction: FactionId; objectives: string[] }> = [];
-            const attackerCorpsIds = Object.keys(corpsCommand).sort(strictCompare);
-            for (const attackerCorpsId of attackerCorpsIds) {
-                const attackerCmd = corpsCommand[attackerCorpsId];
-                if (!attackerCmd) continue;
-                const attackerCorps = formations[attackerCorpsId];
-                if (!attackerCorps) continue;
-                const attackerFaction = attackerCorps.faction;
-                for (const op of attackerCmd.active_operations) {
-                    if (op.phase !== 'execution') continue;
-                    // Treat sector_attack/general_offensive/feint as "offensive";
-                    // probes are non-territorial and excluded. (Feints exert
-                    // distraction pressure consistent with the E-A3 model.)
-                    if (op.type === 'reorganization' || op.type === 'strategic_defense' || op.type === 'probe') continue;
-                    const objectives: string[] = [];
-                    if (op.objectives) for (const o of op.objectives) objectives.push(o);
-                    if (op.axes) {
-                        for (const axis of op.axes) {
-                            if (axis.objectives) for (const o of axis.objectives) objectives.push(o);
-                        }
-                    }
-                    if (objectives.length === 0) continue;
-                    activeOffensives.push({ attackerFaction, objectives });
-                }
-            }
-
-            // For each defender corps, count how many active enemy offensives
-            // target at least one OSID currently controlled by that corps's faction.
-            const defenderCorpsIds = Object.keys(corpsCommand).sort(strictCompare);
-            for (const defenderCorpsId of defenderCorpsIds) {
-                const defenderCorps = formations[defenderCorpsId];
-                if (!defenderCorps) continue;
-                const defenderFaction = defenderCorps.faction;
-                let count = 0;
-                for (const off of activeOffensives) {
-                    if (off.attackerFaction === defenderFaction) continue;
-                    let targetsDefender = false;
-                    for (const osid of off.objectives) {
-                        if (pc[osid] === defenderFaction) {
-                            targetsDefender = true;
-                            break;
-                        }
-                    }
-                    if (targetsDefender) count++;
-                }
-                if (count > 0) cache[defenderCorpsId] = count;
-            }
-            context.state.military.active_offensives_against_corps = cache;
+            refreshActiveOffensivesAgainstCorps(context.state);
         }
     },
     {

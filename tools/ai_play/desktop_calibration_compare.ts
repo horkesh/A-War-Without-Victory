@@ -97,6 +97,14 @@ interface CliOptions {
     /** When set, write `<dir>/{headless,player}/final_save.json` so each branch can be scored
      *  per-OSID with `tools/compare_painted_vs_sim.cjs <dir>/<branch> --target <checkpoint>`. */
     finalSaveDir?: string;
+    /**
+     * `--reload-at <turn>[,<turn>...]` (FRESH-COUNT, rulings §75/§77): after the player branch
+     * reaches each listed turn, save it as the desktop does (canonical `serializeState` bytes to
+     * `<final-save-dir>/player/reload_w<turn>.json`) and load it back through the desktop's own
+     * Load path (`loadStateFromPath`), then continue. Headless runs uninterrupted, so live parity
+     * then also proves that a save and reload inside a live game changes nothing.
+     */
+    reloadAt?: number[];
     /** Corps ids whose operation queue and live operations are recorded every turn (diagnostic only). */
     traceCorps?: string[];
     /** Settlement ids whose controller is recorded every turn in both branches (diagnostic only;
@@ -348,6 +356,14 @@ function parseArgs(argv: string[]): CliOptions {
         ),
         ...(values.get('--out') ? { outPath: fromLaunchDir(values.get('--out') as string) } : {}),
         ...(values.get('--final-save-dir') ? { finalSaveDir: fromLaunchDir(values.get('--final-save-dir') as string) } : {}),
+        ...(() => {
+            const raw = values.get('--reload-at');
+            if (raw == null) return {};
+            if (!values.get('--final-save-dir')) throw new Error('--reload-at requires --final-save-dir');
+            const reloadAt = [...new Set(raw.split(',').map((x) => Number(x.trim())))].sort((a, b) => a - b);
+            if (reloadAt.some((t) => !Number.isInteger(t) || t < 1)) throw new Error(`--reload-at expects game turns (integers >= 1), got ${raw}`);
+            return { reloadAt };
+        })(),
         ...(values.get('--trace-corps')
             ? { traceCorps: (values.get('--trace-corps') ?? '').split(',').filter(Boolean).sort(strictCompare) }
             : {}),
@@ -1122,6 +1138,7 @@ async function runComparison(baseDir: string, options: CliOptions) {
     // desktop's contracts, before the week's decisions are answered.
     const presidentEventDefs = options.president ? loadGestureEventDefs(baseDir) : new Map<string, unknown>();
     const presidentRequests: PresidentRequestDetail[] = [];
+    const playerReloads: { turn: number; state_sha256: string }[] = [];
     for (let index = 0; index < options.turns; index += 1) {
         const presidentLog = emptyPresidentTurnLog();
         if (options.president) {
@@ -1147,6 +1164,20 @@ async function runComparison(baseDir: string, options: CliOptions) {
         if (playerResult.error) throw new Error(`Player advance failed: ${playerResult.error}`);
         headlessState = headlessResult.state;
         playerState = playerResult.state;
+        if (options.reloadAt?.includes(playerState.meta.turn)) {
+            // The desktop's Save, then its Load: canonical bytes out, `loadStateFromPath` back in.
+            const reloadDir = resolve(baseDir, options.finalSaveDir!, 'player');
+            await mkdir(reloadDir, { recursive: true });
+            const reloadPath = resolve(reloadDir, `reload_w${playerState.meta.turn}.json`);
+            const savedBytes = serializeState(playerState);
+            await writeFile(reloadPath, savedBytes, 'utf8');
+            playerState = (await loadStateFromPath(reloadPath, baseDir)).state;
+            const reloadedHash = stateHash(playerState);
+            if (reloadedHash !== sha256(savedBytes)) {
+                throw new Error(`Reload at turn ${playerState.meta.turn} did not round-trip the saved bytes`);
+            }
+            playerReloads.push({ turn: playerState.meta.turn, state_sha256: reloadedHash });
+        }
         if (presidentLog.request_details) bindPresidentRequestAttempts(presidentLog.request_details, playerState, weekStartTurn);
         const headless = reportSummary(headlessState, headlessResult.report?.details, options.faction);
         const player = reportSummary(playerState, playerResult.report?.details, options.faction);
@@ -1223,6 +1254,7 @@ async function runComparison(baseDir: string, options: CliOptions) {
     const baseOutput = {
         schema_version: 1,
         comparison_kind: 'player_choice_vs_headless',
+        ...(options.reloadAt ? { player_reloads: playerReloads } : {}),
         execution_profiles: {
             gameplay: {
                 profile_id: 'live-equivalent-desktop-v1',

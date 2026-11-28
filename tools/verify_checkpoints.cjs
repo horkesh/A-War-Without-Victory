@@ -41,6 +41,7 @@ const { classifyCombatCapture } = require('./lib/capture_provenance.cjs');
 const {
   checkFarzObjectiveCaptures, LATE_SCAN_START, FARZ_LIVENESS_TURN, TRIPWIRE_BOUNDS,
   easternCaptureGate, operationOwnershipGate, farzLivenessGate, earlyFarzFalls, stoppingLineRows,
+  splitG1ExpectedRed,
   anchorContract, receiptTripwire, distinctCells,
 } = require('./lib/farz_objective_gate.cjs');
 
@@ -415,11 +416,18 @@ const liveness = farzLivenessGate({ cells: FARZ_CELLS, stateAt, farz, battles: b
 console.log('');
 console.log(`OPERATION FARZ / "Uragan 95" RECEIPTS — GATE tier (every merge, both modes; mode read: ${farz.mode})${FARZ_GUARD_ENFORCED ? '' : '  [--no-farz-guard: informational, not a breach]'}`);
 console.log(`  G1 eastern municipalities (§6, any ARBiH corps, from t${LATE_SCAN_START}) — a red goes to the §6 panel`);
+// §77: a dated single-cell EXPECTED-RED owned by an engine row. It does not break the gate, and
+// it is never printed as a pass. Every other row stays a red (lib: splitG1ExpectedRed).
+const g1 = splitG1ExpectedRed(eastRows, { mode: farzMode, corpsOf });
 if (eastRows.length === 0) console.log(`    no late ARBiH capture in ${EASTERN_SURPLUS_MUNS.length} municipalities ** PASS **`);
-else {
-  farzGateBroken++;
-  for (const r of eastRows) console.log(`    *** t${r.turn} ${r.osid} by ${r.attacker} (${corpsOf(r.attacker) ?? '?'}) — §6 panel matter; do not merge ***`);
+for (const r of g1.matched) {
+  console.log(`    RED-EXPECTED t${r.turn} ${r.osid} by ${r.attacker} (${corpsOf(r.attacker) ?? '?'}) — engine row ${r.entry.row} (${r.entry.ruling}, recorded ${r.entry.recorded}); NOT green, expires when that row lands`);
 }
+if (g1.unexpected.length > 0) {
+  farzGateBroken++;
+  for (const r of g1.unexpected) console.log(`    *** t${r.turn} ${r.osid} by ${r.attacker} (${corpsOf(r.attacker) ?? '?'}) — §6 panel matter; do not merge ***`);
+}
+for (const x of g1.unused) console.log(`    (expected-red entry ${x.osid} t${x.turn} did not fire in this run; ${x.row}'s PR removes it)`);
 console.log(`  G2 operation ownership — every Farz-cell capture, and every late (t${LATE_SCAN_START}+) 2nd/3rd Corps capture, is operation-owned combat`);
 if (ownershipRows.length === 0) console.log('    all operation-owned ** PASS **');
 else {
@@ -572,6 +580,6 @@ console.log('');
 if (breached) console.log('RESULT: GUARD BREACHED — inspect failed guard(s). Do not merge.');
 else if (tripped) console.log('RESULT: TRIPWIRE — the Farz shape drifted past its bounds. Hold and trace.');
 else if (regressed) console.log('RESULT: SCORE REGRESSION beyond tolerance. Not a guard breach; explain or revert.');
-else console.log(`RESULT: guard intact.${shapeRed > 0 ? ` ${shapeRed} SHAPE row(s) red: list them on Part 6.` : ''}`);
+else console.log(`RESULT: guard intact.${g1.matched.length > 0 ? ` G1 RED-EXPECTED: ${g1.matched.length} cell(s) owned by an engine row (§77); G1 is NOT green.` : ''}${shapeRed > 0 ? ` ${shapeRed} SHAPE row(s) red: list them on Part 6.` : ''}`);
 
 process.exit(breached || tripped || regressed ? 1 : 0);
