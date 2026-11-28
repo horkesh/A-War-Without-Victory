@@ -531,6 +531,9 @@ export interface AxisOrderGenerationDetail {
     threshold: string | null;
     predicted_outcome: string | null;
     power_ratio: number | null;
+    /** The attacker's firepower deficit the battle would apply (1 = none). `power_ratio`
+     *  is by mass and leaves it out (MASS-DOCTRINE, rulings §75). Null when no forecast. */
+    firepower_deficit_mult: number | null;
     concentrated_outcome: string | null;
     decision:
         | 'objective_missing_or_friendly'

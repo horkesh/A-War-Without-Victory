@@ -74,10 +74,13 @@ function computeTgDonorPower(
 
 /** Known friendly force arithmetic shared by forecast and execution.
  * Callers supply active, tactically adjacent, unique attackers in strict ID order.
- * Enemy-dependent firepower deficit remains an explicit caller input. The player-facing
- * predictor must not query hidden enemy equipment to manufacture exact knowledge, so it
- * passes none. The resolver passes it, and so does the bot planner's estimate
- * (`estimateForceRatio`), which already reads the defending roster exactly (P3-EST §11).
+ * Enemy-dependent firepower deficit remains an explicit caller input. The resolver passes
+ * it, and so does the bot planner's estimate (`estimateForceRatio`, P3-EST §11). The
+ * predictor's bot gate leaves it out on purpose, and the reason is DOCTRINE, not hidden
+ * knowledge (the launch estimate already reads the defending roster): a brigade goes by
+ * the men in front of it, the ARBiH mass and attrition doctrine (MASS-DOCTRINE, rulings
+ * §75; Systems Manual "Attack gate: the mass doctrine"). `predictCombatOutcome` takes an
+ * explicit `AttackFirePricing` and passes the deficit only for `'priced'`.
  * No state mutation or enemy-intelligence lookup occurs here.
  */
 export function computeAttackForcePower(

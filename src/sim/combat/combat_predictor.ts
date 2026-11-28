@@ -5,8 +5,16 @@ import { collectAverageDefenseRoster, collectSectorDefenseBrigades } from './sec
 /**
  * OSID-native combat outcome predictor — read-only.
  *
- * Mirrors the power/outcome logic in attack_resolution_osid.ts but does NOT mutate state.
+ * Shares the power/outcome formulas of attack_resolution_osid.ts but does NOT mutate state.
  * Used by bot brigade AIs to decide whether an attack is worth committing to.
+ *
+ * MASS DOCTRINE (rulings §75; Systems Manual "Attack gate: the mass doctrine"): for a bot
+ * it does NOT mirror the battle's fire comparison. Bot callers pass `'by_mass'`, so the
+ * go or no-go compares men, ground, supply and posture with the operation's
+ * `min_attack_outcome` and leaves the attacker's firepower deficit out. The launch
+ * estimate (`estimateForceRatio`) and the battle price it. Relief comes when
+ * `operation_storm_triggered` sets the deficit to 1. The deficit is returned as
+ * `firepower_deficit_mult` either way, so a trace reads both numbers.
  *
  * FOG OF WAR: The predictor intentionally underestimates enemy strength.
  * Commanders don't know exact enemy power before engaging. After a failed
@@ -79,6 +87,7 @@ import {
     selectWeightedPrimaryDefender,
     HOME_DEFENSE_REACTIVE_BONUS,
     SECTOR_STANCE_REACTIVE_BONUS,
+    getAttackerFirepowerDeficitMult,
 } from './combat_math.js';
 import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sectors.js';
 import { getEnclaveGarrisonPower } from './enclave_resilience.js';
@@ -226,6 +235,9 @@ export interface CombatPrediction {
     defender_has_reachable_brigade: boolean;
     defender_disrupted: boolean;
     defender_cohesion: number;
+    /** The attacker's firepower deficit on the resolver's roster (1 = none). Applied to
+     *  `attacker_power` only in a `'priced'` forecast (MASS-DOCTRINE, §75). */
+    firepower_deficit_mult: number;
     /** Phase B: sub-segment responsible for defending this OSID (undefined if no sub-segment found). */
     defending_sub_segment_id?: string;
 }
@@ -250,15 +262,34 @@ export function buildTerrainCache(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
+ * How a forecast treats the attacker's firepower deficit (MASS-DOCTRINE, rulings §75;
+ * `fable_consults/14_forecast_gap.md`; Systems Manual "Attack gate: the mass doctrine").
+ *
+ * - `'by_mass'`: the bot's go or no-go. Men, ground, supply and posture are compared, with
+ *   no fire comparison; the deficit is read and returned but not applied. This is the
+ *   ARBiH mass and attrition doctrine: low-odds attacks are launched on purpose and are
+ *   thrown back by the fire the battle prices. Every bot caller passes it.
+ * - `'priced'`: the deficit is applied on the resolver's roster (the sector defenders, else
+ *   the primary defender), as `attack_resolution_osid.ts` does in the battle.
+ *
+ * There is no default, so no caller inherits a pricing by accident.
+ */
+export type AttackFirePricing = 'by_mass' | 'priced';
+
+/**
  * Predict combat outcome for an attacker brigade vs a target OSID.
  *
  * Uses the same formulas as attack_resolution_osid.ts but with FOG OF WAR:
  * defender power is discounted because commanders don't know exact enemy strength.
+ * With `firePricing = 'by_mass'` the attacker's firepower deficit is NOT applied
+ * (the doctrine above); it is returned as `firepower_deficit_mult` either way.
  *
+ * @param firePricing — whether the attacker's firepower deficit is applied (see {@link AttackFirePricing})
  * @param attackerPosture — override posture to use for attack power ('attack' or 'assault')
  * @param additionalAttackers — other brigades joining the attack (coordination penalty applies)
  */
 export function predictCombatOutcome(
+    firePricing: AttackFirePricing,
     state: GameState,
     attackerId: FormationId,
     targetOsid: Osid,
@@ -533,6 +564,13 @@ export function predictCombatOutcome(
         getAttackIntelConfidence(state, attackerFormations[0]?.location_osid ?? attackerLoc, defendingSectorId, targetOsid),
         false,
     ).attackerPowerMult;
+    // MASS-DOCTRINE (§75): read on the resolver's roster (attack_resolution_osid.ts, the
+    // `getAttackerFirepowerDeficitMult` call before its `computeAttackForcePower`); applied
+    // only when the caller asks for a priced forecast.
+    const firepowerDeficitMult = getAttackerFirepowerDeficitMult(
+        state, attackerFormations,
+        sectorDefBrigades ?? (defenderFormation ? [defenderFormation] : []),
+    );
     const attackerPower = predictorPerfTime(
         profilePrefix,
         '.attackerPower',
@@ -540,6 +578,7 @@ export function predictCombatOutcome(
             state, attackerFormations, targetOsid, adjacency, targetTerrainMult,
             seasonal.attack_mult, supplyStateByOsid,
             attackerPosture ? new Map([[attackerId, attackerPosture]]) : undefined,
+            firePricing === 'priced' ? firepowerDeficitMult : 1,
         ) * ownExecutionMult,
     );
     defenderPower *= seasonal.defense_mult;
@@ -619,6 +658,7 @@ export function predictCombatOutcome(
         defender_has_reachable_brigade: defenderHasReachableBrigade,
         defender_disrupted: defenderDisrupted,
         defender_cohesion: defenderCohesion,
+        firepower_deficit_mult: firepowerDeficitMult,
         defending_sub_segment_id: defendingSubSegmentId,
     };
 }
@@ -626,6 +666,7 @@ export function predictCombatOutcome(
 /**
  * Convenience: predict outcome for every adjacent enemy OSID.
  * Returns array sorted by power_ratio descending (best opportunities first).
+ * Every caller is a bot gate, so it forecasts by mass (MASS-DOCTRINE, §75).
  */
 export function predictAllAdjacentTargets(
     state: GameState,
@@ -650,7 +691,7 @@ export function predictAllAdjacentTargets(
     for (const n of getTacticalAdjacentOsids(state, loc as Osid, adjacency)) {
         const controller = getPoliticalControllerOSID(state, n, reverseMap);
         if (controller === null || controller === factionId) continue;
-        const pred = predictCombatOutcome(state, attackerId, n, adjacency, reverseMap, terrainMultByOsid, attackerPosture, undefined, supplyStateByOsid, osidPopulationMap, slopeByOsid, ethnicComposition);
+        const pred = predictCombatOutcome('by_mass', state, attackerId, n, adjacency, reverseMap, terrainMultByOsid, attackerPosture, undefined, supplyStateByOsid, osidPopulationMap, slopeByOsid, ethnicComposition);
         if (pred) results.push({ osid: n, prediction: pred });
     }
 

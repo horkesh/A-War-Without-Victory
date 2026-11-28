@@ -396,8 +396,8 @@ describe('attack resolution intel execution friction', () => {
         // Single-target forecasts intentionally do not assume another axis will execute.
         // Test that the reserve estimate stays exclusive while real batch resolution
         // divides mobile response; enemy fog remains a separate approximation.
-        const singleForecast = predictCombatOutcome(alone.state, 'brig_rs_1', 'op:rbih:target_a', buildOsidAdjacency(alone.edges), new Map(), {});
-        const batchForecast = predictCombatOutcome(together.state, 'brig_rs_1', 'op:rbih:target_a', buildOsidAdjacency(together.edges), new Map(), {});
+        const singleForecast = predictCombatOutcome('by_mass', alone.state, 'brig_rs_1', 'op:rbih:target_a', buildOsidAdjacency(alone.edges), new Map(), {});
+        const batchForecast = predictCombatOutcome('by_mass', together.state, 'brig_rs_1', 'op:rbih:target_a', buildOsidAdjacency(together.edges), new Map(), {});
         expect(singleForecast).not.toBeNull();expect(batchForecast).not.toBeNull();
         expect(batchForecast!.defender_power).toBe(singleForecast!.defender_power);
         expect(batchForecast!.attacker_power).toBe(singleForecast!.attacker_power);
@@ -935,7 +935,7 @@ describe('predictor known own execution friction', () => {
         if (targetConfidence !== undefined) state.military.sector_intel!['sector:vrs_1st:0'][0].osid_confidence![0].confidence = targetConfidence;
         if (opsec) state.military.opsec_sectors = ['sector:rbih_defense:0'];
         const before = JSON.stringify(state);
-        const result = predictCombatOutcome(state, 'brig_rs_1', 'op:rbih:target', buildOsidAdjacency(edges), new Map(), {}, 'attack');
+        const result = predictCombatOutcome('by_mass', state, 'brig_rs_1', 'op:rbih:target', buildOsidAdjacency(edges), new Map(), {}, 'attack');
         expect(JSON.stringify(state)).toBe(before);
         expect(result).not.toBeNull();
         return result!;

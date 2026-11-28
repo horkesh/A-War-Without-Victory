@@ -143,6 +143,7 @@ export function predictAxisOutcome(
     const additionalAttackers = axis.brigadeIds.slice(1);
 
     const prediction = predictCombatOutcome(
+        'by_mass',
         state,
         primaryBrigade,
         targetOsid,

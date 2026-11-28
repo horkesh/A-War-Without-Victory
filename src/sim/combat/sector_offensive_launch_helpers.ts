@@ -847,6 +847,7 @@ export function axisHasExecutableOpeningAttack(
             : undefined;
         const contextualPrediction = predictionContext
             ? predictCombatOutcome(
+                'by_mass',
                 state,
                 brigadeId,
                 objective,

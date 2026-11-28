@@ -723,8 +723,8 @@ describe('operation execution staging truth', () => {
         };
 
         const spy = vi.spyOn(combatPredictor, 'predictCombatOutcome').mockImplementation(((...args: any[]) => {
-            const attackerId = idOf(args[1]);
-            const additionalAttackers = Array.isArray(args[7]) ? args[7] : [];
+            const attackerId = idOf(args[2]);
+            const additionalAttackers = Array.isArray(args[8]) ? args[8] : [];
             const ids = new Set<string>();
             if (attackerId) ids.add(attackerId);
             for (const value of additionalAttackers) {
@@ -839,8 +839,8 @@ function runAxisControl(config: AxisControlConfig): AxisControlRun {
 
     const ratios = config.ratios;
     const spy = vi.spyOn(combatPredictor, 'predictCombatOutcome').mockImplementation(((...args: any[]) => {
-        const attackerId = controlIdOf(args[1]);
-        const additionalAttackers = Array.isArray(args[7]) ? args[7] : [];
+        const attackerId = controlIdOf(args[2]);
+        const additionalAttackers = Array.isArray(args[8]) ? args[8] : [];
         const ids = new Set<string>();
         if (attackerId) ids.add(attackerId);
         for (const value of additionalAttackers) {

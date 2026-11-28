@@ -370,7 +370,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 decision: AxisOrderGenerationDetail['decision'],
                 overrides: Partial<Pick<AxisOrderGenerationDetail,
                     'tactically_adjacent' | 'threshold' | 'predicted_outcome' | 'power_ratio' |
-                    'concentrated_outcome' | 'issued_target_osid'>> = {},
+                    'firepower_deficit_mult' | 'concentrated_outcome' | 'issued_target_osid'>> = {},
             ): void => recordAxisOrderGenerationDetail(activeOp, brigade.id, {
                 turn: state.meta?.turn ?? 0,
                 phase: activeOp.phase,
@@ -381,6 +381,9 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 threshold: overrides.threshold ?? null,
                 predicted_outcome: overrides.predicted_outcome ?? null,
                 power_ratio: overrides.power_ratio ?? null,
+                // MASS-DOCTRINE (§75): the by-mass ratio above, and the deficit the battle
+                // will apply, so a trace reads "0.85 by mass, 0.30 with fire".
+                firepower_deficit_mult: overrides.firepower_deficit_mult ?? null,
                 concentrated_outcome: overrides.concentrated_outcome ?? null,
                 decision,
                 issued_target_osid: overrides.issued_target_osid ?? null,
@@ -428,6 +431,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                         '.sectorAttack.executionDirectObjective.predict',
                         () => {
                             return predictCombatOutcome(
+                                'by_mass',
                                 state,
                                 brigade.id,
                                 currentObjective as Osid,
@@ -480,6 +484,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                     ? sectorAttackProfileTime(
                         '.sectorAttack.executionDirectObjective.predictJoint',
                         () => predictCombatOutcome(
+                            'by_mass',
                             state,
                             brigade.id,
                             currentObjective as Osid,
@@ -516,6 +521,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                         threshold: probeThreshold,
                         predicted_outcome: predictedOutcome,
                         power_ratio: directObjectiveAttack.prediction.power_ratio,
+                        firepower_deficit_mult: directObjectiveAttack.prediction.firepower_deficit_mult,
                         concentrated_outcome: concentratedOutcome,
                         issued_target_osid: currentObjective,
                     });
@@ -540,6 +546,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                         threshold: directAttackThreshold,
                         predicted_outcome: directObjectiveAttack?.prediction.predicted_outcome ?? null,
                         power_ratio: directObjectiveAttack?.prediction.power_ratio ?? null,
+                        firepower_deficit_mult: directObjectiveAttack?.prediction.firepower_deficit_mult ?? null,
                         concentrated_outcome: directConcentratedOutcome,
                     },
                 );
@@ -683,6 +690,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                         threshold: getSectorOffensiveProbeThreshold(activeOp, brigade.id),
                         predicted_outcome: bestIntermediate.prediction.predicted_outcome,
                         power_ratio: bestIntermediate.prediction.power_ratio,
+                        firepower_deficit_mult: bestIntermediate.prediction.firepower_deficit_mult,
                         issued_target_osid: bestIntermediate.osid,
                     });
                     const attackPosture: BrigadePosture = (brigade.cohesion ?? 0) >= 60 ? 'assault' : 'attack';
