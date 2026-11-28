@@ -326,6 +326,7 @@ function predictDirectEnemyTargets(
         }
 
         const prediction = predictCombatOutcome(
+            'by_mass',
             briefing.state_ref,
             probeBrigadeId,
             target,
@@ -1316,6 +1317,7 @@ function findLocalOccupationCandidateImpl(
                     },
                 };
                 return predictCombatOutcome(
+                    'by_mass',
                     projectedState,
                     participants[0]!,
                     target,

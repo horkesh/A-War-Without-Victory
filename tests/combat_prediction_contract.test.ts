@@ -26,7 +26,7 @@ function fixture(faction: FactionId='RS') {
 }
 function measure(name:string,f:ReturnType<typeof fixture>,additional:string[]=[],posture?:string){
  const original=JSON.stringify(f.state);
- const pred=predictCombatOutcome(f.state,'A',T,buildOsidAdjacency(f.edges),new Map(),{},posture,additional)!;
+ const pred=predictCombatOutcome('by_mass', f.state,'A',T,buildOsidAdjacency(f.edges),new Map(),{},posture,additional)!;
  expect(JSON.stringify(f.state)).toBe(original);
  const resolved=structuredClone(f.state);
  for(const id of additional)resolved.military.brigade_attack_orders![id]=T;
@@ -92,7 +92,7 @@ describe('shared base-power substrate and forecast purity',()=>{
  it.each(['RS','RBiH','HRHB'] as FactionId[])('missing equipment fallback remains read-only for %s',faction=>{
   const f=fixture(faction);delete f.state.military.formations!.A.composition;delete f.state.military.formations!.D.composition;
   const before=JSON.stringify(f.state);
-  const result=predictCombatOutcome(f.state,'A',T,buildOsidAdjacency(f.edges),new Map(),{});
+  const result=predictCombatOutcome('by_mass', f.state,'A',T,buildOsidAdjacency(f.edges),new Map(),{});
   expect(result).not.toBeNull();expect(JSON.stringify(f.state)).toBe(before);
  });
 });
@@ -105,11 +105,11 @@ describe('noncontributing defender metadata',()=>{
   f.state.military.corps_front_sectors={enemy:{sector_id:'enemy',corps_id:'E',faction:'RBiH',territory_osids:[T,R],assigned_brigade_ids:['D'],reserve_brigade_ids:[],sector_stance:'defend',sub_segments:[{friendly_osids:[T,R],enemy_osids:[S],edge_ids:[],primary_brigade_ids:['D']}]}} as any;
   const adjacency=buildOsidAdjacency(f.edges);
   D.morale=0;
-  const sample=predictCombatOutcome(f.state,'A',T,adjacency,new Map(),{})!;
+  const sample=predictCombatOutcome('by_mass', f.state,'A',T,adjacency,new Map(),{})!;
   f.state.military.formations!.A.personnel=Math.round(1000*1.2/sample.power_ratio);
-  const low=predictCombatOutcome(f.state,'A',T,adjacency,new Map(),{})!;
+  const low=predictCombatOutcome('by_mass', f.state,'A',T,adjacency,new Map(),{})!;
   expect(low.power_ratio).toBeGreaterThan(1);expect(low.power_ratio).toBeLessThan(1.5);D.morale=100;
-  const high=predictCombatOutcome(f.state,'A',T,adjacency,new Map(),{})!;
+  const high=predictCombatOutcome('by_mass', f.state,'A',T,adjacency,new Map(),{})!;
   expect(high.power_ratio).toBe(low!.power_ratio);
   expect(high.predicted_outcome).toBe(low!.predicted_outcome);
   expect(high.predicted_outcome).toBe('costly_victory');
@@ -158,10 +158,10 @@ describe('explicit forecast information boundary probes',()=>{
   state.military.corps_front_sectors={enemy:{sector_id:'enemy',corps_id:'E',faction:'RBiH',territory_osids:[target,R],assigned_brigade_ids:['D'],reserve_brigade_ids:[],sector_stance:'defend',sub_segments:[{friendly_osids:[target,R],enemy_osids:[S],edge_ids:[],primary_brigade_ids:['D']}]}} as any;
   if(learned)(state.military.formations.A as any).last_repulsed_from={osid:target,turn:59};
   state.political.enclave_resilience={sarajevo:0} as any;
-  const low=predictCombatOutcome(state,'A',target,adjacency,new Map(),{},undefined,undefined,undefined,population)!;
+  const low=predictCombatOutcome('by_mass', state,'A',target,adjacency,new Map(),{},undefined,undefined,undefined,population)!;
   const lowGarrison=getEnclaveGarrisonPower(state,target,100000),lowState=structuredClone(state);
   state.political.enclave_resilience={sarajevo:40} as any;
-  const high=predictCombatOutcome(state,'A',target,adjacency,new Map(),{},undefined,undefined,undefined,population)!;
+  const high=predictCombatOutcome('by_mass', state,'A',target,adjacency,new Map(),{},undefined,undefined,undefined,population)!;
   const delta=getEnclaveGarrisonPower(state,target,100000)-lowGarrison;
   expect(delta).toBeGreaterThan(0);
   const fog=learned?Math.max(.70+.25*confidence,.95):.70+.25*confidence;
@@ -208,9 +208,9 @@ it('ignores a stronger unreachable Ghost for casualties and defender metadata wh
 
  const adjacency=buildOsidAdjacency(f.edges);
  G.morale=0;
- const low=predictCombatOutcome(f.state,'A',T,adjacency,new Map(),{})!;
+ const low=predictCombatOutcome('by_mass', f.state,'A',T,adjacency,new Map(),{})!;
  G.morale=100;
- const high=predictCombatOutcome(f.state,'A',T,adjacency,new Map(),{})!;
+ const high=predictCombatOutcome('by_mass', f.state,'A',T,adjacency,new Map(),{})!;
  expect(low.defender_has_reachable_brigade).toBe(true);
  expect(high.defender_cohesion).toBe(42);expect(low.defender_cohesion).toBe(42);
  expect(high.defender_entrenchment).toBe(3);expect(low.defender_entrenchment).toBe(3);
@@ -250,7 +250,7 @@ it.each([100,2000])('forecast engaged base and resolver casualties use only posi
  f.state.military.corps_front_sectors={enemy:{sector_id:'enemy',corps_id:'E',faction:'RBiH',territory_osids:[T,R],assigned_brigade_ids:['D','G'],reserve_brigade_ids:[],sector_stance:'defend',sub_segments:[{friendly_osids:[T,R],enemy_osids:[S],edge_ids:[],primary_brigade_ids:['D','G']}]}} as any;
  const raw=structuredClone(f.state);
  const adjacency=buildOsidAdjacency(f.edges);
- const pred=predictCombatOutcome(f.state,'A',T,adjacency,new Map(),{})!;
+ const pred=predictCombatOutcome('by_mass', f.state,'A',T,adjacency,new Map(),{})!;
  expect(pred.expected_defender_casualties).toBeGreaterThan(0);
  expect(pred.defender_casualty_percent).toBeGreaterThan(0);
  const engagedBase=pred.expected_defender_casualties/pred.defender_casualty_percent;

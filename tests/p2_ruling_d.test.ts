@@ -231,7 +231,7 @@ describe('Ruling D, 4c bound (Fable consult 7): seam brigades only add', () => {
     };
     const predictDefence = (seam: boolean): number => {
         const s = seamState(seam);
-        const p = predictCombatOutcome(s, 'attacker' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack');
+        const p = predictCombatOutcome('by_mass', s, 'attacker' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack');
         expect(p).not.toBeNull();
         return p!.defender_power;
     };
