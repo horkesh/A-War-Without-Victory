@@ -1375,6 +1375,7 @@ export function preflightOpportunityAdmission(
     const soleDefender: SoleDefenderDrawContext = {
         stagingOsid: def.staging_osid ?? null,
         drawn: new Set<FormationId>(),
+        exempt: authoredHandoffBrigades(state, axesIn),
         deferredOut: [],
     };
     const rows: SoleDefenderFloorRow[] = [];
@@ -1520,6 +1521,7 @@ function spawnCorpsOperationFromOpportunity(
     const soleDefender: SoleDefenderDrawContext = {
         stagingOsid,
         drawn: new Set<FormationId>(),
+        exempt: authoredHandoffBrigades(state, axesIn),
         deferredOut: [],
     };
     const selectionRows: Array<SoleDefenderFloorRow & {
@@ -1946,6 +1948,7 @@ function selectEligibleOpportunityParticipants(
         // never blocks a launch. Later roster entries substitute for a deferred one.
         if (
             soleDefender
+            && !soleDefender.exempt.has(brigadeId)
             && isSoleDefenderOfFrontCell(state, brigadeId, soleDefender.drawn, adjacency)
             && !isAxisStagingOrApproachCell(state, formation.location_osid!, axisStaging, axis.objectives, adjacency)
         ) {
@@ -1992,8 +1995,28 @@ interface SoleDefenderDrawContext {
     readonly stagingOsid: string | null;
     /** Brigades already drawn in this selection (counted as leaving their cells). */
     readonly drawn: Set<FormationId>;
+    /**
+     * Authored phased-axis handoff brigades. Never deferred: the handoff destination axis has no
+     * other brigade, so the soft floor would always re-admit it, and deferring it on the source
+     * axis would drop the destination axis that main builds (consult 9: no launch blocked).
+     */
+    readonly exempt: ReadonlySet<FormationId>;
     /** Deferred sole defenders of the axis being selected, in roster order. */
     deferredOut: DeferredSoleDefender[];
+}
+
+function authoredHandoffBrigades(
+    state: GameState,
+    axes: readonly OpportunityAxisDef[],
+): ReadonlySet<FormationId> {
+    const exempt = new Set<FormationId>();
+    for (const axis of axes) {
+        const handoff = axis.phase_gate?.handoff;
+        if (!handoff) continue;
+        const resolved = resolveOperationFormation(state.military.formations ?? {}, handoff.brigade_id).formation_id;
+        if (resolved) exempt.add(resolved);
+    }
+    return exempt;
 }
 
 interface DeferredSoleDefender {

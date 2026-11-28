@@ -2,7 +2,7 @@
  * SOLE-DEFENDER-STRIP (rulings §73, §78.3): an operation must not take the last own brigade off an
  * enemy-adjacent own cell, and a brigade left on own ground after an operation re-mans the line.
  *
- * The draw gate is SOFT: a deferred sole defender is re-admitted whenever the axis or operation
+ * The draw gate is SOFT (and never applied to an authored phased-axis handoff brigade): a deferred sole defender is re-admitted whenever the axis or operation
  * would otherwise fall under its participant floor, so the gate never blocks a launch (consult 9).
  *
  * Geometry (all RBiH unless noted):
@@ -20,7 +20,6 @@ import {
     type AxisPredicate,
     type OperationOpportunityDef,
 } from '../src/sim/combat/operation_opportunities.js';
-import { advanceLatePhaseGates, operationInstanceId } from '../src/sim/combat/operation_phase_gate.js';
 import { issuePostOperationReturnMarches } from '../src/sim/combat/sector_offensive.js';
 import { isSoleDefenderOfFrontCell } from '../src/sim/combat/sole_defender_gate.js';
 import type { CorpsCommandState, CorpsOperation, GameState } from '../src/state/game_state.js';
@@ -205,57 +204,25 @@ describe('SOLE-DEFENDER-STRIP: roster draw gate', () => {
     });
 });
 
-describe('SOLE-DEFENDER-STRIP: phased-axis handoff gate', () => {
-    function handoffState(handoffLoc: string): { state: GameState; op: CorpsOperation } {
-        const state = buildState({ h: handoffLoc, y: R });
-        const op = {
-            name: 'Fixture Handoff',
-            type: 'sector_attack',
-            phase: 'execution',
-            started_turn: 170,
-            phase_started_turn: 171,
-            staging_osid: R,
-            participating_brigades: ['h', 'y'],
-            objectives: [T, R3],
-            current_objective_index: 0,
-            axes: [
-                {
-                    axis_id: 'source', name: 'Source', assigned_brigades: ['h', 'y'], objectives: [R2],
-                    current_objective_index: 0, status: 'executing', failure_count: 0,
-                    consecutive_failures_on_current: 0, momentum: 0,
+describe('SOLE-DEFENDER-STRIP: phased-axis handoff brigade', () => {
+    it('never defers the authored handoff brigade, so the phased axis main builds is still built', () => {
+        const state = buildState({ h: A, y: R, z: R2 });
+        const def = fixtureDef(['h', 'y', 'z']);
+        const phased: OperationOpportunityDef = {
+            ...def,
+            axes: [def.axes[0]!, {
+                axis_id: 'destination', name: 'Destination', corps: CORPS, brigades: [], objectives: [T],
+                phase_gate: {
+                    main_axis_id: 'main', requires_operation_captures: [T],
+                    handoff: { brigade_id: 'h', source_axis_id: 'main' },
                 },
-                {
-                    axis_id: 'destination', name: 'Destination', assigned_brigades: [], objectives: [R3],
-                    current_objective_index: 0, status: 'executing', failure_count: 0,
-                    consecutive_failures_on_current: 0, momentum: 0,
-                    late_phase: {
-                        phase: 'holding', main_axis_id: 'source', requires: [R2], gated_objectives: [R3],
-                        receipts: [], handoff: { brigade_id: 'h', source_axis_id: 'source' },
-                    },
-                },
-            ],
-        } as unknown as CorpsOperation;
-        op.axes![1]!.late_phase!.receipts.push({
-            osid: R2, turn: 172, battle_id: 'b1', attacker_brigade: 'y',
-            operation_id: operationInstanceId(CORPS, op), axis_id: 'source',
-        });
-        state.military.corps_command![CORPS]!.active_operations.push(op);
-        return { state, op };
-    }
-
-    it('keeps a sole defender of a cell off both axis lines on the source axis', () => {
-        const { state, op } = handoffState(A);
-        advanceLatePhaseGates(state, op, CORPS, 'RBiH', 175);
-        expect(op.axes![0]!.assigned_brigades).toEqual(['h', 'y']);
-        expect(op.axes![1]!.late_phase!.phase).toBe('holding');
-    });
-
-    it('hands off a brigade that is not a sole defender', () => {
-        const { state, op } = handoffState(R);
-        advanceLatePhaseGates(state, op, CORPS, 'RBiH', 175);
-        expect(op.axes![0]!.assigned_brigades).toEqual(['y']);
-        expect(op.axes![1]!.assigned_brigades).toEqual(['h']);
-        expect(op.axes![1]!.late_phase!.phase).toBe('capture');
+            }],
+        };
+        expect(isSoleDefenderOfFrontCell(state, 'h', new Set())).toBe(true);
+        const op = approve(state, phased);
+        expect(op.participating_brigades).toEqual(['h', 'y', 'z']);
+        expect(op.axes!.map((axis) => axis.axis_id)).toEqual(['main', 'destination']);
+        expect(op.axes![1]!.late_phase?.handoff?.brigade_id).toBe('h');
     });
 });
 
