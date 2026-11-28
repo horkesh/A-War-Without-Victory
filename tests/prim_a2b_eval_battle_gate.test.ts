@@ -149,7 +149,7 @@ function makeFixture(window: Window): BrigadeEvaluationContext {
 function spyPredictedTargets(): { direct: string[]; fallback: string[] } {
     const seen = { direct: [] as string[], fallback: [] as string[] };
     vi.spyOn(combatPredictor, 'predictCombatOutcome').mockImplementation(((...args: any[]) => {
-        seen.direct.push(String(args[2]));
+        seen.direct.push(String(args[3]));
         return { outcome: 'defender_holds', ratio: 0.1 } as unknown as ReturnType<typeof combatPredictor.predictCombatOutcome>;
     }) as any);
     vi.spyOn(combatPredictor, 'predictAllAdjacentTargets').mockImplementation(((...args: any[]) => {

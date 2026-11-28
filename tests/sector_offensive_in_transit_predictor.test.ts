@@ -519,6 +519,7 @@ describe('LANE-2026-06-03-STANDING-OG-Foca T8: static approach overlay for launc
         });
         const adjacency = buildOsidAdjacencyFromFrontEdges(state);
         const solo = predictCombatOutcome(
+            'by_mass',
             state,
             'synth_west' as FormationId,
             'op:test:objective_a',
@@ -528,6 +529,7 @@ describe('LANE-2026-06-03-STANDING-OG-Foca T8: static approach overlay for launc
             'attack',
         );
         const converged = predictCombatOutcome(
+            'by_mass',
             state,
             'synth_west' as FormationId,
             'op:test:objective_a',
@@ -589,6 +591,7 @@ describe('LANE-2026-06-03-STANDING-OG-Foca T8: static approach overlay for launc
             terrainMultByOsid,
         };
         const direct = predictCombatOutcome(
+            'by_mass',
             state,
             'synth_alpha' as FormationId,
             'op:test:objective_a',
@@ -658,6 +661,7 @@ describe('LANE-2026-06-03-STANDING-OG-Foca T8: static approach overlay for launc
         const adjacency = buildOsidAdjacencyFromFrontEdges(state);
         const context = { adjacency, reverseMap: new Map(), terrainMultByOsid: {} };
         const solo = predictCombatOutcome(
+            'by_mass',
             state,
             'synth_alpha' as FormationId,
             'op:test:objective_a',
@@ -667,6 +671,7 @@ describe('LANE-2026-06-03-STANDING-OG-Foca T8: static approach overlay for launc
             'attack',
         );
         const stack = predictCombatOutcome(
+            'by_mass',
             state,
             'synth_alpha' as FormationId,
             'op:test:objective_a',

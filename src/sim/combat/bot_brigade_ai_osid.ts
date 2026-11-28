@@ -974,6 +974,7 @@ function executeFactionDirectivesImpl(
                     threshold: getSectorOffensiveProbeThreshold(activeOp, brigade.id),
                     predicted_outcome: null,
                     power_ratio: null,
+                    firepower_deficit_mult: null,
                     concentrated_outcome: null,
                     decision: 'in_transit_skipped',
                     issued_target_osid: existingTransit.destination_sids?.[0] ?? null,
@@ -1407,6 +1408,7 @@ export function generateAllBotOrdersOsid(
                     adjacency,
                 );
                 const prediction = predictCombatOutcome(
+                    'by_mass',
                     state,
                     brigadeId,
                     identity.objective,

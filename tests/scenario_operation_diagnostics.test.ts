@@ -165,6 +165,7 @@ describe('combat causality diagnostics', () => {
                 threshold: 'stalemate',
                 predicted_outcome: 'catastrophic',
                 power_ratio: 0.2,
+                firepower_deficit_mult: 0.35,
                 concentrated_outcome: null,
                 decision: 'direct_attack_below_threshold',
                 issued_target_osid: null,

@@ -48,8 +48,8 @@ it.each([false,true])('loaded terrain and slope make launch/execution agree, win
  let witnessed=false;
  for(let personnel=500;personnel<=5000;personnel+=50){
   state.military.formations!.A.personnel=personnel;
-  const direct=predictor.predictCombatOutcome(state,'A','op:test:t',adjacency,reverseMap,executionCache,'attack',undefined,undefined,undefined,opening.slopeByOsid)!;
-  const flat=predictor.predictCombatOutcome(state,'A','op:test:t',adjacency,reverseMap,{},'attack',undefined,undefined,undefined,opening.slopeByOsid)!;
+  const direct=predictor.predictCombatOutcome('by_mass', state,'A','op:test:t',adjacency,reverseMap,executionCache,'attack',undefined,undefined,undefined,opening.slopeByOsid)!;
+  const flat=predictor.predictCombatOutcome('by_mass', state,'A','op:test:t',adjacency,reverseMap,{},'attack',undefined,undefined,undefined,opening.slopeByOsid)!;
   if(!isOutcomeSufficientForAttack(flat.predicted_outcome,'costly_victory') || isOutcomeSufficientForAttack(direct.predicted_outcome,'costly_victory'))continue;
   const launch=axisHasExecutableOpeningAttack(state,'RS','op:test:t',['A'],adjacency,'costly_victory',undefined,undefined,opening);
   const stripped=axisHasExecutableOpeningAttack(state,'RS','op:test:t',['A'],adjacency,'costly_victory',undefined,undefined,{...opening,terrainMultByOsid:{}});
@@ -73,14 +73,14 @@ it('forwards nonempty winter slope alone across the actual opening threshold',()
  let witness=false;
  for(let n=500;n<=10000;n+=25){
   state.military.formations!.A.personnel=n;
-  const lowland=predictor.predictCombatOutcome(state,'A',target,adjacency,reverseMap,{},'attack',undefined,undefined,undefined,{})!;
-  const mountain=predictor.predictCombatOutcome(state,'A',target,adjacency,reverseMap,{},'attack',undefined,undefined,undefined,slopes)!;
+  const lowland=predictor.predictCombatOutcome('by_mass', state,'A',target,adjacency,reverseMap,{},'attack',undefined,undefined,undefined,{})!;
+  const mountain=predictor.predictCombatOutcome('by_mass', state,'A',target,adjacency,reverseMap,{},'attack',undefined,undefined,undefined,slopes)!;
   if(!isOutcomeSufficientForAttack(lowland.predicted_outcome,'costly_victory')||isOutcomeSufficientForAttack(mountain.predicted_outcome,'costly_victory'))continue;
   const spy=vi.spyOn(predictor,'predictCombatOutcome');
   const flat={adjacency,reverseMap,terrainMultByOsid:{},slopeByOsid:{}};
   expect(axisHasExecutableOpeningAttack(state,'RS',target,['A'],adjacency,'costly_victory',undefined,undefined,flat)).toBe(true);
   expect(axisHasExecutableOpeningAttack(state,'RS',target,['A'],adjacency,'costly_victory',undefined,undefined,{...flat,slopeByOsid:slopes})).toBe(false);
-  expect(spy.mock.lastCall?.[10]).toEqual(slopes);witness=true;break;
+  expect(spy.mock.lastCall?.[0]).toBe('by_mass');expect(spy.mock.lastCall?.[11]).toEqual(slopes);witness=true;break;
  }
  expect(witness).toBe(true);
 });

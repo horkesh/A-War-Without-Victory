@@ -1817,6 +1817,7 @@ describe('commander emission overlap guards', () => {
             },
         } as GameState;
         const predict = (attacker: FormationId, support: FormationId[] = []) => predictCombatOutcome(
+            'by_mass',
             projectedState,
             attacker,
             'op:test:objective',
@@ -1902,6 +1903,7 @@ describe('commander emission overlap guards', () => {
             },
         } as GameState;
         const soloPrediction = predictCombatOutcome(
+            'by_mass',
             soloState,
             'b1' as FormationId,
             'op:test:objective',

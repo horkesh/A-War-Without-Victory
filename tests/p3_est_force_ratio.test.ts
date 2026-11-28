@@ -87,7 +87,7 @@ describe('P3-EST: the planner estimates the defence the battle builds', () => {
         const est = planner(s);
         expect(est).not.toBeNull();
         expect(est!.contributors).toBe(2);
-        const p = predictCombatOutcome(s, 'attacker' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack', ['attacker_2' as FormationId]);
+        const p = predictCombatOutcome('by_mass', s, 'attacker' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack', ['attacker_2' as FormationId]);
         expect(p).not.toBeNull();
         expect(p!.defender_power / PREDICTOR_FOG_WITHOUT_INTEL).toBeCloseTo(est!.power, 6);
     });
@@ -97,7 +97,7 @@ describe('P3-EST: the planner estimates the defence the battle builds', () => {
         const withCutOff = planner(fixture(true))!;
         expect(withCutOff.contributors).toBe(without.contributors);
         // Only the cap/floor average can move (the roster average includes it); the reactive sum cannot.
-        const p = predictCombatOutcome(fixture(true), 'attacker' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack', ['attacker_2' as FormationId]);
+        const p = predictCombatOutcome('by_mass', fixture(true), 'attacker' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack', ['attacker_2' as FormationId]);
         expect(p!.defender_power / PREDICTOR_FOG_WITHOUT_INTEL).toBeCloseTo(withCutOff.power, 6);
     });
 
@@ -123,7 +123,7 @@ describe('P3-EST §11: the attack side mirrors the battle', () => {
     it('equals the predictor ratio (fog removed): computeAttackForcePower plus own execution friction', () => {
         const s = fixture(false);
         const est = estimateForceRatio(s, op(), 3, 0.9, null, {}, adjacency());
-        const p = predictCombatOutcome(s, 'attacker' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack', ['attacker_2' as FormationId]);
+        const p = predictCombatOutcome('by_mass', s, 'attacker' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack', ['attacker_2' as FormationId]);
         expect(p).not.toBeNull();
         expect(est).toBeCloseTo(p!.attacker_power / (p!.defender_power / PREDICTOR_FOG_WITHOUT_INTEL), 6);
     });
@@ -139,7 +139,7 @@ describe('P3-EST §11: the attack side mirrors the battle', () => {
             ],
         } as unknown as CorpsOperation;
         const scoped = estimateForceRatio(s, twoAxes, 3, 0.9, null, {}, adjacency());
-        const p = predictCombatOutcome(s, 'attacker' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack');
+        const p = predictCombatOutcome('by_mass', s, 'attacker' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack');
         expect(p).not.toBeNull();
         expect(scoped).toBeCloseTo(p!.attacker_power / (p!.defender_power / PREDICTOR_FOG_WITHOUT_INTEL), 6);
         expect(scoped).toBeLessThan(estimateForceRatio(s, op(), 3, 0.9, null, {}, adjacency()));
@@ -212,7 +212,7 @@ describe('P3-EST §11: the attack side mirrors the battle', () => {
             (s.political as any).political_controllers.A0 = 'HRHB';
             (s.political as any).war_alliance_rbih_hrhb = alliance;
             (s.political as any).rbih_hrhb_state = rhs;
-            const p = predictCombatOutcome(s, 'attacker_2' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack');
+            const p = predictCombatOutcome('by_mass', s, 'attacker_2' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack');
             return { est: estimateForceRatio(s, twoAxes, 3, 0.9, null, {}, adjacency()), aloneAtD: p!.attacker_power / (p!.defender_power / PREDICTOR_FOG_WITHOUT_INTEL) };
         };
         // At war, under a ceasefire: not allied (so `isFriendlyFaction` alone called A0 contested), but combat is blocked.
@@ -240,7 +240,7 @@ describe('P3-EST §11: the attack side mirrors the battle', () => {
         } as unknown as CorpsOperation;
         const est = estimateForceRatio(s, depthAxisOp, 3, 0.9, null, {}, adjacency());
         // Only 'attacker' fights at D, as in the battle.
-        const p = predictCombatOutcome(s, 'attacker' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack');
+        const p = predictCombatOutcome('by_mass', s, 'attacker' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack');
         expect(p).not.toBeNull();
         expect(est).toBeCloseTo(p!.attacker_power / (p!.defender_power / PREDICTOR_FOG_WITHOUT_INTEL), 6);
         expect(est).toBeLessThan(estimateForceRatio(s, op(), 3, 0.9, null, {}, adjacency()));
@@ -319,7 +319,7 @@ describe('P3-EST §11: the attack side mirrors the battle', () => {
         expect(season.attack_mult).not.toBe(1);
         expect(season.defense_mult).not.toBe(1);
         const est = estimateForceRatio(s, op(), 3, 0.9, null, {}, adjacency());
-        const p = predictCombatOutcome(s, 'attacker' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack', ['attacker_2' as FormationId]);
+        const p = predictCombatOutcome('by_mass', s, 'attacker' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack', ['attacker_2' as FormationId]);
         expect(est).toBeCloseTo(p!.attacker_power / (p!.defender_power / PREDICTOR_FOG_WITHOUT_INTEL), 6);
     });
 

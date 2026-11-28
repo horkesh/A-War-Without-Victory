@@ -292,7 +292,7 @@ function runHarness(options: HarnessOptions = {}) {
         { threatened_zones: [], enemy_concentration_zones: [], recent_losses: [], overall_pressure: 'low' },
     );
     spy.mockRestore();
-    const prediction = predictCombatOutcome(state, attacker.id, TARGET, adjacency, reverseMap, {}, 'attack');
+    const prediction = predictCombatOutcome('by_mass', state, attacker.id, TARGET, adjacency, reverseMap, {}, 'attack');
     const receiptLine = lines.find((line) => line.startsWith(COMMANDER_CREATION_PREFIX));
     const receipt = receiptLine
         ? JSON.parse(receiptLine.slice(COMMANDER_CREATION_PREFIX.length + 1)) as Record<string, any>
@@ -738,8 +738,8 @@ describe('commander forecast input forwarding',()=>{
  it.each([false,true])('forwards real terrain and slope for occupation=%s',localOccupationBypass=>{
   const spy=vi.spyOn(combatPredictor,'predictCombatOutcome');
   runHarness({localOccupationBypass,terrainData:{by_sid:{S2:{road_access_index:.1,river_crossing_penalty:.2,elevation_mean_m:1200,elevation_stddev_m:200,slope_index:.7,terrain_friction_index:.8}}}});
-  const calls=spy.mock.calls.filter(args=>typeof args[12]==='string'&&args[12].includes('.predictDirectTargets.predictCombatOutcome'));
+  const calls=spy.mock.calls.filter(args=>typeof args[13]==='string'&&args[13].includes('.predictDirectTargets.predictCombatOutcome'));
   expect(calls.length).toBeGreaterThan(0);
-  for(const args of calls){expect(args[5][TARGET]).toBeGreaterThan(1);expect(args[10]?.[TARGET]).toBe(.7);}
+  for(const args of calls){expect(args[0]).toBe('by_mass');expect(args[6][TARGET]).toBeGreaterThan(1);expect(args[11]?.[TARGET]).toBe(.7);}
  });
 });
