@@ -68,6 +68,7 @@ import { finalizeOperationAAR } from './operation_aar.js';
 import { linkOpportunityResolutionToAAR } from './operation_opportunities.js';
 import { applyOperationExperience, gradeStarsToOutcome, checkDefeatism } from './officer_experience.js';
 import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
+import { findNearestVacantSectorFrontCell, isSoleDefenderOfFrontCell } from './sole_defender_gate.js';
 import { isEastHerzegovinaPair, isGrazAccordsActive, shouldGrazBlockAttack } from '../local_truces.js';
 import { isFriendlyFaction as isFriendlyFactionCtrl, isRbihHrhbCombatBlocked } from '../early_war/alliance_update.js';
 import { isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
@@ -769,13 +770,20 @@ export function getTargetOsidIntelConfidenceForCorps(
  * Called at the moment the operation is about to be cleared, while
  * participating_brigades is still available on the op.
  */
-function issuePostOperationReturnMarches(state: GameState, op: CorpsOperation): void {
+export function issuePostOperationReturnMarches(
+    state: GameState,
+    op: CorpsOperation,
+    adjacency?: Map<string, string[]>,
+): void {
     const formations = state.military.formations ?? {};
     const allBrigades = isMultiAxis(op) ? getAllAxisBrigades(op) : (op.participating_brigades ?? []);
     const lineAssigned = new Set<string>();
     for (const sector of Object.values(state.military.corps_front_sectors ?? {})) {
         for (const bid of sector.assigned_brigade_ids ?? []) lineAssigned.add(bid);
     }
+    // SOLE-DEFENDER-STRIP: front cells claimed by an earlier return this pass, so two brigades
+    // never march to the same vacancy.
+    const claimedFrontCells = new Set<string>();
 
     for (const bid of allBrigades) {
         const f = formations[bid];
@@ -786,6 +794,37 @@ function issuePostOperationReturnMarches(state: GameState, op: CorpsOperation): 
         if (lineAssigned.has(bid)) continue;
 
         const loc = f.location_osid;
+        // SOLE-DEFENDER-STRIP (§78.3): a brigade left standing on own ground re-mans the line.
+        // It marches to the nearest enemy-adjacent front cell of its corps sector that no own
+        // brigade holds (friendly BFS; ties by distance, then strictCompare). It is not sent if
+        // it is itself the last defender of an enemy-adjacent cell. No pre-op cell is recorded:
+        // the vacancy search recovers the line from geometry. home_osid is not used.
+        if (
+            loc
+            && f.corps_id
+            && f.faction
+            && getPoliticalControllerOSID(state, loc, undefined) === f.faction
+            && (f.disrupted_turns ?? 0) <= 0
+            && !state.military.brigade_movement_orders?.[bid as FormationId]
+            && !isSoleDefenderOfFrontCell(state, bid as FormationId, new Set(), adjacency)
+        ) {
+            const vacancy = findNearestVacantSectorFrontCell(
+                state,
+                f.faction,
+                f.corps_id,
+                loc,
+                adjacency,
+                claimedFrontCells,
+            );
+            if (vacancy) {
+                claimedFrontCells.add(vacancy);
+                const movementOrders = state.military.brigade_movement_orders
+                    ?? (state.military.brigade_movement_orders = {});
+                movementOrders[bid as FormationId] = createColumnMovementOrder(vacancy);
+                continue;
+            }
+        }
+
         const homeOsid = f.home_osid;
         if (!loc || !homeOsid) continue;
         // Check whether the brigade is actually IN one of its corps' sector territories.
@@ -2365,7 +2404,7 @@ export function advanceSectorOffensives(
                 // Without this, brigades stay at their operation endpoint and get classified
                 // into whatever sector owns that OSID — potentially far from home.
                 if (op.preparation_probe_link?.restored_to_parent !== true) {
-                    issuePostOperationReturnMarches(state, op);
+                    issuePostOperationReturnMarches(state, op, staticAdjacency);
                 }
 
                 // Only reset probe counter when a FULL operation completes.

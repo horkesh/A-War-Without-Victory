@@ -101,6 +101,7 @@ import { FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES } from './operation_opportunity
 import { DAYTON_CONTINUATION_OPPORTUNITIES } from './operation_opportunity_catalog_dayton_continuation.js';
 import { enterOperationRecovery } from './tactical_group_lifecycle.js';
 import { effectiveOperationMinimum } from './operation_minimum_policy.js';
+import { isAxisStagingOrApproachCell, isSoleDefenderOfFrontCell } from './sole_defender_gate.js';
 import { isFactionBoundByOct1995Ceasefire } from './oct1995_ceasefire.js';
 import { resolveBySilence } from '../player_override.js';
 
@@ -448,7 +449,11 @@ export type OperationParticipantEvaluationReason =
     | 'ineligible_operation_formation'
     | 'below_min_attack_personnel'
     | 'disrupted'
-    | 'in_transit';
+    | 'in_transit'
+    /** SOLE-DEFENDER-STRIP: the last own brigade on an enemy-adjacent own cell off the axis line. */
+    | 'sole_defender_of_front_cell'
+    /** SOLE-DEFENDER-STRIP soft gate: re-admitted because the axis or operation floor needs it. */
+    | 'eligible_sole_defender_floor';
 
 export interface OperationParticipantEvaluation {
     readonly axis_id: string;
@@ -1367,11 +1372,18 @@ export function preflightOpportunityAdmission(
         : new Set<string>();
     const candidateAxes: Array<{ axis: OpportunityAxisDef; participants: FormationId[] }> = [];
 
+    const soleDefender: SoleDefenderDrawContext = {
+        stagingOsid: def.staging_osid ?? null,
+        drawn: new Set<FormationId>(),
+        deferredOut: [],
+    };
+    const rows: SoleDefenderFloorRow[] = [];
     for (const axis of axesIn) {
         const handoff = axis.phase_gate?.handoff;
         const selectionAxis = handoff
             ? { ...axis, brigades: axis.brigades.filter((brigadeId) => brigadeId !== handoff.brigade_id) }
             : axis;
+        soleDefender.deferredOut = [];
         const participants = selectEligibleOpportunityParticipants(
             state,
             selectionAxis,
@@ -1383,17 +1395,25 @@ export function preflightOpportunityAdmission(
             undefined,
             undefined,
             supersessionFor(def),
+            soleDefender,
         );
-        if (participants.length === 0 && !handoff) continue;
-        const hasObjective = axis.objectives.some((osid) => {
-            const controller = getPoliticalControllerOSID(state, osid, undefined);
-            return controller === null
-                || isOperationObjectiveHostile(state, def.faction, controller)
-                || overrideSet.has(osid);
+        rows.push({
+            axis: selectionAxis,
+            participants,
+            deferred: soleDefender.deferredOut,
+            targetCount: commitmentTargetCount(selectionAxis, commitment),
+            counts: axisHasLiveObjective(state, def, axis, overrideSet),
         });
-        if (!hasObjective) continue;
-        candidateAxes.push({ axis, participants });
     }
+    admitSoleDefendersToFloor(state, rows, required);
+
+    axesIn.forEach((axis, index) => {
+        const row = rows[index]!;
+        const handoff = axis.phase_gate?.handoff;
+        if (row.participants.length === 0 && !handoff) return;
+        if (!row.counts) return;
+        candidateAxes.push({ axis, participants: row.participants });
+    });
 
     for (let index = candidateAxes.length - 1; index >= 0; index--) {
         const candidate = candidateAxes[index]!;
@@ -1429,6 +1449,21 @@ export function preflightOpportunityAdmission(
     return selected >= required
         ? { admitted: true, selected_participants: selected, required_participants: required, reason: null }
         : insufficientAdmission(selected, required);
+}
+
+/** An authored objective is still worth attacking: unknown, hostile, or a scoped friendly override. */
+function axisHasLiveObjective(
+    state: GameState,
+    def: OperationOpportunityDef,
+    axis: OpportunityAxisDef,
+    overrideSet: ReadonlySet<string>,
+): boolean {
+    return axis.objectives.some((osid) => {
+        const controller = getPoliticalControllerOSID(state, osid, undefined);
+        return controller === null
+            || isOperationObjectiveHostile(state, def.faction, controller)
+            || overrideSet.has(osid);
+    });
 }
 
 function insufficientAdmission(selected: number, required: number): OpportunityAdmissionPreflight {
@@ -1480,6 +1515,17 @@ function spawnCorpsOperationFromOpportunity(
     // Elite loans owed to sector-exempt roster members, deployed only once the
     // operation is certain to spawn so an aborted spawn mutates nothing.
     const eliteLoans: Array<{ brigadeId: FormationId; corpsId: string }> = [];
+    // Selection first, for every axis, so the SOLE-DEFENDER-STRIP soft gate can restore the
+    // axis and operation floors before anything is built (same procedure as the preflight).
+    const soleDefender: SoleDefenderDrawContext = {
+        stagingOsid,
+        drawn: new Set<FormationId>(),
+        deferredOut: [],
+    };
+    const selectionRows: Array<SoleDefenderFloorRow & {
+        loans: Array<{ brigadeId: FormationId; corpsId: string }>;
+        preemptions: ProbePreemption[];
+    }> = [];
     for (const axis of axesIn) {
         const axisLoans: Array<{ brigadeId: FormationId; corpsId: string }> = [];
         const axisProbePreemptions: ProbePreemption[] = [];
@@ -1487,7 +1533,8 @@ function spawnCorpsOperationFromOpportunity(
         const selectionAxis = handoff
             ? { ...axis, brigades: axis.brigades.filter((brigadeId) => brigadeId !== handoff.brigade_id) }
             : axis;
-        const brigadesForAxis = selectEligibleOpportunityParticipants(
+        soleDefender.deferredOut = [];
+        const participants = selectEligibleOpportunityParticipants(
             state,
             selectionAxis,
             commitment,
@@ -1498,7 +1545,26 @@ function spawnCorpsOperationFromOpportunity(
             participantEvaluations,
             axisProbePreemptions,
             supersessionFor(def),
+            soleDefender,
         );
+        selectionRows.push({
+            axis: selectionAxis,
+            participants,
+            deferred: soleDefender.deferredOut,
+            targetCount: commitmentTargetCount(selectionAxis, commitment),
+            counts: axisHasLiveObjective(state, def, axis, overrideSet),
+            loans: axisLoans,
+            preemptions: axisProbePreemptions,
+        });
+    }
+    admitSoleDefendersToFloor(state, selectionRows, effectiveOperationMinimum('sector_attack'));
+
+    for (const [axisIndex, axis] of axesIn.entries()) {
+        const selectionRow = selectionRows[axisIndex]!;
+        const axisLoans = selectionRow.loans;
+        const axisProbePreemptions = selectionRow.preemptions;
+        const handoff = axis.phase_gate?.handoff;
+        const brigadesForAxis = selectionRow.participants;
         // A handoff destination is intentionally empty until activation. Its brigade is admitted
         // once through the declared source axis and must never be reserved on both axes.
         if (brigadesForAxis.length === 0 && !handoff) continue;
@@ -1743,12 +1809,12 @@ function selectEligibleOpportunityParticipants(
     evaluationsOut?: OperationParticipantEvaluation[],
     probePreemptionsOut?: ProbePreemption[],
     supersedes?: OperationOpportunityDef['supersedes_live_operation'] | null,
+    soleDefender?: SoleDefenderDrawContext,
 ): FormationId[] {
     const formations = state.military.formations ?? {};
     const movementState = state.military.brigade_movement_state ?? {};
-    const targetCount = commitment === 'minimum'
-        ? Math.max(1, Math.floor(axis.brigades.length / 2))
-        : Number.POSITIVE_INFINITY;
+    const targetCount = commitmentTargetCount(axis, commitment);
+    const axisStaging = axis.staging_osid ?? soleDefender?.stagingOsid ?? null;
     const selected: FormationId[] = [];
 
     for (const authoredBrigadeId of axis.brigades) {
@@ -1860,20 +1926,44 @@ function selectEligibleOpportunityParticipants(
             continue;
         }
 
-        if (admittedByRosterAttachment && !alreadyLoanedToHost && eliteLoansOut) {
-            const loanState = formation.elite_loan_state!;
-            eliteLoansOut.push({ brigadeId, corpsId: axis.corps });
-        }
-        if (liveCommitment && (liveCommitment.op.type === 'probe' || supersededCommitment) && probePreemptionsOut) {
-            probePreemptionsOut.push({
+        const loan = admittedByRosterAttachment && !alreadyLoanedToHost
+            ? { brigadeId, corpsId: axis.corps }
+            : null;
+        const preemption: ProbePreemption | null = liveCommitment
+            && (liveCommitment.op.type === 'probe' || supersededCommitment)
+            ? {
                 brigadeId,
                 hostCorpsId: liveCommitment.corps_id,
                 op: liveCommitment.op,
                 kind: supersededCommitment ? 'supersession' : 'probe',
+            }
+            : null;
+
+        // SOLE-DEFENDER-STRIP (§78.3): never take the last own brigade off an enemy-adjacent own
+        // cell unless that cell is where the axis wants it (staging, or touching an objective).
+        // SOFT: the brigade is deferred, not dropped. admitSoleDefendersToFloor re-admits it when
+        // the axis or the operation would otherwise fall under its participant floor, so this gate
+        // never blocks a launch. Later roster entries substitute for a deferred one.
+        if (
+            soleDefender
+            && isSoleDefenderOfFrontCell(state, brigadeId, soleDefender.drawn, adjacency)
+            && !isAxisStagingOrApproachCell(state, formation.location_osid!, axisStaging, axis.objectives, adjacency)
+        ) {
+            record('rejected', 'sole_defender_of_front_cell');
+            soleDefender.deferredOut.push({
+                brigadeId,
+                loan,
+                preemption,
+                recordReadmission: () => record('admitted', 'eligible_sole_defender_floor'),
             });
+            continue;
         }
 
+        if (loan && eliteLoansOut) eliteLoansOut.push(loan);
+        if (preemption && probePreemptionsOut) probePreemptionsOut.push(preemption);
+
         selected.push(brigadeId);
+        soleDefender?.drawn.add(brigadeId);
         record('admitted', supersededCommitment
             ? 'eligible_supersession'
             : liveCommitment?.op.type === 'probe'
@@ -1885,6 +1975,80 @@ function selectEligibleOpportunityParticipants(
     }
 
     return selected;
+}
+
+function commitmentTargetCount(
+    axis: OpportunityAxisDef,
+    commitment: 'minimum' | 'standard' | 'reinforced',
+): number {
+    return commitment === 'minimum'
+        ? Math.max(1, Math.floor(axis.brigades.length / 2))
+        : Number.POSITIVE_INFINITY;
+}
+
+/** SOLE-DEFENDER-STRIP draw context, shared by every axis of one operation's selection. */
+interface SoleDefenderDrawContext {
+    /** Opportunity-level staging, used when the axis has no staging override. */
+    readonly stagingOsid: string | null;
+    /** Brigades already drawn in this selection (counted as leaving their cells). */
+    readonly drawn: Set<FormationId>;
+    /** Deferred sole defenders of the axis being selected, in roster order. */
+    deferredOut: DeferredSoleDefender[];
+}
+
+interface DeferredSoleDefender {
+    readonly brigadeId: FormationId;
+    readonly loan: { brigadeId: FormationId; corpsId: string } | null;
+    readonly preemption: ProbePreemption | null;
+    readonly recordReadmission: () => void;
+}
+
+interface SoleDefenderFloorRow {
+    readonly axis: OpportunityAxisDef;
+    readonly participants: FormationId[];
+    readonly deferred: DeferredSoleDefender[];
+    readonly targetCount: number;
+    /** The axis has a live objective, so its participants count toward the operation floor. */
+    readonly counts: boolean;
+    readonly loans?: Array<{ brigadeId: FormationId; corpsId: string }>;
+    readonly preemptions?: ProbePreemption[];
+}
+
+/**
+ * SOLE-DEFENDER-STRIP soft gate. Re-admits deferred sole defenders, in axis then roster order,
+ * only as far as the floors require: first every counted axis keeps at least one participant,
+ * then the operation reaches its admission minimum. A re-admitted brigade takes its authored
+ * roster place, and never beyond what the commitment would have taken.
+ */
+function admitSoleDefendersToFloor(
+    state: GameState,
+    rows: readonly SoleDefenderFloorRow[],
+    required: number,
+): void {
+    const admit = (row: SoleDefenderFloorRow): FormationId | null => {
+        const deferred = row.deferred.shift();
+        if (!deferred) return null;
+        row.participants.push(deferred.brigadeId);
+        const rosterOrder = row.axis.brigades.map((authored) =>
+            resolveOperationFormation(state.military.formations ?? {}, authored).formation_id);
+        row.participants.sort((a, b) => rosterOrder.indexOf(a) - rosterOrder.indexOf(b));
+        if (deferred.loan) row.loans?.push(deferred.loan);
+        if (deferred.preemption) row.preemptions?.push(deferred.preemption);
+        deferred.recordReadmission();
+        return deferred.brigadeId;
+    };
+    for (const row of rows) {
+        if (row.counts && row.participants.length === 0) admit(row);
+    }
+    const unique = new Set<FormationId>(rows.filter((row) => row.counts).flatMap((row) => row.participants));
+    for (const row of rows) {
+        if (!row.counts) continue;
+        while (unique.size < required && row.participants.length < row.targetCount) {
+            const admitted = admit(row);
+            if (!admitted) break;
+            unique.add(admitted);
+        }
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

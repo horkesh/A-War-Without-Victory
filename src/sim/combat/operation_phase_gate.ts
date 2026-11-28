@@ -36,6 +36,7 @@ import { findBrigadeOperationAnywhere } from './corps_operation_helpers.js';
 import { getBrigadeAxis } from './operation_approach_osids.js';
 import { assignBrigadeRoles } from './sector_offensive_axis_helpers.js';
 import { emitMistralTgActivationRecord, isReasonCodeTopicEnabled } from './reason_code_debug.js';
+import { isAxisStagingOrApproachCell, isSoleDefenderOfFrontCell } from './sole_defender_gate.js';
 
 /** Exact operation instance id: the same string the resolver stamps on battle reports. */
 export function operationInstanceId(corpsId: string, op: CorpsOperation): string {
@@ -282,6 +283,22 @@ function applyGateHandoff(
             ) return false;
         }
     }
+
+    // SOLE-DEFENDER-STRIP (§78.3): the handoff must not take the last own brigade off an
+    // enemy-adjacent own cell that is not on either axis's line (staging, or touching an
+    // objective). The brigade then stays on the source axis; the destination keeps holding and
+    // re-tries every pass, so nothing about the operation's launch changes.
+    const location = formation.location_osid;
+    if (
+        location
+        && isSoleDefenderOfFrontCell(state, brigadeId, new Set())
+        && ![source, destination].some((axis) => isAxisStagingOrApproachCell(
+            state,
+            location,
+            axis.staging_osid ?? op.staging_osid,
+            axis.objectives,
+        ))
+    ) return false;
 
     const nextSource = source.assigned_brigades.filter((id) => id !== brigadeId);
     const nextDestination = [...destination.assigned_brigades, brigadeId].sort();
